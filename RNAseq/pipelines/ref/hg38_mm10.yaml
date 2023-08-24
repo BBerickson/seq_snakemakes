@@ -1,0 +1,32 @@
+#===== Config file for standared hg38 with mm10 spikeIN  ===================
+
+# Path to mixed bowtie2 index and chrom name txt file
+GENELIST:
+    ""
+INDEX_PATH:
+    "/beevol/home/erickson/ref/hg38_mm10/"
+INDEX_MIX:
+    "hg38_mm10"
+INDEX_SAMPLE:
+    "hg38"
+INDEX_SPIKE:
+    "mm10"
+MASK:
+  "/beevol/home/erickson/ref/hg38/ref/hg38_snoRNAs.bed"
+# fasta files for splitting bam file
+FA_SAMPLE:
+  "/beevol/home/erickson/ref/hg38/Homo_sapiens.GRCh38.dna.primary_assembly.UCSC.fa"
+FA_SPIKE:
+  "/beevol/home/erickson/ref/mm10/mm10.fa"
+ENRICHED_SAMPLE:
+  "/beevol/home/erickson/ref/hg38/ref/enrich.bed"
+ENRICHED_SPIKE:
+  "/beevol/home/erickson/ref/table_mm10/enrich.bed"
+MY_REF:
+  "/beevol/home/erickson/ref/hg38/ref/hg38_gene.bed"
+FW_REF:
+  "/beevol/home/erickson/ref/hg38/ref/hg38_gene_fw.bed"
+REV_REF:
+  "/beevol/home/erickson/ref/hg38/ref/hg38_gene_rev.bed"
+PI_REF:
+  "/beevol/home/erickson/ref/hg38/ref/PI.bed"

@@ -1,0 +1,28 @@
+#===== Config file for standared hg19 with mm10 spikeIN  ===================
+
+# Path to mixed bowtie2 index and chrom name txt file
+GENELIST:
+    ""
+INDEX_PATH:
+    "/beevol/home/erickson/ref/hg19_mm10/"
+INDEX_MIX:
+    "hg19_mm10"
+INDEX_SAMPLE:
+    "hg19"
+INDEX_SPIKE:
+    "mm10"
+# fasta files for splitting bam file
+FA_SAMPLE:
+  "/beevol/home/erickson/ref/hg19/hg19.fa"
+FA_SPIKE:
+  "/beevol/home/erickson/ref/mm10/mm10.fa"
+ENRICHED_SAMPLE:
+  "/beevol/home/erickson/ref/table_hg19/enrich.bed"
+ENRICHED_SPIKE:
+  "/beevol/home/erickson/ref/table_mm10/enrich.bed"
+MY_REF:
+  "/beevol/home/erickson/ref/table_hg19/hg19_gene.bed"
+FW_REF:
+  "/beevol/home/erickson/ref/table_hg19/hg19_gene_fw.bed"
+REV_REF:
+  "/beevol/home/erickson/ref/table_hg19/hg19_gene_rev.bed"

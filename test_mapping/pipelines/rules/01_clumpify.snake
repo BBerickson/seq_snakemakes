@@ -1,0 +1,83 @@
+# ===== Snakefile for removing duplicates with clumpify =====================
+
+# Function to retrieve fastq paths
+def _get_fq_paths(wildcards):
+    fqs = [_get_fqs(wildcards.sample, x) for x in FQ_SFX]
+    fqs = [FASTQ_DIR + "/" + x + SFX for x in fqs]
+
+    return fqs
+
+
+# Run clumpify for paired-end reads
+rule clumpify_paired:
+    input:
+        _get_fq_paths
+    output:
+        R1  = temp(PROJ + "/clumpify/{sample}_R1_clumpify.fastq.gz"),
+        R2  = temp(PROJ + "/clumpify/{sample}_R2_clumpify.fastq.gz"),
+        log = PROJ + "/clumpify/{sample}_clumpify.log"
+    params:
+        job_name = "{sample}_clumpify",
+        memory   = 200,
+        args     = CMD_PARAMS["clumpify"]
+    log:
+        out = PROJ + "/logs/{sample}_clumpify.out",
+        err = PROJ + "/logs/{sample}_clumpify.err"
+    message:
+        "Removing duplicats for {wildcards.sample}" 
+    threads:
+        1
+    run:
+        # If no params are passed, make a symlink to original fastq
+        if len(params.args) == 0:
+            os.symlink(input[0], output[0])
+        else:
+            shell(
+                """
+                clumpify.sh -Xmx200g \
+                    in1={input[0]} in2={input[1]} \
+                    out1={output[0]} out2={output[1]} \
+                    {params.args} 2>> {output[2]}
+                """
+            )
+
+
+# Create clumpify summary
+rule clumpify_summary:
+    input:
+        expand(
+            PROJ + "/clumpify/{sample}_clumpify.log",
+            sample = SAMS_UNIQ
+        )
+    output:
+        PROJ + "/stats/" + PROJ + "_clumpify.tsv"
+    params:
+        job_name = PROJ + "_clumpify_summary",
+        memory   = 4
+    log:
+        out = PROJ + "/logs/" + PROJ + "_clumpify_summary.out",
+        err = PROJ + "/logs/" + PROJ + "_clumpify_summary.err"
+    message:
+        "Creating " + PROJ + " clumpify summary"
+    threads:
+        1
+    run:
+        with open(output[0], "w") as out:
+            for file in input:
+                name = os.path.basename(file)
+                name = re.sub("_clumpify.log", "", name)
+
+                for line in open(file, "r"):
+                    match = re.search("Reads In: |Duplicates Found:", line)
+
+                    if match:
+                        num = re.search("[0-9,]{2,}", line)
+                        num = re.sub(",", "", num.group(0))
+                        met = re.search("[\w\(\) ]+:", line).group(0)
+                        met = re.sub(":", "", met)
+                        met = met.strip()
+                        met = re.sub(" ", "_", met)
+
+                        out.write("%s\t%s\t%s\n" % (name, met, num))
+
+

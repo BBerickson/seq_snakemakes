@@ -1,0 +1,360 @@
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                     count    min threads    max threads
+--------------------  -------  -------------  -------------
+all                         1              1              1
+bamCoverage                 2             12             12
+bamCoverage_summary         1              1              1
+bbduk_paired                4             12             12
+bbduk_summary               1              1              1
+bowtie                      4             12             12
+bowtie_counts               4              1              1
+bowtie_summary              1              1              1
+calculating_OR              2              1              1
+clumpify_paired             4              1              1
+clumpify_summary            1              1              1
+fastqc                      8              6              6
+fastqc_summary              1              1              1
+gathering_OR_results        1              1              1
+gathering_results           1              1              1
+total                      36              1             12
+
+Select jobs to execute...
+
+[Fri Jun 16 10:15:29 2023]
+Job 2: Running FastQC on 293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input_S40_L002_R1_001
+
+Submitted DRMAA job 2 with external jobid 10502.
+
+[Fri Jun 16 10:15:29 2023]
+Job 4: Running FastQC on 293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD_S41_L002_R1_001
+
+Submitted DRMAA job 4 with external jobid 10503.
+
+[Fri Jun 16 10:15:30 2023]
+Job 6: Running FastQC on 293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input_S39_L002_R1_001
+
+Submitted DRMAA job 6 with external jobid 10504.
+
+[Fri Jun 16 10:15:30 2023]
+Job 8: Running FastQC on 293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_CTD_S42_L002_R1_001
+
+Submitted DRMAA job 8 with external jobid 10505.
+
+[Fri Jun 16 10:15:30 2023]
+Job 13: Removing duplicats for 293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input
+
+Submitted DRMAA job 13 with external jobid 10506.
+
+[Fri Jun 16 10:15:30 2023]
+Job 14: Removing duplicats for 293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_CTD
+
+Submitted DRMAA job 14 with external jobid 10507.
+
+[Fri Jun 16 10:15:31 2023]
+Job 3: Running FastQC on 293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input_S40_L002_R2_001
+
+Submitted DRMAA job 3 with external jobid 10508.
+
+[Fri Jun 16 10:15:31 2023]
+Job 5: Running FastQC on 293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD_S41_L002_R2_001
+
+Submitted DRMAA job 5 with external jobid 10509.
+
+[Fri Jun 16 10:15:31 2023]
+Job 7: Running FastQC on 293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input_S39_L002_R2_001
+
+Submitted DRMAA job 7 with external jobid 10510.
+
+[Fri Jun 16 10:15:31 2023]
+Job 9: Running FastQC on 293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_CTD_S42_L002_R2_001
+
+Submitted DRMAA job 9 with external jobid 10511.
+
+[Fri Jun 16 10:15:32 2023]
+Job 11: Removing duplicats for 293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input
+
+Submitted DRMAA job 11 with external jobid 10512.
+
+[Fri Jun 16 10:15:32 2023]
+Job 12: Removing duplicats for 293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD
+
+Submitted DRMAA job 12 with external jobid 10513.
+[Fri Jun 16 10:15:50 2023]
+Finished job 6.
+1 of 36 steps (3%) done
+[Fri Jun 16 10:15:50 2023]
+Finished job 13.
+2 of 36 steps (6%) done
+Select jobs to execute...
+
+[Fri Jun 16 10:15:50 2023]
+Job 18: Removing duplicats for 293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input
+
+Submitted DRMAA job 18 with external jobid 10514.
+[Fri Jun 16 10:15:50 2023]
+Finished job 7.
+3 of 36 steps (8%) done
+Removing temporary output file 230426_H66K_DRB/clumpify/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input_R2_clumpify.fastq.gz.
+Removing temporary output file 230426_H66K_DRB/clumpify/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input_R1_clumpify.fastq.gz.
+[Fri Jun 16 10:16:01 2023]
+Finished job 18.
+4 of 36 steps (11%) done
+Select jobs to execute...
+
+[Fri Jun 16 10:16:01 2023]
+Job 23: Aligning reads with Bowtie2 for 293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input
+
+Submitted DRMAA job 23 with external jobid 10515.
+[Fri Jun 16 10:16:12 2023]
+Finished job 11.
+5 of 36 steps (14%) done
+Select jobs to execute...
+
+[Fri Jun 16 10:16:12 2023]
+Job 16: Removing duplicats for 293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input
+
+Submitted DRMAA job 16 with external jobid 10516.
+Removing temporary output file 230426_H66K_DRB/bbduk/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input_R2_bbduk.fastq.gz.
+Removing temporary output file 230426_H66K_DRB/bbduk/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input_R1_bbduk.fastq.gz.
+Removing temporary output file 230426_H66K_DRB/bams/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input_hg38_mm10.bam.
+Removing temporary output file 230426_H66K_DRB/bams/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input_hg38_mm10.bam.bai.
+[Fri Jun 16 10:16:56 2023]
+Finished job 23.
+6 of 36 steps (17%) done
+Select jobs to execute...
+
+[Fri Jun 16 10:16:57 2023]
+Job 30: Bowtie2 counts for 293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input
+
+Submitted DRMAA job 30 with external jobid 10517.
+Removing temporary output file 230426_H66K_DRB/clumpify/293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input_R2_clumpify.fastq.gz.
+Removing temporary output file 230426_H66K_DRB/clumpify/293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input_R1_clumpify.fastq.gz.
+[Fri Jun 16 10:16:57 2023]
+Finished job 16.
+7 of 36 steps (19%) done
+Select jobs to execute...
+
+[Fri Jun 16 10:16:57 2023]
+Job 21: Aligning reads with Bowtie2 for 293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input
+
+Submitted DRMAA job 21 with external jobid 10518.
+[Fri Jun 16 10:17:07 2023]
+Finished job 30.
+8 of 36 steps (22%) done
+[Fri Jun 16 10:17:18 2023]
+Finished job 2.
+9 of 36 steps (25%) done
+[Fri Jun 16 10:17:49 2023]
+Finished job 3.
+10 of 36 steps (28%) done
+[Fri Jun 16 10:19:10 2023]
+Finished job 12.
+11 of 36 steps (31%) done
+Select jobs to execute...
+
+[Fri Jun 16 10:19:10 2023]
+Job 17: Removing duplicats for 293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD
+
+Submitted DRMAA job 17 with external jobid 10519.
+[Fri Jun 16 10:20:10 2023]
+Finished job 14.
+12 of 36 steps (33%) done
+Select jobs to execute...
+
+[Fri Jun 16 10:20:10 2023]
+Job 10: Creating 230426_H66K_DRB clumpify summary
+
+Submitted DRMAA job 10 with external jobid 10520.
+
+[Fri Jun 16 10:20:11 2023]
+Job 19: Removing duplicats for 293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_CTD
+
+Submitted DRMAA job 19 with external jobid 10521.
+[Fri Jun 16 10:20:20 2023]
+Finished job 10.
+13 of 36 steps (36%) done
+Removing temporary output file 230426_H66K_DRB/clumpify/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD_R2_clumpify.fastq.gz.
+Removing temporary output file 230426_H66K_DRB/clumpify/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD_R1_clumpify.fastq.gz.
+[Fri Jun 16 10:22:52 2023]
+Finished job 17.
+14 of 36 steps (39%) done
+Select jobs to execute...
+
+[Fri Jun 16 10:22:52 2023]
+Job 22: Aligning reads with Bowtie2 for 293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD
+
+Submitted DRMAA job 22 with external jobid 10523.
+Removing temporary output file 230426_H66K_DRB/clumpify/293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_CTD_R1_clumpify.fastq.gz.
+Removing temporary output file 230426_H66K_DRB/clumpify/293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_CTD_R2_clumpify.fastq.gz.
+[Fri Jun 16 10:23:42 2023]
+Finished job 19.
+15 of 36 steps (42%) done
+Select jobs to execute...
+
+[Fri Jun 16 10:23:42 2023]
+Job 15: Creating 230426_H66K_DRB bbduk summary
+
+Submitted DRMAA job 15 with external jobid 10524.
+
+[Fri Jun 16 10:23:43 2023]
+Job 24: Aligning reads with Bowtie2 for 293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_CTD
+
+Submitted DRMAA job 24 with external jobid 10525.
+[Fri Jun 16 10:23:52 2023]
+Finished job 15.
+16 of 36 steps (44%) done
+[Fri Jun 16 10:24:12 2023]
+Finished job 8.
+17 of 36 steps (47%) done
+[Fri Jun 16 10:25:03 2023]
+Finished job 4.
+18 of 36 steps (50%) done
+[Fri Jun 16 10:25:43 2023]
+Finished job 9.
+19 of 36 steps (53%) done
+[Fri Jun 16 10:27:14 2023]
+Finished job 5.
+20 of 36 steps (56%) done
+Select jobs to execute...
+
+[Fri Jun 16 10:27:14 2023]
+Job 1: Creating 230426_H66K_DRB FastQC summary
+
+Submitted DRMAA job 1 with external jobid 10526.
+[Fri Jun 16 10:27:24 2023]
+Finished job 1.
+21 of 36 steps (58%) done
+Removing temporary output file 230426_H66K_DRB/bbduk/293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input_R1_bbduk.fastq.gz.
+Removing temporary output file 230426_H66K_DRB/bbduk/293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input_R2_bbduk.fastq.gz.
+Removing temporary output file 230426_H66K_DRB/bams/293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input_hg38_mm10.bam.
+Removing temporary output file 230426_H66K_DRB/bams/293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input_hg38_mm10.bam.bai.
+[Fri Jun 16 10:34:38 2023]
+Finished job 21.
+22 of 36 steps (61%) done
+Select jobs to execute...
+
+[Fri Jun 16 10:34:38 2023]
+Job 33: Bowtie2 counts for 293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input
+
+Submitted DRMAA job 33 with external jobid 10527.
+[Fri Jun 16 10:35:18 2023]
+Finished job 33.
+23 of 36 steps (64%) done
+Removing temporary output file 230426_H66K_DRB/bbduk/293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_CTD_R1_bbduk.fastq.gz.
+Removing temporary output file 230426_H66K_DRB/bbduk/293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_CTD_R2_bbduk.fastq.gz.
+Removing temporary output file 230426_H66K_DRB/bams/293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_CTD_hg38_mm10.bam.
+Removing temporary output file 230426_H66K_DRB/bams/293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_CTD_hg38_mm10.bam.bai.
+[Fri Jun 16 12:16:25 2023]
+Finished job 24.
+24 of 36 steps (67%) done
+Select jobs to execute...
+
+[Fri Jun 16 12:16:25 2023]
+Job 32: Bowtie2 counts for 293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_CTD
+
+Submitted DRMAA job 32 with external jobid 10538.
+[Fri Jun 16 12:19:05 2023]
+Finished job 32.
+25 of 36 steps (69%) done
+Select jobs to execute...
+
+[Fri Jun 16 12:19:05 2023]
+Job 31: getting OR norm for PP1-PNUTS-H66K_pdox_DRB_CTD
+
+Submitted DRMAA job 31 with external jobid 10539.
+[Fri Jun 16 12:19:25 2023]
+Finished job 31.
+26 of 36 steps (72%) done
+Removing temporary output file 230426_H66K_DRB/bbduk/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD_R2_bbduk.fastq.gz.
+Removing temporary output file 230426_H66K_DRB/bbduk/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD_R1_bbduk.fastq.gz.
+Removing temporary output file 230426_H66K_DRB/bams/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD_hg38_mm10.bam.
+Removing temporary output file 230426_H66K_DRB/bams/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD_hg38_mm10.bam.bai.
+[Fri Jun 16 12:27:59 2023]
+Finished job 22.
+27 of 36 steps (75%) done
+Select jobs to execute...
+
+[Fri Jun 16 12:27:59 2023]
+Job 20: Creating 230426_H66K_DRB bowtie2 summary
+
+Submitted DRMAA job 20 with external jobid 10540.
+
+[Fri Jun 16 12:27:59 2023]
+Job 29: Bowtie2 counts for 293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD
+
+Submitted DRMAA job 29 with external jobid 10541.
+[Fri Jun 16 12:28:08 2023]
+Finished job 20.
+28 of 36 steps (78%) done
+[Fri Jun 16 12:30:29 2023]
+Finished job 29.
+29 of 36 steps (81%) done
+Select jobs to execute...
+
+[Fri Jun 16 12:30:29 2023]
+Job 28: getting OR norm for PP1-PNUTS-H66K_mdox_DRB_CTD
+
+Submitted DRMAA job 28 with external jobid 10542.
+[Fri Jun 16 12:30:49 2023]
+Finished job 28.
+30 of 36 steps (83%) done
+Select jobs to execute...
+
+[Fri Jun 16 12:30:49 2023]
+Job 27: getting final results
+
+Submitted DRMAA job 27 with external jobid 10543.
+[Fri Jun 16 12:30:59 2023]
+Finished job 27.
+31 of 36 steps (86%) done
+Select jobs to execute...
+
+[Fri Jun 16 12:30:59 2023]
+Job 34: Aligning reads with bamCoverage for PP1-PNUTS-H66K_pdox_DRB_CTD
+
+Submitted DRMAA job 34 with external jobid 10544.
+
+[Fri Jun 16 12:31:00 2023]
+Job 35: getting final results
+
+Submitted DRMAA job 35 with external jobid 10545.
+
+[Fri Jun 16 12:31:00 2023]
+Job 26: Aligning reads with bamCoverage for PP1-PNUTS-H66K_mdox_DRB_CTD
+
+Submitted DRMAA job 26 with external jobid 10546.
+[Fri Jun 16 12:31:19 2023]
+Finished job 35.
+32 of 36 steps (89%) done
+[Fri Jun 16 12:35:11 2023]
+Finished job 34.
+33 of 36 steps (92%) done
+[Fri Jun 16 12:35:21 2023]
+Finished job 26.
+34 of 36 steps (94%) done
+Select jobs to execute...
+
+[Fri Jun 16 12:35:21 2023]
+Job 25: Creating 230426_H66K_DRB bamCoverage summary
+
+Submitted DRMAA job 25 with external jobid 10547.
+Removing temporary output file 230426_H66K_DRB/bw/PP1-PNUTS-H66K_mdox_DRB_CTD_bamCoverage_stats.txt.
+Removing temporary output file 230426_H66K_DRB/bw/PP1-PNUTS-H66K_pdox_DRB_CTD_bamCoverage_stats.txt.
+[Fri Jun 16 12:35:31 2023]
+Finished job 25.
+35 of 36 steps (97%) done
+Select jobs to execute...
+
+[Fri Jun 16 12:35:31 2023]
+localrule all:
+    input: 230426_H66K_DRB/stats/230426_H66K_DRB_fastqc.tsv, 230426_H66K_DRB/stats/230426_H66K_DRB_clumpify.tsv, 230426_H66K_DRB/stats/230426_H66K_DRB_bbduk.tsv, 230426_H66K_DRB/stats/230426_H66K_DRB_aligned.tsv, 230426_H66K_DRB/URLS/230426_H66K_DRB_hg38_norm_CPM_bw_URL.txt, 230426_H66K_DRB/stats/230426_H66K_DRB_results.tsv
+    jobid: 0
+    resources: tmpdir=/tmp
+
+[Fri Jun 16 12:35:31 2023]
+Finished job 0.
+36 of 36 steps (100%) done
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/ChIPseq/.snakemake/log/2023-06-16T101526.285337.snakemake.log

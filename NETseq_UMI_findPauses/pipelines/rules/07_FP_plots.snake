@@ -1,0 +1,41 @@
+#===== Rule to generate final plots ============================
+
+
+rule create_plots:
+    input:
+        expand(
+            PROJ + "/pauses/{sam_grp}_{win}{grp}pauses_meta_N.bed.gz",
+            sam_grp = GENE_SUB_GRPS, win = WIN_SIZE, grp = ALL_GROUPS
+        ),
+        expand(
+            PROJ + "/pauses/{sam_grp}_{win}{grp}pauses_{region}.bed.gz",
+            sam_grp = GENE_SUB_GRPS, win = WIN_SIZE, grp = ALL_GROUPS, region = REGIONS
+        )
+    output:
+        PROJ + "/" + PROJ + "_analysis.html"
+    params:
+        job_name = PROJ + "_plots",
+        ref_file = "pipeline/ref/" + GENELIST + ".yaml",
+        memory   = MEMORY * 4
+    log:
+        out = PROJ + "/logs/" + PROJ + "_plots.out",
+        err = PROJ + "/logs/" + PROJ + "_plots.err"
+    message:
+        "Creating plots for " + PROJ + " project"
+    threads:
+        1
+    shell:
+        """
+        Rmd={SRC}/Rmds/analysis.Rmd
+        script={SRC}/Rmds/knit_rmd.R
+        yml={params.ref_file}
+        samp=samples.yaml
+
+        Rscript $script \
+            -i $Rmd \
+            -p {PROJ} \
+            -y $yml \
+            -s $samp
+            -o {PROJ}
+        """
+

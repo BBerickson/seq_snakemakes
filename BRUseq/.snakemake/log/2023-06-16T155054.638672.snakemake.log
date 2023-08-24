@@ -1,0 +1,163 @@
+Building DAG of jobs...
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                     count    min threads    max threads
+--------------------  -------  -------------  -------------
+all                         1              1              1
+bamCoverage                 2             12             12
+bamCoverage_summary         1              1              1
+bbduk_summary               1              1              1
+bowtie                      1             12             12
+bowtie_counts               2              1              1
+bowtie_summary              1              1              1
+calculating_OR              2              1              1
+clumpify_summary            1              1              1
+fastqc_summary              1              1              1
+gathering_OR_results        1              1              1
+gathering_results           1              1              1
+total                      15              1             12
+
+Select jobs to execute...
+
+[Fri Jun 16 15:50:56 2023]
+Job 14: Aligning reads with Bowtie2 for 293flpIN_RTF1_MT_DRB_t0
+
+Submitted DRMAA job 14 with external jobid 10646.
+
+[Fri Jun 16 15:50:56 2023]
+Job 6: Creating 220812_RTF1_DRB_BrUseq clumpify summary
+
+Submitted DRMAA job 6 with external jobid 10647.
+
+[Fri Jun 16 15:50:56 2023]
+Job 9: Creating 220812_RTF1_DRB_BrUseq bbduk summary
+
+Submitted DRMAA job 9 with external jobid 10648.
+
+[Fri Jun 16 15:50:56 2023]
+Job 1: Creating 220812_RTF1_DRB_BrUseq FastQC summary
+
+Submitted DRMAA job 1 with external jobid 10649.
+
+[Fri Jun 16 15:50:57 2023]
+Job 19: Bowtie2 counts for 293flpIN_RTF1_WT_DRB_t0
+
+Submitted DRMAA job 19 with external jobid 10650.
+[Fri Jun 16 15:51:05 2023]
+Finished job 6.
+1 of 15 steps (7%) done
+[Fri Jun 16 15:51:05 2023]
+Finished job 9.
+2 of 15 steps (13%) done
+[Fri Jun 16 15:51:05 2023]
+Finished job 1.
+3 of 15 steps (20%) done
+[Fri Jun 16 15:51:46 2023]
+Finished job 19.
+4 of 15 steps (27%) done
+Select jobs to execute...
+
+[Fri Jun 16 15:51:46 2023]
+Job 18: getting OR norm for RTF1_WT_pDox_DRB_0
+
+Submitted DRMAA job 18 with external jobid 10652.
+[Fri Jun 16 15:52:06 2023]
+Finished job 18.
+5 of 15 steps (33%) done
+Removing temporary output file 220812_RTF1_DRB_BrUseq/bbduk/293flpIN_RTF1_MT_DRB_t0_R1_bbduk.fastq.gz.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/bbduk/293flpIN_RTF1_MT_DRB_t0_R2_bbduk.fastq.gz.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/bams/293flpIN_RTF1_MT_DRB_t0_hg38_scer3.bam.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/bams/293flpIN_RTF1_MT_DRB_t0_hg38_scer3.bam.bai.
+[Fri Jun 16 17:26:01 2023]
+Finished job 14.
+6 of 15 steps (40%) done
+Select jobs to execute...
+
+[Fri Jun 16 17:26:01 2023]
+Job 21: Bowtie2 counts for 293flpIN_RTF1_MT_DRB_t0
+
+Submitted DRMAA job 21 with external jobid 10674.
+
+[Fri Jun 16 17:26:01 2023]
+Job 12: Creating 220812_RTF1_DRB_BrUseq bowtie2 summary
+
+Submitted DRMAA job 12 with external jobid 10675.
+[Fri Jun 16 17:26:10 2023]
+Finished job 12.
+7 of 15 steps (47%) done
+[Fri Jun 16 17:29:21 2023]
+Finished job 21.
+8 of 15 steps (53%) done
+Select jobs to execute...
+
+[Fri Jun 16 17:29:21 2023]
+Job 20: getting OR norm for RTF1_MT_pDox_DRB_0
+
+Submitted DRMAA job 20 with external jobid 10676.
+[Fri Jun 16 17:29:41 2023]
+Finished job 20.
+9 of 15 steps (60%) done
+Select jobs to execute...
+
+[Fri Jun 16 17:29:42 2023]
+Job 17: getting final results
+
+Submitted DRMAA job 17 with external jobid 10677.
+[Fri Jun 16 17:29:51 2023]
+Finished job 17.
+10 of 15 steps (67%) done
+Select jobs to execute...
+
+[Fri Jun 16 17:29:52 2023]
+Job 22: stranded bigwigs with reads in R2-R1 orentation for RTF1_WT_pDox_DRB_0
+
+Submitted DRMAA job 22 with external jobid 10678.
+
+[Fri Jun 16 17:29:52 2023]
+Job 16: stranded bigwigs with reads in R2-R1 orentation for RTF1_MT_pDox_DRB_0
+
+Submitted DRMAA job 16 with external jobid 10679.
+
+[Fri Jun 16 17:29:52 2023]
+Job 23: getting final results
+
+Submitted DRMAA job 23 with external jobid 10680.
+[Fri Jun 16 17:30:12 2023]
+Finished job 23.
+11 of 15 steps (73%) done
+[Fri Jun 16 17:36:04 2023]
+Finished job 22.
+12 of 15 steps (80%) done
+[Fri Jun 16 17:51:38 2023]
+Finished job 16.
+13 of 15 steps (87%) done
+Select jobs to execute...
+
+[Fri Jun 16 17:51:38 2023]
+Job 15: Creating 220812_RTF1_DRB_BrUseq bamCoverage summary
+
+Submitted DRMAA job 15 with external jobid 10681.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/bw/RTF1_MT_pDox_DRB_0_bamCoverage_stats.txt.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/bw/RTF1_WT_pDox_DRB_0_bamCoverage_stats.txt.
+[Fri Jun 16 17:51:48 2023]
+Finished job 15.
+14 of 15 steps (93%) done
+Select jobs to execute...
+
+[Fri Jun 16 17:51:48 2023]
+localrule all:
+    input: 220812_RTF1_DRB_BrUseq/stats/220812_RTF1_DRB_BrUseq_fastqc.tsv, 220812_RTF1_DRB_BrUseq/stats/220812_RTF1_DRB_BrUseq_clumpify.tsv, 220812_RTF1_DRB_BrUseq/stats/220812_RTF1_DRB_BrUseq_bbduk.tsv, 220812_RTF1_DRB_BrUseq/stats/220812_RTF1_DRB_BrUseq_aligned.tsv, 220812_RTF1_DRB_BrUseq/URLS/220812_RTF1_DRB_BrUseq_hg38_norm_None_chrM_bw_URL.txt, 220812_RTF1_DRB_BrUseq/stats/220812_RTF1_DRB_BrUseq_results.tsv
+    jobid: 0
+    resources: tmpdir=/tmp
+
+[Fri Jun 16 17:51:48 2023]
+Finished job 0.
+15 of 15 steps (100%) done
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/BRUseq/.snakemake/log/2023-06-16T155054.638672.snakemake.log

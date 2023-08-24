@@ -1,0 +1,9 @@
+Building DAG of jobs...
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Nothing to be done (all requested files are present and up to date).
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/BRUseq/.snakemake/log/2023-06-17T082208.018313.snakemake.log

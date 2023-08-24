@@ -1,0 +1,32 @@
+#===== Config file for standared hg38 with scer3 spikeIN  ===================
+
+# Path to mixed bowtie2 index and chrom name txt file
+GENELIST:
+    ""
+INDEX_PATH:
+    "/beevol/home/erickson/ref/hg38_scer3/"
+INDEX_MIX:
+    "hg38_scer3"
+INDEX_SAMPLE:
+    "hg38"
+INDEX_SPIKE:
+    "scer3"
+MASK:
+  "/beevol/home/erickson/ref/hg38/ref/hg38_snoRNAs.bed"
+# fasta files for splitting bam file
+FA_SAMPLE:
+  "/beevol/home/erickson/ref/hg38/Homo_sapiens.GRCh38.dna.primary_assembly.UCSC.fa"
+FA_SPIKE:
+  "/beevol/home/erickson/ref/scer3/scer3.fa"
+ENRICHED_SAMPLE:
+  "/beevol/home/erickson/ref/hg38/ref/enrich.bed"
+ENRICHED_SPIKE:
+  "/beevol/home/erickson/ref/table_scer3/enrich.bed"
+MY_REF:
+  "/beevol/home/erickson/ref/hg38/ref/hg38_gene.bed"
+FW_REF:
+  "/beevol/home/erickson/ref/hg38/ref/hg38_gene_fw.bed"
+REV_REF:
+  "/beevol/home/erickson/ref/hg38/ref/hg38_gene_rev.bed"
+PI_REF:
+  "/beevol/home/erickson/ref/hg38/ref/PI.bed"

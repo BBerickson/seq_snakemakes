@@ -1,0 +1,142 @@
+
+```{r "Packages", include = FALSE, cache = FALSE}
+
+# Load packages
+library(tidyverse)
+library(knitr)
+library(scales)
+library(here)
+library(vroom)
+library(Matrix)
+library(ggpointdensity)  # To create scatter plots
+library(ggseqlogo)       # To create sequence logos
+library(valr)            # To create sequence logos
+library(bedr)            # To create sequence logos
+library(cowplot)         # To arrange plot panels
+library(patchwork)       # To arrange plot panels
+library(yaml)            # To parse config yamls
+library(gprofiler2)      # To perform GO analysis
+library(ggrepel)         # To create GO plots
+library(colorspace)      # To modify color palette
+library(colorblindr)     # github, to modify color palette
+library(ensembldb)
+library(BiocManager)
+
+# Read functions
+source(here::here(plot_params$template_dir, "funs.R"))
+
+```
+
+```{r "Theme", cache = FALSE}
+
+txt_mplyr <- 1.5
+
+ttl_pt <- 10 * txt_mplyr
+txt_pt <- 8  * txt_mplyr
+ln_pt  <- 0.5
+
+theme_info <- theme_cowplot() +
+  theme(
+    plot.title       = element_text(face = "plain"),
+    strip.background = element_rect(fill = NA),
+    legend.title     = element_text(size = ttl_pt),
+    legend.text      = element_text(size = ttl_pt),
+    strip.text       = element_text(size = ttl_pt),
+    axis.title       = element_text(size = ttl_pt),
+    axis.text        = element_text(size = txt_pt),
+    axis.line        = element_blank(),
+    panel.border     = element_rect(fill = NA, color = "black", size = ln_pt),
+    axis.ticks       = element_line(size = ln_pt, color = "black")
+  )
+
+theme_colors <- c(
+  "#225ea8",  # blue
+  "#e31a1c",  # red
+  "#238443",  # green
+  "#ec7014",  # orange
+  "#8c6bb1",  # purple
+  "#737373",  # grey
+  "#41b6c4"   # aqua
+)
+
+```
+
+```{r "sample names", echo = FALSE}
+
+# Directories
+if (!dir.exists(here(plot_params$obj_dir))) {
+  dir.create(here(plot_params$obj_dir), recursive = TRUE, mode = "0750")
+}
+
+if (!dir.exists(here(plot_params$tab_dir))) {
+  dir.create(here(plot_params$tab_dir), recursive = TRUE, mode = "0750")
+}
+
+
+# Create data.frame with sample info
+sample_df <- tibble(stack(plot_grpss$SAMPLES)) %>% 
+  dplyr::rename(file=values,sampling_grp=ind) %>% 
+  mutate(plot_grp=plot_grpss$PROJ,
+         clr=rep(plot_grpss$COLORS[seq_along(plot_grpss$groups)],length(names(plot_grpss$SAMPLES))),
+         sample=rep(plot_grpss$groups,length(names(plot_grpss$SAMPLES)))) %>% 
+  separate(.,sampling_grp,c("name","rep"),sep="-",remove=F) %>% mutate(sample=paste0(sample,"-",rep)) %>% 
+  dplyr::select(-name,-rep)
+
+sample_df <- sample_df %>%
+  separate(sample, into = c("sam", "rep"), sep = "-", remove = FALSE)
+
+# Columns for bed files
+bed_cols <- c(
+  "chrom", "start", 
+  "end",   "name", 
+  "score", "strand"
+)
+
+win_cols <- c(bed_cols, "counts")
+win_cols[5] <- "win_id"
+
+# Genome files
+genome <- read_tsv(
+  file.path(plot_params$ref_dir, plot_params$genome),
+  col_names = c("chrom", "size")
+)
+
+fa <- here(plot_params$ref_dir, plot_params$fasta)
+
+# Gene lists and filter based on length
+load_genes <- function(drctry, file, len = 1, rm_cols = TRUE) {
+  res <- here(drctry, file) %>%
+    read_tsv(col_names = bed_cols) %>%
+    mutate(gene_len = (end - start) / 1000) %>%
+    dplyr::filter(gene_len > len)
+  
+  if (rm_cols) {
+    res <- res %>%
+      dplyr::select(name, gene_len)
+  }
+  
+  res
+}
+
+list_dir <- file.path(plot_params$ref_dir, plot_params$list_dir)
+
+genes_5     <- load_genes(list_dir, plot_params$genes_5, 2)
+genes_3     <- load_genes(list_dir, plot_params$genes_3, 2)
+genes_pause <- load_genes(list_dir, plot_params$genes_pause, 2)
+
+genes_exons <- load_genes(
+  drctry  = list_dir,
+  file    = plot_params$genes_zone,
+  len     = 4,
+  rm_cols = FALSE
+)
+
+genes_zone  <- genes_exons %>%
+  dplyr::select(name, gene_len)
+
+genes_exons <- genes_exons %>%
+  dplyr::select(1:6)
+
+```
+
+

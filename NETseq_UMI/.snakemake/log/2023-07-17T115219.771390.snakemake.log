@@ -1,0 +1,3 @@
+SyntaxError in line 29 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI/pipelines/rules/04_UMI_dedup_subsample.snake:
+invalid syntax
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI/pipelines/mNETseq_UMI_spikeIN.snake", line 174, in <module>

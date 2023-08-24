@@ -1,0 +1,466 @@
+
+```{r "{{.x}} sample names"}
+
+# Strings to match samples and create labels
+sam_grp     <- "{{.x}}"
+samples <- plot_grps$samples[[sam_grp]]
+clrs    <- plot_grps$colors[[sam_grp]]
+
+# Sample names
+sams <- samples %>%
+  str_c("-", sam_grp)
+
+sam_nms <- samples %>%
+  flatten() %>%
+  unlist()
+
+sam_nms <- set_names(
+  names(sam_nms),
+  unname(sam_nms)
+)
+
+n_sams <- length(sam_nms)
+
+# Sample colors
+clrs <- set_names(clrs, sam_nms)
+
+# Output files to save
+out_file <- here(plot_params$obj_dir, str_c(sam_grp, "_exon_pausing.tsv.gz"))
+
+merge_windows <- !file.exists(out_file)
+
+```
+
+```{r}
+
+# Columns for bed files
+coord_cols <- c(
+  "chrom", "start",
+  "end"
+)
+
+name_cols <- c(coord_cols, "name")
+
+bed_cols <- c(
+  name_cols, "score", 
+  "strand"
+)
+
+net_cols <- c(
+  name_cols, "score_1",
+  "strand",   "score_2", 
+  "biotype",  "counts"
+)
+
+pause_cols <- c(
+  name_cols, "score_1", 
+  "strand",   "symbol",
+  "biotype",  "counts"
+)
+
+win_cols <- c(
+  name_cols, "win_id", 
+  "strand",   "counts"
+)
+
+ex_win_cols <- c(
+  coord_cols, "ex_name",
+  "win_id",   "strand",
+  "counts"
+)
+
+ex_cols <- c(
+  name_cols,    "num",
+  "strand",     "symbol",
+  "transcript", "counts"
+)
+
+int_cols <- c(
+  name_cols, "num",
+  "strand",  "symbol",
+  "biotype", "counts"
+)
+
+```
+
+# `r sam_grp`
+
+```{r "{{.x}} FUNCTIONS"}
+
+# Calculate mean signal
+calc_mean_signal <- function(df_in, grps, grp_info = NULL) {
+  use_seqs <- c("AT-AC", "GC-AG", "GT-AG")
+
+  res <- df_in
+  
+  if (!is.null(grp_info)) {
+    res <- res %>%
+      left_join(grp_info, by = c("name", "type")) %>%
+      na.omit()
+  }
+  
+  res <- res %>%
+    dplyr::filter(seq %in% use_seqs) %>%
+    
+    group_by(sample, type, name) %>%
+    mutate(
+      counts     = counts * 1000,
+      rel_counts = counts / sum(counts)
+    ) %>%
+    
+    group_by(!!!syms(grps)) %>%
+    summarize(
+      across(c(counts, rel_counts), mean),
+      n       = str_c(comma(n_distinct(name)), " sites"),
+      n       = str_c(n, "\n", comma(n_distinct(gene_name)), " genes"),
+      .groups = "drop"
+    ) %>%
+    mutate(type = fct_relevel(type, names(sfxs)))
+  
+  res
+}
+
+# Divide splice sites into groups based on -1 and +1 signal
+get_ss_grps <- function(df_in, sam, genes = NULL) {
+  res <- df_in %>%
+    dplyr::filter(
+      win_id %in% c(50, 51),
+      sample == sam
+    ) %>%
+    dplyr::select(name, type, win_id, counts) %>%
+    pivot_wider(names_from = "win_id", values_from = "counts") %>%
+    dplyr::rename("m1" = `50`, "p1" = `51`) %>%
+    mutate(
+      grp = case_when(
+        p1 > m1 ~ "+1 sites",
+        m1 > p1 ~ "-1 sites",
+        TRUE    ~ "no difference"
+      ),
+      seq       = str_extract(name, "(?<=;)[ATGC\\-,;]+$"),
+      seq       = map_chr(str_split(seq, ";|,"), ~ str_c(unique(.x), collapse = ";")),  # remove duplicates from seq
+      gene_name = str_extract(name, "(?<=;)chr[0-9]{1,2}:[0-9]+-[0-9]+[-+];ENSG[0-9]+\\|[^;]+(?=;)")
+    ) %>%
+    dplyr::select(name, type, gene_name, grp, seq)
+    
+  if (!is.null(genes)) {
+    res <- res %>%
+      semi_join(genes, by = c("gene_name" = "name"))
+  }
+  
+  res <- res %>%
+    mutate(grp = "all") %>%
+    bind_rows(res)
+  
+  res
+}
+
+# Create metaplots
+create_ss_meta <- function(df_in, y, yttl = waiver(), brks = 0:100) {
+  res <- df_in %>%
+    ggplot(aes(win_id, !!sym(y), color = sample)) +
+    geom_line() +
+    geom_vline(xintercept = 50.5, size = 0.5, linetype = 2) +
+    geom_text(
+      aes(Inf, Inf, label = n),
+      color = "black",
+      hjust = 1.1,
+      vjust = 1.1,
+      size  = txt_pt / .pt,
+      check_overlap = TRUE
+    ) +
+    scale_x_continuous(
+      labels = (function(x) ifelse(x <= 50, x - 51, str_c("+", x - 50))),
+      breaks = brks
+    ) +
+    guides(color = guide_legend(override.aes = list(size = 3))) +
+    scale_color_manual(values = clrs) +
+    theme_info +
+    theme(
+      legend.position  = "top",
+      legend.title     = element_blank(),
+      strip.background = element_rect(fill = "#fafafa", color = "grey85"),
+      axis.title.x     = element_blank()
+    ) +
+    labs(y = yttl)
+  
+  res
+}
+
+# Create metaplot bargraph
+create_ss_bars <- function(df_in, y, yttl = waiver(), wins = c(41, 60), plt_clrs = clrs) {
+  
+  fill_clrs    <- plt_clrs
+  fill_clrs[1] <- "white"
+  
+  zero_ct <- df_in %>%
+    pull(y) %>%
+    max() %>%
+    (function(x) 0 - (x * 0.05))
+  
+  res <- df_in %>%  
+    convert_to_bars() %>%
+    
+    ggplot(aes(win_id, !!sym(y), color = sample, fill = sample)) +
+    
+    geom_ribbon(
+      aes(ymin = zero_ct, ymax = !!sym(y)),
+      alpha = 0.05,
+      size  = 0.5,
+      key_glyph = draw_key_point
+    ) +
+    
+    geom_hline(yintercept = zero_ct, size = 1.5, color = "white") +
+    geom_vline(xintercept = 50.5, size = 0.5, linetype = 2) +
+    
+    geom_text(
+      aes(Inf, Inf, label = n),
+      color = "black",
+      hjust = 1.1,
+      vjust = 1.1,
+      size  = txt_pt / .pt,
+      check_overlap = TRUE
+    ) +
+    
+    scale_x_continuous(
+      labels = (function(x) ifelse(x <= 50, x - 51, str_c("+", x - 50))),
+      breaks = wins[1]:wins[2]
+    ) +
+    guides(color = guide_legend(override.aes = list(size = 5, alpha = 1, shape = 15)), fill = FALSE) +
+    
+    scale_color_manual(values = plt_clrs) +
+    scale_fill_manual(values = fill_clrs) +
+    
+    theme_info +
+    theme(
+      legend.position  = "top",
+      legend.title     = element_blank(),
+      strip.background = element_rect(fill = "#fafafa", color = "grey85"),
+      axis.title.x     = element_blank(),
+      axis.text.x      = element_text(hjust = 0.7)
+    ) +
+    labs(y = yttl)
+  
+  res
+}
+
+# Add extra values so signal appears as bar graph
+convert_to_bars <- function(df_in, xclmn = "win_id", yclmn = "counts") {
+  res <- df_in %>%
+    rowwise() %>%
+    mutate(
+      !!sym(xclmn) := list(c(!!sym(xclmn) - 0.5, !!sym(xclmn) + 0.5)),
+      !!sym(yclmn) := list(rep(!!sym(yclmn), 2))
+    ) %>%
+    ungroup() %>%
+    unnest(all_of(c(xclmn, yclmn)))
+  
+  res
+}
+
+```
+
+```{r "{{.x}} LOAD FILES"}
+
+sfxs <- c(
+  "5' ss" = "_5ss-wins_S_N.bed.gz",
+  "3' ss" = "_3ss-wins_S_N.bed.gz"
+)
+
+out <- here(plot_params$obj_dir, str_c(sam_grp, "_ss.rds"))
+
+# Load windows do not filter low signal sites
+# This will include sites that only have signal in one sample
+ss <- load_merge_wins(
+  sams      = sams,
+  grps      = sam_grp,
+  sfxs      = sfxs,
+  res_dir   = "results",
+  bed_dir   = "metaplot_beds",
+  file_out  = out,
+  col_names = win_cols,
+  win_num   = 100,
+  win_len   = 1,
+  win_min   = 26,
+  win_max   = 75
+) %>%
+  mutate(sample = str_remove(sample, str_c("-", group)))
+
+```
+
+```{r "{{.x}} CALC MEAN"}
+
+# Divide sites into groups
+ss_grps <- ss %>%
+  get_ss_grps(
+    sam   = samples[[1]],
+    genes = genes
+  )
+  
+
+# Calculate mean signal for filtered sites
+grps <- c("sample", "type", "seq", "win_id")
+ 
+dat <- ss %>%
+  calc_mean_signal(
+    grps     = grps,
+    grp_info = ss_grps
+  ) %>%
+  mutate(
+    sample = sam_nms[sample],
+    sample = fct_relevel(sample, unname(sam_nms))
+  )
+
+```
+
+## Mean relative signal
+
+Mean relative mNET-seq signal is shown for the region +/-25 bp (left) or +/-10 bp (right) around each splice site. The dotted line indicates the exon-intron boundary. Site are only included if they are present in all datasets, are separated by >50 bp from other sites, and there is signal within 25 bp.
+
+```{r "{{.x}} REL META", fig.width = 12.5, fig.height = 5.5}
+
+brks <- c(seq(26, 50, 5), 50, 51, seq(75, 51, -5))
+
+plt_args <- list(
+  "rel_counts" = "mean relative signal",
+  "counts"     = "mean signal (RPKM)"
+)
+
+plts <- plt_args %>%
+  imap(~ {
+    p1 <- dat %>%
+      create_ss_meta(
+        y    = .y,
+        yttl = .x,
+        brks = brks
+      ) +
+      facet_grid(seq ~ type, scales = "free_y") +
+      theme(axis.text.x = element_text(hjust = c(rep(0.5, 5), 1, 0, rep(0.5, 5))))
+    
+    p2 <- dat %>%
+      dplyr::filter(
+        win_id >= 41 & win_id <= 60,
+        type == "5' ss"
+      ) %>%
+      create_ss_bars(.y, .x) +
+      facet_grid(seq ~ type, scales = "free_y") +
+      theme(legend.position = "none")
+    
+    plot_grid(
+      p1, p2,
+      align = "vh",
+      axis  = "trbl",
+      nrow  = 1,
+      rel_widths = c(1, 0.7)
+    )
+  })
+
+plts[[1]]
+
+```
+
+<br>
+
+## Mean signal
+
+Mean mNET-seq signal is shown below for the region +/-25 bp (left) or +/-10 bp (right) around each splice site.
+
+```{r "{{.x}} MEAN META", fig.width = 12.5, fig.height = 5.5}
+
+plts[[2]]
+
+```
+
+<br>
+
+## Splice site groups {.tabset}
+
+5' splice sites were grouped based on signal at the -1 and +1 positions. Splice site groups were identified separately for each dataset (select the tabs below).
+
+* -1 sites: -1 signal is greater than +1 signal
+* +1 sites: +1 signal is greater than -1 signal
+* no difference: Signal is equal at the -1 and +1 positions
+
+```{r "{{.x}} SITE GROUPS METAPLOTS", fig.width = 12.5, fig.height = 11, results = "asis"}
+
+samples %>%
+  walk(~ {
+    cat("\n\n###", .x, "\n\n")
+    
+    g_info <- ss %>%
+      get_ss_grps(.x, genes)
+      
+    dat_g <- ss %>%
+      mutate(
+        sample = sam_nms[sample],
+        sample = fct_relevel(sample, unname(sam_nms))
+      ) %>%
+      calc_mean_signal(
+        grps     = c(grps, "grp"),
+        grp_info = g_info
+      )
+
+    plt <- plt_args %>%
+      imap(~ {
+        dat_g %>%
+          dplyr::filter(
+            win_id >= 41 & win_id <= 60,
+            type == names(sfxs[1]),
+            grp != "all"
+          ) %>%
+          create_ss_bars(.y, .x) +
+          facet_grid(seq ~ grp, scales = "free_y")
+      }) %>%
+      plot_grid(
+        plotlist = .,
+        align    = "vh",
+        axis     = "trbl",
+        ncol     = 1
+      )
+    
+    print(plt)
+    cat("\n\n---\n\n<br>\n\n<br>\n\n")
+  })
+
+```
+
+
+
+
+
+
+```{r "{{.x}} REL META TOP SIGNAL", fig.width = 12.5, fig.height = 5.5, eval = FALSE}
+
+clmn <- "rel_counts"
+
+p1 <- dat_q %>%
+  dplyr::filter(qrt == 2) %>%
+  create_ss_meta(
+    y    = clmn,
+    yttl = plt_args[clmn],
+    brks = brks
+  ) +
+  facet_grid(seq ~ type) +
+  theme(axis.text.x = element_text(hjust = c(rep(0.5, 5), 1, 0, rep(0.5, 5))))
+
+p2 <- dat_q %>%
+  dplyr::filter(
+    win_id >= 41 & win_id <= 60,
+    qrt == 2,
+    type == "5' ss"
+  ) %>%
+  create_ss_meta(
+    y    = clmn,
+    yttl = plt_args[clmn]
+  ) +
+  facet_grid(seq ~ type, scales = "free_y") +
+  theme(legend.position = "none")
+
+plot_grid(
+  p1, p2,
+  align = "vh",
+  axis  = "trbl",
+  nrow  = 1,
+  rel_widths = c(1, 0.7)
+)
+
+```

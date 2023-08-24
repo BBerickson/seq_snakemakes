@@ -1,0 +1,192 @@
+# ====== Rules for seperating sample and spikeIN from bam file =================================
+
+
+# Align trimmed reads with bowtie2
+rule bowtie:
+    input:
+        R1  = PROJ + "/bbduk/{sample}_R1_bbduk.fastq.gz",
+        R2  = PROJ + "/bbduk/{sample}_R2_bbduk.fastq.gz"
+    output:
+        bam1   = temp(PROJ + "/bams/{sample}_" + INDEX_MIX + ".bam"),
+        bai1   = temp(PROJ + "/bams/{sample}_" + INDEX_MIX + ".bam.bai"),
+        stats1 = PROJ + "/bams/{sample}_" + INDEX_MIX + "_bowtie_stats.txt",
+        bam2   = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
+        bai2   = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai",
+        bam3   = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
+        bai3   = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam.bai"
+    params:
+        job_name = "{sample}_bowtie",
+        memory   = 64,
+        idx1     = INDEX_PATH + INDEX_MIX,
+        idx2     = INDEX_PATH + INDEX_SAMPLE + ".txt",
+        idx3     = INDEX_PATH + INDEX_SPIKE + ".txt",
+        fa2      = FA_SAMPLE,
+        fa3      = FA_SPIKE,
+        sortname = "{sample}.temp",
+        args     = CMD_PARAMS["bowtie2"]
+    log:
+        out = PROJ + "/logs/{sample}_bowtie.out",
+        err = PROJ + "/logs/{sample}_bowtie.err"
+    message:
+        "Aligning reads with Bowtie2 for {wildcards.sample}"
+    threads: 
+        12
+    shell:
+        """
+        # By default bowtie2 performs end-to-end alignment
+        # By default bowtie2 searches for multiple alignments and reports the best one
+        bowtie2 \
+            -p {threads} \
+            -x {params.idx1} \
+            -1 {input.R1} \
+            -2 {input.R2} \
+            {params.args} \
+            2> {output.stats1} \
+            | samtools view -bF4q5 - \
+            | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+            > {output.bam1}
+
+        samtools index -@ {threads} {output.bam1}
+        
+        samtools view {output.bam1} $(head -n1 {params.idx2}) \
+        | samtools view -bT {params.fa2} - \
+        | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+        > {output.bam2}
+    
+        samtools index -@ {threads} {output.bam2}
+
+        samtools view {output.bam1} $(head -n1 {params.idx3}) \
+        | sed 's/spike_chr*/chr/g' | samtools view -bT {params.fa3} - \
+        | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+        > {output.bam3}
+    
+        samtools index -@ {threads} {output.bam3}
+        
+        """
+
+# get read counts from bams
+rule bowtie_counts:
+    input:
+        bam2   = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
+        bai2   = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai",
+        bam3   = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
+        bai3   = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam.bai"
+    output:
+        stats2 = PROJ + "/bams/{sample}_count.txt"
+    params:
+        job_name = "{sample}_bowtie_counts",
+        enrich2  = ENRICHED_SAMPLE,
+        enrich3  = ENRICHED_SPIKE,
+        memory   = 4
+    log:
+        out = PROJ + "/logs/{sample}_bowtie_counts.out",
+        err = PROJ + "/logs/{sample}_bowtie_counts.err"
+    message:
+        "Bowtie2 counts for {wildcards.sample}"
+    threads:
+        1
+    shell:
+        """
+        echo "{INDEX_SAMPLE} $(samtools idxstats {input.bam2} | awk '{{s+=$3}} END {{print s/2}}')" >> {output.stats2}
+        echo "{INDEX_SPIKE} $(samtools idxstats {input.bam3} | awk '{{s+=$3}} END {{print s/2}}')" >> {output.stats2}
+        echo "enrich_{INDEX_SAMPLE} $(samtools view {input.bam2} -L {params.enrich2} -c | awk ' {{print $0/2}}')" >> {output.stats2}
+        echo "enrich_{INDEX_SPIKE} $(samtools view {input.bam3} -L {params.enrich3} -c | awk ' {{print $0/2}}')" >> {output.stats2}
+        echo "chrM_{INDEX_SAMPLE} $(samtools view {input.bam2} chrM -c | awk ' {{print $0/2}}')" >> {output.stats2}
+        echo "chrM_{INDEX_SPIKE} $(samtools view {input.bam3} chrM -c | awk ' {{print $0/2}}')" >> {output.stats2}
+        
+        """
+
+# fragment size of mapped paired end reads
+rule fragment_size_samp:
+    input:
+      bam = expand(
+            PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
+            sample = SAMS_UNIQ2
+        ),
+      bai =  expand(
+            PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai",
+            sample = SAMS_UNIQ2
+        ),
+      bam2 = expand(
+            PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
+            sample = SAMS_UNIQ2
+        ),
+      bai2 =  expand(
+            PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam.bai",
+            sample = SAMS_UNIQ2
+        )
+    output:
+      log =  PROJ + "/stats/" + PROJ + "_" + INDEX_SAMPLE + "_fragment.txt",
+      pic =  PROJ + "/stats/" + PROJ + "_" + INDEX_SAMPLE + "_fragmentSize.png",
+      log2 =  PROJ + "/stats/" + PROJ + "_" + INDEX_SPIKE + "_fragment.txt",
+      pic2 =  PROJ + "/stats/" + PROJ + "_" + INDEX_SPIKE + "_fragmentSize.png"
+    params:
+        job_name = "PE_fragment_size_sample",
+        memory   = 64,
+        labels   = SAMS_UNIQ2, 
+        args     = CMD_PARAMS["fragment_size"]
+    log:
+        out = PROJ + "/logs/PE_fragment_sample_size.out",
+        err = PROJ + "/logs/PE_fragment_sample_size.err"
+    message:
+        "fragment size of mapped paired end reads for sample"
+    threads: 
+        12
+    shell:
+        """
+        bamPEFragmentSize \
+          -hist {output.pic2} \
+          --numberOfProcessors {threads} \
+          -T "Fragment size of PE data" \
+          -b  {input.bam2} {params.args} \
+          --samplesLabel {params.labels} \
+          --table {output.log2} 
+    
+        bamPEFragmentSize \
+          -hist {output.pic} \
+          --numberOfProcessors {threads} \
+          -T "Fragment size of PE data" \
+          -b  {input.bam} {params.args} \
+          --samplesLabel {params.labels} \
+          --table {output.log} 
+        
+        """
+
+# Combine bowtie2 summaries
+rule bowtie_summary:
+    input:
+        expand(
+            PROJ + "/bams/{sample}_" + INDEX_MIX + "_bowtie_stats.txt",
+            sample = SAMS_UNIQ
+        )
+    output:
+        PROJ + "/stats/" + PROJ + "_aligned.tsv"
+    params:
+        job_name = PROJ + "_bowtie_summary",
+        memory   = 4
+    log:
+        out = PROJ + "/logs/" + PROJ + "_bowtie_summary.out",
+        err = PROJ + "/logs/" + PROJ + "_bowtie_summary.err"
+    message:
+        "Creating " + PROJ + " bowtie2 summary"
+    threads:
+        1
+    run:
+        with open(output[0], "w") as out:
+            for file in input:
+                name = os.path.basename(file)
+                name = re.sub("_" + INDEX_MIX + "_bowtie_stats.txt", "", name)
+
+                for line in open(file, "r"):
+                    match = re.search("overall alignment rate", line)
+
+                    if match:
+                        num = re.search("[0-9.%]+", line)
+                        num = num.group(0).strip()
+                        met = re.search("[a-z\s]+", line).group(0)
+                        met = met.strip()
+                        met = re.sub(" ", "_", met)
+
+                        out.write("%s\t%s\t%s\n" % (name, met, num))
+
+

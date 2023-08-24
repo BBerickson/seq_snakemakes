@@ -1,0 +1,402 @@
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                    count    min threads    max threads
+-------------------  -------  -------------  -------------
+all                        1              1              1
+bamCoverage                3             12             12
+bamCoverage_summary        1              1              1
+bbduk_paired               6             12             12
+bbduk_summary              1              1              1
+clumpify_paired            6              1              1
+clumpify_summary           1              1              1
+fastqc                    12              6              6
+fastqc_summary             1              1              1
+gathering_results          1              1              1
+hisat                      6             12             12
+hisat_summary              1              1              1
+total                     40              1             12
+
+Select jobs to execute...
+
+[Sat Jun 17 09:31:04 2023]
+Job 2: Running FastQC on 293flpIN_RTF1_MT_R2_S5_L004_R1_001
+
+Submitted DRMAA job 2 with external jobid 10726.
+
+[Sat Jun 17 09:31:05 2023]
+Job 16: Removing duplicats for 293flpIN_RTF1_WT3
+
+Submitted DRMAA job 16 with external jobid 10727.
+
+[Sat Jun 17 09:31:05 2023]
+Job 3: Running FastQC on 293flpIN_RTF1_MT_R2_S5_L004_R2_001
+
+Submitted DRMAA job 3 with external jobid 10728.
+
+[Sat Jun 17 09:31:06 2023]
+Job 17: Removing duplicats for 293flpIN_RTF1_MT_R3
+
+Submitted DRMAA job 17 with external jobid 10729.
+
+[Sat Jun 17 09:31:07 2023]
+Job 5: Running FastQC on 293flpIN_RTF1_WT3_S3_L004_R2_001
+
+Submitted DRMAA job 5 with external jobid 10730.
+
+[Sat Jun 17 09:31:07 2023]
+Job 19: Removing duplicats for 293flpIN_RTF1_WT1
+
+Submitted DRMAA job 19 with external jobid 10731.
+
+[Sat Jun 17 09:31:07 2023]
+Job 7: Running FastQC on 293flpIN_RTF1_MT_R3_S6_L004_R2_001
+
+Submitted DRMAA job 7 with external jobid 10732.
+
+[Sat Jun 17 09:31:07 2023]
+Job 9: Running FastQC on 293flpIN_RTF1_MT_R1_S4_L004_R2_001
+
+Submitted DRMAA job 9 with external jobid 10733.
+
+[Sat Jun 17 09:31:08 2023]
+Job 11: Running FastQC on 293flpIN_RTF1_WT1_S1_L004_R2_001
+
+Submitted DRMAA job 11 with external jobid 10734.
+
+[Sat Jun 17 09:31:08 2023]
+Job 13: Running FastQC on 293flpIN_RTF1_WT2_S2_L004_R2_001
+
+Submitted DRMAA job 13 with external jobid 10735.
+
+[Sat Jun 17 09:31:08 2023]
+Job 15: Removing duplicats for 293flpIN_RTF1_MT_R2
+
+Submitted DRMAA job 15 with external jobid 10736.
+
+[Sat Jun 17 09:31:08 2023]
+Job 4: Running FastQC on 293flpIN_RTF1_WT3_S3_L004_R1_001
+
+Submitted DRMAA job 4 with external jobid 10737.
+
+[Sat Jun 17 09:31:09 2023]
+Job 18: Removing duplicats for 293flpIN_RTF1_MT_R1
+
+Submitted DRMAA job 18 with external jobid 10738.
+
+[Sat Jun 17 09:31:09 2023]
+Job 6: Running FastQC on 293flpIN_RTF1_MT_R3_S6_L004_R1_001
+
+Submitted DRMAA job 6 with external jobid 10739.
+
+[Sat Jun 17 09:31:09 2023]
+Job 20: Removing duplicats for 293flpIN_RTF1_WT2
+
+Submitted DRMAA job 20 with external jobid 10740.
+
+[Sat Jun 17 09:31:09 2023]
+Job 8: Running FastQC on 293flpIN_RTF1_MT_R1_S4_L004_R1_001
+
+Submitted DRMAA job 8 with external jobid 10741.
+
+[Sat Jun 17 09:31:09 2023]
+Job 10: Running FastQC on 293flpIN_RTF1_WT1_S1_L004_R1_001
+
+Submitted DRMAA job 10 with external jobid 10742.
+
+[Sat Jun 17 09:31:10 2023]
+Job 12: Running FastQC on 293flpIN_RTF1_WT2_S2_L004_R1_001
+
+Submitted DRMAA job 12 with external jobid 10743.
+[Sat Jun 17 09:34:46 2023]
+Finished job 16.
+1 of 40 steps (2%) done
+Select jobs to execute...
+
+[Sat Jun 17 09:34:46 2023]
+Job 23: Removing duplicats for 293flpIN_RTF1_WT3
+
+Submitted DRMAA job 23 with external jobid 10744.
+[Sat Jun 17 09:34:47 2023]
+Finished job 20.
+2 of 40 steps (5%) done
+Select jobs to execute...
+
+[Sat Jun 17 09:34:47 2023]
+Job 27: Removing duplicats for 293flpIN_RTF1_WT2
+
+Submitted DRMAA job 27 with external jobid 10745.
+[Sat Jun 17 09:35:08 2023]
+Finished job 17.
+3 of 40 steps (8%) done
+Select jobs to execute...
+
+[Sat Jun 17 09:35:08 2023]
+Job 24: Removing duplicats for 293flpIN_RTF1_MT_R3
+
+Submitted DRMAA job 24 with external jobid 10746.
+[Sat Jun 17 09:35:08 2023]
+Finished job 19.
+4 of 40 steps (10%) done
+Select jobs to execute...
+
+[Sat Jun 17 09:35:09 2023]
+Job 26: Removing duplicats for 293flpIN_RTF1_WT1
+
+Submitted DRMAA job 26 with external jobid 10747.
+[Sat Jun 17 09:35:20 2023]
+Finished job 15.
+5 of 40 steps (12%) done
+Select jobs to execute...
+
+[Sat Jun 17 09:35:20 2023]
+Job 22: Removing duplicats for 293flpIN_RTF1_MT_R2
+
+Submitted DRMAA job 22 with external jobid 10748.
+[Sat Jun 17 09:35:21 2023]
+Finished job 18.
+6 of 40 steps (15%) done
+Select jobs to execute...
+
+[Sat Jun 17 09:35:21 2023]
+Job 25: Removing duplicats for 293flpIN_RTF1_MT_R1
+
+Submitted DRMAA job 25 with external jobid 10749.
+
+[Sat Jun 17 09:35:21 2023]
+Job 14: Creating 220812_RTF1_RNAseq clumpify summary
+
+Submitted DRMAA job 14 with external jobid 10750.
+[Sat Jun 17 09:35:32 2023]
+Finished job 14.
+7 of 40 steps (18%) done
+Removing temporary output file 220812_RTF1_RNAseq/clumpify/293flpIN_RTF1_WT3_R1_clumpify.fastq.gz.
+Removing temporary output file 220812_RTF1_RNAseq/clumpify/293flpIN_RTF1_WT3_R2_clumpify.fastq.gz.
+[Sat Jun 17 09:37:33 2023]
+Finished job 23.
+8 of 40 steps (20%) done
+Select jobs to execute...
+
+[Sat Jun 17 09:37:33 2023]
+Job 30: Aligning reads with hisat2 for 293flpIN_RTF1_WT3
+
+Submitted DRMAA job 30 with external jobid 10751.
+Removing temporary output file 220812_RTF1_RNAseq/clumpify/293flpIN_RTF1_WT2_R1_clumpify.fastq.gz.
+Removing temporary output file 220812_RTF1_RNAseq/clumpify/293flpIN_RTF1_WT2_R2_clumpify.fastq.gz.
+[Sat Jun 17 09:37:34 2023]
+Finished job 27.
+9 of 40 steps (22%) done
+Select jobs to execute...
+
+[Sat Jun 17 09:37:34 2023]
+Job 34: Aligning reads with hisat2 for 293flpIN_RTF1_WT2
+
+Submitted DRMAA job 34 with external jobid 10752.
+Removing temporary output file 220812_RTF1_RNAseq/clumpify/293flpIN_RTF1_MT_R3_R1_clumpify.fastq.gz.
+Removing temporary output file 220812_RTF1_RNAseq/clumpify/293flpIN_RTF1_MT_R3_R2_clumpify.fastq.gz.
+[Sat Jun 17 09:37:44 2023]
+Finished job 24.
+10 of 40 steps (25%) done
+Select jobs to execute...
+
+[Sat Jun 17 09:37:44 2023]
+Job 31: Aligning reads with hisat2 for 293flpIN_RTF1_MT_R3
+
+Submitted DRMAA job 31 with external jobid 10753.
+Removing temporary output file 220812_RTF1_RNAseq/clumpify/293flpIN_RTF1_MT_R2_R1_clumpify.fastq.gz.
+Removing temporary output file 220812_RTF1_RNAseq/clumpify/293flpIN_RTF1_MT_R2_R2_clumpify.fastq.gz.
+[Sat Jun 17 09:37:45 2023]
+Finished job 22.
+11 of 40 steps (28%) done
+Select jobs to execute...
+
+[Sat Jun 17 09:37:45 2023]
+Job 29: Aligning reads with hisat2 for 293flpIN_RTF1_MT_R2
+
+Submitted DRMAA job 29 with external jobid 10754.
+Removing temporary output file 220812_RTF1_RNAseq/clumpify/293flpIN_RTF1_WT1_R2_clumpify.fastq.gz.
+Removing temporary output file 220812_RTF1_RNAseq/clumpify/293flpIN_RTF1_WT1_R1_clumpify.fastq.gz.
+[Sat Jun 17 09:38:06 2023]
+Finished job 26.
+12 of 40 steps (30%) done
+Select jobs to execute...
+
+[Sat Jun 17 09:38:07 2023]
+Job 33: Aligning reads with hisat2 for 293flpIN_RTF1_WT1
+
+Submitted DRMAA job 33 with external jobid 10755.
+Removing temporary output file 220812_RTF1_RNAseq/clumpify/293flpIN_RTF1_MT_R1_R1_clumpify.fastq.gz.
+Removing temporary output file 220812_RTF1_RNAseq/clumpify/293flpIN_RTF1_MT_R1_R2_clumpify.fastq.gz.
+[Sat Jun 17 09:38:19 2023]
+Finished job 25.
+13 of 40 steps (32%) done
+Select jobs to execute...
+
+[Sat Jun 17 09:38:19 2023]
+Job 21: Creating 220812_RTF1_RNAseq bbduk summary
+
+Submitted DRMAA job 21 with external jobid 10756.
+
+[Sat Jun 17 09:38:19 2023]
+Job 32: Aligning reads with hisat2 for 293flpIN_RTF1_MT_R1
+
+Submitted DRMAA job 32 with external jobid 10757.
+[Sat Jun 17 09:38:30 2023]
+Finished job 21.
+14 of 40 steps (35%) done
+[Sat Jun 17 09:45:22 2023]
+Finished job 10.
+15 of 40 steps (38%) done
+[Sat Jun 17 09:45:43 2023]
+Finished job 5.
+16 of 40 steps (40%) done
+[Sat Jun 17 09:45:54 2023]
+Finished job 2.
+17 of 40 steps (42%) done
+[Sat Jun 17 09:46:06 2023]
+Finished job 12.
+18 of 40 steps (45%) done
+[Sat Jun 17 09:46:38 2023]
+Finished job 3.
+19 of 40 steps (48%) done
+[Sat Jun 17 09:46:39 2023]
+Finished job 8.
+20 of 40 steps (50%) done
+[Sat Jun 17 09:47:00 2023]
+Finished job 4.
+21 of 40 steps (52%) done
+[Sat Jun 17 09:47:12 2023]
+Finished job 11.
+22 of 40 steps (55%) done
+[Sat Jun 17 09:47:56 2023]
+Finished job 13.
+23 of 40 steps (57%) done
+[Sat Jun 17 09:48:37 2023]
+Finished job 6.
+24 of 40 steps (60%) done
+[Sat Jun 17 09:49:08 2023]
+Finished job 9.
+25 of 40 steps (62%) done
+[Sat Jun 17 09:49:58 2023]
+Finished job 7.
+26 of 40 steps (65%) done
+Select jobs to execute...
+
+[Sat Jun 17 09:49:58 2023]
+Job 1: Creating 220812_RTF1_RNAseq FastQC summary
+
+Submitted DRMAA job 1 with external jobid 10758.
+[Sat Jun 17 09:50:08 2023]
+Finished job 1.
+27 of 40 steps (68%) done
+Removing temporary output file 220812_RTF1_RNAseq/bbduk/293flpIN_RTF1_MT_R3_R2_bbduk.fastq.gz.
+Removing temporary output file 220812_RTF1_RNAseq/bbduk/293flpIN_RTF1_MT_R3_R1_bbduk.fastq.gz.
+Removing temporary output file 220812_RTF1_RNAseq/bams/293flpIN_RTF1_MT_R3_temp.bam.
+Removing temporary output file 220812_RTF1_RNAseq/bams/293flpIN_RTF1_MT_R3_temp.bam.bai.
+[Sat Jun 17 10:01:34 2023]
+Finished job 31.
+28 of 40 steps (70%) done
+Removing temporary output file 220812_RTF1_RNAseq/bbduk/293flpIN_RTF1_MT_R2_R2_bbduk.fastq.gz.
+Removing temporary output file 220812_RTF1_RNAseq/bbduk/293flpIN_RTF1_MT_R2_R1_bbduk.fastq.gz.
+Removing temporary output file 220812_RTF1_RNAseq/bams/293flpIN_RTF1_MT_R2_temp.bam.
+Removing temporary output file 220812_RTF1_RNAseq/bams/293flpIN_RTF1_MT_R2_temp.bam.bai.
+[Sat Jun 17 10:02:15 2023]
+Finished job 29.
+29 of 40 steps (72%) done
+Removing temporary output file 220812_RTF1_RNAseq/bbduk/293flpIN_RTF1_WT1_R1_bbduk.fastq.gz.
+Removing temporary output file 220812_RTF1_RNAseq/bbduk/293flpIN_RTF1_WT1_R2_bbduk.fastq.gz.
+Removing temporary output file 220812_RTF1_RNAseq/bams/293flpIN_RTF1_WT1_temp.bam.
+Removing temporary output file 220812_RTF1_RNAseq/bams/293flpIN_RTF1_WT1_temp.bam.bai.
+[Sat Jun 17 10:03:35 2023]
+Finished job 33.
+30 of 40 steps (75%) done
+Removing temporary output file 220812_RTF1_RNAseq/bbduk/293flpIN_RTF1_WT3_R2_bbduk.fastq.gz.
+Removing temporary output file 220812_RTF1_RNAseq/bbduk/293flpIN_RTF1_WT3_R1_bbduk.fastq.gz.
+Removing temporary output file 220812_RTF1_RNAseq/bams/293flpIN_RTF1_WT3_temp.bam.
+Removing temporary output file 220812_RTF1_RNAseq/bams/293flpIN_RTF1_WT3_temp.bam.bai.
+[Sat Jun 17 10:05:26 2023]
+Finished job 30.
+31 of 40 steps (78%) done
+Select jobs to execute...
+
+[Sat Jun 17 10:05:26 2023]
+Job 38: stranded bigwigs with reads in R2-R1 orentation for RTF1-r3
+
+Submitted DRMAA job 38 with external jobid 10760.
+Removing temporary output file 220812_RTF1_RNAseq/bbduk/293flpIN_RTF1_MT_R1_R2_bbduk.fastq.gz.
+Removing temporary output file 220812_RTF1_RNAseq/bbduk/293flpIN_RTF1_MT_R1_R1_bbduk.fastq.gz.
+Removing temporary output file 220812_RTF1_RNAseq/bams/293flpIN_RTF1_MT_R1_temp.bam.
+Removing temporary output file 220812_RTF1_RNAseq/bams/293flpIN_RTF1_MT_R1_temp.bam.bai.
+[Sat Jun 17 10:06:27 2023]
+Finished job 32.
+32 of 40 steps (80%) done
+Select jobs to execute...
+
+[Sat Jun 17 10:06:27 2023]
+Job 36: stranded bigwigs with reads in R2-R1 orentation for RTF1-r1
+
+Submitted DRMAA job 36 with external jobid 10761.
+Removing temporary output file 220812_RTF1_RNAseq/bbduk/293flpIN_RTF1_WT2_R2_bbduk.fastq.gz.
+Removing temporary output file 220812_RTF1_RNAseq/bbduk/293flpIN_RTF1_WT2_R1_bbduk.fastq.gz.
+Removing temporary output file 220812_RTF1_RNAseq/bams/293flpIN_RTF1_WT2_temp.bam.
+Removing temporary output file 220812_RTF1_RNAseq/bams/293flpIN_RTF1_WT2_temp.bam.bai.
+[Sat Jun 17 10:06:37 2023]
+Finished job 34.
+33 of 40 steps (82%) done
+Select jobs to execute...
+
+[Sat Jun 17 10:06:37 2023]
+Job 37: stranded bigwigs with reads in R2-R1 orentation for RTF1-r2
+
+Submitted DRMAA job 37 with external jobid 10762.
+
+[Sat Jun 17 10:06:37 2023]
+Job 28: Creating 220812_RTF1_RNAseq hisat2 summary
+
+Submitted DRMAA job 28 with external jobid 10763.
+[Sat Jun 17 10:06:46 2023]
+Finished job 28.
+34 of 40 steps (85%) done
+Select jobs to execute...
+
+[Sat Jun 17 10:06:47 2023]
+Job 39: getting final results
+
+Submitted DRMAA job 39 with external jobid 10764.
+[Sat Jun 17 10:07:07 2023]
+Finished job 39.
+35 of 40 steps (88%) done
+[Sat Jun 17 10:21:03 2023]
+Finished job 38.
+36 of 40 steps (90%) done
+[Sat Jun 17 10:22:44 2023]
+Finished job 37.
+37 of 40 steps (92%) done
+[Sat Jun 17 10:23:24 2023]
+Finished job 36.
+38 of 40 steps (95%) done
+Select jobs to execute...
+
+[Sat Jun 17 10:23:24 2023]
+Job 35: Creating 220812_RTF1_RNAseq bamCoverage summary
+
+Submitted DRMAA job 35 with external jobid 10765.
+Removing temporary output file 220812_RTF1_RNAseq/bw/RTF1-r1_bamCoverage_stats.txt.
+Removing temporary output file 220812_RTF1_RNAseq/bw/RTF1-r2_bamCoverage_stats.txt.
+Removing temporary output file 220812_RTF1_RNAseq/bw/RTF1-r3_bamCoverage_stats.txt.
+[Sat Jun 17 10:23:34 2023]
+Finished job 35.
+39 of 40 steps (98%) done
+Select jobs to execute...
+
+[Sat Jun 17 10:23:34 2023]
+localrule all:
+    input: 220812_RTF1_RNAseq/stats/220812_RTF1_RNAseq_fastqc.tsv, 220812_RTF1_RNAseq/stats/220812_RTF1_RNAseq_clumpify.tsv, 220812_RTF1_RNAseq/stats/220812_RTF1_RNAseq_bbduk.tsv, 220812_RTF1_RNAseq/stats/220812_RTF1_RNAseq_aligned.tsv, 220812_RTF1_RNAseq/URLS/220812_RTF1_RNAseq_hg38_norm_CPM_bw_URL.txt, 220812_RTF1_RNAseq/stats/220812_RTF1_RNAseq_results.tsv
+    jobid: 0
+    resources: tmpdir=/tmp
+
+[Sat Jun 17 10:23:34 2023]
+Finished job 0.
+40 of 40 steps (100%) done
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/RNAseq/.snakemake/log/2023-06-17T093100.900449.snakemake.log

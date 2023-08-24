@@ -1,0 +1,121 @@
+# ===== Snakefile for trimming and filtering NET-seq reads =====================
+
+
+# Function to retrieve fastq paths
+def _get_fq_paths(wildcards):
+    fqs = [_get_fqs(wildcards.sample, x) for x in FQ_SFX]
+    fqs = [FASTQ_DIR + "/" + x + SFX for x in fqs]
+
+    return fqs
+
+
+# Extract UMI sequence
+# The UMI is the first 12 bases of read 2. By default umi_tools assumes
+# the given UMI pattern starts at the 5' end of the read. To account for
+# this read 2 is provided with -I and read 1 is provided with --read2-in.
+rule extract_umi:
+    input:
+        _get_fq_paths
+    output:
+        R1  = temp(PROJ + "/UMI/{sample}_R1_umi.fastq.gz"),
+        R2  = temp(PROJ + "/UMI/{sample}_R2_umi.fastq.gz"),
+        log = PROJ + "/logs/{sample}_extract_umi.out"
+    params:
+        job_name = "{sample}_umi_extract",
+        memory   = MEMORY,
+        umi_pat  = CMD_PARAMS["umi_pattern"]
+    log:
+        out = PROJ + "/logs/{sample}_extract_umi.out",
+        err = PROJ + "/logs/{sample}_extract_umi.err"
+    message:
+        "Extracting UMIs for {wildcards.sample}"
+    threads:
+        1
+    shell:
+        """
+        umi_tools extract \
+            -I {input[1]} \
+            --extract-method=string \
+            --bc-pattern={params.umi_pat} \
+            --read2-in={input[0]} \
+            --read2-out={output.R1} \
+            -L {output.log} \
+            | gzip \
+            > {output.R2}
+        """
+
+
+# Trim reads with cutadapt
+rule cutadapt:
+    input:
+        R1 = PROJ + "/UMI/{sample}_R1_umi.fastq.gz",
+        R2 = PROJ + "/UMI/{sample}_R2_umi.fastq.gz"
+    output:
+        R1    = temp(PROJ + "/UMI/{sample}_R1_trim.fastq.gz"),
+        R2    = temp(PROJ + "/UMI/{sample}_R2_trim.fastq.gz"),
+        stats = PROJ + "/UMI/{sample}_cutadapt_stats.txt"
+    params:
+        job_name = "{sample}_cutadapt",
+        memory   = MEMORY * 2,
+        args     = CMD_PARAMS["cutadapt"]
+    log:
+        out = PROJ + "/logs/{sample}_cutadapt.out",
+        err = PROJ + "/logs/{sample}_cutadapt.err"
+    message:
+        "Running cutadapt on {wildcards.sample}"
+    threads:
+        6
+    shell:
+        """
+        cutadapt \
+            {params.args} \
+            -j {threads} \
+            -o {output.R1} \
+            -p {output.R2} \
+            {input.R1} \
+            {input.R2} \
+            > {output.stats}
+        """
+
+
+# Create cutadapt summary
+rule cutadapt_summary:
+    input:
+        expand(
+            PROJ + "/UMI/{sample}_cutadapt_stats.txt",
+            sample = SAMS_UNIQ
+        )
+    output:
+        PROJ + "/stats/" + PROJ + "_cutadapt.tsv"
+    params:
+        job_name = PROJ + "_cutadapt_summary",
+        memory   = 4
+    log:
+        out = PROJ + "/logs/" + PROJ + "_cutadapt_summary.out",
+        err = PROJ + "/logs/" + PROJ + "_cutadapt_summary.err"
+    message:
+        "Creating " + PROJ + " cutadapt summary"
+    threads:
+        1
+    run:
+        with open(output[0], "w") as out:
+            for file in input:
+                name = os.path.basename(file)
+                name = re.sub("_cutadapt_stats.txt", "", name)
+
+                for line in open(file, "r"):
+                    match = re.search("Pairs | pairs |with adapter", line)
+
+                    if match:
+                      line = line.strip()
+                      mett = re.split(r'\s{2,}', line)
+                      num = mett[1].strip()
+                      num = re.sub("\,", "", num)
+                      num = re.sub(" ", "", num)
+                      met = re.search("[\w\(\) ]+:", line).group(0)
+                      met = re.sub(":", "", met)
+                      met = re.sub(" ", "_", met)
+
+                      out.write("%s\t%s\t%s\n" % (name, met, num))
+
+

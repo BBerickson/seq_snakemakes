@@ -1,0 +1,1307 @@
+
+```{r "{{grp}} pause zone setup"}
+
+grp   <- "{{grp}}"
+stren <- "{{stren}}"
+win   <- {{win}}
+
+sep_prfx   <- str_c("_", win, "_sep", stren)
+pause_prfx <- str_c("_", win, stren)
+
+# Pause zone output files
+out_file <- here(plot_params$obj_dir, str_c(grp, pause_prfx, "pause_zones.tsv.gz"))
+tab_prfx <- here(plot_params$tab_dir, str_c(grp, pause_prfx))
+
+find_zones <- !file.exists(out_file) || plot_params$overwrite
+
+```
+
+### Identification of pausing zones
+
+Pausing zones were identified as the window (200 bp) where the fraction of pause reads is >0.15 and the average for the prospective zone is >0.3. Metaplots (200 bp windows) are shown for different pausing metrics. The vertical lines show the mean length of the pausing zone for each sample.
+
+* genes >4 kb long and separated by >2 kb
+* entire gene region was downsampled
+
+```{r "{{grp}} load data", eval = find_zones}
+
+# Suffixes for files to load
+gene_meta_dir  <- sub_meta_dir$gene
+gene_pause_dir <- sub_pause_dir$gene
+
+sfxs <- list(
+  gene_meta_dir  = c(NET       = "_4-200bp_S.bed.gz"),
+  gene_pause_dir = c(`p-reads` = str_c(pause_prfx, "pause_reads_4-200bp.bed.gz")),
+  gene_pause_dir = c(pauses    = str_c(pause_prfx, "pauses_4-200bp.bed.gz"))
+)
+
+types <- names(flatten(sfxs))
+
+# Load and merge pausing zone bed files
+zone_wins <- sfxs %>%
+  imap_dfr(~ {    
+    prfxs <- names(eval(sym(.y)))
+    paths <- eval(sym(.y))
+    
+    load_merge_wins(
+      prfxs     = prfxs,       # Sample names
+      sfxs      = .x,          # Suffix list with types as names
+      paths     = paths,       # Directory containing files
+      group     = grp,         # Group name
+      
+      genes     = g_z,         # Genes to filter
+      col_names = win_cols,    # Column names for bed files
+      win_len   = 200,         # Expected length of each window
+      ref_win   = 1,           # Reference window for adjusting window ids
+      
+      expr_quartiles = FALSE
+    )
+  })
+
+# Genes with no pauses identified for any window are removed when running
+# load_merge_wins(). Must have at least 1 total pause for the gene.
+# Genes that are removed here only have data from the NET-seq count bed.
+zone_wins <- zone_wins %>%
+  group_by(name) %>%
+  dplyr::filter(all(types %in% type)) %>%
+  ungroup()
+
+# Double check that all samples have the same genes
+# split by sample and check for identical columns for all samples
+chk_clmns <- colnames(zone_wins)
+chk_clmns <- chk_clmns[chk_clmns != "counts"]
+
+chk_dat <- zone_wins %>%
+  split(.$sample)
+
+chk_res <- chk_clmns %>%
+  map_lgl(~ {
+    chk_fn <- function(x, y, dat = chk_dat, clmn = .x) {
+      identical(dat[[x]][[clmn]], dat[[y]][[clmn]])
+    }
+    
+    all(combn(names(chk_dat), 2, chk_fn, TRUE))
+  })
+
+if (!all(chk_res)) {
+  stop("Not all genes are shared")
+}
+
+# Check that each gene has the expected number of windows based on the gene
+# length. All windows lengths should be the same (0.2 kb).
+win_kb <- unique(zone_wins$win_len)
+
+if (length(win_kb) != 1) {
+  stop("Variable window lengths present.")
+}
+
+gene_win_len_chk <- zone_wins %>%
+  group_by(name) %>%
+  summarize(n = n_distinct(win_dist), .groups = "drop") %>%
+  left_join(g_z, by = "name") %>%
+  mutate(
+    len = n * win_kb,
+    len_dif = gene_len - len
+  )
+
+stopifnot(
+  all(gene_win_len_chk$len_dif < 0.2),
+  all(gene_win_len_chk$len_dif > -0.2)
+)
+
+```
+
+```{r "{{grp}} format data", eval = find_zones}
+
+# Data for pause zones
+# Some windows are slightly longer than the gene length since 0.2 kb (win size)
+# is added to each. For p-reads_NET a pseudo count is added to the
+# mNET-seq counts to eliminate division by 0
+pseudo <- 0.1
+
+zone_wins <- zone_wins %>%
+  left_join(g_z, by = "name") %>%                   # Re-join with gene list to add gene lengths
+  mutate(win_dist = win_dist + win_kb) %>%          # Add win_kb so windows do not start at zero
+  pivot_wider(names_from = "type", values_from = "counts")
+
+# Check windows
+chk <- zone_wins %>%
+  group_by(name, group, sample) %>%
+  summarize(
+    across(all_of(types), sum),
+    .groups = "drop"
+  )
+
+stopifnot(
+  all(complete.cases(chk)),
+  all(chk$NET > chk$`p-reads`),
+  all(chk$`p-reads` > chk$pauses),
+  all(chk$NET > 0),
+  all(chk$pauses > 0)
+)
+
+# Calculate fraction pause reads
+# add pseudo count to denominator so fraction pause reads for windows with no
+# NET-seq reads are recorded as 0
+zone_wins <- zone_wins %>%
+  mutate(
+    pauses_NET    = pauses / (NET + pseudo),
+    `p-reads_NET` = `p-reads` / (NET + pseudo)
+  ) %>%
+  mutate(
+    across(
+      all_of(types),
+      ~ .x / win_len,
+      .names = "{.col}_kb"
+    )
+  ) %>%
+  format_sample_names(key_vec = sub_sam_lnms$gene)  # Create treatment and replicate columns
+
+if (!all(complete.cases(zone_wins))) {
+  stop("NAs present in data.frame.")
+}
+
+```
+
+```{r "{{grp}} find pause zones", eval = find_zones}
+
+# Identify pausing zones
+# Find window where p-reads_NET is > cutoff and where average
+# p-reads_NET for the prospective zone is > cutoff * ave_mtplyr
+cutoff     <- 0.15
+ave_mtplyr <- 2
+
+zone_wins <- zone_wins %>%
+  group_by(sample, treat, rep, name, gene_len) %>%
+  arrange(sample, name, win_dist) %>%
+  
+  mutate(
+    # NET_sum    = cumsum(NET),
+    # preads_sum = cumsum(`p-reads`),
+    # zone_ave   = preads_sum / NET_sum,
+    zone_ave      = cummean(`p-reads_NET`),
+    zone_cutoff   = `p-reads_NET` > cutoff & zone_ave > cutoff * ave_mtplyr,
+    
+    zone = ifelse(                       # return NA if no window meets cutoff
+      !is_empty(win_dist[zone_cutoff]),
+      max(win_dist[zone_cutoff]),
+      NA
+    ),
+    
+    zone_class = case_when(
+      zone == max(win_dist) ~ "max",     # genes where zone extends to last bin
+      is.na(zone)           ~ "none",    # genes where no window meets cutoff
+      TRUE                  ~ "zone"     # genes with identified zone in gene body
+    )
+  ) %>%
+  ungroup()
+
+# Save pausing zone windows
+zone_wins %>%
+  vroom_write(out_file, delim = "\t")
+
+```
+
+```{r "{{grp}} load pause zones", eval = !find_zones}
+
+zone_wins <- out_file %>%
+  vroom(delim = "\t")
+
+```
+
+```{r "{{grp}} zone tables"}
+
+# Window length
+win_kb <- unique(zone_wins$win_len)
+
+if (length(win_kb) != 1) {
+  stop("Variable window lengths present.")
+}
+
+# Get zone coordinates
+all_zones <- zone_wins %>%
+  dplyr::filter(win_dist == if_else(zone_class == "none", win_kb, zone)) %>%
+  dplyr::select(-win_id, -win_len, -win_dist)
+  
+# Filter for genes with an annotated zone for each sample
+zones <- all_zones %>%
+  dplyr::filter(zone_class == "zone") %>%
+  group_by(name) %>%
+  dplyr::filter(all(unname(sam_nms) %in% sample)) %>%
+  ungroup()
+
+# Pausing zone genes
+zone_genes <- zones %>%
+  distinct(name)
+
+```
+
+```{r "{{grp}} metaplots", fig.width = 10, fig.height = 1 + (n_reps * 2.5)}
+
+# Function to metaplots for pausing stats
+create_stat_meta <- function(df_in, plot_clrs, n_rows = n_reps) {
+  res <- df_in %>%
+    ggplot(aes(win_dist, value, color = treat)) +
+    geom_vline(aes(xintercept = zone, color = treat), linetype = 2, show.legend = FALSE) +
+    geom_line(key_glyph = draw_key_point) +
+    
+    geom_text(
+      aes(Inf, Inf, label = n),
+      color         = "black",
+      check_overlap = TRUE,
+      hjust         = 1.1,
+      vjust         = 1.3,
+      size          = txt_pt / .pt
+    ) +
+    
+    facet_wrap(rep ~ type_lab, scales = "free", nrow = n_rows) +
+    guides(color = guide_legend(override.aes = list(size = 3, shape = 15))) +
+    
+    scale_color_manual(values = plot_clrs) +
+    
+    labs(x = "distance from TSS (kb)") +
+    theme_info +
+    theme(
+      aspect.ratio    = 0.8,
+      legend.position = "top",
+      legend.text     = element_text(size = txt_pt),
+      legend.title    = element_blank()
+    )
+  
+  res
+}
+
+# Names for type columns
+stat_cols <- c(
+  NET_kb          = "eNET-seq reads/kb",
+  pauses_kb       = "pauses/kb",
+  `p-reads_kb`    = "pause reads/kb",
+  `p-reads_NET`   = "fraction pause reads",
+  `p-reads_ratio` = "pause reads/other reads"
+)
+
+rm_cols <- names(stat_cols) %>%
+  str_remove("_kb$") %>%
+  c("pauses_NET")
+
+rm_cols <- rm_cols[!rm_cols %in% c("p-reads_NET", "p-reads_ratio")]
+
+# Calculate fraction of zeros in data
+# for p-reads_ratio add 1 to denominator to prevent NaNs
+meta_dat <- zone_wins %>%
+  
+  mutate(`p-reads_ratio` = `p-reads` / (NET - `p-reads` + 1)) %>%
+  
+  semi_join(zone_genes, by = "name") %>%
+  dplyr::filter(win_dist <= 4 + win_kb) %>%
+  dplyr::select(-all_of(rm_cols))
+
+pct_0 <- meta_dat %>%
+  dplyr::filter(`p-reads_NET` == 0) %>%
+  nrow()
+
+pct_0 <- round((pct_0 / nrow(meta_dat)) * 100, 0)
+  
+# Format data for metaplots
+meta_dat <- meta_dat %>%
+  pivot_longer(all_of(names(stat_cols)), names_to = "type") %>%  # Calculate mean signal
+  group_by(sample, type, treat, rep, win_dist) %>%
+  summarize(
+    value   = mean(value),
+    n       = n_distinct(name),
+    n       = str_c("n = ", comma(n)),
+    zone    = mean(zone),
+    .groups = "drop"
+  ) %>%
+  
+  mutate(                                       # Adjust factor levels
+    win_dist = win_dist - win_kb,
+    treat    = fct_relevel(treat, treats),
+    type_lab = stat_cols[type],
+    type_lab = fct_relevel(type_lab, stat_cols),
+    rep      = fct_relevel(rep, reps)
+  )
+
+# Create metaplots
+meta_dat %>%
+  create_stat_meta(plot_clrs = clrs) +
+  theme(axis.title.y = element_blank())
+
+```
+
+The mean fraction of pause reads is shown on the left for all replicates for the region +4 kb downstream of the TSS. The vertical lines show the mean length of the pausing zone for each sample and replicate. Zeros make up `r pct_0`% of data points.
+
+* genes >4 kb long and separated by >2 kb
+* entire gene region was downsampled
+
+```{r "{{grp}} fraction pause reads metaplots"}
+
+# Function to label x-axis
+x_labs <- function(x) {
+  x <- str_c(x, " kb")
+  x[x == "0 kb"] <- "TSS"
+  x
+}
+
+# Create metaplot with all replicates
+meta <- meta_dat %>%
+  dplyr::filter(type == "p-reads_NET") %>%
+  pivot_wider(names_from = "type_lab") %>%
+  
+  ggplot(aes(win_dist, !!sym(stat_cols["p-reads_NET"]), alpha = sample, color = treat)) +
+  
+  geom_vline(
+    aes(xintercept = zone, alpha = sample, color = treat),
+    linetype    = 2,
+    show.legend = FALSE
+  ) +
+  
+  geom_line(key_glyph = draw_key_point) +
+  
+  geom_text(
+    aes(Inf, Inf, label = n),
+    color         = "black",
+    check_overlap = TRUE,
+    hjust         = 1.2,
+    vjust         = 1.4,
+    size          = txt_pt / .pt
+  ) +
+  
+  scale_color_manual(values = clrs) +
+  scale_alpha_manual(values = rep(1, 100)) +
+  scale_x_continuous(labels = x_labs) +
+  
+  guides(alpha = "none", color = guide_legend(override.aes = list(size = 3, shape = 15))) +
+  
+  labs(x = "distance from TSS (kb)") +
+  
+  theme_info +
+  theme(
+    aspect.ratio    = 0.65,
+    legend.position = "top",
+    legend.title    = element_blank(),
+    legend.text     = element_text(size = txt_pt),
+    axis.title.x    = element_blank()
+  )
+
+```
+
+```{r "{{grp}} zone boxplots", fig.width = 5.5 + 1 + (n_treats * 0.75 * n_reps), fig.height = 3.5}
+
+# Format data for plotting
+h_dat <- zones %>%
+  dplyr::select(group, treat, rep, name, gene_len, zone) %>%
+  
+  group_by(group, treat, rep) %>%
+  mutate(
+    n = n_distinct(name),
+    n = str_c("n = ", comma(n)),
+    n_lab = n
+  ) %>%
+  ungroup() %>%
+  pivot_wider(names_from = "treat", values_from = "zone")
+
+# Calculate p-values
+if (n_treats > 1 && n_reps == n_common_reps) {
+  h_dat <- h_dat %>%
+    group_by(group, rep) %>%
+    mutate(
+      p     = wilcox.test(!!!syms(fc_treats))$p.value,
+      p     = scientific(p, digits = 2),
+      n_lab = str_c(n, "\n", p)
+    ) %>%
+    ungroup()
+}
+  
+# Check for NAs
+# this would indicate that not all genes are shared between treats
+if (!all(complete.cases(h_dat))) {
+  stop("NAs in data.frame, not all genes are shared")
+}
+
+h_dat <- h_dat %>%
+  pivot_longer(all_of(treats), names_to = "treat", values_to = "zone") %>%
+  mutate(
+    treat = fct_relevel(treat, treats),
+    rep   = fct_relevel(rep, reps)
+  ) %>%
+  unite(sample, treat, rep, remove = FALSE)
+
+# Create boxplots
+y_lim <- range(h_dat$zone)
+
+zone_box <- h_dat %>%
+  ggplot(aes(treat, zone, fill = treat)) +
+  geom_boxplot(alpha = 0.5, notch = TRUE, outlier.size = 0.2, outlier.alpha = 1) +
+  
+  geom_text(
+    aes(median(seq_len(n_treats)), Inf, label = n_lab),
+    color         = "black",
+    check_overlap = TRUE,
+    vjust         = 1.2,
+    size          = txt_pt / .pt
+  ) +
+  
+  expand_limits(y = y_lim) +
+  
+  scale_y_continuous(trans = "log10", expand = expansion(mult = c(0.05, 0.25))) +
+  
+  labs(y = "pausing zone length (kb)") +
+  
+  scale_fill_manual(values = clrs) +
+  
+  facet_wrap(~ rep, nrow = 1, scales = "free") +
+  theme_info +
+  theme(
+    legend.position = "none",
+    axis.title.x    = element_blank()
+  )
+
+if (n_treats > 2) {
+  zone_box <- zone_box +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+}
+
+# Create final figure
+plot_grid(
+  meta, zone_box,
+  align = "vh",
+  axis  = "trbl",
+  rel_widths = c(1, n_reps * 0.3)
+)
+
+```
+
+```{r "{{grp}} zone rep metaplots", fig.width = 5.5 * n_reps, fig.height = 3.5}
+
+meta +
+  facet_wrap(~ rep) +
+  theme(aspect.ratio = 0.8)
+
+```
+
+```{r "{{grp}} zone histograms", fig.width = 1 + (n_reps * 3.5), fig.height = 3.5}
+
+h_dat %>%
+  ggplot(aes(zone, fill = treat)) +
+  geom_histogram(alpha = 0.5, position = "identity") +
+  geom_text(
+    aes(Inf, Inf, label = n_lab),
+    color         = "black",
+    check_overlap = TRUE,
+    vjust         = 1.2,
+    hjust         = 1.2,
+    size          = txt_pt / .pt
+  ) +
+  facet_wrap(~ rep, scales = "free") +
+  labs(x = "pausing zone (kb)", y = "number of genes") +
+  guides(fill = guide_legend(override.aes = list(alpha = 1))) +
+  scale_x_log10() +
+  scale_color_manual(values = clrs) +
+  scale_fill_manual(values = clrs) +
+  theme_info +
+  theme(
+    legend.position  = "top",
+    legend.title     = element_blank(),
+    legend.direction = "vertical"
+  )
+
+```
+
+```{r "{{grp}} SMALL WINS LOAD DATA"}
+
+# Suffixes for files to load
+gene_meta_dir  <- sub_meta_dir$gene
+gene_pause_dir <- sub_pause_dir$gene
+
+sfxs <- list(
+  gene_meta_dir  = c(NET       = "_5-10bp_S.bed.gz"),
+  gene_pause_dir = c(`p-reads` = str_c(pause_prfx, "pause_reads_5-10bp.bed.gz")),
+  gene_pause_dir = c(pauses    = str_c(pause_prfx, "pauses_5-10bp.bed.gz"))
+)
+
+types <- names(flatten(sfxs))
+
+# Load and merge pausing zone bed files
+sm_zone_wins <- sfxs %>%
+  imap_dfr(~ {
+    typ <- names(.x)
+    out <- here(plot_params$obj_dir, str_c(grp, "_pause_zones_", typ, "_5_10bp.tsv.gz"))
+    
+    prfxs <- names(eval(sym(.y)))
+    paths <- eval(sym(.y))
+    
+    load_merge_wins(
+      prfxs     = prfxs,             # Sample names
+      sfxs      = .x,                # Suffix list with types as names
+      paths     = paths,             # Directory containing files
+      group     = grp,               # Group name
+      genes     = g_z,               # Genes to filter
+      
+      file_out  = out,               # Path to output file
+      overwrite = plot_params$overwrite,  # Overwrite output file if it exists
+      col_names = win_cols,          # Column names for bed files
+      win_len   = 10,                # Expected length of each window
+      ref_win   = 201,               # Reference window for adjusting window ids
+      
+      expr_quartiles = FALSE
+    )
+  })
+
+sm_zone_wins <- sm_zone_wins %>%
+  group_by(name) %>%
+  dplyr::filter(all(types %in% type)) %>%
+  ungroup()
+
+```
+
+```{r "{{grp}} SMALL WINS FORMAT DATA"}
+
+# Data for pause zones
+# Some windows are slightly longer than the gene length since 0.2 kb (win size)
+# is added to each. For pause_reads_NET a pseudo count is added to the
+# mNET-seq counts to eliminate division by 0
+win_kb <- unique(sm_zone_wins$win_len)
+
+if (length(win_kb) != 1) {
+  stop("Variable window lengths present.")
+}
+
+pseudo <- 0.1
+
+sm_zone_wins <- sm_zone_wins %>%
+  left_join(g_z, by = "name") %>%                   # Re-join with gene list to add gene lengths
+  mutate(win_dist = win_dist + win_kb) %>%          # Add win_kb so pause zone windows do not start at zero
+  
+  pivot_wider(names_from = "type", values_from = "counts") %>%
+  mutate(                                           # Calculate pausing stats
+    pauses_NET    = pauses / (NET + pseudo),
+    `p-reads_NET` = `p-reads` / (NET + pseudo)
+  ) %>%
+  mutate(
+    across(
+      all_of(types),
+      ~ .x / win_len,
+      .names = "{.col}_kb"
+    )
+  ) %>%
+  format_sample_names(key_vec = sub_sam_lnms$gene)  # Create treatment and replicate columns
+
+if (!all(complete.cases(sm_zone_wins))) {
+  stop("NAs present in data.frame.")
+}
+
+```
+
+```{r "{{grp}} SMALL WINS METAPLOT DATA"}
+
+# Only include genes with at least 5 pauses
+p_lim <- 5
+n_lim <- 0
+
+meta_genes <- sm_zone_wins %>%
+  group_by(name, treat, rep) %>%
+  summarize(
+    across(all_of(c("NET", "pauses")), sum),
+    .groups = "drop"
+  ) %>%
+  dplyr::filter(
+    pauses >= p_lim,
+    NET    >= n_lim
+  ) %>%
+  dplyr::select(-pauses) %>%
+  pivot_wider(names_from = "treat", values_from = "NET") %>%
+  dplyr::filter(if_all(all_of(treats), ~ !is.na(.x))) %>%
+  dplyr::select(name, rep)
+
+# Calculate fraction of zeros in data
+meta_dat <- sm_zone_wins %>%
+  semi_join(meta_genes, by = c("name", "rep")) %>%
+  dplyr::filter(win_dist >= 0)
+
+pct_0 <- meta_dat %>%
+  dplyr::filter(`p-reads_NET` == 0) %>%
+  nrow()
+
+pct_0 <- round((pct_0 / nrow(meta_dat)) * 100, 0)
+
+# Added n labels and set factor levels
+meta_dat <- meta_dat %>%
+  group_by(sample, treat, rep, win_dist) %>%
+  summarize(
+    value   = mean(`p-reads_NET`),
+    n       = n_distinct(name),
+    n       = str_c("n = ", comma(n)),
+    .groups = "drop"
+  ) %>%
+  mutate(                                       # Adjust factor levels
+    win_dist = win_dist - win_kb,
+    treat    = fct_relevel(treat, treats),
+    rep      = fct_relevel(rep, reps)
+  )
+
+```
+
+The mean fraction of pause reads is shown for 10 bp windows for the region +2 kb downstream of the TSS. Zeros make up `r pct_0`% of data points.
+
+* genes >4 kb long and separated by >2 kb
+* at least `r p_lim` pauses within 2 kb of TSS
+* entire gene region was downsampled
+
+```{r "{{grp}} SMALL WINS METAPLOTS", fig.width = 2 + (n_reps * 4), fig.height = 4.5}
+
+# Create metaplots
+meta_dat %>%
+  ggplot(aes(win_dist, value, color = treat)) +
+  geom_line() +
+  geom_vline(xintercept = 0, linetype = 2) +
+  
+  geom_text(
+    aes(Inf, Inf, label = n),
+    color         = "black",
+    check_overlap = TRUE,
+    hjust         = 1.1,
+    vjust         = 1.3,
+    size          = txt_pt / .pt
+  ) +
+  
+  scale_color_manual(values = clrs) +
+  facet_wrap(~ rep) +
+  guides(color = guide_legend(override.aes = list(size = 3))) +
+  labs(
+    x = "distance from TSS (kb)",
+    y = "fraction pause reads"
+  ) +
+  theme_info +
+  theme(
+    legend.position  = "top",
+    legend.title     = element_blank(),
+    legend.direction = "vertical"
+  )
+
+```
+
+<br>
+
+### Pausing zone classes {.tabset}
+
+```{r "{{grp}} pausing zone quartiles"}
+
+n_qrts <- 4
+
+qrt_nms <- seq_len(n_qrts) %>%
+  set_names(str_c("group ", .), .)
+
+# Control pausing zone quartiles
+z_dat <- zones %>%
+  group_by(name, treat) %>%
+  summarize(zone_kb = mean(zone), .groups = "drop") %>%
+  dplyr::rename(treatment = treat)
+
+zone_qrts <- z_dat %>%
+  group_by(treatment) %>%
+  mutate(
+    zone_qrt = ntile(zone_kb, n_qrts),
+    zone_qrt = qrt_nms[as.character(zone_qrt)]
+  ) %>%
+  ungroup() %>%
+  arrange(desc(zone_kb))
+
+clmn_order <- colnames(zone_qrts)
+
+zone_qrts <- set_names(treats) %>%
+  map(~ dplyr::filter(zone_qrts, treatment == .x))
+
+# Fold change zone quartiles
+fc_qrts <- z_dat %>%
+  pivot_wider(names_from = "treatment", values_from = "zone_kb") %>%
+  mutate(
+    `fold change` = !!sym(fc_treats[2]) / !!sym(fc_treats[1]),
+    zone_qrt      = ntile(`fold change`, 4),
+    zone_qrt      = qrt_nms[as.character(zone_qrt)],
+    treatment     = fc_lab
+  ) %>%
+  dplyr::select(name, treatment, all_of(treats), `fold change`, zone_qrt) %>%
+  arrange(desc(`fold change`))
+
+zone_qrts[[fc_lab]] <- fc_qrts
+
+```
+
+```{r "{{grp}} gene classes", fig.width = 10, fig.height = (n_reps * 2.5) + 4.5, results = "asis"}
+
+# Zone quartiles functions
+create_qrt_meta <- function(meta_df, zone_df, zone_path = NULL, plot_clrs,
+                            metric = c("p-reads_NET" = "fraction pause reads")) {
+
+  # Write gene lists for quartiles
+  if (!is.null(zone_path)) {
+    zone_df %>%
+      vroom_write(zone_path, delim = "\t")
+  }
+
+  # Number of quartiles
+  n_qrts <- n_distinct(zone_df$zone_qrt)
+  
+  # Format quartile data.frame for merging
+  zone_df <- zone_df %>%
+    dplyr::select(name, zone_qrt)
+  
+  # Stats for metaplots
+  # * set window distance so 0 represents first window for the gene
+  # * merge with zone_df containing zone length and assigned quartiles
+  # * only plot the first 4 kb of each gene
+  max_dist <- 4
+  
+  qrt_dat <- meta_df %>%
+    mutate(win_dist = win_dist - win_len) %>%
+    left_join(zone_df, by = "name") %>%
+    dplyr::filter(
+      !is.na(zone_qrt),
+      win_dist <= max_dist      # calculate stats for the first 4 kb
+    ) %>%
+    group_by(treat, rep, zone_qrt) %>%
+    mutate(
+      n = n_distinct(name),
+      n = str_c("n = ", comma(n))
+    ) %>%
+    group_by(treat, rep, win_dist, n, zone_qrt) %>%
+    summarize(
+      across(all_of(names(metric)), mean),
+      zone = mean(zone),
+      .groups = "drop"
+    ) %>%
+    pivot_longer(all_of(names(metric)), names_to = "type") %>%
+    mutate(
+      treat    = fct_relevel(treat, treats),
+      type_lab = metric[type]
+    )
+  
+  # Create final figure
+  res <- qrt_dat %>%
+    create_stat_meta(plot_clrs = plot_clrs) +
+    facet_wrap(rep ~ zone_qrt, scales = "free_x", nrow = n_reps) +
+    labs(y = unname(metric)) +
+    theme(aspect.ratio = 0.9)
+  
+  res
+}
+
+create_qrt_go <- function(zone_df, go_path = NULL, plot_clr, background = NULL) {
+
+  go_url <- "biit.cs.ut.ee"
+
+  if (httr::http_error(go_url)) return(NULL)
+  
+  # Identify GO terms for each quartile
+  # remove terms that are identified for multiple quartiles
+  qrts <- zone_df %>%
+    pull(zone_qrt) %>%
+    unique() %>%
+    sort()
+  
+  go_terms <- qrts %>%
+    map_dfr(~ {
+      res <- zone_df %>%
+        dplyr::filter(zone_qrt == .x) %>%
+        mutate(symbol = str_extract(name, "(?<=\\|).+$")) %>%
+        pull(symbol) %>%
+        gost(
+          organism  = "hsapiens",
+          custom_bg = background,
+          sources   = c("GO:MF", "GO:BP", "GO:CC", "KEGG")
+        )
+      
+      if (!is_empty(res)) {
+        res <- res$result %>%
+          mutate(zone_qrt = .x) %>%
+          arrange(p_value)
+      }
+      
+      res
+    }) %>%
+    arrange(zone_qrt, p_value)
+  
+  # if (only_uniq) {
+  #   go_terms <- go_terms %>%
+  #     group_by(term_name) %>%
+  #     dplyr::filter(n() == 1) %>%
+  #     ungroup()
+  # }
+
+  # Write GO terms for quartiles
+  if (!is.null(go_path)) {
+    go_terms %>%
+      dplyr::select(
+        zone_qrt,  source,    term_id,    term_name,
+        p_value,   term_size, query_size, intersection_size,
+        precision, recall,    effective_domain_size
+      ) %>%
+      vroom_write(go_path, delim = "\t")
+  }
+  
+  res <- go_terms %>%
+    dplyr::filter(zone_qrt == last(qrts)) %>%
+    create_bubbles(color = plot_clr, txt_size = 5 / .pt) +
+    theme(
+      legend.title = element_text(size = txt_pt),
+      legend.text  = element_text(size = txt_pt)
+    )
+  
+  res
+}
+
+create_qrt_boxes <- function(zone_df, plot_clr, metric = c("fold change" = "pausing zone fold change")) {
+  
+  if (any(duplicated(zone_df$name))) {
+    stop("malformed input data, duplicate genes")
+  }
+  
+  plt_dat <- zone_df %>%
+    mutate(
+      n = n_distinct(name),
+      n = str_c("n = ", comma(n))
+    )
+  
+  res <- plt_dat %>%
+    ggplot(aes(zone_qrt, !!sym(names(metric)), alpha = zone_qrt)) +
+    geom_boxplot(fill = plot_clr, outlier.size = 0.2, outlier.alpha = 1, fatten = 1) +
+    
+    geom_text(
+      aes(-Inf, Inf, label = n),
+      color         = "black",
+      check_overlap = TRUE,
+      hjust         = -0.2,
+      vjust         = 1.4,
+      size          = txt_pt / .pt
+    ) +
+    
+    scale_y_log10() +
+    scale_alpha_manual(values = seq(0.25, 1, 0.25)) +
+    labs(y = unname(metric)) +
+    theme_info +
+    theme(
+      legend.position = "none",
+      axis.title.x    = element_blank()
+    )
+  
+  res
+}
+
+# Use pausing zone genes as background for gost
+go_background <- g_z$name %>%
+  str_extract("(?<=\\|).+$")
+
+stopifnot(
+  !any(is.na(go_background)),
+  !any(str_detect(go_background, "\\|"))
+)
+
+# Create plots for zone quartiles
+zone_qrts %>%
+  iwalk(~ {
+    cat("#### ", .y, "\n\n")
+    
+    desc     <- ifelse(.y == fc_lab, str_c("fold change (", fc_lab, ") in"), .y)
+    filt     <- ifelse(.y == fc_lab, list(treats), .y)
+    bx_y     <- ifelse(.y == fc_lab, "fold change", "zone_kb")
+    ylab     <- ifelse(.y == fc_lab, "pausing zone fold change", "pausing zone length (kb)")
+    zone_grp <- ifelse(.y == fc_lab, "fold-change", .y)
+    
+    cat(
+      "Pausing zone lengths were averaged for biological replicates.",
+      "Genes were divided into quartiles based on", desc, "average zone length.",
+      "Group 4 includes genes with the largest values.",
+      "Metaplots are shown for each group (200 bp windows) for the region +4 kb downstream of the TSS.",
+      "GO terms are shown for group 4 genes.\n\n"
+    )
+    
+    qrt_out <- str_c(tab_prfx, zone_grp, "_zones.tsv.gz")
+    go_out  <- str_c(tab_prfx, zone_grp, "_zones_GO.tsv.gz")
+    
+    # Create metaplots, plot all samples
+    # dplyr::filter(treat %in% unlist(filt)) %>%
+    zone_meta <- zone_wins %>%
+      create_qrt_meta(
+        zone_df   = .x,
+        metric    = c("p-reads_NET" = "fraction pause reads"),
+        plot_clrs = clrs,
+        zone_path = qrt_out
+      )
+    
+    zone_box <- .x %>%
+      create_qrt_boxes(
+        metric   = set_names(ylab, bx_y),
+        plot_clr = last(clrs)
+      )
+    
+    zone_go <- .x %>%
+      create_qrt_go(
+        plot_clr   = last(clrs),
+        go_path    = go_out,
+        background = go_background
+      )
+    
+    dsgn <- "
+      AAAAAA
+      BBCCCC
+    "
+
+    zone_fig <- wrap_plots(
+      zone_meta, zone_box, zone_go,
+      design = dsgn,
+      heights = c(1, (1 / n_reps) * 1.5)
+    )
+    
+    print(zone_fig)
+    cat("\n\n<br>\n\n")
+  })
+
+```
+
+```{r "{{grp}} GSEA TEST", eval = FALSE}
+
+gsea_df <- zone_qrts$`+Spt5` %>%
+  arrange(desc(zone_kb)) %>%
+  mutate(symbol = str_extract(name, "(?<=\\|).+$"))
+
+bg <- g_z$name %>%
+  str_extract("(?<=\\|).+$")
+
+res <- str_c("group ", 1:4) %>%
+  map_dfr(~ {
+    res <- gsea_df %>%
+      dplyr::filter(zone_qrt == .x) %>%
+      pull(symbol) %>%
+      gost(
+        organism  = "hsapiens",
+        custom_bg = bg,
+        sources   = c("GO:MF", "GO:BP", "GO:CC", "KEGG")
+      )
+    
+    if (!is_empty(res)) {
+      res <- res$result %>%
+        mutate(key = .x) %>%
+        arrange(p_value)
+    }
+    
+    res
+  })
+
+```
+
+### Zone length correlation
+
+Scatter plots show the correlation between replicates for pausing zone length. Colors indicate the number of overlapping points.
+
+```{r "{{grp}} corr params"}
+
+n_treat_plts <- n_rep_plts <- 1
+
+if (n_reps > 1) {
+  n_rep_plts <- length(combn(reps, 2, simplify = FALSE))
+  n_rep_plts <- n_rep_plts * n_treats
+}
+
+if (n_treats > 1) {
+  n_treat_plts <- length(combn(treats, 2, simplify = FALSE))
+  n_treat_plts <- n_treat_plts * n_reps
+}
+
+# Color for scatter plots
+cor_clr <- last(clrs)
+
+if (cor_clr %in% c("black", "#000000")) {
+  cor_clr <- lighten(cor_clr, 0.7)
+}
+
+```
+
+```{r "{{grp}} rep corr", fig.width = n_rep_plts * 4, fig.height = 3.5}
+
+# Function to create scatter plots
+create_cor_plots <- function(df_in, x, y, clr = "red", pt_size = 1, out_size = 1.5) {
+  
+  lms <- range(c(df_in[[x]], df_in[[y]]))
+  
+  res <- df_in %>%
+    mutate(
+      corr = cor(log10(!!sym(x)), log10(!!sym(y))),
+      corr = str_c(n, "\nr = ", round(corr, 2))
+    ) %>%
+    
+    ggplot(aes(!!sym(x), !!sym(y))) +
+    geom_abline(slope = 1, intercept = 0) +
+    geom_pointdensity(size = pt_size) +
+    geom_smooth(formula = y ~ x, method = "lm", color = "black", linetype = 2, size = 0.5) +
+    
+    geom_text(
+      aes(0.3, Inf, label = corr),
+      color         = "black",
+      check_overlap = TRUE,
+      hjust         = 0.35,
+      vjust         = 1.15,
+      size          = txt_pt / .pt
+    ) +
+    
+    labs(x = str_c(x, " pausing zone (kb)"), y = str_c(y, " pausing zone (kb)")) +
+    
+    scale_color_gradientn(colours = c("black", clr), trans = "log10") +
+    
+    guides(color = guide_colorbar(title = "n genes", barwidth = unit(5, "pt"))) +
+    
+    scale_x_log10(limits = lms) +
+    scale_y_log10(limits = lms) +
+    theme_info +
+    theme(
+      aspect.ratio = 1,
+      legend.title = element_text(size = txt_pt),
+      legend.text  = element_text(size = txt_pt),
+      axis.line    = element_blank(),
+      panel.border = element_rect(fill = NA, color = "black")
+    )
+  
+  res
+}
+
+# Format data for plotting
+cor_dat <- h_dat %>%
+  dplyr::select(sample, name, gene_len, n, zone) %>%
+  pivot_wider(names_from = "sample", values_from = "zone")
+
+if (n_reps > 1) {
+  grps <- reps %>%
+    combn(2, simplify = FALSE)
+  
+  grps <- treats %>%
+    map(~ {
+      s <- .x
+      map(grps, ~ str_c(s, "_", .x))
+    }) %>%
+    flatten()
+  
+  # Create scatter plots
+  cor_plts <- grps %>%
+    map(~ {
+      lbs <- str_remove(.x, ".+_(?=r[0-9]+)")
+      lbs <- str_c(lbs, " pausing zone (kb)")
+      
+      create_cor_plots(
+        df_in   = cor_dat,
+        x       = .x[1],
+        y       = .x[2],
+        clr     = cor_clr,
+        pt_size = 0.75
+      ) +
+        labs(
+          x = lbs[1],
+          y = lbs[2],
+          title = str_c(.x, collapse = " ")
+        )
+    })
+  
+  # Create final figure
+  cor_plts %>%
+    plot_grid(
+      plotlist = .,
+      nrow     = 1,
+      align    = "v"
+    )
+  
+} else {
+  ggplot() +
+    geom_blank()
+}
+
+```
+
+Scatter plots show the correlation between samples for pausing zone length. Colors indicate the number of overlapping points.
+
+```{r "{{grp}} treatment corr", fig.width = n_treat_plts * 4, fig.height = 3.5}
+
+# Create scatter plots
+if (n_treats > 1) {
+  grps <- reps %>%
+    map(~ str_c(treats, "_", .x)) %>%
+    map(combn, 2, simplify = FALSE) %>%
+    flatten()
+  
+  cor_plts <- grps %>%
+    map(~ {
+      lbs <- str_remove(.x, "_r[0-9]+$")
+      lbs <- str_c(lbs, " pausing zone (kb)")
+      
+      create_cor_plots(
+        df_in   = cor_dat,
+        x       = .x[1],
+        y       = .x[2],
+        clr     = cor_clr,
+        pt_size = 0.75
+      ) +
+        labs(
+          x = lbs[1],
+          y = lbs[2],
+          title = str_c(.x, collapse = " ")
+        )
+    })
+  
+  cor_plts %>%
+    plot_grid(
+      plotlist = .,
+      nrow     = 1,
+      align    = "v"
+    )
+  
+} else {
+  ggplot() +
+    geom_blank()
+}
+
+```
+
+<br>
+
+### Gene length correlation
+
+Scatter plots show the correlation between pausing zone length and gene length for each sample. The shaded portion shows the maximum pausing zone length for each gene. Points close to the shaded region have a high fraction of the gene overlapped by the pausing zone. Colors indicate the number of overlapping points.
+
+```{r "{{grp}} gene length corr", fig.width = ceiling(n_sams / 2) * 4, fig.height = 7}
+
+# Function to create pausing zone gene length plots
+create_len_plots <- function(df_in, sam, zone_col = "zone", len_col = "gene_len",
+                             len_poly = TRUE, plot_clr = "#132B43",
+                             x_ttl = "gene length (kb)") {
+  
+  # Data for gene length polygon
+  poly_dat <- tibble(
+    x = c(1:1000, 0),
+    y = c(1:1000, 1000)
+  )
+  
+  poly_clr <- "grey95"
+  
+  # Filter plot data
+  dat <- df_in %>%
+    mutate(frac = !!sym(zone_col) / !!sym(len_col)) %>%
+    dplyr::filter(sample == sam)
+  
+  # Calculate correlation
+  dat <- dat %>%
+    group_by(group, treat, rep) %>%
+    mutate(
+      n = n_distinct(name),
+      n = str_c("n = ", comma(n)),
+      r = cor(log10(!!sym(zone_col)), log10(!!sym(len_col))),
+      r = round(r, 2),
+      n = str_c(n, "\nr = ", r)
+    ) %>%
+    ungroup()
+  
+  # Set plot limits
+  x_rng <- range(pull(dat, len_col))
+  y_rng <- range(pull(dat, zone_col))
+  
+  # Create scatter plot
+  res <- dat %>%
+    ggplot(aes(!!sym(len_col), !!sym(zone_col)))
+    
+  # Add gene length polygon
+  # this produces infinite x-axis warning
+  if (len_poly) {
+    res <- res +
+      geom_polygon(
+        aes(x = x, y = y),
+        data  = poly_dat,
+        fill  = poly_clr,
+        color = poly_clr
+      )
+  }
+  
+  # Add points, text, theme, etc
+  res <- res +
+    geom_pointdensity(size = 0.5) +
+    
+    geom_text(
+      aes(max(x_rng), max(y_rng), label = n),
+      color         = "black",
+      check_overlap = TRUE,
+      hjust         = 1,
+      vjust         = 1,
+      size          = txt_pt / .pt
+    ) +
+    
+    scale_color_gradientn(colours = c("black", plot_clr)) +
+    guides(color = guide_colorbar(title = "n genes", barwidth = unit(5, "pt"))) +
+    
+    labs(
+      title = sam,
+      x     = x_ttl,
+      y     = "pausing zone (kb)"
+    ) +
+    
+    coord_cartesian(xlim = x_rng, ylim = y_rng) +
+    scale_x_log10() +
+    scale_y_log10() +
+    theme_info +
+    theme(
+      aspect.ratio = 0.9,
+      plot.title   = element_text(size = ttl_pt),
+      legend.title = element_text(size = ttl_pt),
+      legend.text  = element_text(size = txt_pt),
+      axis.line    = element_blank(),
+      panel.border = element_rect(fill = NA, color = "black")
+    )
+  
+  res
+}
+
+# Create scatter plots
+len_plts <- sam_nms %>%
+  map(create_len_plots, df_in = h_dat, plot_clr = cor_clr)
+
+# Create final figure
+len_plts %>%
+  plot_grid(
+    plotlist = .,
+    nrow = 2
+  )
+
+```
+
+<br>
+
+### 1st exon length correlation
+
+Scatter plots show the correlation between pausing zone length and 1st exon length. Colors indicate the number of overlapping points.
+
+```{r "{{grp}} exon length corr", fig.width = ceiling(n_sams / 2) * 4, fig.height = 7}
+
+# Format data for plotting
+# number of genes is slightly less than shown for other pause zone plots since
+# we do not have a 1st exon length for every gene
+ex_dat <- h_dat %>%
+  left_join(exon_lens, by = c(name = "gene_name")) %>%
+  dplyr::filter(!is.na(ex_len))
+
+# Create scatter plots
+ex_plts <- sam_nms %>%
+  map(~ {
+    create_len_plots(
+      df_in    = ex_dat,
+      sam      = .x,
+      len_col  = "ex_len", 
+      plot_clr = cor_clr,
+      x_ttl    = "exon 1 (bp)",
+      len_poly = FALSE
+    )
+  })
+
+# Create final figure
+ex_plts %>%
+  plot_grid(
+    plotlist = .,
+    nrow = 2
+  )
+
+```
+

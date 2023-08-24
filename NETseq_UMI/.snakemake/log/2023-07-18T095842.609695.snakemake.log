@@ -1,0 +1,53 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                  count    min threads    max threads
+-----------------  -------  -------------  -------------
+all                      1              1              1
+subsample_summary        1              1              1
+subsample_whole          2             16             16
+total                    4              1             16
+
+Select jobs to execute...
+
+[Tue Jul 18 09:58:45 2023]
+Job 21: Subsampling reads for siControl_S1 INDEX_SAMPLE 
+
+Submitted DRMAA job 21 with external jobid 125510.
+
+[Tue Jul 18 09:58:46 2023]
+Job 24: Subsampling reads for siPNUTS_1_S2 INDEX_SAMPLE 
+
+Submitted DRMAA job 24 with external jobid 125511.
+Removing temporary output file Nick/bams/siControl_S1_hg38_230316_dedup_subsample.bam.
+Removing temporary output file Nick/bams/siControl_S1_hg38_230316_dedup_subsample.bam.bai.
+[Tue Jul 18 09:59:44 2023]
+Finished job 21.
+1 of 4 steps (25%) done
+Removing temporary output file Nick/bams/siPNUTS_1_S2_hg38_230316_dedup_subsample.bam.
+Removing temporary output file Nick/bams/siPNUTS_1_S2_hg38_230316_dedup_subsample.bam.bai.
+[Tue Jul 18 09:59:54 2023]
+Finished job 24.
+2 of 4 steps (50%) done
+Select jobs to execute...
+
+[Tue Jul 18 09:59:55 2023]
+Job 20: Creating Nick subsample_whole summary
+
+Submitted DRMAA job 20 with external jobid 125513.
+[Tue Jul 18 10:00:04 2023]
+Finished job 20.
+3 of 4 steps (75%) done
+Select jobs to execute...
+
+[Tue Jul 18 10:00:04 2023]
+localrule all:
+    input: Nick/stats/Nick_fastqc.tsv, Nick/stats/Nick_cutadapt.tsv, Nick/stats/Nick_aligned.tsv, Nick/stats/Nick_HHV8_dedup.tsv, Nick/stats/Nick_hg38_dedup.tsv, Nick/stats/Nick_hg38_subsample.tsv
+    jobid: 0
+    resources: tmpdir=/tmp
+
+[Tue Jul 18 10:00:05 2023]
+Finished job 0.
+4 of 4 steps (100%) done
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI/.snakemake/log/2023-07-18T095842.609695.snakemake.log

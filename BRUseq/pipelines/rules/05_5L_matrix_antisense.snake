@@ -1,0 +1,133 @@
+# ====== Rules for making standard sense 5L matrix files =================================
+
+
+def _get_col(wildcards):
+    sample = SAMPLES[wildcards.group][0]
+  
+    if sample in COLS_DICT:
+      results = (COLS_DICT[sample])
+    else:
+      results = "0,0,0"
+    return(results)
+          
+
+# stranded antisense matrix files
+rule my_5L_amtisense_matrix:
+    input:
+        fw  =   PROJ   + "/bw/{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
+        rev =   PROJ   + "/bw/{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw"
+    output:
+        asense   = temp(PROJ   + "/matrix/{group}_temp0_a5L_matrix.gz"),
+        asense1  = temp(PROJ   + "/matrix/{group}_temp1_a5L_matrix.gz"),
+        asense2  = temp(PROJ   + "/matrix/{group}_temp2_a5L_matrix.gz")
+    params:
+        job_name = "{group}_5L_antisense_matrix",
+        memory   = 20,
+        args     = CMD_PARAMS["asense5L"] + "--scale -1 ",
+        fw_ref   = FW_REF,
+        rev_ref  = REV_REF
+    log:
+        out = PROJ + "/logs/{group}_antisense_5L_matrix.out",
+        err = PROJ + "/logs/{group}_antisense_5L_matrix.err"
+    message:
+        "standard antisense 5L matrix files {wildcards.group}"
+    threads: 
+        12
+    shell:
+        """
+        # no unscaled body
+        computeMatrix reference-point \
+          {params.args} \
+          -R {params.fw_ref} \
+          -S {input.rev} \
+          -p {threads} \
+          -o {output.asense1}
+
+        computeMatrix reference-point \
+          {params.args} \
+          -R {params.rev_ref} \
+          -S {input.fw} \
+          -p {threads} \
+          -o {output.asense2}
+
+        computeMatrixOperations rbind -m {output.asense1} {output.asense2} -o {output.asense}
+
+        """
+
+# stranded asense matrix files
+rule fix_5L_asense_matrix:
+    input:
+        PROJ   + "/matrix/{group}_temp1_a5L_matrix.gz"
+    output:
+        PROJ + "/matrix/5L_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5LA + "_anti_matrix.gz"
+    params:
+        job_name = "{group}_5L_asense_matrix",
+        memory   = 20,
+        args    = CMD_PARAMS["table5L"]
+    log:
+        out = PROJ + "/logs/{group}_fix_5L_asense_matrix.out",
+        err = PROJ + "/logs/{group}_fix_5L_asense_matrix.err"
+    message:
+        "fix standard asense 5L matrix files {wildcards.group}"
+    threads: 
+        1
+    script:
+        '../R_scripts/MatrixTrim.R'
+        
+# make url's and scp to sandbox
+rule my_5L_anti_url:
+    input:
+        matrix2 = PROJ + "/matrix/5L_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5LA + "_anti_matrix.gz"
+    output:
+        temp(PROJ + "/matrix/5L.{group}_antisense_matrix.url.txt")
+    params:
+        job_name = PROJ + "_5L_matrix_url",
+        memory   = 4,
+        color    = _get_col,
+        url_anti = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + PROJ + "/5L_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5LA + "_anti_matrix.gz",
+        matrix2g = PROJ + "/matrix/5L_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5LA + "_anti_matrix"
+    log:
+        out = PROJ + "/logs/{group}_sense_5L_matrix_url.out",
+        err = PROJ + "/logs/{group}_sense_5L_matrix_url.err"
+    message:
+        "Creating sense 5L_matrix url for {wildcards.group}"
+    threads:
+        1
+    shell:
+        """
+        # fix for strange side affect that only the 1 line loads from sandbox
+        gunzip {input.matrix2}
+        gzip {params.matrix2g}
+        ssh amc-sandbox 'mkdir -p ./public_html/{PROJ}'
+        echo {params.url_anti} 5L 5L.{wildcards.group}_{SEQ_DATE}_anti {params.color} >> {output[0]}
+        scp {input.matrix2} amc-sandbox:./public_html/{PROJ}
+        """
+        
+# Combine urls
+rule my_5L_anti_url_summary:
+    input:
+        sorted(expand(
+            PROJ + "/matrix/5L.{group}_antisense_matrix.url.txt",
+            group = GRPS_UNIQ
+        ))
+    output:
+        PROJ + "/URLS/5L_" + PROJ + "_" + INDEX_SAMPLE + "_" + NORM5LA + "_antisense_matrix.url.txt"
+    params:
+        job_name = PROJ + "_sense_5L_matrix_url",
+        memory   = 4
+    log:
+        out = PROJ + "/logs/" + PROJ + "_sense_5L_matrix_url.out",
+        err = PROJ + "/logs/" + PROJ + "_sense_5L_matrix_url.err"
+    message:
+        "Creating " + PROJ + " sense 5L_matrix url"
+    threads:
+        1
+    run:
+        with open(output[0], "w") as out:
+            for file in input:
+                for line in open(file, "r"):
+                    out.write(line)
+
+
+
+

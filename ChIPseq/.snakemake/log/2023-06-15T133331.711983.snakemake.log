@@ -1,0 +1,4 @@
+NameError in line 17 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/ChIPseq/pipelines/rules/05_543_matrix.snake:
+name 'NORMS' is not defined
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/ChIPseq/pipelines/ChIPseq_Matrix.snake", line 128, in <module>
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/ChIPseq/pipelines/rules/05_543_matrix.snake", line 17, in <module>

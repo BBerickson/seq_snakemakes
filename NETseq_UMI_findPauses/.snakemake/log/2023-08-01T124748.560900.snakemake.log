@@ -1,0 +1,183 @@
+Building DAG of jobs...
+The code used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-code-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-code-changes)'.
+Using shell: /usr/bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                    count    min threads    max threads
+-------------------  -------  -------------  -------------
+all                        1              1              1
+bamCoverage                6             12             12
+bamCoverage_summary        1              1              1
+gathering_results          1              1              1
+subsample_summary          1              1              1
+subsample_whole            6             16             16
+total                     16              1             16
+
+Select jobs to execute...
+
+[Tue Aug  1 12:47:52 2023]
+Job 42: Subsampling reads for 293flpin_Xrn2_WT_R2 INDEX_SAMPLE 
+
+Submitted DRMAA job 42 with external jobid 155604.
+
+[Tue Aug  1 12:47:53 2023]
+Job 47: Subsampling reads for 293flpin_Xrn2_MT_R2 INDEX_SAMPLE 
+
+Submitted DRMAA job 47 with external jobid 155605.
+
+[Tue Aug  1 12:47:53 2023]
+Job 49: Subsampling reads for 293flpin_Xrn2_MT_R3 INDEX_SAMPLE 
+
+Submitted DRMAA job 49 with external jobid 155606.
+
+[Tue Aug  1 12:47:53 2023]
+Job 51: Subsampling reads for 293flpin_Xrn2_MT_R4 INDEX_SAMPLE 
+
+Submitted DRMAA job 51 with external jobid 155607.
+
+[Tue Aug  1 12:47:53 2023]
+Job 48: Subsampling reads for 293flpin_Xrn2_WT_R3 INDEX_SAMPLE 
+
+Submitted DRMAA job 48 with external jobid 155608.
+
+[Tue Aug  1 12:47:53 2023]
+Job 50: Subsampling reads for 293flpin_Xrn2_WT_R4 INDEX_SAMPLE 
+
+Submitted DRMAA job 50 with external jobid 155609.
+[Tue Aug  1 12:48:50 2023]
+Finished job 48.
+1 of 16 steps (6%) done
+Select jobs to execute...
+
+[Tue Aug  1 12:48:51 2023]
+Job 58: stranded bigwigs 5prim or 3prim reads in R1-R2 orentation for 293flpin_Xrn2_WT_R3
+
+Submitted DRMAA job 58 with external jobid 155617.
+[Tue Aug  1 12:49:00 2023]
+Finished job 42.
+2 of 16 steps (12%) done
+Select jobs to execute...
+
+[Tue Aug  1 12:49:00 2023]
+Job 57: stranded bigwigs 5prim or 3prim reads in R1-R2 orentation for 293flpin_Xrn2_WT_R2
+
+Submitted DRMAA job 57 with external jobid 155618.
+[Tue Aug  1 12:49:00 2023]
+Finished job 47.
+3 of 16 steps (19%) done
+[Tue Aug  1 12:49:00 2023]
+Finished job 49.
+4 of 16 steps (25%) done
+[Tue Aug  1 12:49:00 2023]
+Finished job 51.
+5 of 16 steps (31%) done
+Select jobs to execute...
+
+[Tue Aug  1 12:49:01 2023]
+Job 56: stranded bigwigs 5prim or 3prim reads in R1-R2 orentation for 293flpin_Xrn2_MT_R4
+
+Submitted DRMAA job 56 with external jobid 155619.
+
+[Tue Aug  1 12:49:01 2023]
+Job 55: stranded bigwigs 5prim or 3prim reads in R1-R2 orentation for 293flpin_Xrn2_MT_R3
+
+Submitted DRMAA job 55 with external jobid 155620.
+
+[Tue Aug  1 12:49:01 2023]
+Job 54: stranded bigwigs 5prim or 3prim reads in R1-R2 orentation for 293flpin_Xrn2_MT_R2
+
+Submitted DRMAA job 54 with external jobid 155621.
+[Tue Aug  1 12:49:10 2023]
+Finished job 50.
+6 of 16 steps (38%) done
+Select jobs to execute...
+
+[Tue Aug  1 12:49:10 2023]
+Job 41: Creating Xrn2 subsample_whole summary
+
+Submitted DRMAA job 41 with external jobid 155622.
+
+[Tue Aug  1 12:49:10 2023]
+Job 59: stranded bigwigs 5prim or 3prim reads in R1-R2 orentation for 293flpin_Xrn2_WT_R4
+
+Submitted DRMAA job 59 with external jobid 155623.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_WT_R2_hg38_dedup_subsample.txt.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_MT_R2_hg38_dedup_subsample.txt.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_WT_R3_hg38_dedup_subsample.txt.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_MT_R3_hg38_dedup_subsample.txt.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_WT_R4_hg38_dedup_subsample.txt.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_MT_R4_hg38_dedup_subsample.txt.
+[Tue Aug  1 12:49:20 2023]
+Finished job 41.
+7 of 16 steps (44%) done
+Select jobs to execute...
+
+[Tue Aug  1 12:49:21 2023]
+Job 52: getting final results
+
+Submitted DRMAA job 52 with external jobid 155624.
+[Tue Aug  1 12:49:41 2023]
+Finished job 52.
+8 of 16 steps (50%) done
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_WT_R2_hg38_220215_220218_dedup_subsample.bam.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_WT_R2_hg38_220215_220218_dedup_subsample.bam.bai.
+[Tue Aug  1 13:09:18 2023]
+Finished job 57.
+9 of 16 steps (56%) done
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_MT_R3_hg38_220215_220218_dedup_subsample.bam.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_MT_R3_hg38_220215_220218_dedup_subsample.bam.bai.
+[Tue Aug  1 13:09:48 2023]
+Finished job 55.
+10 of 16 steps (62%) done
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_WT_R3_hg38_220215_220218_dedup_subsample.bam.bai.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_WT_R3_hg38_220215_220218_dedup_subsample.bam.
+[Tue Aug  1 13:10:18 2023]
+Finished job 58.
+11 of 16 steps (69%) done
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_MT_R2_hg38_220215_220218_dedup_subsample.bam.bai.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_MT_R2_hg38_220215_220218_dedup_subsample.bam.
+[Tue Aug  1 13:10:28 2023]
+Finished job 54.
+12 of 16 steps (75%) done
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_MT_R4_hg38_220215_220218_dedup_subsample.bam.bai.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_MT_R4_hg38_220215_220218_dedup_subsample.bam.
+[Tue Aug  1 13:10:38 2023]
+Finished job 56.
+13 of 16 steps (81%) done
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_WT_R4_hg38_220215_220218_dedup_subsample.bam.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_WT_R4_hg38_220215_220218_dedup_subsample.bam.bai.
+[Tue Aug  1 13:11:19 2023]
+Finished job 59.
+14 of 16 steps (88%) done
+Select jobs to execute...
+
+[Tue Aug  1 13:11:19 2023]
+Job 53: Creating Xrn2 bamCoverage summary
+
+Submitted DRMAA job 53 with external jobid 155646.
+Removing temporary output file Xrn2/bw/293flpin_Xrn2_MT_R2_bamCoverage_spike_stats.txt.
+Removing temporary output file Xrn2/bw/293flpin_Xrn2_MT_R3_bamCoverage_spike_stats.txt.
+Removing temporary output file Xrn2/bw/293flpin_Xrn2_MT_R4_bamCoverage_spike_stats.txt.
+Removing temporary output file Xrn2/bw/293flpin_Xrn2_WT_R2_bamCoverage_spike_stats.txt.
+Removing temporary output file Xrn2/bw/293flpin_Xrn2_WT_R3_bamCoverage_spike_stats.txt.
+Removing temporary output file Xrn2/bw/293flpin_Xrn2_WT_R4_bamCoverage_spike_stats.txt.
+[Tue Aug  1 13:11:29 2023]
+Finished job 53.
+15 of 16 steps (94%) done
+Select jobs to execute...
+
+[Tue Aug  1 13:11:29 2023]
+localrule all:
+    input: Xrn2/stats/Xrn2_fastqc.tsv, Xrn2/stats/Xrn2_cutadapt.tsv, Xrn2/stats/Xrn2_aligned.tsv, Xrn2/stats/Xrn2_hg38_dedup.tsv, Xrn2/stats/Xrn2_hg38_subsample.tsv, Xrn2/stats/Xrn2_results.tsv, Xrn2/URLS/Xrn2_hg38_norm_3end_subsample_bw_URL.txt
+    jobid: 0
+    resources: tmpdir=/tmp
+
+[Tue Aug  1 13:11:29 2023]
+Finished job 0.
+16 of 16 steps (100%) done
+The code used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-code-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-code-changes)'.
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI_findPauses/.snakemake/log/2023-08-01T124748.560900.snakemake.log

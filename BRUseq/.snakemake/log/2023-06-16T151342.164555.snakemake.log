@@ -1,0 +1,122 @@
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                     count    min threads    max threads
+--------------------  -------  -------------  -------------
+all                         1              1              1
+bamCoverage                 2             12             12
+bamCoverage_summary         1              1              1
+bbduk_paired                2             12             12
+bbduk_summary               1              1              1
+bowtie                      2             12             12
+bowtie_counts               2              1              1
+bowtie_summary              1              1              1
+calculating_OR              2              1              1
+clumpify_paired             2              1              1
+clumpify_summary            1              1              1
+fastqc                      4              6              6
+fastqc_summary              1              1              1
+gathering_OR_results        1              1              1
+gathering_results           1              1              1
+total                      24              1             12
+
+Select jobs to execute...
+
+[Fri Jun 16 15:13:43 2023]
+Job 2: Running FastQC on 293flpIN_RTF1_WT_DRB_t0_BrUseq_S10_L003_R1_001
+
+Submitted DRMAA job 2 with external jobid 10597.
+
+[Fri Jun 16 15:13:43 2023]
+Job 4: Running FastQC on 293flpIN_RTF1_MT_DRB_t0_BrUseq_S11_L003_R1_001
+
+Submitted DRMAA job 4 with external jobid 10598.
+
+[Fri Jun 16 15:13:43 2023]
+Job 3: Running FastQC on 293flpIN_RTF1_WT_DRB_t0_BrUseq_S10_L003_R2_001
+
+Submitted DRMAA job 3 with external jobid 10599.
+
+[Fri Jun 16 15:13:43 2023]
+Job 5: Running FastQC on 293flpIN_RTF1_MT_DRB_t0_BrUseq_S11_L003_R2_001
+
+Submitted DRMAA job 5 with external jobid 10600.
+
+[Fri Jun 16 15:13:44 2023]
+Job 7: Removing duplicats for 293flpIN_RTF1_WT_DRB_t0
+
+Submitted DRMAA job 7 with external jobid 10601.
+
+[Fri Jun 16 15:13:44 2023]
+Job 8: Removing duplicats for 293flpIN_RTF1_MT_DRB_t0
+
+Submitted DRMAA job 8 with external jobid 10602.
+[Fri Jun 16 15:18:46 2023]
+Finished job 7.
+1 of 24 steps (4%) done
+Select jobs to execute...
+
+[Fri Jun 16 15:18:46 2023]
+Job 10: Removing duplicats for 293flpIN_RTF1_WT_DRB_t0
+
+Submitted DRMAA job 10 with external jobid 10605.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/clumpify/293flpIN_RTF1_WT_DRB_t0_R2_clumpify.fastq.gz.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/clumpify/293flpIN_RTF1_WT_DRB_t0_R1_clumpify.fastq.gz.
+[Fri Jun 16 15:20:06 2023]
+Finished job 10.
+2 of 24 steps (8%) done
+Select jobs to execute...
+
+[Fri Jun 16 15:20:07 2023]
+Job 13: Aligning reads with Bowtie2 for 293flpIN_RTF1_WT_DRB_t0
+
+Submitted DRMAA job 13 with external jobid 10606.
+[Fri Jun 16 15:22:58 2023]
+Finished job 8.
+3 of 24 steps (12%) done
+Select jobs to execute...
+
+[Fri Jun 16 15:22:58 2023]
+Job 6: Creating 220812_RTF1_DRB_BrUseq clumpify summary
+
+Submitted DRMAA job 6 with external jobid 10607.
+
+[Fri Jun 16 15:22:59 2023]
+Job 11: Removing duplicats for 293flpIN_RTF1_MT_DRB_t0
+
+Submitted DRMAA job 11 with external jobid 10608.
+[Fri Jun 16 15:23:08 2023]
+Error in rule clumpify_summary:
+    jobid: 6
+    output: 220812_RTF1_DRB_BrUseq/stats/220812_RTF1_DRB_BrUseq_clumpify.tsv
+    log: 220812_RTF1_DRB_BrUseq/logs/220812_RTF1_DRB_BrUseq_clumpify_summary.out, 220812_RTF1_DRB_BrUseq/logs/220812_RTF1_DRB_BrUseq_clumpify_summary.err (check log file(s) for error message)
+
+Error executing rule clumpify_summary on cluster (jobid: 6, external: 10607, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/BRUseq/.snakemake/tmp.s7w6ethe/snakejob.clumpify_summary.6.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Fri Jun 16 15:25:30 2023]
+Finished job 2.
+4 of 24 steps (17%) done
+[Fri Jun 16 15:25:50 2023]
+Finished job 3.
+5 of 24 steps (21%) done
+Removing temporary output file 220812_RTF1_DRB_BrUseq/clumpify/293flpIN_RTF1_MT_DRB_t0_R1_clumpify.fastq.gz.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/clumpify/293flpIN_RTF1_MT_DRB_t0_R2_clumpify.fastq.gz.
+[Fri Jun 16 15:28:52 2023]
+Finished job 11.
+6 of 24 steps (25%) done
+[Fri Jun 16 15:41:17 2023]
+Finished job 4.
+7 of 24 steps (29%) done
+[Fri Jun 16 15:41:37 2023]
+Finished job 5.
+8 of 24 steps (33%) done
+Removing temporary output file 220812_RTF1_DRB_BrUseq/bbduk/293flpIN_RTF1_WT_DRB_t0_R1_bbduk.fastq.gz.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/bbduk/293flpIN_RTF1_WT_DRB_t0_R2_bbduk.fastq.gz.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/bams/293flpIN_RTF1_WT_DRB_t0_hg38_scer3.bam.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/bams/293flpIN_RTF1_WT_DRB_t0_hg38_scer3.bam.bai.
+[Fri Jun 16 15:43:18 2023]
+Finished job 13.
+9 of 24 steps (38%) done
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/BRUseq/.snakemake/log/2023-06-16T151342.164555.snakemake.log

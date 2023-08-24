@@ -1,0 +1,164 @@
+# ====== Rules for aligning reads with bamCoverage and OR norm to spike in =================================
+
+# gets number for norm fraction
+def _get_norm(wildcards):
+    group = wildcards.group
+    sample = SAMPLES[wildcards.group][0]
+    patternfile = NORM
+    num = 1
+    if re.search("OR|OR_enrich", patternfile):
+      filename =  PROJ + "/bams/" + group + "_OR_count.txt"
+      for line in open(filename, "r"):
+        match = re.search(r'^\S+\s+\b%s\b' % patternfile, line)
+        if match:
+          num = line.strip().split()
+          num = float(num[2])
+          break
+    else:
+      filename =  PROJ + "/bams/" + sample + "_count.txt"
+      for line in open(filename, "r"):
+        match = re.search(patternfile, line)
+        if match:
+          num = line.strip().split()
+          num = 1000000/float(num[1])
+          break
+    if isinstance(num, (int, float)):
+      return num
+    else:
+      return 1
+        
+
+def _get_col(wildcards):
+    sample = SAMPLES[wildcards.group][0]
+  
+    if sample in COLS_DICT:
+      results = (COLS_DICT[sample])
+    else:
+      results = "0,0,0"
+    return(results)
+
+
+# calculating OR
+rule calculating_OR:
+    input:
+        lambda wildcards: expand(
+            PROJ      + "/bams/{sample}_count.txt",
+            sample = SAMPLES[wildcards.group]
+        )
+    output:
+        PROJ      + "/bams/{group}_OR_count.txt"
+    params:
+        job_name = "{group}_OR",
+        memory   = 4,
+        type  = NORM,
+        sam_en  = "enrich_" + INDEX_SAMPLE,
+        spk_en = "enrich_" + INDEX_SPIKE,
+        in_sam = INDEX_SAMPLE,
+        in_spk = INDEX_SPIKE
+    log:
+        out = PROJ + "/logs/{group}_OR.out",
+        err = PROJ + "/logs/{group}_OR.err"
+    message:
+        "getting OR norm for {wildcards.group}"
+    threads: 
+        1
+    script:
+        '/beevol/home/erickson/src/pipelines/R_scripts/count_OR.R'
+  
+# gathering results
+rule gathering_OR_results:
+    input:
+        expand(
+        PROJ      + "/bams/{group}_OR_count.txt",
+            group = GRPS_UNIQ
+        )
+    output:
+        PROJ + "/stats/" + PROJ + "_OR_summery.tsv"
+    params:
+        job_name = "ORresults",
+        memory   = 4
+    log:
+        out = PROJ + "/logs/ORresults.out",
+        err = PROJ + "/logs/ORresults.err"
+    message:
+        "getting final results"
+    threads: 
+        1
+    run:
+        with open(output[0], "w") as out:
+            for file in input:
+                for line in open(file, "r"):
+                    out.write(line)   
+        
+        
+# Align trimmed reads with bamCoverage
+rule bamCoverage:
+    input:
+        bam = lambda wildcards: expand(
+            PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
+            sample = SAMPLES[wildcards.group]
+        ),
+        check_point = PROJ + "/stats/" + PROJ + "_OR_summery.tsv"
+    output:
+        bigwig  = PROJ      + "/bw/{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + ".bw",
+        stats   = temp(PROJ      + "/bw/{group}_bamCoverage_stats.txt")
+    params:
+        job_name = "{group}_bamCoverage",
+        memory   = 20,
+        args     = CMD_PARAMS["bamCoverage"],
+        scale    = _get_norm,
+        color    = _get_col,
+        url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + PROJ + "/{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + ".bw"
+    log:
+        out = PROJ + "/logs/{group}_bamCoverage.out",
+        err = PROJ + "/logs/{group}_bamCoverage.err"
+    message:
+        "Aligning reads with bamCoverage for {wildcards.group}"
+    threads: 
+        12
+    shell:
+        """
+        
+        bamCoverage \
+          -b {input.bam[0]} \
+          -of bigwig \
+          -o {output.bigwig} \
+          {params.args} \
+          --scaleFactor {params.scale} \
+          -p {threads} 
+        
+        echo "track type=bigWig visibility=full name='{wildcards.group}_{SEQ_DATE}_{NORMS}' description='{wildcards.group}_{SEQ_DATE}_{NORMS}' color={params.color} bigDataUrl={params.url}" > {output.stats}
+        ssh amc-sandbox 'mkdir -p ./public_html/{PROJ}'
+        scp {output.bigwig} amc-sandbox:./public_html/{PROJ}
+        
+        """
+
+
+# Combine bamCoverage summaries
+rule bamCoverage_summary:
+    input:
+        sorted(expand(
+            PROJ + "/bw/{group}_bamCoverage_stats.txt",
+            group = GRPS_UNIQ
+        ))
+    output:
+        PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + "_" + NORMS + "_bw_URL.txt"
+    params:
+        job_name = PROJ + "_bamCoverage_summary",
+        memory   = 4
+    log:
+        out = PROJ + "/logs/" + PROJ + "_bamCoverage_summary.out",
+        err = PROJ + "/logs/" + PROJ + "_bamCoverage_summary.err"
+    message:
+        "Creating " + PROJ + " bamCoverage summary"
+    threads:
+        1
+    run:
+        with open(output[0], "w") as out:
+            for file in input:
+                for line in open(file, "r"):
+                    out.write(line)
+
+
+
+

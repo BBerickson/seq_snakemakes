@@ -1,0 +1,1563 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                    count    min threads    max threads
+-------------------  -------  -------------  -------------
+all                        1              1              1
+create_plots               1              1              1
+gene_subsample_test        8              1              1
+pause_density            312              6              6
+pause_metaplots           24              6              6
+pause_reads               24              6              6
+pausing_summary            2              1              1
+strong_pauses             12              1              1
+total                    384              1              6
+
+Select jobs to execute...
+
+[Tue Aug  8 14:50:11 2023]
+Job 461: Intersecting reads with _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_gene
+
+Submitted DRMAA job 461 with external jobid 239897.
+
+[Tue Aug  8 14:50:11 2023]
+Job 258: Filtering _strong_ pauses (200bp window) for 293flpin_Xrn2_WT_R4_xrn2-r4_body
+
+Submitted DRMAA job 258 with external jobid 239898.
+
+[Tue Aug  8 14:50:12 2023]
+Job 230: Testing subsampling for xrn2-r4 gene
+
+Submitted DRMAA job 230 with external jobid 239899.
+
+[Tue Aug  8 14:50:12 2023]
+Job 252: Filtering _strong_ pauses (200bp window) for 293flpin_Xrn2_MT_R3_xrn2-r3_body
+
+Submitted DRMAA job 252 with external jobid 239900.
+
+[Tue Aug  8 14:50:13 2023]
+Job 266: Filtering _strong_ pauses (200bp window) for 293flpin_Xrn2_MT_R4_xrn2-r4_gene
+
+Submitted DRMAA job 266 with external jobid 239901.
+
+[Tue Aug  8 14:50:13 2023]
+Job 224: Testing subsampling for xrn2-r2 gene
+
+Submitted DRMAA job 224 with external jobid 239902.
+
+[Tue Aug  8 14:50:13 2023]
+Job 273: Creating _ pause (200bp window) metaplot files for 293flpin_Xrn2_WT_R2_xrn2-r2_body
+
+Submitted DRMAA job 273 with external jobid 239903.
+
+[Tue Aug  8 14:50:14 2023]
+Job 287: Creating _ pause (200bp window) metaplot files for 293flpin_Xrn2_WT_R3_xrn2-r3_gene
+
+Submitted DRMAA job 287 with external jobid 239904.
+
+[Tue Aug  8 14:50:14 2023]
+Job 281: Creating _ pause (200bp window) metaplot files for 293flpin_Xrn2_MT_R2_xrn2-r2_gene
+
+Submitted DRMAA job 281 with external jobid 239905.
+
+[Tue Aug  8 14:50:14 2023]
+Job 225: Testing subsampling for xrn2-r3 tss
+
+Submitted DRMAA job 225 with external jobid 239906.
+
+[Tue Aug  8 14:50:14 2023]
+Job 545: Intersecting reads with _ pauses (200bp window) for 293flpin_Xrn2_WT_R3_xrn2-r3_gene
+
+Submitted DRMAA job 545 with external jobid 239907.
+
+[Tue Aug  8 14:50:15 2023]
+Job 246: Filtering _strong_ pauses (200bp window) for 293flpin_Xrn2_WT_R3_xrn2-r3_body
+
+Submitted DRMAA job 246 with external jobid 239908.
+
+[Tue Aug  8 14:50:15 2023]
+Job 260: Filtering _strong_ pauses (200bp window) for 293flpin_Xrn2_WT_R4_xrn2-r4_gene
+
+Submitted DRMAA job 260 with external jobid 239909.
+
+[Tue Aug  8 14:50:15 2023]
+Job 601: Intersecting reads with _ pauses (200bp window) for 293flpin_Xrn2_MT_R3_xrn2-r3_body
+
+Submitted DRMAA job 601 with external jobid 239910.
+
+[Tue Aug  8 14:50:15 2023]
+Job 797: Intersecting reads with _ pauses (200bp window) for 293flpin_Xrn2_MT_R4_xrn2-r4_gene
+
+Submitted DRMAA job 797 with external jobid 239911.
+
+[Tue Aug  8 14:50:16 2023]
+Job 349: Intersecting reads with _ pauses (200bp window) for 293flpin_Xrn2_WT_R2_xrn2-r2_body
+
+Submitted DRMAA job 349 with external jobid 239912.
+
+[Tue Aug  8 14:50:16 2023]
+Job 254: Filtering _strong_ pauses (200bp window) for 293flpin_Xrn2_MT_R3_xrn2-r3_gene
+
+Submitted DRMAA job 254 with external jobid 239913.
+
+[Tue Aug  8 14:50:16 2023]
+Job 268: Creating Xrn2 _ pausing summary (200bp window)
+
+Submitted DRMAA job 268 with external jobid 239914.
+
+[Tue Aug  8 14:50:16 2023]
+Job 240: Filtering _strong_ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_body
+
+Submitted DRMAA job 240 with external jobid 239915.
+
+[Tue Aug  8 14:50:16 2023]
+Job 226: Testing subsampling for xrn2-r3 body
+
+Submitted DRMAA job 226 with external jobid 239916.
+
+[Tue Aug  8 14:50:17 2023]
+Job 275: Creating _ pause (200bp window) metaplot files for 293flpin_Xrn2_WT_R2_xrn2-r2_gene
+
+Submitted DRMAA job 275 with external jobid 239917.
+
+[Tue Aug  8 14:50:17 2023]
+Job 303: Creating _ pause (200bp window) metaplot files for 293flpin_Xrn2_MT_R4_xrn2-r4_body
+
+Submitted DRMAA job 303 with external jobid 239918.
+
+[Tue Aug  8 14:50:17 2023]
+Job 685: Intersecting reads with _ pauses (200bp window) for 293flpin_Xrn2_WT_R4_xrn2-r4_body
+
+Submitted DRMAA job 685 with external jobid 239919.
+
+[Tue Aug  8 14:50:18 2023]
+Job 297: Creating _ pause (200bp window) metaplot files for 293flpin_Xrn2_WT_R4_xrn2-r4_body
+
+Submitted DRMAA job 297 with external jobid 239920.
+
+[Tue Aug  8 14:50:18 2023]
+Job 227: Testing subsampling for xrn2-r3 gene
+
+Submitted DRMAA job 227 with external jobid 239921.
+
+[Tue Aug  8 14:50:18 2023]
+Job 248: Filtering _strong_ pauses (200bp window) for 293flpin_Xrn2_WT_R3_xrn2-r3_gene
+
+Submitted DRMAA job 248 with external jobid 239922.
+
+[Tue Aug  8 14:50:18 2023]
+Job 234: Filtering _strong_ pauses (200bp window) for 293flpin_Xrn2_WT_R2_xrn2-r2_body
+
+Submitted DRMAA job 234 with external jobid 239923.
+
+[Tue Aug  8 14:50:19 2023]
+Job 629: Intersecting reads with _ pauses (200bp window) for 293flpin_Xrn2_MT_R3_xrn2-r3_gene
+
+Submitted DRMAA job 629 with external jobid 239924.
+
+[Tue Aug  8 14:50:19 2023]
+Job 242: Filtering _strong_ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_gene
+
+Submitted DRMAA job 242 with external jobid 239925.
+
+[Tue Aug  8 14:50:19 2023]
+Job 228: Testing subsampling for xrn2-r4 tss
+
+Submitted DRMAA job 228 with external jobid 239926.
+
+[Tue Aug  8 14:50:19 2023]
+Job 433: Intersecting reads with _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_body
+
+Submitted DRMAA job 433 with external jobid 239927.
+
+[Tue Aug  8 14:50:19 2023]
+Job 305: Creating _ pause (200bp window) metaplot files for 293flpin_Xrn2_MT_R4_xrn2-r4_gene
+
+Submitted DRMAA job 305 with external jobid 239928.
+
+[Tue Aug  8 14:50:20 2023]
+Job 291: Creating _ pause (200bp window) metaplot files for 293flpin_Xrn2_MT_R3_xrn2-r3_body
+
+Submitted DRMAA job 291 with external jobid 239929.
+
+[Tue Aug  8 14:50:20 2023]
+Job 377: Intersecting reads with _ pauses (200bp window) for 293flpin_Xrn2_WT_R2_xrn2-r2_gene
+
+Submitted DRMAA job 377 with external jobid 239930.
+
+[Tue Aug  8 14:50:20 2023]
+Job 223: Testing subsampling for xrn2-r2 body
+
+Submitted DRMAA job 223 with external jobid 239931.
+
+[Tue Aug  8 14:50:21 2023]
+Job 285: Creating _ pause (200bp window) metaplot files for 293flpin_Xrn2_WT_R3_xrn2-r3_body
+
+Submitted DRMAA job 285 with external jobid 239932.
+
+[Tue Aug  8 14:50:21 2023]
+Job 229: Testing subsampling for xrn2-r4 body
+
+Submitted DRMAA job 229 with external jobid 239933.
+
+[Tue Aug  8 14:50:21 2023]
+Job 299: Creating _ pause (200bp window) metaplot files for 293flpin_Xrn2_WT_R4_xrn2-r4_gene
+
+Submitted DRMAA job 299 with external jobid 239934.
+
+[Tue Aug  8 14:50:21 2023]
+Job 264: Filtering _strong_ pauses (200bp window) for 293flpin_Xrn2_MT_R4_xrn2-r4_body
+
+Submitted DRMAA job 264 with external jobid 239935.
+
+[Tue Aug  8 14:50:23 2023]
+Job 279: Creating _ pause (200bp window) metaplot files for 293flpin_Xrn2_MT_R2_xrn2-r2_body
+
+Submitted DRMAA job 279 with external jobid 239936.
+
+[Tue Aug  8 14:50:23 2023]
+Job 769: Intersecting reads with _ pauses (200bp window) for 293flpin_Xrn2_MT_R4_xrn2-r4_body
+
+Submitted DRMAA job 769 with external jobid 239937.
+
+[Tue Aug  8 14:50:23 2023]
+Job 236: Filtering _strong_ pauses (200bp window) for 293flpin_Xrn2_WT_R2_xrn2-r2_gene
+
+Submitted DRMAA job 236 with external jobid 239938.
+
+[Tue Aug  8 14:50:23 2023]
+Job 517: Intersecting reads with _ pauses (200bp window) for 293flpin_Xrn2_WT_R3_xrn2-r3_body
+
+Submitted DRMAA job 517 with external jobid 239939.
+
+[Tue Aug  8 14:50:23 2023]
+Job 713: Intersecting reads with _ pauses (200bp window) for 293flpin_Xrn2_WT_R4_xrn2-r4_gene
+
+Submitted DRMAA job 713 with external jobid 239940.
+
+[Tue Aug  8 14:50:24 2023]
+Job 293: Creating _ pause (200bp window) metaplot files for 293flpin_Xrn2_MT_R3_xrn2-r3_gene
+
+Submitted DRMAA job 293 with external jobid 239941.
+[Tue Aug  8 14:50:31 2023]
+Finished job 258.
+1 of 384 steps (0.3%) done
+Select jobs to execute...
+
+[Tue Aug  8 14:50:31 2023]
+Job 671: Intersecting reads with _strong_ pauses (200bp window) for 293flpin_Xrn2_WT_R4_xrn2-r4_body
+
+Submitted DRMAA job 671 with external jobid 239942.
+
+[Tue Aug  8 14:50:31 2023]
+Job 296: Creating _strong_ pause (200bp window) metaplot files for 293flpin_Xrn2_WT_R4_xrn2-r4_body
+
+Submitted DRMAA job 296 with external jobid 239943.
+[Tue Aug  8 14:50:31 2023]
+Finished job 252.
+2 of 384 steps (1%) done
+[Tue Aug  8 14:50:31 2023]
+Finished job 266.
+3 of 384 steps (1%) done
+Select jobs to execute...
+
+[Tue Aug  8 14:50:31 2023]
+Job 290: Creating _strong_ pause (200bp window) metaplot files for 293flpin_Xrn2_MT_R3_xrn2-r3_body
+
+Submitted DRMAA job 290 with external jobid 239944.
+
+[Tue Aug  8 14:50:32 2023]
+Job 587: Intersecting reads with _strong_ pauses (200bp window) for 293flpin_Xrn2_MT_R3_xrn2-r3_body
+
+Submitted DRMAA job 587 with external jobid 239945.
+
+[Tue Aug  8 14:50:32 2023]
+Job 783: Intersecting reads with _strong_ pauses (200bp window) for 293flpin_Xrn2_MT_R4_xrn2-r4_gene
+
+Submitted DRMAA job 783 with external jobid 239946.
+
+[Tue Aug  8 14:50:32 2023]
+Job 304: Creating _strong_ pause (200bp window) metaplot files for 293flpin_Xrn2_MT_R4_xrn2-r4_gene
+
+Submitted DRMAA job 304 with external jobid 239947.
+[Tue Aug  8 14:50:32 2023]
+Finished job 246.
+4 of 384 steps (1%) done
+[Tue Aug  8 14:50:32 2023]
+Finished job 260.
+5 of 384 steps (1%) done
+[Tue Aug  8 14:50:32 2023]
+Finished job 254.
+6 of 384 steps (2%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R2_xrn2-r2_tss_200_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_tss_200_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_tss_200_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R3_xrn2-r3_tss_200_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R4_xrn2-r4_tss_200_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_tss_200_pauses.bed.gz.
+[Tue Aug  8 14:50:33 2023]
+Finished job 268.
+7 of 384 steps (2%) done
+[Tue Aug  8 14:50:33 2023]
+Finished job 240.
+8 of 384 steps (2%) done
+Select jobs to execute...
+
+[Tue Aug  8 14:50:33 2023]
+Job 292: Creating _strong_ pause (200bp window) metaplot files for 293flpin_Xrn2_MT_R3_xrn2-r3_gene
+
+Submitted DRMAA job 292 with external jobid 239948.
+
+[Tue Aug  8 14:50:33 2023]
+Job 278: Creating _strong_ pause (200bp window) metaplot files for 293flpin_Xrn2_MT_R2_xrn2-r2_body
+
+Submitted DRMAA job 278 with external jobid 239949.
+
+[Tue Aug  8 14:50:33 2023]
+Job 419: Intersecting reads with _strong_ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_body
+
+Submitted DRMAA job 419 with external jobid 239950.
+
+[Tue Aug  8 14:50:34 2023]
+Job 503: Intersecting reads with _strong_ pauses (200bp window) for 293flpin_Xrn2_WT_R3_xrn2-r3_body
+
+Submitted DRMAA job 503 with external jobid 239951.
+
+[Tue Aug  8 14:50:34 2023]
+Job 284: Creating _strong_ pause (200bp window) metaplot files for 293flpin_Xrn2_WT_R3_xrn2-r3_body
+
+Submitted DRMAA job 284 with external jobid 239952.
+
+[Tue Aug  8 14:50:34 2023]
+Job 298: Creating _strong_ pause (200bp window) metaplot files for 293flpin_Xrn2_WT_R4_xrn2-r4_gene
+
+Submitted DRMAA job 298 with external jobid 239953.
+
+[Tue Aug  8 14:50:34 2023]
+Job 615: Intersecting reads with _strong_ pauses (200bp window) for 293flpin_Xrn2_MT_R3_xrn2-r3_gene
+
+Submitted DRMAA job 615 with external jobid 239954.
+
+[Tue Aug  8 14:50:34 2023]
+Job 699: Intersecting reads with _strong_ pauses (200bp window) for 293flpin_Xrn2_WT_R4_xrn2-r4_gene
+
+Submitted DRMAA job 699 with external jobid 239955.
+[Tue Aug  8 14:50:45 2023]
+Finished job 248.
+9 of 384 steps (2%) done
+Select jobs to execute...
+
+[Tue Aug  8 14:50:45 2023]
+Job 531: Intersecting reads with _strong_ pauses (200bp window) for 293flpin_Xrn2_WT_R3_xrn2-r3_gene
+
+Submitted DRMAA job 531 with external jobid 239956.
+
+[Tue Aug  8 14:50:45 2023]
+Job 286: Creating _strong_ pause (200bp window) metaplot files for 293flpin_Xrn2_WT_R3_xrn2-r3_gene
+
+Submitted DRMAA job 286 with external jobid 239957.
+[Tue Aug  8 14:50:46 2023]
+Finished job 234.
+10 of 384 steps (3%) done
+[Tue Aug  8 14:50:46 2023]
+Finished job 242.
+11 of 384 steps (3%) done
+Select jobs to execute...
+
+[Tue Aug  8 14:50:46 2023]
+Job 335: Intersecting reads with _strong_ pauses (200bp window) for 293flpin_Xrn2_WT_R2_xrn2-r2_body
+
+Submitted DRMAA job 335 with external jobid 239958.
+
+[Tue Aug  8 14:50:47 2023]
+Job 280: Creating _strong_ pause (200bp window) metaplot files for 293flpin_Xrn2_MT_R2_xrn2-r2_gene
+
+Submitted DRMAA job 280 with external jobid 239959.
+
+[Tue Aug  8 14:50:47 2023]
+Job 272: Creating _strong_ pause (200bp window) metaplot files for 293flpin_Xrn2_WT_R2_xrn2-r2_body
+
+Submitted DRMAA job 272 with external jobid 239960.
+
+[Tue Aug  8 14:50:47 2023]
+Job 447: Intersecting reads with _strong_ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_gene
+
+Submitted DRMAA job 447 with external jobid 239961.
+[Tue Aug  8 14:50:48 2023]
+Finished job 264.
+12 of 384 steps (3%) done
+Select jobs to execute...
+
+[Tue Aug  8 14:50:49 2023]
+Job 755: Intersecting reads with _strong_ pauses (200bp window) for 293flpin_Xrn2_MT_R4_xrn2-r4_body
+
+Submitted DRMAA job 755 with external jobid 239962.
+
+[Tue Aug  8 14:50:49 2023]
+Job 302: Creating _strong_ pause (200bp window) metaplot files for 293flpin_Xrn2_MT_R4_xrn2-r4_body
+
+Submitted DRMAA job 302 with external jobid 239963.
+[Tue Aug  8 14:50:49 2023]
+Finished job 236.
+13 of 384 steps (3%) done
+Select jobs to execute...
+
+[Tue Aug  8 14:50:50 2023]
+Job 363: Intersecting reads with _strong_ pauses (200bp window) for 293flpin_Xrn2_WT_R2_xrn2-r2_gene
+
+Submitted DRMAA job 363 with external jobid 239964.
+
+[Tue Aug  8 14:50:50 2023]
+Job 231: Creating Xrn2 _strong_ pausing summary (200bp window)
+
+Submitted DRMAA job 231 with external jobid 239965.
+
+[Tue Aug  8 14:50:50 2023]
+Job 274: Creating _strong_ pause (200bp window) metaplot files for 293flpin_Xrn2_WT_R2_xrn2-r2_gene
+
+Submitted DRMAA job 274 with external jobid 239966.
+[Tue Aug  8 14:51:01 2023]
+Finished job 461.
+14 of 384 steps (4%) done
+Select jobs to execute...
+
+[Tue Aug  8 14:51:01 2023]
+Job 467: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_gene 5-50bp
+
+Submitted DRMAA job 467 with external jobid 239967.
+
+[Tue Aug  8 14:51:01 2023]
+Job 468: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_gene 3-50bp
+
+Submitted DRMAA job 468 with external jobid 239968.
+
+[Tue Aug  8 14:51:02 2023]
+Job 470: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_gene introns
+
+Submitted DRMAA job 470 with external jobid 239969.
+
+[Tue Aug  8 14:51:02 2023]
+Job 472: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_gene body
+
+Submitted DRMAA job 472 with external jobid 239970.
+
+[Tue Aug  8 14:51:02 2023]
+Job 460: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_gene 5-TSS-100bp
+
+Submitted DRMAA job 460 with external jobid 239971.
+
+[Tue Aug  8 14:51:02 2023]
+Job 462: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_gene 5-100bp-300bp
+
+Submitted DRMAA job 462 with external jobid 239972.
+
+[Tue Aug  8 14:51:02 2023]
+Job 464: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_gene 5-500bp-1kb
+
+Submitted DRMAA job 464 with external jobid 239973.
+
+[Tue Aug  8 14:51:03 2023]
+Job 466: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_gene 5-10bp
+
+Submitted DRMAA job 466 with external jobid 239974.
+
+[Tue Aug  8 14:51:03 2023]
+Job 469: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_gene exons
+
+Submitted DRMAA job 469 with external jobid 239975.
+
+[Tue Aug  8 14:51:03 2023]
+Job 471: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_gene tss
+
+Submitted DRMAA job 471 with external jobid 239976.
+
+[Tue Aug  8 14:51:03 2023]
+Job 473: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_gene gene
+
+Submitted DRMAA job 473 with external jobid 239977.
+
+[Tue Aug  8 14:51:03 2023]
+Job 463: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_gene 5-300bp-500bp
+
+Submitted DRMAA job 463 with external jobid 239978.
+
+[Tue Aug  8 14:51:04 2023]
+Job 465: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_gene 4-200bp
+
+Submitted DRMAA job 465 with external jobid 239979.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R2_xrn2-r2_tss_200_strong_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_tss_200_strong_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_tss_200_strong_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R3_xrn2-r3_tss_200_strong_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R4_xrn2-r4_tss_200_strong_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_tss_200_strong_pauses.bed.gz.
+[Tue Aug  8 14:51:04 2023]
+Finished job 231.
+15 of 384 steps (4%) done
+[Tue Aug  8 14:51:17 2023]
+Finished job 433.
+16 of 384 steps (4%) done
+Select jobs to execute...
+
+[Tue Aug  8 14:51:17 2023]
+Job 439: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_body 5-50bp
+
+Submitted DRMAA job 439 with external jobid 239980.
+
+[Tue Aug  8 14:51:18 2023]
+Job 440: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_body 3-50bp
+
+Submitted DRMAA job 440 with external jobid 239981.
+
+[Tue Aug  8 14:51:18 2023]
+Job 442: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_body introns
+
+Submitted DRMAA job 442 with external jobid 239982.
+
+[Tue Aug  8 14:51:18 2023]
+Job 444: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_body body
+
+Submitted DRMAA job 444 with external jobid 239983.
+
+[Tue Aug  8 14:51:18 2023]
+Job 432: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_body 5-TSS-100bp
+
+Submitted DRMAA job 432 with external jobid 239984.
+
+[Tue Aug  8 14:51:18 2023]
+Job 434: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_body 5-100bp-300bp
+
+Submitted DRMAA job 434 with external jobid 239985.
+
+[Tue Aug  8 14:51:19 2023]
+Job 436: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_body 5-500bp-1kb
+
+Submitted DRMAA job 436 with external jobid 239986.
+
+[Tue Aug  8 14:51:19 2023]
+Job 438: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_body 5-10bp
+
+Submitted DRMAA job 438 with external jobid 239987.
+
+[Tue Aug  8 14:51:19 2023]
+Job 441: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_body exons
+
+Submitted DRMAA job 441 with external jobid 239988.
+
+[Tue Aug  8 14:51:19 2023]
+Job 443: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_body tss
+
+Submitted DRMAA job 443 with external jobid 239990.
+
+[Tue Aug  8 14:51:20 2023]
+Job 445: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_body gene
+
+Submitted DRMAA job 445 with external jobid 239991.
+
+[Tue Aug  8 14:51:20 2023]
+Job 435: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_body 5-300bp-500bp
+
+Submitted DRMAA job 435 with external jobid 239992.
+
+[Tue Aug  8 14:51:20 2023]
+Job 437: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R2_xrn2-r2_body 4-200bp
+
+Submitted DRMAA job 437 with external jobid 239993.
+[Tue Aug  8 14:51:21 2023]
+Finished job 545.
+17 of 384 steps (4%) done
+[Tue Aug  8 14:51:21 2023]
+Finished job 797.
+18 of 384 steps (5%) done
+[Tue Aug  8 14:51:21 2023]
+Finished job 349.
+19 of 384 steps (5%) done
+[Tue Aug  8 14:51:21 2023]
+Finished job 685.
+20 of 384 steps (5%) done
+Select jobs to execute...
+
+[Tue Aug  8 14:51:21 2023]
+Job 552: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_WT_R3_xrn2-r3_gene 3-50bp
+
+Submitted DRMAA job 552 with external jobid 239994.
+
+[Tue Aug  8 14:51:21 2023]
+Job 804: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R4_xrn2-r4_gene 3-50bp
+
+Submitted DRMAA job 804 with external jobid 239995.
+
+[Tue Aug  8 14:51:22 2023]
+Job 798: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R4_xrn2-r4_gene 5-100bp-300bp
+
+Submitted DRMAA job 798 with external jobid 239996.
+
+[Tue Aug  8 14:51:22 2023]
+Job 546: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_WT_R3_xrn2-r3_gene 5-100bp-300bp
+
+Submitted DRMAA job 546 with external jobid 239997.
+
+[Tue Aug  8 14:51:22 2023]
+Job 553: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_WT_R3_xrn2-r3_gene exons
+
+Submitted DRMAA job 553 with external jobid 239998.
+
+[Tue Aug  8 14:51:22 2023]
+Job 805: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R4_xrn2-r4_gene exons
+
+Submitted DRMAA job 805 with external jobid 239999.
+
+[Tue Aug  8 14:51:22 2023]
+Job 799: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R4_xrn2-r4_gene 5-300bp-500bp
+
+Submitted DRMAA job 799 with external jobid 240000.
+
+[Tue Aug  8 14:51:23 2023]
+Job 547: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_WT_R3_xrn2-r3_gene 5-300bp-500bp
+
+Submitted DRMAA job 547 with external jobid 240001.
+
+[Tue Aug  8 14:51:23 2023]
+Job 554: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_WT_R3_xrn2-r3_gene introns
+
+Submitted DRMAA job 554 with external jobid 240002.
+
+[Tue Aug  8 14:51:23 2023]
+Job 806: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R4_xrn2-r4_gene introns
+
+Submitted DRMAA job 806 with external jobid 240003.
+
+[Tue Aug  8 14:51:23 2023]
+Job 548: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_WT_R3_xrn2-r3_gene 5-500bp-1kb
+
+Submitted DRMAA job 548 with external jobid 240004.
+
+[Tue Aug  8 14:51:23 2023]
+Job 800: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R4_xrn2-r4_gene 5-500bp-1kb
+
+Submitted DRMAA job 800 with external jobid 240005.
+
+[Tue Aug  8 14:51:24 2023]
+Job 807: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R4_xrn2-r4_gene tss
+
+Submitted DRMAA job 807 with external jobid 240006.
+
+[Tue Aug  8 14:51:24 2023]
+Job 555: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_WT_R3_xrn2-r3_gene tss
+
+Submitted DRMAA job 555 with external jobid 240007.
+
+[Tue Aug  8 14:51:24 2023]
+Job 549: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_WT_R3_xrn2-r3_gene 4-200bp
+
+Submitted DRMAA job 549 with external jobid 240008.
+
+[Tue Aug  8 14:51:25 2023]
+Job 801: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R4_xrn2-r4_gene 4-200bp
+
+Submitted DRMAA job 801 with external jobid 240009.
+
+[Tue Aug  8 14:51:25 2023]
+Job 556: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_WT_R3_xrn2-r3_gene body
+
+Submitted DRMAA job 556 with external jobid 240010.
+
+[Tue Aug  8 14:51:25 2023]
+Job 808: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R4_xrn2-r4_gene body
+
+Submitted DRMAA job 808 with external jobid 240011.
+
+[Tue Aug  8 14:51:25 2023]
+Job 550: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_WT_R3_xrn2-r3_gene 5-10bp
+
+Submitted DRMAA job 550 with external jobid 240012.
+
+[Tue Aug  8 14:51:25 2023]
+Job 802: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R4_xrn2-r4_gene 5-10bp
+
+Submitted DRMAA job 802 with external jobid 240013.
+
+[Tue Aug  8 14:51:26 2023]
+Job 557: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_WT_R3_xrn2-r3_gene gene
+
+Submitted DRMAA job 557 with external jobid 240014.
+
+[Tue Aug  8 14:51:26 2023]
+Job 809: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R4_xrn2-r4_gene gene
+
+Submitted DRMAA job 809 with external jobid 240015.
+
+[Tue Aug  8 14:51:26 2023]
+Job 803: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R4_xrn2-r4_gene 5-50bp
+
+Submitted DRMAA job 803 with external jobid 240016.
+
+[Tue Aug  8 14:51:26 2023]
+Job 796: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_MT_R4_xrn2-r4_gene 5-TSS-100bp
+
+Submitted DRMAA job 796 with external jobid 240017.
+Select jobs to execute...
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_body_200_pause_reads_body.bed.gz.
+[Tue Aug  8 14:51:30 2023]
+Finished job 444.
+21 of 384 steps (5%) done
+
+[Tue Aug  8 14:51:31 2023]
+Job 551: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_WT_R3_xrn2-r3_gene 5-50bp
+
+Submitted DRMAA job 551 with external jobid 240018.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_body_200_pause_reads_5-TSS-100bp.bed.gz.
+[Tue Aug  8 14:51:31 2023]
+Finished job 432.
+22 of 384 steps (6%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_body_200_pause_reads_5-100bp-300bp.bed.gz.
+[Tue Aug  8 14:51:31 2023]
+Finished job 434.
+23 of 384 steps (6%) done
+Select jobs to execute...
+
+[Tue Aug  8 14:51:31 2023]
+Job 544: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_WT_R3_xrn2-r3_gene 5-TSS-100bp
+
+Submitted DRMAA job 544 with external jobid 240019.
+
+[Tue Aug  8 14:51:31 2023]
+Job 356: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_WT_R2_xrn2-r2_body 3-50bp
+
+Submitted DRMAA job 356 with external jobid 240020.
+Select jobs to execute...
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_gene_200_pause_reads_body.bed.gz.
+[Tue Aug  8 14:51:32 2023]
+Finished job 472.
+24 of 384 steps (6%) done
+
+[Tue Aug  8 14:51:32 2023]
+Job 350: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_WT_R2_xrn2-r2_body 5-100bp-300bp
+
+Submitted DRMAA job 350 with external jobid 240021.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_gene_200_pause_reads_5-TSS-100bp.bed.gz.
+[Tue Aug  8 14:51:32 2023]
+Finished job 460.
+25 of 384 steps (7%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_gene_200_pause_reads_5-100bp-300bp.bed.gz.
+[Tue Aug  8 14:51:32 2023]
+Finished job 462.
+26 of 384 steps (7%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_gene_200_pause_reads_5-500bp-1kb.bed.gz.
+[Tue Aug  8 14:51:32 2023]
+Finished job 464.
+27 of 384 steps (7%) done
+Select jobs to execute...
+
+[Tue Aug  8 14:51:32 2023]
+Job 358: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_WT_R2_xrn2-r2_body introns
+
+Submitted DRMAA job 358 with external jobid 240022.
+
+[Tue Aug  8 14:51:32 2023]
+Job 357: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_WT_R2_xrn2-r2_body exons
+
+Submitted DRMAA job 357 with external jobid 240023.
+
+[Tue Aug  8 14:51:33 2023]
+Job 351: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_WT_R2_xrn2-r2_body 5-300bp-500bp
+
+Submitted DRMAA job 351 with external jobid 240024.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_gene_200_pause_reads_tss.bed.gz.
+[Tue Aug  8 14:51:33 2023]
+Finished job 471.
+28 of 384 steps (7%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_gene_200_pause_reads_gene.bed.gz.
+[Tue Aug  8 14:51:33 2023]
+Finished job 473.
+29 of 384 steps (8%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_gene_200_pause_reads_5-300bp-500bp.bed.gz.
+[Tue Aug  8 14:51:33 2023]
+Finished job 463.
+30 of 384 steps (8%) done
+Select jobs to execute...
+
+[Tue Aug  8 14:51:33 2023]
+Job 353: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_WT_R2_xrn2-r2_body 4-200bp
+
+Submitted DRMAA job 353 with external jobid 240025.
+
+[Tue Aug  8 14:51:34 2023]
+Job 352: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_WT_R2_xrn2-r2_body 5-500bp-1kb
+
+Submitted DRMAA job 352 with external jobid 240026.
+
+[Tue Aug  8 14:51:34 2023]
+Job 359: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_WT_R2_xrn2-r2_body tss
+
+Submitted DRMAA job 359 with external jobid 240027.
+[Tue Aug  8 14:51:34 2023]
+Finished job 671.
+31 of 384 steps (8%) done
+[Tue Aug  8 14:51:34 2023]
+Finished job 587.
+32 of 384 steps (8%) done
+[Tue Aug  8 14:51:34 2023]
+Finished job 503.
+33 of 384 steps (9%) done
+Select jobs to execute...
+
+[Tue Aug  8 14:51:34 2023]
+Job 360: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_WT_R2_xrn2-r2_body body
+
+Submitted DRMAA job 360 with external jobid 240028.
+
+[Tue Aug  8 14:51:35 2023]
+Job 361: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_WT_R2_xrn2-r2_body gene
+
+Submitted DRMAA job 361 with external jobid 240029.
+[Tue Aug  8 14:51:35 2023]
+Error in rule gene_subsample_test:
+    jobid: 230
+    output: Xrn2/stats/xrn2-r4_gene_test.tsv
+    log: Xrn2/logs/xrn2-r4_gene_test.out, Xrn2/logs/xrn2-r4_gene_test.err (check log file(s) for error message)
+    shell:
+        
+        check_sampling() {
+            local bgs=($1)
+            local genes="$2"
+            local out="$3"
+        
+            local test_res=${bgs[@]/%/.TEST}
+        
+            for bed in ${bgs[@]}
+            do
+                local res="$bed.TEST"
+        
+                zcat "$bed"                     | awk -v OFS="	" '{
+                        $4 = $4 * ($3 - $2);
+                        print
+                    }'                     | bedtools map -a "$genes" -b - -c 4 -o sum                     | awk -v OFS="	" '$6 == "+" {gsub("\.", 0, $7); print}'                     > "$res"
+            done
+        
+            local chk=$(md5sum ${test_res[@]} | sort -k1,1 -u | wc -l)
+        
+            rm ${test_res[@]}
+        
+            if [[ "$chk" == 1 ]]
+            then
+                local res='PASS'
+            else
+                local res='FAIL'
+            fi
+        
+            for file in ${bgs[@]}
+            do
+                echo -e "$file	xrn2-r4	gene	$res"                     >> "$out"
+            done
+        }
+
+        check_sampling "Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_gene_pos.bedgraph.gz" /beevol/home/erickson/ref/hg38/find_pauses/ref/GRCh38/base_lists/GRCh38_0ksep.bed.gz Xrn2/stats/xrn2-r4_gene_test.tsv
+        check_sampling "Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_gene_neg.bedgraph.gz" /beevol/home/erickson/ref/hg38/find_pauses/ref/GRCh38/base_lists/GRCh38_0ksep.bed.gz Xrn2/stats/xrn2-r4_gene_test.tsv
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+
+Error executing rule gene_subsample_test on cluster (jobid: 230, external: 239899, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI_findPauses/.snakemake/tmp.09ptt0m9/snakejob.gene_subsample_test.230.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Tue Aug  8 14:51:35 2023]
+Job 354: Intersecting _ pauses (200bp window) for 293flpin_Xrn2_WT_R2_xrn2-r2_body 5-10bp
+
+Submitted DRMAA job 354 with external jobid 240030.
+[Tue Aug  8 14:51:35 2023]
+Finished job 629.
+34 of 384 steps (9%) done
+[Tue Aug  8 14:51:36 2023]
+Finished job 601.
+35 of 384 steps (9%) done
+[Tue Aug  8 14:51:36 2023]
+Finished job 377.
+36 of 384 steps (9%) done
+[Tue Aug  8 14:51:37 2023]
+Finished job 769.
+37 of 384 steps (10%) done
+[Tue Aug  8 14:51:37 2023]
+Finished job 517.
+38 of 384 steps (10%) done
+[Tue Aug  8 14:51:37 2023]
+Finished job 713.
+39 of 384 steps (10%) done
+[Tue Aug  8 14:51:37 2023]
+Finished job 615.
+40 of 384 steps (10%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_body_200_pause_reads_5-300bp-500bp.bed.gz.
+[Tue Aug  8 14:51:38 2023]
+Finished job 435.
+41 of 384 steps (11%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_body_200_pause_reads_5-500bp-1kb.bed.gz.
+[Tue Aug  8 14:51:52 2023]
+Finished job 436.
+42 of 384 steps (11%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_body_200_pause_reads_tss.bed.gz.
+[Tue Aug  8 14:51:52 2023]
+Finished job 443.
+43 of 384 steps (11%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_body_200_pause_reads_gene.bed.gz.
+[Tue Aug  8 14:51:53 2023]
+Finished job 445.
+44 of 384 steps (11%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_gene_200_pause_reads_5-50bp.bed.gz.
+[Tue Aug  8 14:51:53 2023]
+Finished job 467.
+45 of 384 steps (12%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_gene_200_pause_reads_introns.bed.gz.
+[Tue Aug  8 14:51:53 2023]
+Finished job 470.
+46 of 384 steps (12%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_gene_200_pause_reads_exons.bed.gz.
+[Tue Aug  8 14:51:53 2023]
+Finished job 469.
+47 of 384 steps (12%) done
+[Tue Aug  8 14:51:53 2023]
+Finished job 531.
+48 of 384 steps (12%) done
+[Tue Aug  8 14:51:53 2023]
+Finished job 335.
+49 of 384 steps (13%) done
+[Tue Aug  8 14:51:54 2023]
+Finished job 447.
+50 of 384 steps (13%) done
+[Tue Aug  8 14:51:54 2023]
+Finished job 783.
+51 of 384 steps (13%) done
+[Tue Aug  8 14:51:55 2023]
+Error in rule gene_subsample_test:
+    jobid: 225
+    output: Xrn2/stats/xrn2-r3_tss_test.tsv
+    log: Xrn2/logs/xrn2-r3_tss_test.out, Xrn2/logs/xrn2-r3_tss_test.err (check log file(s) for error message)
+    shell:
+        
+        check_sampling() {
+            local bgs=($1)
+            local genes="$2"
+            local out="$3"
+        
+            local test_res=${bgs[@]/%/.TEST}
+        
+            for bed in ${bgs[@]}
+            do
+                local res="$bed.TEST"
+        
+                zcat "$bed"                     | awk -v OFS="	" '{
+                        $4 = $4 * ($3 - $2);
+                        print
+                    }'                     | bedtools map -a "$genes" -b - -c 4 -o sum                     | awk -v OFS="	" '$6 == "+" {gsub("\.", 0, $7); print}'                     > "$res"
+            done
+        
+            local chk=$(md5sum ${test_res[@]} | sort -k1,1 -u | wc -l)
+        
+            rm ${test_res[@]}
+        
+            if [[ "$chk" == 1 ]]
+            then
+                local res='PASS'
+            else
+                local res='FAIL'
+            fi
+        
+            for file in ${bgs[@]}
+            do
+                echo -e "$file	xrn2-r3	tss	$res"                     >> "$out"
+            done
+        }
+
+        check_sampling "Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_gene_pos.bedgraph.gz" /beevol/home/erickson/ref/hg38/find_pauses/ref/GRCh38/base_lists/GRCh38_0ksep.bed.gz Xrn2/stats/xrn2-r3_tss_test.tsv
+        check_sampling "Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_gene_neg.bedgraph.gz" /beevol/home/erickson/ref/hg38/find_pauses/ref/GRCh38/base_lists/GRCh38_0ksep.bed.gz Xrn2/stats/xrn2-r3_tss_test.tsv
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Error executing rule gene_subsample_test on cluster (jobid: 225, external: 239906, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI_findPauses/.snakemake/tmp.09ptt0m9/snakejob.gene_subsample_test.225.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Tue Aug  8 14:51:56 2023]
+Error in rule gene_subsample_test:
+    jobid: 226
+    output: Xrn2/stats/xrn2-r3_body_test.tsv
+    log: Xrn2/logs/xrn2-r3_body_test.out, Xrn2/logs/xrn2-r3_body_test.err (check log file(s) for error message)
+    shell:
+        
+        check_sampling() {
+            local bgs=($1)
+            local genes="$2"
+            local out="$3"
+        
+            local test_res=${bgs[@]/%/.TEST}
+        
+            for bed in ${bgs[@]}
+            do
+                local res="$bed.TEST"
+        
+                zcat "$bed"                     | awk -v OFS="	" '{
+                        $4 = $4 * ($3 - $2);
+                        print
+                    }'                     | bedtools map -a "$genes" -b - -c 4 -o sum                     | awk -v OFS="	" '$6 == "+" {gsub("\.", 0, $7); print}'                     > "$res"
+            done
+        
+            local chk=$(md5sum ${test_res[@]} | sort -k1,1 -u | wc -l)
+        
+            rm ${test_res[@]}
+        
+            if [[ "$chk" == 1 ]]
+            then
+                local res='PASS'
+            else
+                local res='FAIL'
+            fi
+        
+            for file in ${bgs[@]}
+            do
+                echo -e "$file	xrn2-r3	body	$res"                     >> "$out"
+            done
+        }
+
+        check_sampling "Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_gene_pos.bedgraph.gz" /beevol/home/erickson/ref/hg38/find_pauses/ref/GRCh38/base_lists/GRCh38_0ksep.bed.gz Xrn2/stats/xrn2-r3_body_test.tsv
+        check_sampling "Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_gene_neg.bedgraph.gz" /beevol/home/erickson/ref/hg38/find_pauses/ref/GRCh38/base_lists/GRCh38_0ksep.bed.gz Xrn2/stats/xrn2-r3_body_test.tsv
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Error executing rule gene_subsample_test on cluster (jobid: 226, external: 239916, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI_findPauses/.snakemake/tmp.09ptt0m9/snakejob.gene_subsample_test.226.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Tue Aug  8 14:51:57 2023]
+Finished job 699.
+52 of 384 steps (14%) done
+[Tue Aug  8 14:51:57 2023]
+Finished job 755.
+53 of 384 steps (14%) done
+[Tue Aug  8 14:51:57 2023]
+Finished job 363.
+54 of 384 steps (14%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_gene_200_pause_reads_5-100bp-300bp.bed.gz.
+[Tue Aug  8 14:51:57 2023]
+Finished job 798.
+55 of 384 steps (14%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_gene_200_pause_reads_5-100bp-300bp.bed.gz.
+[Tue Aug  8 14:51:58 2023]
+Finished job 546.
+56 of 384 steps (15%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_gene_200_pause_reads_5-300bp-500bp.bed.gz.
+[Tue Aug  8 14:51:58 2023]
+Finished job 799.
+57 of 384 steps (15%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_gene_200_pause_reads_5-300bp-500bp.bed.gz.
+[Tue Aug  8 14:51:58 2023]
+Finished job 547.
+58 of 384 steps (15%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_gene_200_pause_reads_5-500bp-1kb.bed.gz.
+[Tue Aug  8 14:51:58 2023]
+Finished job 548.
+59 of 384 steps (15%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_gene_200_pause_reads_5-500bp-1kb.bed.gz.
+[Tue Aug  8 14:51:59 2023]
+Finished job 800.
+60 of 384 steps (16%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_gene_200_pause_reads_tss.bed.gz.
+[Tue Aug  8 14:51:59 2023]
+Finished job 807.
+61 of 384 steps (16%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_gene_200_pause_reads_tss.bed.gz.
+[Tue Aug  8 14:51:59 2023]
+Finished job 555.
+62 of 384 steps (16%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_gene_200_pause_reads_body.bed.gz.
+[Tue Aug  8 14:51:59 2023]
+Finished job 556.
+63 of 384 steps (16%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_gene_200_pause_reads_body.bed.gz.
+[Tue Aug  8 14:51:59 2023]
+Finished job 808.
+64 of 384 steps (17%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_gene_200_pause_reads_gene.bed.gz.
+[Tue Aug  8 14:51:59 2023]
+Finished job 557.
+65 of 384 steps (17%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_gene_200_pause_reads_gene.bed.gz.
+[Tue Aug  8 14:52:00 2023]
+Finished job 809.
+66 of 384 steps (17%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_gene_200_pause_reads_5-TSS-100bp.bed.gz.
+[Tue Aug  8 14:52:00 2023]
+Finished job 796.
+67 of 384 steps (17%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_gene_200_pause_reads_5-TSS-100bp.bed.gz.
+[Tue Aug  8 14:52:10 2023]
+Finished job 544.
+68 of 384 steps (18%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R2_xrn2-r2_body_200_pause_reads_5-100bp-300bp.bed.gz.
+[Tue Aug  8 14:52:10 2023]
+Finished job 350.
+69 of 384 steps (18%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R2_xrn2-r2_body_200_pause_reads_5-300bp-500bp.bed.gz.
+[Tue Aug  8 14:52:10 2023]
+Finished job 351.
+70 of 384 steps (18%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R2_xrn2-r2_body_200_pause_reads_5-500bp-1kb.bed.gz.
+[Tue Aug  8 14:52:10 2023]
+Finished job 352.
+71 of 384 steps (18%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R2_xrn2-r2_body_200_pause_reads_tss.bed.gz.
+[Tue Aug  8 14:52:10 2023]
+Finished job 359.
+72 of 384 steps (19%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R2_xrn2-r2_body_200_pause_reads_body.bed.gz.
+[Tue Aug  8 14:52:11 2023]
+Finished job 360.
+73 of 384 steps (19%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R2_xrn2-r2_body_200_pause_reads_gene.bed.gz.
+[Tue Aug  8 14:52:11 2023]
+Finished job 361.
+74 of 384 steps (19%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_body_200_pause_reads_5-50bp.bed.gz.
+[Tue Aug  8 14:52:11 2023]
+Finished job 439.
+75 of 384 steps (20%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_body_200_pause_reads_introns.bed.gz.
+[Tue Aug  8 14:52:11 2023]
+Finished job 442.
+76 of 384 steps (20%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_body_200_pause_reads_exons.bed.gz.
+[Tue Aug  8 14:52:11 2023]
+Finished job 441.
+77 of 384 steps (20%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_gene_200_pause_reads_3-50bp.bed.gz.
+[Tue Aug  8 14:52:12 2023]
+Finished job 468.
+78 of 384 steps (20%) done
+[Tue Aug  8 14:52:13 2023]
+Finished job 419.
+79 of 384 steps (21%) done
+[Tue Aug  8 14:52:13 2023]
+Error in rule gene_subsample_test:
+    jobid: 227
+    output: Xrn2/stats/xrn2-r3_gene_test.tsv
+    log: Xrn2/logs/xrn2-r3_gene_test.out, Xrn2/logs/xrn2-r3_gene_test.err (check log file(s) for error message)
+    shell:
+        
+        check_sampling() {
+            local bgs=($1)
+            local genes="$2"
+            local out="$3"
+        
+            local test_res=${bgs[@]/%/.TEST}
+        
+            for bed in ${bgs[@]}
+            do
+                local res="$bed.TEST"
+        
+                zcat "$bed"                     | awk -v OFS="	" '{
+                        $4 = $4 * ($3 - $2);
+                        print
+                    }'                     | bedtools map -a "$genes" -b - -c 4 -o sum                     | awk -v OFS="	" '$6 == "+" {gsub("\.", 0, $7); print}'                     > "$res"
+            done
+        
+            local chk=$(md5sum ${test_res[@]} | sort -k1,1 -u | wc -l)
+        
+            rm ${test_res[@]}
+        
+            if [[ "$chk" == 1 ]]
+            then
+                local res='PASS'
+            else
+                local res='FAIL'
+            fi
+        
+            for file in ${bgs[@]}
+            do
+                echo -e "$file	xrn2-r3	gene	$res"                     >> "$out"
+            done
+        }
+
+        check_sampling "Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_gene_pos.bedgraph.gz" /beevol/home/erickson/ref/hg38/find_pauses/ref/GRCh38/base_lists/GRCh38_0ksep.bed.gz Xrn2/stats/xrn2-r3_gene_test.tsv
+        check_sampling "Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_gene_neg.bedgraph.gz" /beevol/home/erickson/ref/hg38/find_pauses/ref/GRCh38/base_lists/GRCh38_0ksep.bed.gz Xrn2/stats/xrn2-r3_gene_test.tsv
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Error executing rule gene_subsample_test on cluster (jobid: 227, external: 239921, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI_findPauses/.snakemake/tmp.09ptt0m9/snakejob.gene_subsample_test.227.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Tue Aug  8 14:52:14 2023]
+Error in rule gene_subsample_test:
+    jobid: 223
+    output: Xrn2/stats/xrn2-r2_body_test.tsv
+    log: Xrn2/logs/xrn2-r2_body_test.out, Xrn2/logs/xrn2-r2_body_test.err (check log file(s) for error message)
+    shell:
+        
+        check_sampling() {
+            local bgs=($1)
+            local genes="$2"
+            local out="$3"
+        
+            local test_res=${bgs[@]/%/.TEST}
+        
+            for bed in ${bgs[@]}
+            do
+                local res="$bed.TEST"
+        
+                zcat "$bed"                     | awk -v OFS="	" '{
+                        $4 = $4 * ($3 - $2);
+                        print
+                    }'                     | bedtools map -a "$genes" -b - -c 4 -o sum                     | awk -v OFS="	" '$6 == "+" {gsub("\.", 0, $7); print}'                     > "$res"
+            done
+        
+            local chk=$(md5sum ${test_res[@]} | sort -k1,1 -u | wc -l)
+        
+            rm ${test_res[@]}
+        
+            if [[ "$chk" == 1 ]]
+            then
+                local res='PASS'
+            else
+                local res='FAIL'
+            fi
+        
+            for file in ${bgs[@]}
+            do
+                echo -e "$file	xrn2-r2	body	$res"                     >> "$out"
+            done
+        }
+
+        check_sampling "Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_gene_pos.bedgraph.gz" /beevol/home/erickson/ref/hg38/find_pauses/ref/GRCh38/base_lists/GRCh38_0ksep.bed.gz Xrn2/stats/xrn2-r2_body_test.tsv
+        check_sampling "Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_gene_neg.bedgraph.gz" /beevol/home/erickson/ref/hg38/find_pauses/ref/GRCh38/base_lists/GRCh38_0ksep.bed.gz Xrn2/stats/xrn2-r2_body_test.tsv
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Error executing rule gene_subsample_test on cluster (jobid: 223, external: 239931, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI_findPauses/.snakemake/tmp.09ptt0m9/snakejob.gene_subsample_test.223.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Tue Aug  8 14:52:14 2023]
+Error in rule gene_subsample_test:
+    jobid: 229
+    output: Xrn2/stats/xrn2-r4_body_test.tsv
+    log: Xrn2/logs/xrn2-r4_body_test.out, Xrn2/logs/xrn2-r4_body_test.err (check log file(s) for error message)
+    shell:
+        
+        check_sampling() {
+            local bgs=($1)
+            local genes="$2"
+            local out="$3"
+        
+            local test_res=${bgs[@]/%/.TEST}
+        
+            for bed in ${bgs[@]}
+            do
+                local res="$bed.TEST"
+        
+                zcat "$bed"                     | awk -v OFS="	" '{
+                        $4 = $4 * ($3 - $2);
+                        print
+                    }'                     | bedtools map -a "$genes" -b - -c 4 -o sum                     | awk -v OFS="	" '$6 == "+" {gsub("\.", 0, $7); print}'                     > "$res"
+            done
+        
+            local chk=$(md5sum ${test_res[@]} | sort -k1,1 -u | wc -l)
+        
+            rm ${test_res[@]}
+        
+            if [[ "$chk" == 1 ]]
+            then
+                local res='PASS'
+            else
+                local res='FAIL'
+            fi
+        
+            for file in ${bgs[@]}
+            do
+                echo -e "$file	xrn2-r4	body	$res"                     >> "$out"
+            done
+        }
+
+        check_sampling "Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_gene_pos.bedgraph.gz" /beevol/home/erickson/ref/hg38/find_pauses/ref/GRCh38/base_lists/GRCh38_0ksep.bed.gz Xrn2/stats/xrn2-r4_body_test.tsv
+        check_sampling "Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_gene_neg.bedgraph.gz" /beevol/home/erickson/ref/hg38/find_pauses/ref/GRCh38/base_lists/GRCh38_0ksep.bed.gz Xrn2/stats/xrn2-r4_body_test.tsv
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Error executing rule gene_subsample_test on cluster (jobid: 229, external: 239933, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI_findPauses/.snakemake/tmp.09ptt0m9/snakejob.gene_subsample_test.229.sh). For error details see the cluster log and the log files of the involved rule(s).
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_gene_200_pause_reads_exons.bed.gz.
+[Tue Aug  8 14:52:15 2023]
+Finished job 553.
+80 of 384 steps (21%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_gene_200_pause_reads_exons.bed.gz.
+[Tue Aug  8 14:52:15 2023]
+Finished job 805.
+81 of 384 steps (21%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_gene_200_pause_reads_introns.bed.gz.
+[Tue Aug  8 14:52:16 2023]
+Finished job 554.
+82 of 384 steps (21%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_gene_200_pause_reads_introns.bed.gz.
+[Tue Aug  8 14:52:16 2023]
+Finished job 806.
+83 of 384 steps (22%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R2_xrn2-r2_body_200_pause_reads_introns.bed.gz.
+[Tue Aug  8 14:52:26 2023]
+Finished job 358.
+84 of 384 steps (22%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_body_200_pause_reads_3-50bp.bed.gz.
+[Tue Aug  8 14:52:26 2023]
+Finished job 440.
+85 of 384 steps (22%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_gene_200_pause_reads_4-200bp.bed.gz.
+[Tue Aug  8 14:52:27 2023]
+Finished job 465.
+86 of 384 steps (22%) done
+[Tue Aug  8 14:52:28 2023]
+Error in rule gene_subsample_test:
+    jobid: 228
+    output: Xrn2/stats/xrn2-r4_tss_test.tsv
+    log: Xrn2/logs/xrn2-r4_tss_test.out, Xrn2/logs/xrn2-r4_tss_test.err (check log file(s) for error message)
+    shell:
+        
+        check_sampling() {
+            local bgs=($1)
+            local genes="$2"
+            local out="$3"
+        
+            local test_res=${bgs[@]/%/.TEST}
+        
+            for bed in ${bgs[@]}
+            do
+                local res="$bed.TEST"
+        
+                zcat "$bed"                     | awk -v OFS="	" '{
+                        $4 = $4 * ($3 - $2);
+                        print
+                    }'                     | bedtools map -a "$genes" -b - -c 4 -o sum                     | awk -v OFS="	" '$6 == "+" {gsub("\.", 0, $7); print}'                     > "$res"
+            done
+        
+            local chk=$(md5sum ${test_res[@]} | sort -k1,1 -u | wc -l)
+        
+            rm ${test_res[@]}
+        
+            if [[ "$chk" == 1 ]]
+            then
+                local res='PASS'
+            else
+                local res='FAIL'
+            fi
+        
+            for file in ${bgs[@]}
+            do
+                echo -e "$file	xrn2-r4	tss	$res"                     >> "$out"
+            done
+        }
+
+        check_sampling "Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_gene_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_tss_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_body_pos.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_gene_pos.bedgraph.gz" /beevol/home/erickson/ref/hg38/find_pauses/ref/GRCh38/base_lists/GRCh38_0ksep.bed.gz Xrn2/stats/xrn2-r4_tss_test.tsv
+        check_sampling "Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R2_xrn2-r2_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R2_xrn2-r2_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R3_xrn2-r3_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R3_xrn2-r3_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_WT_R4_xrn2-r4_gene_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_tss_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_body_neg.bedgraph.gz Xrn2/bg/293flpin_Xrn2_MT_R4_xrn2-r4_gene_neg.bedgraph.gz" /beevol/home/erickson/ref/hg38/find_pauses/ref/GRCh38/base_lists/GRCh38_0ksep.bed.gz Xrn2/stats/xrn2-r4_tss_test.tsv
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Error executing rule gene_subsample_test on cluster (jobid: 228, external: 239926, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI_findPauses/.snakemake/tmp.09ptt0m9/snakejob.gene_subsample_test.228.sh). For error details see the cluster log and the log files of the involved rule(s).
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_body_200_pause_reads_4-200bp.bed.gz.
+[Tue Aug  8 14:52:29 2023]
+Finished job 437.
+87 of 384 steps (23%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_gene_200_pause_reads_3-50bp.bed.gz.
+[Tue Aug  8 14:52:30 2023]
+Finished job 552.
+88 of 384 steps (23%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_gene_200_pause_reads_3-50bp.bed.gz.
+[Tue Aug  8 14:52:30 2023]
+Finished job 804.
+89 of 384 steps (23%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R2_xrn2-r2_body_200_pause_reads_3-50bp.bed.gz.
+[Tue Aug  8 14:52:40 2023]
+Finished job 356.
+90 of 384 steps (23%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R2_xrn2-r2_body_200_pause_reads_exons.bed.gz.
+[Tue Aug  8 14:52:41 2023]
+Finished job 357.
+91 of 384 steps (24%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_gene_200_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_gene_200_pause_reads.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_gene_200_pause_reads_5-10bp.bed.gz.
+[Tue Aug  8 14:52:41 2023]
+Finished job 466.
+92 of 384 steps (24%) done
+[Tue Aug  8 14:52:42 2023]
+Finished job 224.
+93 of 384 steps (24%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_gene_200_pause_reads_4-200bp.bed.gz.
+[Tue Aug  8 14:52:44 2023]
+Finished job 549.
+94 of 384 steps (24%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_gene_200_pause_reads_5-50bp.bed.gz.
+[Tue Aug  8 14:52:44 2023]
+Finished job 803.
+95 of 384 steps (25%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_gene_200_pause_reads_5-50bp.bed.gz.
+[Tue Aug  8 14:52:54 2023]
+Finished job 551.
+96 of 384 steps (25%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R2_xrn2-r2_body_200_pause_reads_4-200bp.bed.gz.
+[Tue Aug  8 14:52:54 2023]
+Finished job 353.
+97 of 384 steps (25%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_body_200_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_body_200_pause_reads.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_body_200_pause_reads_5-10bp.bed.gz.
+[Tue Aug  8 14:52:54 2023]
+Finished job 438.
+98 of 384 steps (26%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_gene_200_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_gene_200_pause_reads.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_gene_200_pause_reads_5-10bp.bed.gz.
+[Tue Aug  8 14:53:09 2023]
+Finished job 550.
+99 of 384 steps (26%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_gene_200_pause_reads_5-10bp.bed.gz.
+[Tue Aug  8 14:53:09 2023]
+Finished job 802.
+100 of 384 steps (26%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R2_xrn2-r2_body_200_pause_reads_5-10bp.bed.gz.
+[Tue Aug  8 14:53:31 2023]
+Finished job 354.
+101 of 384 steps (26%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_gene_200_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_gene_200_pause_reads.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_gene_200_pause_reads_4-200bp.bed.gz.
+[Tue Aug  8 14:53:34 2023]
+Finished job 801.
+102 of 384 steps (27%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_body_200_sep_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_body_200_pauses_wins.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_body_200_pauses_meta.bed.gz.
+[Tue Aug  8 14:54:57 2023]
+Finished job 285.
+103 of 384 steps (27%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R4_xrn2-r4_body_200_sep_strong_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R4_xrn2-r4_body_200_strong_pauses_wins.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R4_xrn2-r4_body_200_strong_pauses_meta.bed.gz.
+[Tue Aug  8 14:55:20 2023]
+Finished job 296.
+104 of 384 steps (27%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_body_200_sep_strong_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_body_200_strong_pauses_wins.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_body_200_strong_pauses_meta.bed.gz.
+[Tue Aug  8 14:55:20 2023]
+Finished job 284.
+105 of 384 steps (27%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R4_xrn2-r4_body_200_sep_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R4_xrn2-r4_body_200_pauses_wins.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R4_xrn2-r4_body_200_pauses_meta.bed.gz.
+[Tue Aug  8 14:55:20 2023]
+Finished job 297.
+106 of 384 steps (28%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_gene_200_sep_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_gene_200_pauses_wins.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_gene_200_pauses_meta.bed.gz.
+[Tue Aug  8 14:55:21 2023]
+Finished job 287.
+107 of 384 steps (28%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_gene_200_sep_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_gene_200_pauses_wins.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_gene_200_pauses_meta.bed.gz.
+[Tue Aug  8 14:55:21 2023]
+Finished job 281.
+108 of 384 steps (28%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R3_xrn2-r3_body_200_sep_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R3_xrn2-r3_body_200_pauses_wins.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R3_xrn2-r3_body_200_pauses_meta.bed.gz.
+[Tue Aug  8 14:55:21 2023]
+Finished job 291.
+109 of 384 steps (28%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_body_200_sep_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_body_200_pauses_wins.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_body_200_pauses_meta.bed.gz.
+[Tue Aug  8 14:55:21 2023]
+Finished job 279.
+110 of 384 steps (29%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R3_xrn2-r3_body_200_sep_strong_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R3_xrn2-r3_body_200_strong_pauses_wins.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R3_xrn2-r3_body_200_strong_pauses_meta.bed.gz.
+[Tue Aug  8 14:55:32 2023]
+Finished job 290.
+111 of 384 steps (29%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R2_xrn2-r2_body_200_sep_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R2_xrn2-r2_body_200_pauses_wins.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R2_xrn2-r2_body_200_pauses_meta.bed.gz.
+[Tue Aug  8 14:55:32 2023]
+Finished job 273.
+112 of 384 steps (29%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_body_200_sep_strong_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_body_200_strong_pauses_wins.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_body_200_strong_pauses_meta.bed.gz.
+[Tue Aug  8 14:55:44 2023]
+Finished job 278.
+113 of 384 steps (29%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R4_xrn2-r4_gene_200_sep_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R4_xrn2-r4_gene_200_pauses_wins.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R4_xrn2-r4_gene_200_pauses_meta.bed.gz.
+[Tue Aug  8 14:55:44 2023]
+Finished job 299.
+114 of 384 steps (30%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R3_xrn2-r3_gene_200_sep_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R3_xrn2-r3_gene_200_pauses_wins.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R3_xrn2-r3_gene_200_pauses_meta.bed.gz.
+[Tue Aug  8 14:55:44 2023]
+Finished job 293.
+115 of 384 steps (30%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_gene_200_sep_strong_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_gene_200_strong_pauses_wins.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R3_xrn2-r3_gene_200_strong_pauses_meta.bed.gz.
+[Tue Aug  8 14:55:55 2023]
+Finished job 286.
+116 of 384 steps (30%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R2_xrn2-r2_gene_200_sep_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R2_xrn2-r2_gene_200_pauses_wins.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R2_xrn2-r2_gene_200_pauses_meta.bed.gz.
+[Tue Aug  8 14:55:55 2023]
+Finished job 275.
+117 of 384 steps (30%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_body_200_sep_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_body_200_pauses_wins.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_body_200_pauses_meta.bed.gz.
+[Tue Aug  8 14:55:55 2023]
+Finished job 303.
+118 of 384 steps (31%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R4_xrn2-r4_gene_200_sep_strong_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R4_xrn2-r4_gene_200_strong_pauses_wins.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R4_xrn2-r4_gene_200_strong_pauses_meta.bed.gz.
+[Tue Aug  8 14:56:06 2023]
+Finished job 298.
+119 of 384 steps (31%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_gene_200_sep_strong_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_gene_200_strong_pauses_wins.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R2_xrn2-r2_gene_200_strong_pauses_meta.bed.gz.
+[Tue Aug  8 14:56:16 2023]
+Finished job 280.
+120 of 384 steps (31%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R2_xrn2-r2_body_200_sep_strong_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R2_xrn2-r2_body_200_strong_pauses_wins.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R2_xrn2-r2_body_200_strong_pauses_meta.bed.gz.
+[Tue Aug  8 14:56:16 2023]
+Finished job 272.
+121 of 384 steps (32%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R3_xrn2-r3_gene_200_sep_strong_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R3_xrn2-r3_gene_200_strong_pauses_wins.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R3_xrn2-r3_gene_200_strong_pauses_meta.bed.gz.
+[Tue Aug  8 14:56:16 2023]
+Finished job 292.
+122 of 384 steps (32%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_gene_200_sep_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_gene_200_pauses_wins.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_gene_200_pauses_meta.bed.gz.
+[Tue Aug  8 14:56:26 2023]
+Finished job 305.
+123 of 384 steps (32%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R2_xrn2-r2_gene_200_sep_strong_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R2_xrn2-r2_gene_200_strong_pauses_wins.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_WT_R2_xrn2-r2_gene_200_strong_pauses_meta.bed.gz.
+[Tue Aug  8 14:56:26 2023]
+Finished job 274.
+124 of 384 steps (32%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_body_200_sep_strong_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_body_200_strong_pauses_wins.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_body_200_strong_pauses_meta.bed.gz.
+[Tue Aug  8 14:56:36 2023]
+Finished job 302.
+125 of 384 steps (33%) done
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_gene_200_sep_strong_pauses.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_gene_200_strong_pauses_wins.bed.gz.
+Removing temporary output file Xrn2/pauses/293flpin_Xrn2_MT_R4_xrn2-r4_gene_200_strong_pauses_meta.bed.gz.
+[Tue Aug  8 14:56:56 2023]
+Finished job 304.
+126 of 384 steps (33%) done
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI_findPauses/.snakemake/log/2023-08-08T144951.908387.snakemake.log

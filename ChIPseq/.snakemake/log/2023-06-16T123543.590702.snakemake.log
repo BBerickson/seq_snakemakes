@@ -1,0 +1,3 @@
+NameError in line 44 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/ChIPseq/pipelines/ChIPseq_Matrix.snake:
+name 'GRPS_UNIQ2' is not defined
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/ChIPseq/pipelines/ChIPseq_Matrix.snake", line 44, in <module>

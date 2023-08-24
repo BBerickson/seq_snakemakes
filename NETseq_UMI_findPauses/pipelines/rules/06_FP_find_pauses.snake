@@ -1,0 +1,325 @@
+#===== Rules for finding pauses using mNET-seq data ============================
+
+
+# Find pause sites
+# Identify pause sites using a cutoff of 3 stdev above the mean for each
+# 200 bp window
+rule find_pauses:
+    input:
+        pos_bg = PROJ + "/bg/{sam_grp}_pos.bedgraph.gz",
+        neg_bg = PROJ + "/bg/{sam_grp}_neg.bedgraph.gz"
+    output:
+        pauses = temp(PROJ + "/pauses/{sam_grp}_{win}_pauses.bed.gz"),
+        sep    = temp(PROJ + "/pauses/{sam_grp}_{win}_sep_pauses.bed.gz")
+    params:
+        job_name = "{sam_grp}_{win}_find_pauses",
+        memory   = MEMORY * 4,
+        genes    = GENES2,
+        mask     = MASK2,
+        chroms   = CHROMS
+    log:
+        out = PROJ + "/logs/{sam_grp}_{win}_pauses.out",
+        err = PROJ + "/logs/{sam_grp}_{win}_pauses.err"
+    benchmark:
+        PROJ + "/benchmarks/{sam_grp}_{win}_pauses.tsv"
+    message:
+        "Finding pauses for {wildcards.sam_grp} using {wildcards.win}bp window"
+    threads:
+        4
+    shell:
+        """
+        tmp_dir=$(dirname {output.pauses})
+
+        # Find pauses for positive strand signal
+        pos_out=$(mktemp -p $tmp_dir pos_out.XXXXX)
+
+        {SRC}/pause_finder \
+            -i {input.pos_bg} \
+            -g {params.genes} \
+            -m {params.mask} \
+            -c {params.chroms} \
+            -s {wildcards.win} \
+            -l 5 \
+            -w 5 \
+            -v 3 \
+            -t {threads} \
+            -o $pos_out
+
+        # Find pauses for negative strand signal
+        neg_out=$(mktemp -p $tmp_dir neg_out.XXXXX)
+ 
+        {SRC}/pause_finder -r \
+            -i {input.neg_bg} \
+            -g {params.genes} \
+            -m {params.mask} \
+            -c {params.chroms} \
+            -s {wildcards.win} \
+            -l 5 \
+            -w 5 \
+            -v 3 \
+            -t {threads} \
+            -o $neg_out
+
+        # Combine positive and negative pauses
+        cat $pos_out $neg_out \
+            | sort -k1,1 -k2,2n -k6,6 -u \
+            | gzip \
+            > {output.pauses}
+
+        rm $pos_out $neg_out
+
+        # Identify separated pauses
+        bedtools closest -k 2 -d -s \
+            -a {output.pauses} \
+            -b {output.pauses} \
+            | awk '$13 > 30' \
+            | cut -f1-6 \
+            | sort -k1,1 -k2,2n -k3,3n -u \
+            | gzip \
+            > {output.sep}
+        """
+
+
+# Identify strong pauses
+rule strong_pauses:
+    input:
+        PROJ + "/pauses/{sam_grp}_{win}_pauses.bed.gz"
+    output:
+        pauses = temp(PROJ + "/pauses/{sam_grp}_{win}{stren}pauses.bed.gz"),
+        sep    = temp(PROJ + "/pauses/{sam_grp}_{win}_sep{stren}pauses.bed.gz")
+    params:
+        job_name = "{sam_grp}_{win}{stren}pauses",
+        memory   = MEMORY,
+        r        = lambda wildcards: PAUSE_ROUND[wildcards.stren]
+    log:
+        out = PROJ + "/logs/{sam_grp}_{win}{stren}pauses.out",
+        err = PROJ + "/logs/{sam_grp}_{win}{stren}pauses.err"
+    benchmark:
+        PROJ + "/benchmarks/{sam_grp}_{win}{stren}pauses.tsv"
+    message:
+        "Filtering {wildcards.stren} pauses ({wildcards.win}bp window) for {wildcards.sam_grp}"
+    threads:
+        1
+    shell:
+        """
+        # Identify strong pauses
+        # Add 0 to convert numeric
+        tmp=$(mktemp strong.XXXXX)
+
+        zcat {input} \
+            | awk -v OFS="\t" '{{
+                met = $5;
+
+                r = match(met, /^[0-9]+/);
+                r = substr(met, RSTART, RLENGTH) + 0;
+
+                if (r <= {params.r}) {{
+                    print
+                }}
+            }}' \
+            | gzip \
+            > $tmp
+
+        mv $tmp {output.pauses}
+
+        # Identify separated pauses
+        bedtools closest -k 2 -d -s \
+            -a {output.pauses} \
+            -b {output.pauses} \
+            | awk '$13 > 30' \
+            | cut -f1-6 \
+            | sort -S1G --parallel={threads} -k1,1 -k2,2n -k3,3n -u \
+            | pigz -p {threads} \
+            > {output.sep}
+        """
+
+
+# Get reads that align to pauses
+rule pause_reads:
+    input:
+        reads  = PROJ + "/beds/{sam_grp}.bed.gz",
+        pauses = PROJ + "/pauses/{sam_grp}_{win}{grp}pauses.bed.gz"
+    output:
+        temp(PROJ + "/pauses/{sam_grp}_{win}{grp}pause_reads.bed.gz")
+    params:
+        job_name = "{sam_grp}_{win}{grp}pause_reads",
+        memory   = MEMORY
+    log:
+        out = PROJ + "/logs/{sam_grp}_{win}{grp}pause_reads.out",
+        err = PROJ + "/logs/{sam_grp}_{win}{grp}pause_reads.err"
+    message:
+        "Intersecting reads with {wildcards.grp} pauses ({wildcards.win}bp window) for {wildcards.sam_grp}"
+    threads:
+        6
+    shell:
+        """
+        bedtools intersect -sorted -s \
+            -a {input.reads} \
+            -b {input.pauses} \
+            | sort -S1G --parallel={threads} -k1,1 -k2,2n \
+            | pigz -p {threads} \
+            > {output}
+        """
+
+
+# Create pausing summary
+rule pausing_summary:
+    input:
+        expand(
+            PROJ + "/pauses/{sam_grp}_{{win}}{{grp}}pauses.bed.gz",
+            sam_grp = GENE_SUB_GRPS
+        )
+    output:
+        PROJ + "/stats/" + PROJ + "_{win}{grp}pausing.tsv"
+    params:
+        job_name = PROJ + "_{win}{grp}pausing_summary",
+        memory   = MEMORY
+    log:
+        out = PROJ + "/logs/" + PROJ + "_{win}{grp}pausing_summary.out",
+        err = PROJ + "/logs/" + PROJ + "_{win}{grp}pausing_summary.err"
+    message:
+        "Creating " + PROJ + " {wildcards.grp} pausing summary ({wildcards.win}bp window)"
+    threads:
+        1
+    shell:
+        """
+        echo -e "Number of pauses\tPause reads\tSample" \
+            > {output}
+
+        file_arr=({input})
+
+        for file in ${{file_arr[@]}}
+        do
+            name=$(basename -s _pauses.bed.gz $file)
+
+            zcat $file \
+                | cut -f 5 \
+                | cut -d ":" -f 2 \
+                | cut -d "," -f 1 \
+                | awk -v OFS="\t" -v name=$name '{{
+                    total += $1
+                }} END {{
+                    print NR, total, name
+                }}' \
+                >> {output}
+        done
+        """
+
+
+# Create files to plot pause density
+rule pause_density:
+    input:
+        pauses = PROJ + "/pauses/{sam_grp}_{win}{grp}pauses.bed.gz",
+        reads  = PROJ + "/pauses/{sam_grp}_{win}{grp}pause_reads.bed.gz"
+    output:
+        pauses = temp(PROJ + "/pauses/{sam_grp}_{win}{grp}pauses_{region}.bed.gz"),
+        reads  = temp(PROJ + "/pauses/{sam_grp}_{win}{grp}pause_reads_{region}.bed.gz")
+    params:
+        job_name = "{sam_grp}_{region}_{win}{grp}pause_density",
+        memory   = MEMORY,
+        bed      = lambda wildcards: META_BEDS[wildcards.region]
+    log:
+        out = PROJ + "/logs/{sam_grp}_{win}{grp}{region}_density.out",
+        err = PROJ + "/logs/{sam_grp}_{win}{grp}{region}_density.err"
+    message:
+        "Intersecting {wildcards.grp} pauses ({wildcards.win}bp window) for {wildcards.sam_grp} {wildcards.region}"
+    threads:
+        6
+    shell:
+        """
+        # Intersect pauses with bed regions
+        bedtools intersect -sorted -s -wa -c \
+            -a {params.bed} \
+            -b {input.pauses} \
+            | sort -S1G --parallel={threads} -k1,1 -k2,2n \
+            | pigz -p {threads} \
+            > {output.pauses}
+
+        # Intersect pause reads with bed regions
+        bedtools intersect -sorted -s -wa -c \
+            -a {params.bed} \
+            -b {input.reads} \
+            | sort -S1G --parallel={threads} -k1,1 -k2,2n \
+            | pigz -p {threads} \
+            > {output.reads}
+        """
+
+
+# Create metaplot files for the region around pauses
+rule pause_metaplots:
+    input:
+        reads  = PROJ + "/beds/{sam_grp}.bed.gz",
+        pauses = PROJ + "/pauses/{sam_grp}_{win}_sep{grp}pauses.bed.gz"
+    output:
+        wins     = temp(PROJ + "/pauses/{sam_grp}_{win}{grp}pauses_wins.bed.gz"),
+        counts   = temp(PROJ + "/pauses/{sam_grp}_{win}{grp}pauses_meta.bed.gz"),
+        counts_N = temp(PROJ + "/pauses/{sam_grp}_{win}{grp}pauses_meta_N.bed.gz")
+    params:
+        job_name = "{sam_grp}_{win}{grp}pause_metaplots",
+        memory   = MEMORY,
+        chroms   = CHROMS
+    log:
+        out = PROJ + "/logs/{sam_grp}_{win}{grp}pause_metaplots.out",
+        err = PROJ + "/logs/{sam_grp}_{win}{grp}pause_metaplots.err"
+    message:
+        "Creating {wildcards.grp} pause ({wildcards.win}bp window) metaplot files for {wildcards.sam_grp}"
+    threads:
+        6
+    shell:
+        """
+        tmp_dir=$(dirname {output.wins})
+
+        # Create windows for the region around pause sites
+        tmp_wins=$(mktemp -p $tmp_dir wins.XXXXX)
+
+        make_wins() {{
+            local pauses=$1
+            local strand=$2
+            local args="$3"
+
+            zcat $pauses \
+                | awk -v OFS="\t" -v strand=$strand '($6 == strand) {{$4 = $4"*"$5"*"; print}}' \
+                | bedtools slop -s -g {params.chroms} -l 49 -r 50 \
+                | bedtools makewindows -b - $args \
+                | awk -v FS="\\*_" -v OFS="\t" -v strand=$strand '{{print $1, $2, strand}}'
+        }}
+
+        make_wins {input.pauses} "+" " -n 100 -i srcwinnum " \
+            > $tmp_wins
+
+        make_wins {input.pauses} "-" " -reverse -n 100 -i srcwinnum " \
+            >> $tmp_wins
+
+        cat $tmp_wins \
+            | sort -S1G --parallel={threads} -k1,1 -k2,2n \
+            | pigz -p {threads} \
+            > {output.wins}
+
+        rm $tmp_wins
+
+        # Intersect reads with pause windows 
+        tmp_reads=$(mktemp -p $tmp_dir tmp_reads.XXXXX)
+        tmp_bed=$(mktemp -p $tmp_dir tmp_bed.XXXXX)
+        
+        zcat -f {input.reads} \
+            > $tmp_reads
+        
+        cat $tmp_reads \
+            | bedtools intersect -sorted -wa -c -a {output.wins} -b - -s \
+            | sort -S1G --parallel={threads} -k1,1 -k2,2n \
+            > $tmp_bed
+
+        {SRC}/norm_bed $tmp_reads $tmp_bed 7 -len \
+            | sort -S1G --parallel={threads} -k1,1 -k2,2n \
+            | pigz -p {threads} \
+            > {output.counts_N}
+
+        cat $tmp_bed \
+            | pigz -p {threads} \
+            > {output.counts} 
+
+        rm $tmp_reads $tmp_bed
+        """
+
+
+

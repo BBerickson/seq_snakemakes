@@ -1,0 +1,227 @@
+#! /bin/bash
+
+set -o nounset -o pipefail -o errexit -x
+
+SRC_DIR=$(dirname "$0")
+
+
+
+# Inputs
+INPUT='none'
+GENES='none'
+MASK='none'
+CHROMS='none'
+WIN=200
+READS=5
+WINREADS=5
+STDEV=3
+THREADS=1
+REVERSE=false
+OUTPUT='none'
+
+
+
+# Usage message
+usage() {
+    echo """
+USAGE
+"$0" [OPTIONS]
+
+OPTIONS
+-h, display this message.
+-i, path to bedGraph.
+-g, path to bed file containing gene coordinates.
+-m, path to bed file containing regions that should be excluded from analysis.
+-c, path to file containing chromosome sizes.
+-s, size of window to use for identifying pause sites (e.g., -w 200 would include 100 bp on either side of the site).
+-l, minimum number of reads to consider a site a pause.
+-w, minimum number of reads in window (excluding pause) to consider a site a pause.
+-v, number of standard deviations above the mean signal for the window to consider a site a pause.
+-t, number of threads to use for sorting.
+-r, the signal in the input bedGraph is for the negative strand.
+-o, path to the output file.
+    """
+}
+
+
+
+# Parse arguments =============================================================
+
+while getopts ":hi:g:m:c:s:l:w:v:t:ro:" args
+do
+    case "$args" in
+        h)
+            usage
+            exit 0
+            ;;
+        i) INPUT="$OPTARG" ;;
+        g) GENES="$OPTARG" ;;
+        m) MASK="$OPTARG" ;;
+        c) CHROMS="$OPTARG" ;;
+        s) WIN="$OPTARG" ;;
+        l) READS="$OPTARG" ;;
+        w) WINREADS="$OPTARG" ;;
+        v) STDEV="$OPTARG" ;;
+        t) THREADS="$OPTARG" ;;
+        r) REVERSE=true ;;
+        o) OUTPUT="$OPTARG" ;;
+        :)
+            echo -e "\nERROR: -$OPTARG requires an argument"
+
+            usage
+	        exit 1
+            ;;
+	    *) 
+            usage
+	        exit 1
+            ;;
+    esac
+done
+
+if [[ "$INPUT" == 'none' || "$GENES" == 'none' || "$MASK" == 'none' || "$CHROMS" == 'none' || "$OUTPUT" == 'none' ]]
+then
+    echo -e "\nERROR: Arguments are required for -i, -g, -m, -c, and -o."
+
+    usage
+    exit 1
+fi
+
+
+
+# Divide bed files by chromosome ===============================================
+split_by_chrom() {
+    local input="$1"
+    local output="$2"
+    local commands="$3"
+
+    local tmp_dir=$(dirname "$output")
+    local tmp_name=$(basename "$input")
+    local tmp_name="$tmp_dir/$tmp_name"
+
+    local chroms=$(
+        zcat -f "$input" \
+            | cut -f 1 \
+            | sort \
+            | uniq
+    )
+
+    # Function to run input commands for each chromosome
+    run_commands() {
+
+        zcat -f "$input" \
+            | awk -v chr="$chr" '$1 == chr' \
+            > "$input_tmp"
+
+        # Input commands must be in the form of a function that takes
+        # an input and output argument
+        "$commands" "$input_tmp" "$output_tmp"
+    }
+
+    # Run input commands on each chromosome input file
+    # Leave $chroms unquoted so can iterate through
+    for chr in $chroms
+    do
+        local input_tmp="$tmp_name.$chr.in"
+        local output_tmp="$tmp_name.$chr.out"
+
+        run_commands &
+    done
+
+    wait
+
+    # Merge output files
+    for chr in $chroms
+    do
+        local input_tmp="$tmp_name.$chr.in"
+        local output_tmp="$tmp_name.$chr.out"
+
+        zcat -f "$output_tmp" \
+            >> "$output"
+
+        rm "$input_tmp" "$output_tmp"
+    done
+}
+
+
+
+# Identify pause sites =========================================================
+find_pauses() {
+    local in_bg="$1"
+    local in_genes="$2"
+    local in_mask="$3"
+    local in_chrom="$4"
+    local in_strand="$5"
+    local in_win="$6"
+    local in_reads="$7"
+    local in_winreads="$8"
+    local in_stdev="$9"
+    local threads="${10}"
+    local out_pauses="${11}"
+
+    local tmp_dir=$(dirname "$out_pauses")
+    local tmp_bg=$(mktemp -p "$tmp_dir" bg.XXXXX)
+    local tmp_genes=$(mktemp -p "$tmp_dir" genes.XXXXX)
+    local tmp_mask=$(mktemp -p "$tmp_dir" mask.XXXXX)
+
+    zcat -f "$in_bg" \
+        > "$tmp_bg"
+
+    zcat "$in_genes" \
+        | awk -v strand="$in_strand" '$6 == strand' \
+        | sort -k1,1 -k2,2n \
+        > "$tmp_genes"
+    
+    # Merge bed files for excluded regions
+    # Leave $bed_files unquoted so multiple files are merged
+    bed_files=$(echo "$in_mask" | tr ',' ' ')
+
+    zcat $bed_files \
+        > "$tmp_mask"
+
+    # Find pauses
+    "$SRC_DIR/find_pauses" \
+        "$tmp_bg" \
+        "$tmp_genes" \
+        "$in_chrom" \
+        "$in_win" \
+        "$in_reads" \
+        "$in_winreads" \
+        "$in_stdev" \
+        "$threads" \
+        "$tmp_dir" \
+        | bedtools subtract -s -a - -b "$tmp_mask" \
+        > "$out_pauses"
+
+    rm "$tmp_bg" "$tmp_genes" "$tmp_mask"
+}
+
+
+
+# Main function ================================================================
+main() {
+    strand='+'
+
+    if "$REVERSE"
+    then
+        strand='-'
+    fi
+
+    find_pauses \
+        "$INPUT" \
+        "$GENES" \
+        "$MASK" \
+        "$CHROMS" \
+        "$strand" \
+        "$WIN" \
+        "$READS" \
+        "$WINREADS" \
+        "$STDEV" \
+        "$THREADS" \
+        "$OUTPUT"
+}
+
+main
+
+
+
+

@@ -1,0 +1,7 @@
+Building DAG of jobs...
+MissingInputException in line 15 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/ChIPseq/pipelines/rules/05_543_matrix.snake:
+Missing input files for rule standared543_matrix:
+    output: 230426_H66K_DRB/matrix/PP1-PNUTS-H66K_mdox_DRB_CTD_temp0_543_matrix.gz
+    wildcards: group=PP1-PNUTS-H66K_mdox_DRB_CTD
+    affected files:
+        230426_H66K_DRB/bw/PP1-PNUTS-H66K_mdox_DRB_CTD_hg38_230426_1.5k_0.5k_2.0k_0.5k_3.5k_100bin_norm_CPM.bw

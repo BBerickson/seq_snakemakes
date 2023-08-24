@@ -1,0 +1,57 @@
+Building DAG of jobs...
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                    count    min threads    max threads
+-------------------  -------  -------------  -------------
+all                        1              1              1
+bamCoverage                2             12             12
+bamCoverage_summary        1              1              1
+total                      4              1             12
+
+Select jobs to execute...
+
+[Thu Jun 15 13:05:44 2023]
+Job 34: Aligning reads with bamCoverage for PP1-PNUTS-H66K_pdox_DRB_CTD
+
+Submitted DRMAA job 34 with external jobid 9317.
+
+[Thu Jun 15 13:05:45 2023]
+Job 26: Aligning reads with bamCoverage for PP1-PNUTS-H66K_mdox_DRB_CTD
+
+Submitted DRMAA job 26 with external jobid 9318.
+[Thu Jun 15 13:14:53 2023]
+Finished job 34.
+1 of 4 steps (25%) done
+[Thu Jun 15 13:16:13 2023]
+Finished job 26.
+2 of 4 steps (50%) done
+Select jobs to execute...
+
+[Thu Jun 15 13:16:13 2023]
+Job 25: Creating 230426_H66K_DRB bamCoverage summary
+
+Submitted DRMAA job 25 with external jobid 9320.
+Removing temporary output file 230426_H66K_DRB/bw/PP1-PNUTS-H66K_mdox_DRB_CTD_bamCoverage_stats.txt.
+Removing temporary output file 230426_H66K_DRB/bw/PP1-PNUTS-H66K_pdox_DRB_CTD_bamCoverage_stats.txt.
+[Thu Jun 15 13:16:43 2023]
+Finished job 25.
+3 of 4 steps (75%) done
+Select jobs to execute...
+
+[Thu Jun 15 13:16:43 2023]
+localrule all:
+    input: 230426_H66K_DRB/stats/230426_H66K_DRB_fastqc.tsv, 230426_H66K_DRB/stats/230426_H66K_DRB_clumpify.tsv, 230426_H66K_DRB/stats/230426_H66K_DRB_bbduk.tsv, 230426_H66K_DRB/stats/230426_H66K_DRB_aligned.tsv, 230426_H66K_DRB/URLS/230426_H66K_DRB_hg38_norm_CPM_bw_URL.txt, 230426_H66K_DRB/stats/230426_H66K_DRB_results.tsv
+    jobid: 0
+    resources: tmpdir=/tmp
+
+[Thu Jun 15 13:16:43 2023]
+Finished job 0.
+4 of 4 steps (100%) done
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/ChIPseq/.snakemake/log/2023-06-15T130533.214969.snakemake.log

@@ -1,0 +1,35 @@
+# ===== Rules to count reads overlapping genes =================================
+
+
+# Run featureCounts
+rule featureCounts:
+    input:
+        expand(
+            PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_dedup.bam",
+            sample = SAMS_UNIQ
+        )
+    output:
+        PROJ + "/stats/" + PROJ + "_featureCounts.tsv"
+    params:
+        job_name = PROJ + "_featureCounts",
+        memory   = MEMORY,
+        args     = CMD_PARAMS["featureCounts"]
+    log:
+        out = PROJ + "/logs/" + PROJ + "_featureCounts.out",
+        err = PROJ + "/logs/" + PROJ + "_featureCounts.err"
+    message:
+        "Counting " + PROJ + " reads with featureCounts"
+    threads:
+        16
+    shell:
+        """
+        featureCounts \
+            {params.args} \
+            -F GTF \
+            -a {GTF} \
+            -o {output} \
+            -T {threads} \
+            {input}
+        """
+
+

@@ -1,0 +1,355 @@
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                    count    min threads    max threads
+-------------------  -------  -------------  -------------
+all                        1              1              1
+fix_3_matrix               2              1              1
+fix_543_matrix             2              1              1
+fix_5L_matrix              2              1              1
+fix_5_matrix               2              1              1
+fix_PI_matrix              2              1              1
+my_3_matrix                2             12             12
+my_3_url                   2              1              1
+my_3_url_summary           1              1              1
+my_5L_matrix               2             12             12
+my_5L_url                  2              1              1
+my_5L_url_summary          1              1              1
+my_5_matrix                2             12             12
+my_5_url                   2              1              1
+my_5_url_summary           1              1              1
+my_PI_matrix               2             12             12
+my_PI_url                  2              1              1
+my_PI_url_summary          1              1              1
+sense_url_summary          1              1              1
+standared543_matrix        2             12             12
+standared543_url           2              1              1
+total                     36              1             12
+
+Select jobs to execute...
+
+[Thu Jun 15 13:53:05 2023]
+Job 14: 5 matrix files PP1-PNUTS-H66K_pdox_DRB_CTD
+
+Submitted DRMAA job 14 with external jobid 9361.
+
+[Thu Jun 15 13:53:06 2023]
+Job 28: 5L matrix files PP1-PNUTS-H66K_pdox_DRB_CTD
+
+Submitted DRMAA job 28 with external jobid 9362.
+
+[Thu Jun 15 13:53:06 2023]
+Job 4: standard sense 543 matrix files PP1-PNUTS-H66K_mdox_DRB_CTD
+
+Submitted DRMAA job 4 with external jobid 9363.
+
+[Thu Jun 15 13:53:06 2023]
+Job 18: 3 matrix files PP1-PNUTS-H66K_mdox_DRB_CTD
+
+Submitted DRMAA job 18 with external jobid 9364.
+
+[Thu Jun 15 13:53:07 2023]
+Job 32: PI matrix files PP1-PNUTS-H66K_mdox_DRB_CTD
+
+Submitted DRMAA job 32 with external jobid 9365.
+
+[Thu Jun 15 13:53:07 2023]
+Job 7: standard sense 543 matrix files PP1-PNUTS-H66K_pdox_DRB_CTD
+
+Submitted DRMAA job 7 with external jobid 9366.
+
+[Thu Jun 15 13:53:07 2023]
+Job 21: 3 matrix files PP1-PNUTS-H66K_pdox_DRB_CTD
+
+Submitted DRMAA job 21 with external jobid 9367.
+
+[Thu Jun 15 13:53:07 2023]
+Job 35: PI matrix files PP1-PNUTS-H66K_pdox_DRB_CTD
+
+Submitted DRMAA job 35 with external jobid 9368.
+
+[Thu Jun 15 13:53:07 2023]
+Job 11: 5 matrix files PP1-PNUTS-H66K_mdox_DRB_CTD
+
+Submitted DRMAA job 11 with external jobid 9369.
+
+[Thu Jun 15 13:53:07 2023]
+Job 25: 5L matrix files PP1-PNUTS-H66K_mdox_DRB_CTD
+
+Submitted DRMAA job 25 with external jobid 9370.
+[Thu Jun 15 13:53:48 2023]
+Finished job 14.
+1 of 36 steps (3%) done
+Select jobs to execute...
+
+[Thu Jun 15 13:53:48 2023]
+Job 13: fix standard 5 matrix files PP1-PNUTS-H66K_pdox_DRB_CTD
+
+Submitted DRMAA job 13 with external jobid 9371.
+[Thu Jun 15 13:53:59 2023]
+Finished job 18.
+2 of 36 steps (6%) done
+Select jobs to execute...
+
+[Thu Jun 15 13:53:59 2023]
+Job 17: fix standard 3 matrix files PP1-PNUTS-H66K_mdox_DRB_CTD
+
+Submitted DRMAA job 17 with external jobid 9372.
+[Thu Jun 15 13:54:00 2023]
+Finished job 32.
+3 of 36 steps (8%) done
+[Thu Jun 15 13:54:00 2023]
+Finished job 21.
+4 of 36 steps (11%) done
+[Thu Jun 15 13:54:00 2023]
+Finished job 35.
+5 of 36 steps (14%) done
+Select jobs to execute...
+
+[Thu Jun 15 13:54:00 2023]
+Job 34: fix standard PI matrix files PP1-PNUTS-H66K_pdox_DRB_CTD
+
+Submitted DRMAA job 34 with external jobid 9373.
+
+[Thu Jun 15 13:54:00 2023]
+Job 20: fix standard 3 matrix files PP1-PNUTS-H66K_pdox_DRB_CTD
+
+Submitted DRMAA job 20 with external jobid 9374.
+
+[Thu Jun 15 13:54:00 2023]
+Job 31: fix standard PI matrix files PP1-PNUTS-H66K_mdox_DRB_CTD
+
+Submitted DRMAA job 31 with external jobid 9375.
+[Thu Jun 15 13:54:10 2023]
+Finished job 28.
+6 of 36 steps (17%) done
+Select jobs to execute...
+
+[Thu Jun 15 13:54:10 2023]
+Job 27: fix standard 5L matrix files PP1-PNUTS-H66K_pdox_DRB_CTD
+
+Submitted DRMAA job 27 with external jobid 9376.
+[Thu Jun 15 13:54:11 2023]
+Finished job 4.
+7 of 36 steps (19%) done
+[Thu Jun 15 13:54:11 2023]
+Finished job 7.
+8 of 36 steps (22%) done
+[Thu Jun 15 13:54:11 2023]
+Finished job 11.
+9 of 36 steps (25%) done
+Select jobs to execute...
+
+[Thu Jun 15 13:54:11 2023]
+Job 3: fix standard 543 matrix files PP1-PNUTS-H66K_mdox_DRB_CTD
+
+Submitted DRMAA job 3 with external jobid 9377.
+
+[Thu Jun 15 13:54:11 2023]
+Job 10: fix standard 5 matrix files PP1-PNUTS-H66K_mdox_DRB_CTD
+
+Submitted DRMAA job 10 with external jobid 9378.
+
+[Thu Jun 15 13:54:12 2023]
+Job 6: fix standard 543 matrix files PP1-PNUTS-H66K_pdox_DRB_CTD
+
+Submitted DRMAA job 6 with external jobid 9379.
+[Thu Jun 15 13:54:44 2023]
+Finished job 25.
+10 of 36 steps (28%) done
+Select jobs to execute...
+
+[Thu Jun 15 13:54:44 2023]
+Job 24: fix standard 5L matrix files PP1-PNUTS-H66K_mdox_DRB_CTD
+
+Submitted DRMAA job 24 with external jobid 9380.
+Removing temporary output file 230426_H66K_DRB/matrix/PP1-PNUTS-H66K_pdox_DRB_CTD_temp0_5_matrix.gz.
+[Thu Jun 15 13:55:17 2023]
+Finished job 13.
+11 of 36 steps (31%) done
+Select jobs to execute...
+
+[Thu Jun 15 13:55:17 2023]
+Job 12: Creating 5_matrix url for PP1-PNUTS-H66K_pdox_DRB_CTD
+
+Submitted DRMAA job 12 with external jobid 9381.
+Removing temporary output file 230426_H66K_DRB/matrix/PP1-PNUTS-H66K_mdox_DRB_CTD_temp0_3_matrix.gz.
+[Thu Jun 15 13:55:17 2023]
+Finished job 17.
+12 of 36 steps (33%) done
+Removing temporary output file 230426_H66K_DRB/matrix/PP1-PNUTS-H66K_pdox_DRB_CTD_temp0_PI_matrix.gz.
+[Thu Jun 15 13:55:17 2023]
+Finished job 34.
+13 of 36 steps (36%) done
+Removing temporary output file 230426_H66K_DRB/matrix/PP1-PNUTS-H66K_pdox_DRB_CTD_temp0_3_matrix.gz.
+[Thu Jun 15 13:55:17 2023]
+Finished job 20.
+14 of 36 steps (39%) done
+Removing temporary output file 230426_H66K_DRB/matrix/PP1-PNUTS-H66K_mdox_DRB_CTD_temp0_PI_matrix.gz.
+[Thu Jun 15 13:55:17 2023]
+Finished job 31.
+15 of 36 steps (42%) done
+Removing temporary output file 230426_H66K_DRB/matrix/PP1-PNUTS-H66K_pdox_DRB_CTD_temp0_5L_matrix.gz.
+[Thu Jun 15 13:55:17 2023]
+Finished job 27.
+16 of 36 steps (44%) done
+Select jobs to execute...
+
+[Thu Jun 15 13:55:17 2023]
+Job 33: Creating PI_matrix url for PP1-PNUTS-H66K_pdox_DRB_CTD
+
+Submitted DRMAA job 33 with external jobid 9382.
+
+[Thu Jun 15 13:55:17 2023]
+Job 26: Creating 5L_matrix url for PP1-PNUTS-H66K_pdox_DRB_CTD
+
+Submitted DRMAA job 26 with external jobid 9383.
+
+[Thu Jun 15 13:55:17 2023]
+Job 30: Creating PI_matrix url for PP1-PNUTS-H66K_mdox_DRB_CTD
+
+Submitted DRMAA job 30 with external jobid 9384.
+
+[Thu Jun 15 13:55:17 2023]
+Job 16: Creating 3_matrix url for PP1-PNUTS-H66K_mdox_DRB_CTD
+
+Submitted DRMAA job 16 with external jobid 9385.
+
+[Thu Jun 15 13:55:17 2023]
+Job 19: Creating 3_matrix url for PP1-PNUTS-H66K_pdox_DRB_CTD
+
+Submitted DRMAA job 19 with external jobid 9386.
+Removing temporary output file 230426_H66K_DRB/matrix/PP1-PNUTS-H66K_mdox_DRB_CTD_temp0_543_matrix.gz.
+[Thu Jun 15 13:55:18 2023]
+Finished job 3.
+17 of 36 steps (47%) done
+Removing temporary output file 230426_H66K_DRB/matrix/PP1-PNUTS-H66K_mdox_DRB_CTD_temp0_5_matrix.gz.
+[Thu Jun 15 13:55:18 2023]
+Finished job 10.
+18 of 36 steps (50%) done
+Removing temporary output file 230426_H66K_DRB/matrix/PP1-PNUTS-H66K_pdox_DRB_CTD_temp0_543_matrix.gz.
+[Thu Jun 15 13:55:18 2023]
+Finished job 6.
+19 of 36 steps (53%) done
+Select jobs to execute...
+
+[Thu Jun 15 13:55:18 2023]
+Job 5: Creating sense 543_matrix url for PP1-PNUTS-H66K_pdox_DRB_CTD
+
+Submitted DRMAA job 5 with external jobid 9387.
+
+[Thu Jun 15 13:55:18 2023]
+Job 9: Creating 5_matrix url for PP1-PNUTS-H66K_mdox_DRB_CTD
+
+Submitted DRMAA job 9 with external jobid 9388.
+
+[Thu Jun 15 13:55:18 2023]
+Job 2: Creating sense 543_matrix url for PP1-PNUTS-H66K_mdox_DRB_CTD
+
+Submitted DRMAA job 2 with external jobid 9389.
+Removing temporary output file 230426_H66K_DRB/matrix/PP1-PNUTS-H66K_mdox_DRB_CTD_temp0_5L_matrix.gz.
+[Thu Jun 15 13:55:28 2023]
+Finished job 24.
+20 of 36 steps (56%) done
+Select jobs to execute...
+
+[Thu Jun 15 13:55:28 2023]
+Job 23: Creating 5L_matrix url for PP1-PNUTS-H66K_mdox_DRB_CTD
+
+Submitted DRMAA job 23 with external jobid 9390.
+[Thu Jun 15 13:55:39 2023]
+Finished job 12.
+21 of 36 steps (58%) done
+[Thu Jun 15 13:55:39 2023]
+Finished job 33.
+22 of 36 steps (61%) done
+[Thu Jun 15 13:55:39 2023]
+Finished job 26.
+23 of 36 steps (64%) done
+[Thu Jun 15 13:55:39 2023]
+Finished job 30.
+24 of 36 steps (67%) done
+Select jobs to execute...
+
+[Thu Jun 15 13:55:39 2023]
+Job 29: Creating 230426_H66K_DRB sense PI_matrix url
+
+Submitted DRMAA job 29 with external jobid 9391.
+[Thu Jun 15 13:55:39 2023]
+Finished job 16.
+25 of 36 steps (69%) done
+[Thu Jun 15 13:55:39 2023]
+Finished job 19.
+26 of 36 steps (72%) done
+[Thu Jun 15 13:55:39 2023]
+Finished job 5.
+27 of 36 steps (75%) done
+[Thu Jun 15 13:55:39 2023]
+Finished job 9.
+28 of 36 steps (78%) done
+[Thu Jun 15 13:55:39 2023]
+Finished job 2.
+29 of 36 steps (81%) done
+Select jobs to execute...
+
+[Thu Jun 15 13:55:39 2023]
+Job 1: Creating 230426_H66K_DRB sense 543_matrix url
+
+Submitted DRMAA job 1 with external jobid 9392.
+
+[Thu Jun 15 13:55:40 2023]
+Job 8: Creating 230426_H66K_DRB sense 5_matrix url
+
+Submitted DRMAA job 8 with external jobid 9393.
+
+[Thu Jun 15 13:55:40 2023]
+Job 15: Creating 230426_H66K_DRB sense 3_matrix url
+
+Submitted DRMAA job 15 with external jobid 9394.
+[Thu Jun 15 13:55:50 2023]
+Finished job 23.
+30 of 36 steps (83%) done
+Select jobs to execute...
+
+[Thu Jun 15 13:55:50 2023]
+Job 22: Creating 230426_H66K_DRB sense 5L_matrix url
+
+Submitted DRMAA job 22 with external jobid 9395.
+Removing temporary output file 230426_H66K_DRB/matrix/PI.PP1-PNUTS-H66K_mdox_DRB_CTD_matrix.url.txt.
+Removing temporary output file 230426_H66K_DRB/matrix/PI.PP1-PNUTS-H66K_pdox_DRB_CTD_matrix.url.txt.
+[Thu Jun 15 13:55:50 2023]
+Finished job 29.
+31 of 36 steps (86%) done
+Removing temporary output file 230426_H66K_DRB/matrix/543.PP1-PNUTS-H66K_mdox_DRB_CTD_matrix.url.txt.
+Removing temporary output file 230426_H66K_DRB/matrix/543.PP1-PNUTS-H66K_pdox_DRB_CTD_matrix.url.txt.
+[Thu Jun 15 13:55:50 2023]
+Finished job 1.
+32 of 36 steps (89%) done
+Removing temporary output file 230426_H66K_DRB/matrix/5.PP1-PNUTS-H66K_mdox_DRB_CTD_matrix.url.txt.
+Removing temporary output file 230426_H66K_DRB/matrix/5.PP1-PNUTS-H66K_pdox_DRB_CTD_matrix.url.txt.
+[Thu Jun 15 13:55:50 2023]
+Finished job 8.
+33 of 36 steps (92%) done
+Removing temporary output file 230426_H66K_DRB/matrix/3.PP1-PNUTS-H66K_mdox_DRB_CTD_matrix.url.txt.
+Removing temporary output file 230426_H66K_DRB/matrix/3.PP1-PNUTS-H66K_pdox_DRB_CTD_matrix.url.txt.
+[Thu Jun 15 13:55:50 2023]
+Finished job 15.
+34 of 36 steps (94%) done
+Removing temporary output file 230426_H66K_DRB/matrix/5L.PP1-PNUTS-H66K_mdox_DRB_CTD_matrix.url.txt.
+Removing temporary output file 230426_H66K_DRB/matrix/5L.PP1-PNUTS-H66K_pdox_DRB_CTD_matrix.url.txt.
+[Thu Jun 15 13:56:00 2023]
+Finished job 22.
+35 of 36 steps (97%) done
+Select jobs to execute...
+
+[Thu Jun 15 13:56:00 2023]
+localrule all:
+    input: 230426_H66K_DRB/URLS/543_230426_H66K_DRB_hg38_1.5k_0.5k_2.0k_0.5k_3.5k_100binnorm_CPM_matrix.url.txt, 230426_H66K_DRB/URLS/5_230426_H66K_DRB_hg38_1.0k_2.0k_25binnorm_CPM_matrix.url.txt, 230426_H66K_DRB/URLS/3_230426_H66K_DRB_hg38_1.0k_9.0k_100binnorm_CPM_matrix.url.txt, 230426_H66K_DRB/URLS/5L_230426_H66K_DRB_hg38_0.1k_30.0k_100binnorm_CPM_matrix.url.txt, 230426_H66K_DRB/URLS/PI_230426_H66K_DRB_hg38_0.4k_0.0k_0.4k_0.0k_0.0k_400binnorm_CPM_matrix.url.txt
+    jobid: 0
+    resources: tmpdir=/tmp
+
+[Thu Jun 15 13:56:00 2023]
+Finished job 0.
+36 of 36 steps (100%) done
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/ChIPseq/.snakemake/log/2023-06-15T135304.744802.snakemake.log

@@ -1,0 +1,232 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                       count    min threads    max threads
+----------------------  -------  -------------  -------------
+all                           1              1              1
+bowtie                        2             12             12
+bowtie_summary                1              1              1
+calculating_subsample         1              1              1
+cutadapt                      2              6              6
+cutadapt_summary              1              1              1
+dedup                         2              1              1
+dedup_spikein                 2              1              1
+dedup_summary                 1              1              1
+dedup_summary_spikein         1              1              1
+extract_umi                   2              1              1
+fastqc                        4              6              6
+fastqc_summary                1              1              1
+subsample_summary             1              1              1
+subsample_summary_frac        1              1              1
+subsample_whole               2             16             16
+total                        25              1             16
+
+Select jobs to execute...
+
+[Mon Jul 17 11:54:09 2023]
+Job 2: Running FastQC on siControl_S1_R1_001
+
+Submitted DRMAA job 2 with external jobid 124795.
+
+[Mon Jul 17 11:54:09 2023]
+Job 4: Running FastQC on siPNUTS_1_S2_R1_001
+
+Submitted DRMAA job 4 with external jobid 124796.
+
+[Mon Jul 17 11:54:09 2023]
+Job 10: Extracting UMIs for siPNUTS_1_S2
+
+Submitted DRMAA job 10 with external jobid 124797.
+
+[Mon Jul 17 11:54:10 2023]
+Job 3: Running FastQC on siControl_S1_R2_001
+
+Submitted DRMAA job 3 with external jobid 124798.
+
+[Mon Jul 17 11:54:10 2023]
+Job 5: Running FastQC on siPNUTS_1_S2_R2_001
+
+Submitted DRMAA job 5 with external jobid 124799.
+
+[Mon Jul 17 11:54:10 2023]
+Job 8: Extracting UMIs for siControl_S1
+
+Submitted DRMAA job 8 with external jobid 124800.
+[Mon Jul 17 12:33:25 2023]
+Finished job 2.
+1 of 25 steps (4%) done
+[Mon Jul 17 12:34:15 2023]
+Finished job 3.
+2 of 25 steps (8%) done
+[Mon Jul 17 12:36:36 2023]
+Finished job 4.
+3 of 25 steps (12%) done
+[Mon Jul 17 12:37:46 2023]
+Finished job 5.
+4 of 25 steps (16%) done
+Select jobs to execute...
+
+[Mon Jul 17 12:37:46 2023]
+Job 1: Creating Nick FastQC summary
+
+Submitted DRMAA job 1 with external jobid 124812.
+[Mon Jul 17 12:37:56 2023]
+Finished job 1.
+5 of 25 steps (20%) done
+[Mon Jul 17 15:15:08 2023]
+Finished job 8.
+6 of 25 steps (24%) done
+Select jobs to execute...
+
+[Mon Jul 17 15:15:08 2023]
+Job 7: Running cutadapt on siControl_S1
+
+Submitted DRMAA job 7 with external jobid 125004.
+[Mon Jul 17 15:21:21 2023]
+Finished job 10.
+7 of 25 steps (28%) done
+Select jobs to execute...
+
+[Mon Jul 17 15:21:21 2023]
+Job 9: Running cutadapt on siPNUTS_1_S2
+
+Submitted DRMAA job 9 with external jobid 125005.
+Removing temporary output file Nick/UMI/siControl_S1_R2_umi.fastq.gz.
+Removing temporary output file Nick/UMI/siControl_S1_R1_umi.fastq.gz.
+Removing temporary output file Nick/UMI/siControl_S1_R2_trim.fastq.gz.
+[Mon Jul 17 15:28:53 2023]
+Finished job 7.
+8 of 25 steps (32%) done
+Select jobs to execute...
+
+[Mon Jul 17 15:28:53 2023]
+Job 12: Aligning reads with Bowtie2 for siControl_S1
+
+Submitted DRMAA job 12 with external jobid 125023.
+Removing temporary output file Nick/UMI/siPNUTS_1_S2_R1_umi.fastq.gz.
+Removing temporary output file Nick/UMI/siPNUTS_1_S2_R2_umi.fastq.gz.
+Removing temporary output file Nick/UMI/siPNUTS_1_S2_R2_trim.fastq.gz.
+[Mon Jul 17 15:37:56 2023]
+Finished job 9.
+9 of 25 steps (36%) done
+Select jobs to execute...
+
+[Mon Jul 17 15:37:56 2023]
+Job 13: Aligning reads with Bowtie2 for siPNUTS_1_S2
+
+Submitted DRMAA job 13 with external jobid 125037.
+
+[Mon Jul 17 15:37:56 2023]
+Job 6: Creating Nick cutadapt summary
+
+Submitted DRMAA job 6 with external jobid 125038.
+[Mon Jul 17 15:38:05 2023]
+Finished job 6.
+10 of 25 steps (40%) done
+Removing temporary output file Nick/UMI/siControl_S1_R1_trim.fastq.gz.
+Removing temporary output file Nick/bams/siControl_S1_hg38_HHV8.bam.
+Removing temporary output file Nick/bams/siControl_S1_hg38_HHV8.bam.bai.
+[Mon Jul 17 16:13:06 2023]
+Finished job 12.
+11 of 25 steps (44%) done
+Select jobs to execute...
+
+[Mon Jul 17 16:13:06 2023]
+Job 18: Removing duplicates for siControl_S1
+
+Submitted DRMAA job 18 with external jobid 125047.
+
+[Mon Jul 17 16:13:07 2023]
+Job 15: Removing duplicates for siControl_S1
+
+Submitted DRMAA job 15 with external jobid 125048.
+Removing temporary output file Nick/bams/siControl_S1_HHV8_230316.bam.bai.
+Removing temporary output file Nick/bams/siControl_S1_HHV8_230316.bam.
+[Mon Jul 17 16:13:25 2023]
+Finished job 15.
+12 of 25 steps (48%) done
+Removing temporary output file Nick/UMI/siPNUTS_1_S2_R1_trim.fastq.gz.
+Removing temporary output file Nick/bams/siPNUTS_1_S2_hg38_HHV8.bam.
+Removing temporary output file Nick/bams/siPNUTS_1_S2_hg38_HHV8.bam.bai.
+[Mon Jul 17 16:27:19 2023]
+Finished job 13.
+13 of 25 steps (52%) done
+Select jobs to execute...
+
+[Mon Jul 17 16:27:19 2023]
+Job 19: Removing duplicates for siPNUTS_1_S2
+
+Submitted DRMAA job 19 with external jobid 125096.
+
+[Mon Jul 17 16:27:19 2023]
+Job 16: Removing duplicates for siPNUTS_1_S2
+
+Submitted DRMAA job 16 with external jobid 125097.
+
+[Mon Jul 17 16:27:20 2023]
+Job 11: Creating Nick bowtie2 summary
+
+Submitted DRMAA job 11 with external jobid 125098.
+[Mon Jul 17 16:27:28 2023]
+Finished job 11.
+14 of 25 steps (56%) done
+Removing temporary output file Nick/bams/siPNUTS_1_S2_HHV8_230316.bam.
+Removing temporary output file Nick/bams/siPNUTS_1_S2_HHV8_230316.bam.bai.
+[Mon Jul 17 16:27:49 2023]
+Finished job 16.
+15 of 25 steps (60%) done
+Select jobs to execute...
+
+[Mon Jul 17 16:27:49 2023]
+Job 14: Creating Nick dedup summary
+
+Submitted DRMAA job 14 with external jobid 125100.
+[Mon Jul 17 16:27:59 2023]
+Finished job 14.
+16 of 25 steps (64%) done
+Removing temporary output file Nick/bams/siControl_S1_hg38_230316.bam.bai.
+Removing temporary output file Nick/bams/siControl_S1_hg38_230316.bam.
+[Mon Jul 17 16:47:03 2023]
+Finished job 18.
+17 of 25 steps (68%) done
+Removing temporary output file Nick/bams/siPNUTS_1_S2_hg38_230316.bam.bai.
+Removing temporary output file Nick/bams/siPNUTS_1_S2_hg38_230316.bam.
+[Mon Jul 17 17:11:56 2023]
+Finished job 19.
+18 of 25 steps (72%) done
+Select jobs to execute...
+
+[Mon Jul 17 17:11:56 2023]
+Job 23: getting subsample norm for PNUTS-r1
+
+Submitted DRMAA job 23 with external jobid 125149.
+
+[Mon Jul 17 17:11:56 2023]
+Job 17: Creating Nick dedup summary
+
+Submitted DRMAA job 17 with external jobid 125150.
+[Mon Jul 17 17:12:06 2023]
+Finished job 17.
+19 of 25 steps (76%) done
+[Mon Jul 17 17:12:26 2023]
+Finished job 23.
+20 of 25 steps (80%) done
+Select jobs to execute...
+
+[Mon Jul 17 17:12:26 2023]
+Job 22: Creating Nick subsample summary
+
+Submitted DRMAA job 22 with external jobid 125151.
+Removing temporary output file Nick/bams/PNUTS-r1_hg38_subsample_frac.txt.
+[Mon Jul 17 17:12:36 2023]
+Finished job 22.
+21 of 25 steps (84%) done
+Select jobs to execute...
+InputFunctionException in line 68 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI/pipelines/rules/04_UMI_dedup_subsample.snake:
+Error:
+  IndexError: list index out of range
+Wildcards:
+  sample=siControl_S1
+Traceback:
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI/pipelines/rules/04_UMI_dedup_subsample.snake", line 12, in _get_norm

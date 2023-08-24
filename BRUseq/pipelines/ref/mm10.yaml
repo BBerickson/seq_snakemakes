@@ -1,0 +1,21 @@
+#===== Config file for mm10 ===================
+
+# Path to mixed bowtie2 index and chrom name txt file
+GENELIST:
+    ""
+INDEX_PATH:
+    "/beevol/home/erickson/ref/mm10/"
+INDEX_SAMPLE:
+    "mm10"
+MASK:
+  ""
+ENRICHED_SAMPLE:
+  "/beevol/home/erickson/ref/table_mm10/enrich.bed"
+MY_REF:
+  "/beevol/home/erickson/ref/table_mm10/refGene_bed6.bed"
+PI_REF:
+  "/beevol/home/erickson/ref/table_mm10/PI.bed"
+FW_REF:
+  "/beevol/home/erickson/ref/table_mm10/refGene_bed6_pos.bed"
+REV_REF:
+  "/beevol/home/erickson/ref/table_mm10/refGene_bed6_neg.bed"

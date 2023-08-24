@@ -1,0 +1,430 @@
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                       count    min threads    max threads
+----------------------  -------  -------------  -------------
+all                           1              1              1
+fix_3_asense_matrix           2              1              1
+fix_3_sense_matrix            2              1              1
+fix_543_sense_matrix          2              1              1
+fix_5L_asense_matrix          2              1              1
+fix_5L_sense_matrix           2              1              1
+fix_5_asense_matrix           2              1              1
+fix_5_sense_matrix            2              1              1
+my_3_amtisense_matrix         2             12             12
+my_3_sense_matrix             2             12             12
+my_3_url                      2              1              1
+my_3_url_summary              1              1              1
+my_5L_amtisense_matrix        2             12             12
+my_5L_sense_matrix            2             12             12
+my_5L_url                     2              1              1
+my_5L_url_summary             1              1              1
+my_5_amtisense_matrix         2             12             12
+my_5_sense_matrix             2             12             12
+my_5_url                      2              1              1
+my_5_url_summary              1              1              1
+sense_543_matrix              2             12             12
+sense_543_url_summary         1              1              1
+urls_543_sense_matrix         2              1              1
+total                        41              1             12
+
+Select jobs to execute...
+
+[Sat Jun 17 08:22:22 2023]
+Job 29: standard antisense 5L matrix files RTF1_WT_pDox_DRB_0
+
+Submitted DRMAA job 29 with external jobid 10684.
+
+[Sat Jun 17 08:22:22 2023]
+Job 16: standard sense 5 matrix files RTF1_WT_pDox_DRB_0
+
+Submitted DRMAA job 16 with external jobid 10685.
+
+[Sat Jun 17 08:22:23 2023]
+Job 18: standard antisense 5 matrix files RTF1_WT_pDox_DRB_0
+
+Submitted DRMAA job 18 with external jobid 10686.
+
+[Sat Jun 17 08:22:23 2023]
+Job 33: standard sense 3 matrix files RTF1_MT_pDox_DRB_0
+
+Submitted DRMAA job 33 with external jobid 10687.
+
+[Sat Jun 17 08:22:23 2023]
+Job 35: standard antisense 3 matrix files RTF1_MT_pDox_DRB_0
+
+Submitted DRMAA job 35 with external jobid 10688.
+
+[Sat Jun 17 08:22:23 2023]
+Job 38: standard sense 3 matrix files RTF1_WT_pDox_DRB_0
+
+Submitted DRMAA job 38 with external jobid 10689.
+
+[Sat Jun 17 08:22:23 2023]
+Job 11: standard sense 5 matrix files RTF1_MT_pDox_DRB_0
+
+Submitted DRMAA job 11 with external jobid 10690.
+
+[Sat Jun 17 08:22:23 2023]
+Job 40: standard antisense 3 matrix files RTF1_WT_pDox_DRB_0
+
+Submitted DRMAA job 40 with external jobid 10691.
+
+[Sat Jun 17 08:22:23 2023]
+Job 13: standard antisense 5 matrix files RTF1_MT_pDox_DRB_0
+
+Submitted DRMAA job 13 with external jobid 10692.
+
+[Sat Jun 17 08:22:23 2023]
+Job 4: standard sense 543 matrix files RTF1_MT_pDox_DRB_0
+
+Submitted DRMAA job 4 with external jobid 10693.
+
+[Sat Jun 17 08:22:24 2023]
+Job 7: standard sense 543 matrix files RTF1_WT_pDox_DRB_0
+
+Submitted DRMAA job 7 with external jobid 10694.
+
+[Sat Jun 17 08:22:24 2023]
+Job 22: standard sense 5L matrix files RTF1_MT_pDox_DRB_0
+
+Submitted DRMAA job 22 with external jobid 10695.
+
+[Sat Jun 17 08:22:24 2023]
+Job 24: standard antisense 5L matrix files RTF1_MT_pDox_DRB_0
+
+Submitted DRMAA job 24 with external jobid 10696.
+
+[Sat Jun 17 08:22:24 2023]
+Job 27: standard sense 5L matrix files RTF1_WT_pDox_DRB_0
+
+Submitted DRMAA job 27 with external jobid 10697.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_WT_pDox_DRB_0_temp1_5_matrix.gz.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_WT_pDox_DRB_0_temp2_5_matrix.gz.
+[Sat Jun 17 08:22:55 2023]
+Finished job 16.
+1 of 41 steps (2%) done
+Select jobs to execute...
+
+[Sat Jun 17 08:22:55 2023]
+Job 15: fix standard sense 5 matrix files RTF1_WT_pDox_DRB_0
+
+Submitted DRMAA job 15 with external jobid 10698.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_WT_pDox_DRB_0_temp0_a5_matrix.gz.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_WT_pDox_DRB_0_temp2_a5_matrix.gz.
+[Sat Jun 17 08:22:55 2023]
+Finished job 18.
+2 of 41 steps (5%) done
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_WT_pDox_DRB_0_temp1_3_matrix.gz.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_WT_pDox_DRB_0_temp2_3_matrix.gz.
+[Sat Jun 17 08:22:55 2023]
+Finished job 38.
+3 of 41 steps (7%) done
+Select jobs to execute...
+
+[Sat Jun 17 08:22:55 2023]
+Job 17: fix standard asense 5 matrix files RTF1_WT_pDox_DRB_0
+
+Submitted DRMAA job 17 with external jobid 10699.
+
+[Sat Jun 17 08:22:55 2023]
+Job 37: fix standard sense 3 matrix files RTF1_WT_pDox_DRB_0
+
+Submitted DRMAA job 37 with external jobid 10700.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_MT_pDox_DRB_0_temp1_3_matrix.gz.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_MT_pDox_DRB_0_temp2_3_matrix.gz.
+[Sat Jun 17 08:23:06 2023]
+Finished job 33.
+4 of 41 steps (10%) done
+Select jobs to execute...
+
+[Sat Jun 17 08:23:06 2023]
+Job 32: fix standard sense 3 matrix files RTF1_MT_pDox_DRB_0
+
+Submitted DRMAA job 32 with external jobid 10701.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_MT_pDox_DRB_0_temp1_a3_matrix.gz.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_MT_pDox_DRB_0_temp2_a3_matrix.gz.
+[Sat Jun 17 08:23:06 2023]
+Finished job 35.
+5 of 41 steps (12%) done
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_MT_pDox_DRB_0_temp1_5_matrix.gz.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_MT_pDox_DRB_0_temp2_5_matrix.gz.
+[Sat Jun 17 08:23:06 2023]
+Finished job 11.
+6 of 41 steps (15%) done
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_WT_pDox_DRB_0_temp1_a3_matrix.gz.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_WT_pDox_DRB_0_temp2_a3_matrix.gz.
+[Sat Jun 17 08:23:06 2023]
+Finished job 40.
+7 of 41 steps (17%) done
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_MT_pDox_DRB_0_temp0_a5_matrix.gz.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_MT_pDox_DRB_0_temp2_a5_matrix.gz.
+[Sat Jun 17 08:23:06 2023]
+Finished job 13.
+8 of 41 steps (20%) done
+Select jobs to execute...
+
+[Sat Jun 17 08:23:06 2023]
+Job 34: fix standard asense 3 matrix files RTF1_MT_pDox_DRB_0
+
+Submitted DRMAA job 34 with external jobid 10702.
+
+[Sat Jun 17 08:23:07 2023]
+Job 10: fix standard sense 5 matrix files RTF1_MT_pDox_DRB_0
+
+Submitted DRMAA job 10 with external jobid 10703.
+
+[Sat Jun 17 08:23:07 2023]
+Job 39: fix standard asense 3 matrix files RTF1_WT_pDox_DRB_0
+
+Submitted DRMAA job 39 with external jobid 10704.
+
+[Sat Jun 17 08:23:07 2023]
+Job 12: fix standard asense 5 matrix files RTF1_MT_pDox_DRB_0
+
+Submitted DRMAA job 12 with external jobid 10705.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_WT_pDox_DRB_0_temp0_a5L_matrix.gz.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_WT_pDox_DRB_0_temp2_a5L_matrix.gz.
+[Sat Jun 17 08:23:17 2023]
+Finished job 29.
+9 of 41 steps (22%) done
+Select jobs to execute...
+
+[Sat Jun 17 08:23:17 2023]
+Job 28: fix standard asense 5L matrix files RTF1_WT_pDox_DRB_0
+
+Submitted DRMAA job 28 with external jobid 10706.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_MT_pDox_DRB_0_temp1_543_sense_matrix.gz.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_MT_pDox_DRB_0_temp2_543_sense_matrix.gz.
+[Sat Jun 17 08:23:17 2023]
+Finished job 4.
+10 of 41 steps (24%) done
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_WT_pDox_DRB_0_temp1_543_sense_matrix.gz.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_WT_pDox_DRB_0_temp2_543_sense_matrix.gz.
+[Sat Jun 17 08:23:17 2023]
+Finished job 7.
+11 of 41 steps (27%) done
+Select jobs to execute...
+
+[Sat Jun 17 08:23:17 2023]
+Job 6: fix standard sense 543 matrix files RTF1_WT_pDox_DRB_0
+
+Submitted DRMAA job 6 with external jobid 10707.
+
+[Sat Jun 17 08:23:17 2023]
+Job 3: fix standard sense 543 matrix files RTF1_MT_pDox_DRB_0
+
+Submitted DRMAA job 3 with external jobid 10708.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_MT_pDox_DRB_0_temp0_3_matrix.gz.
+[Sat Jun 17 08:23:28 2023]
+Finished job 32.
+12 of 41 steps (29%) done
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_MT_pDox_DRB_0_temp0_a3_matrix.gz.
+[Sat Jun 17 08:23:28 2023]
+Finished job 34.
+13 of 41 steps (32%) done
+Select jobs to execute...
+
+[Sat Jun 17 08:23:28 2023]
+Job 31: Creating sense 3_matrix url for RTF1_MT_pDox_DRB_0
+
+Submitted DRMAA job 31 with external jobid 10709.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_MT_pDox_DRB_0_temp0_5_matrix.gz.
+[Sat Jun 17 08:23:28 2023]
+Finished job 10.
+14 of 41 steps (34%) done
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_WT_pDox_DRB_0_temp0_5_matrix.gz.
+[Sat Jun 17 08:23:28 2023]
+Finished job 15.
+15 of 41 steps (37%) done
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_WT_pDox_DRB_0_temp1_a5_matrix.gz.
+[Sat Jun 17 08:23:28 2023]
+Finished job 17.
+16 of 41 steps (39%) done
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_WT_pDox_DRB_0_temp0_3_matrix.gz.
+[Sat Jun 17 08:23:28 2023]
+Finished job 37.
+17 of 41 steps (41%) done
+Select jobs to execute...
+
+[Sat Jun 17 08:23:28 2023]
+Job 14: Creating sense 5_matrix url for RTF1_WT_pDox_DRB_0
+
+Submitted DRMAA job 14 with external jobid 10710.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_MT_pDox_DRB_0_temp0_a5L_matrix.gz.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_MT_pDox_DRB_0_temp2_a5L_matrix.gz.
+[Sat Jun 17 08:23:29 2023]
+Finished job 24.
+18 of 41 steps (44%) done
+Select jobs to execute...
+
+[Sat Jun 17 08:23:29 2023]
+Job 23: fix standard asense 5L matrix files RTF1_MT_pDox_DRB_0
+
+Submitted DRMAA job 23 with external jobid 10711.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_WT_pDox_DRB_0_temp1_5L_matrix.gz.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_WT_pDox_DRB_0_temp2_5L_matrix.gz.
+[Sat Jun 17 08:23:29 2023]
+Finished job 27.
+19 of 41 steps (46%) done
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_WT_pDox_DRB_0_temp0_a3_matrix.gz.
+[Sat Jun 17 08:23:29 2023]
+Finished job 39.
+20 of 41 steps (49%) done
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_MT_pDox_DRB_0_temp1_a5_matrix.gz.
+[Sat Jun 17 08:23:29 2023]
+Finished job 12.
+21 of 41 steps (51%) done
+Select jobs to execute...
+
+[Sat Jun 17 08:23:29 2023]
+Job 26: fix standard sense 5L matrix files RTF1_WT_pDox_DRB_0
+
+Submitted DRMAA job 26 with external jobid 10712.
+
+[Sat Jun 17 08:23:29 2023]
+Job 36: Creating sense 3_matrix url for RTF1_WT_pDox_DRB_0
+
+Submitted DRMAA job 36 with external jobid 10713.
+
+[Sat Jun 17 08:23:30 2023]
+Job 9: Creating sense 5_matrix url for RTF1_MT_pDox_DRB_0
+
+Submitted DRMAA job 9 with external jobid 10714.
+[Sat Jun 17 08:23:39 2023]
+Finished job 31.
+22 of 41 steps (54%) done
+[Sat Jun 17 08:23:39 2023]
+Finished job 14.
+23 of 41 steps (56%) done
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_WT_pDox_DRB_0_temp1_a5L_matrix.gz.
+[Sat Jun 17 08:23:39 2023]
+Finished job 28.
+24 of 41 steps (59%) done
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_WT_pDox_DRB_0_temp0_543_sense_matrix.gz.
+[Sat Jun 17 08:23:39 2023]
+Finished job 6.
+25 of 41 steps (61%) done
+Select jobs to execute...
+
+[Sat Jun 17 08:23:39 2023]
+Job 5: url standard sense 543 matrix files RTF1_WT_pDox_DRB_0
+
+Submitted DRMAA job 5 with external jobid 10715.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_MT_pDox_DRB_0_temp0_543_sense_matrix.gz.
+[Sat Jun 17 08:23:39 2023]
+Finished job 3.
+26 of 41 steps (63%) done
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_MT_pDox_DRB_0_temp1_5L_matrix.gz.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_MT_pDox_DRB_0_temp2_5L_matrix.gz.
+[Sat Jun 17 08:23:39 2023]
+Finished job 22.
+27 of 41 steps (66%) done
+[Sat Jun 17 08:23:39 2023]
+Finished job 36.
+28 of 41 steps (68%) done
+[Sat Jun 17 08:23:40 2023]
+Finished job 9.
+29 of 41 steps (71%) done
+Select jobs to execute...
+
+[Sat Jun 17 08:23:40 2023]
+Job 21: fix standard sense 5L matrix files RTF1_MT_pDox_DRB_0
+
+Submitted DRMAA job 21 with external jobid 10716.
+
+[Sat Jun 17 08:23:40 2023]
+Job 2: url standard sense 543 matrix files RTF1_MT_pDox_DRB_0
+
+Submitted DRMAA job 2 with external jobid 10717.
+
+[Sat Jun 17 08:23:40 2023]
+Job 30: Creating 220812_RTF1_DRB_BrUseq sense 3_matrix url
+
+Submitted DRMAA job 30 with external jobid 10718.
+
+[Sat Jun 17 08:23:40 2023]
+Job 8: Creating 220812_RTF1_DRB_BrUseq sense 5_matrix url
+
+Submitted DRMAA job 8 with external jobid 10719.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_MT_pDox_DRB_0_temp1_a5L_matrix.gz.
+[Sat Jun 17 08:23:50 2023]
+Finished job 23.
+30 of 41 steps (73%) done
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/3.RTF1_MT_pDox_DRB_0_matrix.url.txt.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/3.RTF1_WT_pDox_DRB_0_matrix.url.txt.
+[Sat Jun 17 08:23:50 2023]
+Finished job 30.
+31 of 41 steps (76%) done
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/5.RTF1_MT_pDox_DRB_0_matrix.url.txt.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/5.RTF1_WT_pDox_DRB_0_matrix.url.txt.
+[Sat Jun 17 08:23:50 2023]
+Finished job 8.
+32 of 41 steps (78%) done
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_WT_pDox_DRB_0_temp0_5L_matrix.gz.
+[Sat Jun 17 08:24:00 2023]
+Finished job 26.
+33 of 41 steps (80%) done
+Select jobs to execute...
+
+[Sat Jun 17 08:24:00 2023]
+Job 25: Creating sense 5L_matrix url for RTF1_WT_pDox_DRB_0
+
+Submitted DRMAA job 25 with external jobid 10720.
+[Sat Jun 17 08:24:00 2023]
+Finished job 5.
+34 of 41 steps (83%) done
+[Sat Jun 17 08:24:00 2023]
+Finished job 2.
+35 of 41 steps (85%) done
+Select jobs to execute...
+
+[Sat Jun 17 08:24:01 2023]
+Job 1: Creating 220812_RTF1_DRB_BrUseq sense 543_matrix url
+
+Submitted DRMAA job 1 with external jobid 10721.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/RTF1_MT_pDox_DRB_0_temp0_5L_matrix.gz.
+[Sat Jun 17 08:24:10 2023]
+Finished job 21.
+36 of 41 steps (88%) done
+Select jobs to execute...
+
+[Sat Jun 17 08:24:10 2023]
+Job 20: Creating sense 5L_matrix url for RTF1_MT_pDox_DRB_0
+
+Submitted DRMAA job 20 with external jobid 10722.
+[Sat Jun 17 08:24:10 2023]
+Finished job 25.
+37 of 41 steps (90%) done
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/543.RTF1_MT_pDox_DRB_0_matrix.url.txt.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/543.RTF1_WT_pDox_DRB_0_matrix.url.txt.
+[Sat Jun 17 08:24:11 2023]
+Finished job 1.
+38 of 41 steps (93%) done
+[Sat Jun 17 08:24:30 2023]
+Finished job 20.
+39 of 41 steps (95%) done
+Select jobs to execute...
+
+[Sat Jun 17 08:24:30 2023]
+Job 19: Creating 220812_RTF1_DRB_BrUseq sense 5L_matrix url
+
+Submitted DRMAA job 19 with external jobid 10723.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/5L.RTF1_MT_pDox_DRB_0_matrix.url.txt.
+Removing temporary output file 220812_RTF1_DRB_BrUseq/matrix/5L.RTF1_WT_pDox_DRB_0_matrix.url.txt.
+[Sat Jun 17 08:24:40 2023]
+Finished job 19.
+40 of 41 steps (98%) done
+Select jobs to execute...
+
+[Sat Jun 17 08:24:41 2023]
+localrule all:
+    input: 220812_RTF1_DRB_BrUseq/URLS/543_220812_RTF1_DRB_BrUseq_hg38_1.5k_0.0k_5.0k_0.0k_3.5k_100bin_norm_None_chrM_matrix.url.txt, 220812_RTF1_DRB_BrUseq/URLS/5_220812_RTF1_DRB_BrUseq_hg38_1.0k_1.0k_50bin_norm_None_chrM_matrix.url.txt, 220812_RTF1_DRB_BrUseq/URLS/5L_220812_RTF1_DRB_BrUseq_hg38_0.0k_100.0k_500bin_norm_None_chrM_matrix.url.txt, 220812_RTF1_DRB_BrUseq/URLS/3_220812_RTF1_DRB_BrUseq_hg38_1.0k_5.0k_100bin_norm_None_chrM_matrix.url.txt
+    jobid: 0
+    resources: tmpdir=/tmp
+
+[Sat Jun 17 08:24:41 2023]
+Finished job 0.
+41 of 41 steps (100%) done
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/BRUseq/.snakemake/log/2023-06-17T082222.254970.snakemake.log

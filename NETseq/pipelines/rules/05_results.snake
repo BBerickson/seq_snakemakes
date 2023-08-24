@@ -1,0 +1,27 @@
+# ====== Rules for getting overall results =================================
+
+# gathering results
+rule gathering_results:
+    input:
+        PROJ + "/stats/" + PROJ + "_clumpify.tsv",
+        PROJ + "/stats/" + PROJ + "_bbduk.tsv",
+        PROJ + "/stats/" + PROJ + "_aligned.tsv",
+        PROJ + "/stats/" + PROJ + "_" + INDEX_SAMPLE + "_subsample.tsv",
+        PROJ + "/stats/" + PROJ + "_" + INDEX_SAMPLE + "_subsample_frac.tsv"
+    output:
+        PROJ + "/stats/" + PROJ + "_results.tsv"
+    params:
+        job_name = "results",
+        project  = PROJ + "/stats",
+        memory   = 4
+    log:
+        out = PROJ + "/logs/results.out",
+        err = PROJ + "/logs/results.err"
+    message:
+        "getting final results"
+    threads: 
+        1
+    script:
+        '../R_scripts/results.R'
+  
+  

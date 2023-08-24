@@ -1,0 +1,9 @@
+#===== Config file for Xrn2_codon_optimized ===================
+
+# Path to bowtie2 index 
+GENELIST:
+    "Xrn2_codon_opti"
+INDEX_PATH:
+    "/beevol/home/erickson/ref/Xrn2_Int11_codon_optimized/"
+INDEX_SAMPLE:
+    "Xrn2_codon_optimized"

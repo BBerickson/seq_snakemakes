@@ -1,0 +1,4 @@
+KeyError in line 120 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI/pipelines/rules/02_UMI_bowtie_split_bam.snake:
+'fragment_size'
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI/pipelines/mNETseq_UMI_spikeIN.snake", line 166, in <module>
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI/pipelines/rules/02_UMI_bowtie_split_bam.snake", line 120, in <module>

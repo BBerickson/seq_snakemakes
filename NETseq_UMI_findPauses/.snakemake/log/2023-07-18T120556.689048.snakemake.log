@@ -1,0 +1,578 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                       count    min threads    max threads
+----------------------  -------  -------------  -------------
+all                           1              1              1
+bamCoverage                   3             12             12
+bamCoverage_summary           1              1              1
+bowtie                        6             12             12
+bowtie_summary                1              1              1
+calculating_subsample         3              1              1
+cutadapt                      6              6              6
+cutadapt_summary              1              1              1
+dedup                         6              1              1
+dedup_summary                 1              1              1
+extract_umi                   6              1              1
+fastqc                       12              6              6
+fastqc_summary                1              1              1
+gathering_results             1              1              1
+subsample_summary             1              1              1
+subsample_summary_frac        1              1              1
+subsample_whole               6             16             16
+total                        57              1             16
+
+Select jobs to execute...
+
+[Tue Jul 18 12:05:57 2023]
+Job 2: Running FastQC on 293flpin_Xrn2_WT_R2_CTD_mnet_S22_L004_R1_001
+
+Submitted DRMAA job 2 with external jobid 126195.
+
+[Tue Jul 18 12:05:57 2023]
+Job 16: Extracting UMIs for 293flpin_Xrn2_WT_R2
+
+Submitted DRMAA job 16 with external jobid 126196.
+
+[Tue Jul 18 12:05:58 2023]
+Job 4: Running FastQC on 293flpin_Xrn2_MT_R2_CTD_mnet_S25_L004_R1_001
+
+Submitted DRMAA job 4 with external jobid 126197.
+
+[Tue Jul 18 12:05:58 2023]
+Job 6: Running FastQC on 293flpin_Xrn2_WT_R3_CTD_mnet_S23_L004_R1_001
+
+Submitted DRMAA job 6 with external jobid 126198.
+
+[Tue Jul 18 12:05:58 2023]
+Job 20: Extracting UMIs for 293flpin_Xrn2_WT_R3
+
+Submitted DRMAA job 20 with external jobid 126199.
+
+[Tue Jul 18 12:05:58 2023]
+Job 8: Running FastQC on 293flpin_Xrn2_MT_R3_CTD_mnet_S26_L004_R1_001
+
+Submitted DRMAA job 8 with external jobid 126200.
+
+[Tue Jul 18 12:05:58 2023]
+Job 22: Extracting UMIs for 293flpin_Xrn2_MT_R3
+
+Submitted DRMAA job 22 with external jobid 126201.
+
+[Tue Jul 18 12:05:58 2023]
+Job 10: Running FastQC on 293flpin_Xrn2_WT_R4_CTD_mnet_S24_L004_R1_001
+
+Submitted DRMAA job 10 with external jobid 126202.
+
+[Tue Jul 18 12:05:58 2023]
+Job 24: Extracting UMIs for 293flpin_Xrn2_WT_R4
+
+Submitted DRMAA job 24 with external jobid 126203.
+
+[Tue Jul 18 12:05:59 2023]
+Job 12: Running FastQC on 293flpin_Xrn2_MT_R4_CTD_mnet_S27_L004_R1_001
+
+Submitted DRMAA job 12 with external jobid 126204.
+
+[Tue Jul 18 12:05:59 2023]
+Job 26: Extracting UMIs for 293flpin_Xrn2_MT_R4
+
+Submitted DRMAA job 26 with external jobid 126205.
+
+[Tue Jul 18 12:05:59 2023]
+Job 3: Running FastQC on 293flpin_Xrn2_WT_R2_CTD_mnet_S22_L004_R2_001
+
+Submitted DRMAA job 3 with external jobid 126206.
+
+[Tue Jul 18 12:05:59 2023]
+Job 18: Extracting UMIs for 293flpin_Xrn2_MT_R2
+
+Submitted DRMAA job 18 with external jobid 126207.
+
+[Tue Jul 18 12:05:59 2023]
+Job 5: Running FastQC on 293flpin_Xrn2_MT_R2_CTD_mnet_S25_L004_R2_001
+
+Submitted DRMAA job 5 with external jobid 126208.
+
+[Tue Jul 18 12:05:59 2023]
+Job 7: Running FastQC on 293flpin_Xrn2_WT_R3_CTD_mnet_S23_L004_R2_001
+
+Submitted DRMAA job 7 with external jobid 126209.
+
+[Tue Jul 18 12:06:00 2023]
+Job 9: Running FastQC on 293flpin_Xrn2_MT_R3_CTD_mnet_S26_L004_R2_001
+
+Submitted DRMAA job 9 with external jobid 126210.
+
+[Tue Jul 18 12:06:00 2023]
+Job 11: Running FastQC on 293flpin_Xrn2_WT_R4_CTD_mnet_S24_L004_R2_001
+
+Submitted DRMAA job 11 with external jobid 126211.
+
+[Tue Jul 18 12:06:00 2023]
+Job 13: Running FastQC on 293flpin_Xrn2_MT_R4_CTD_mnet_S27_L004_R2_001
+
+Submitted DRMAA job 13 with external jobid 126212.
+[Tue Jul 18 12:19:46 2023]
+Finished job 12.
+1 of 57 steps (2%) done
+[Tue Jul 18 12:22:11 2023]
+Finished job 7.
+2 of 57 steps (4%) done
+[Tue Jul 18 12:23:17 2023]
+Finished job 6.
+3 of 57 steps (5%) done
+[Tue Jul 18 12:23:40 2023]
+Finished job 9.
+4 of 57 steps (7%) done
+[Tue Jul 18 12:23:51 2023]
+Finished job 5.
+5 of 57 steps (9%) done
+[Tue Jul 18 12:24:01 2023]
+Finished job 2.
+6 of 57 steps (11%) done
+[Tue Jul 18 12:24:13 2023]
+Finished job 13.
+7 of 57 steps (12%) done
+[Tue Jul 18 12:24:23 2023]
+Finished job 4.
+8 of 57 steps (14%) done
+[Tue Jul 18 12:24:23 2023]
+Finished job 8.
+9 of 57 steps (16%) done
+[Tue Jul 18 12:24:23 2023]
+Finished job 3.
+10 of 57 steps (18%) done
+[Tue Jul 18 12:25:14 2023]
+Finished job 11.
+11 of 57 steps (19%) done
+[Tue Jul 18 12:26:25 2023]
+Finished job 10.
+12 of 57 steps (21%) done
+Select jobs to execute...
+
+[Tue Jul 18 12:26:25 2023]
+Job 1: Creating Xrn2 FastQC summary
+
+Submitted DRMAA job 1 with external jobid 126284.
+[Tue Jul 18 12:26:35 2023]
+Finished job 1.
+13 of 57 steps (23%) done
+[Tue Jul 18 13:05:57 2023]
+Finished job 20.
+14 of 57 steps (25%) done
+Select jobs to execute...
+
+[Tue Jul 18 13:05:57 2023]
+Job 19: Running cutadapt on 293flpin_Xrn2_WT_R3
+
+Submitted DRMAA job 19 with external jobid 126556.
+Removing temporary output file Xrn2/UMI/293flpin_Xrn2_WT_R3_R1_umi.fastq.gz.
+Removing temporary output file Xrn2/UMI/293flpin_Xrn2_WT_R3_R2_umi.fastq.gz.
+Removing temporary output file Xrn2/UMI/293flpin_Xrn2_WT_R3_R2_trim.fastq.gz.
+[Tue Jul 18 13:10:09 2023]
+Finished job 19.
+15 of 57 steps (26%) done
+Select jobs to execute...
+
+[Tue Jul 18 13:10:09 2023]
+Job 32: Aligning reads with Bowtie2 for 293flpin_Xrn2_WT_R3
+
+Submitted DRMAA job 32 with external jobid 126590.
+[Tue Jul 18 13:10:28 2023]
+Finished job 16.
+16 of 57 steps (28%) done
+Select jobs to execute...
+
+[Tue Jul 18 13:10:29 2023]
+Job 15: Running cutadapt on 293flpin_Xrn2_WT_R2
+
+Submitted DRMAA job 15 with external jobid 126591.
+Removing temporary output file Xrn2/UMI/293flpin_Xrn2_WT_R2_R1_umi.fastq.gz.
+Removing temporary output file Xrn2/UMI/293flpin_Xrn2_WT_R2_R2_umi.fastq.gz.
+Removing temporary output file Xrn2/UMI/293flpin_Xrn2_WT_R2_R2_trim.fastq.gz.
+[Tue Jul 18 13:15:20 2023]
+Finished job 15.
+17 of 57 steps (30%) done
+Select jobs to execute...
+
+[Tue Jul 18 13:15:20 2023]
+Job 31: Aligning reads with Bowtie2 for 293flpin_Xrn2_WT_R2
+
+Submitted DRMAA job 31 with external jobid 126593.
+[Tue Jul 18 13:20:32 2023]
+Finished job 22.
+18 of 57 steps (32%) done
+Select jobs to execute...
+
+[Tue Jul 18 13:20:32 2023]
+Job 21: Running cutadapt on 293flpin_Xrn2_MT_R3
+
+Submitted DRMAA job 21 with external jobid 126594.
+Removing temporary output file Xrn2/UMI/293flpin_Xrn2_WT_R3_R1_trim.fastq.gz.
+[Tue Jul 18 13:21:22 2023]
+Finished job 32.
+19 of 57 steps (33%) done
+Select jobs to execute...
+
+[Tue Jul 18 13:21:22 2023]
+Job 39: Removing duplicates for 293flpin_Xrn2_WT_R3
+
+Submitted DRMAA job 39 with external jobid 126595.
+[Tue Jul 18 13:21:42 2023]
+Finished job 26.
+20 of 57 steps (35%) done
+Select jobs to execute...
+
+[Tue Jul 18 13:21:42 2023]
+Job 25: Running cutadapt on 293flpin_Xrn2_MT_R4
+
+Submitted DRMAA job 25 with external jobid 126596.
+Removing temporary output file Xrn2/UMI/293flpin_Xrn2_MT_R3_R2_umi.fastq.gz.
+Removing temporary output file Xrn2/UMI/293flpin_Xrn2_MT_R3_R1_umi.fastq.gz.
+Removing temporary output file Xrn2/UMI/293flpin_Xrn2_MT_R3_R2_trim.fastq.gz.
+[Tue Jul 18 13:25:23 2023]
+Finished job 21.
+21 of 57 steps (37%) done
+Select jobs to execute...
+
+[Tue Jul 18 13:25:24 2023]
+Job 29: Aligning reads with Bowtie2 for 293flpin_Xrn2_MT_R3
+
+Submitted DRMAA job 29 with external jobid 126628.
+[Tue Jul 18 13:26:03 2023]
+Finished job 18.
+22 of 57 steps (39%) done
+Select jobs to execute...
+
+[Tue Jul 18 13:26:03 2023]
+Job 17: Running cutadapt on 293flpin_Xrn2_MT_R2
+
+Submitted DRMAA job 17 with external jobid 126629.
+Removing temporary output file Xrn2/UMI/293flpin_Xrn2_MT_R4_R1_umi.fastq.gz.
+Removing temporary output file Xrn2/UMI/293flpin_Xrn2_MT_R4_R2_umi.fastq.gz.
+Removing temporary output file Xrn2/UMI/293flpin_Xrn2_MT_R4_R2_trim.fastq.gz.
+[Tue Jul 18 13:26:44 2023]
+Finished job 25.
+23 of 57 steps (40%) done
+Select jobs to execute...
+
+[Tue Jul 18 13:26:44 2023]
+Job 30: Aligning reads with Bowtie2 for 293flpin_Xrn2_MT_R4
+
+Submitted DRMAA job 30 with external jobid 126630.
+Removing temporary output file Xrn2/UMI/293flpin_Xrn2_WT_R2_R1_trim.fastq.gz.
+[Tue Jul 18 13:27:14 2023]
+Finished job 31.
+24 of 57 steps (42%) done
+Select jobs to execute...
+
+[Tue Jul 18 13:27:14 2023]
+Job 38: Removing duplicates for 293flpin_Xrn2_WT_R2
+
+Submitted DRMAA job 38 with external jobid 126631.
+[Tue Jul 18 13:29:14 2023]
+Finished job 24.
+25 of 57 steps (44%) done
+Select jobs to execute...
+
+[Tue Jul 18 13:29:15 2023]
+Job 23: Running cutadapt on 293flpin_Xrn2_WT_R4
+
+Submitted DRMAA job 23 with external jobid 126632.
+Removing temporary output file Xrn2/UMI/293flpin_Xrn2_MT_R2_R2_umi.fastq.gz.
+Removing temporary output file Xrn2/UMI/293flpin_Xrn2_MT_R2_R1_umi.fastq.gz.
+Removing temporary output file Xrn2/UMI/293flpin_Xrn2_MT_R2_R2_trim.fastq.gz.
+[Tue Jul 18 13:30:45 2023]
+Finished job 17.
+26 of 57 steps (46%) done
+Select jobs to execute...
+
+[Tue Jul 18 13:30:45 2023]
+Job 28: Aligning reads with Bowtie2 for 293flpin_Xrn2_MT_R2
+
+Submitted DRMAA job 28 with external jobid 126633.
+Removing temporary output file Xrn2/UMI/293flpin_Xrn2_WT_R4_R1_umi.fastq.gz.
+Removing temporary output file Xrn2/UMI/293flpin_Xrn2_WT_R4_R2_umi.fastq.gz.
+Removing temporary output file Xrn2/UMI/293flpin_Xrn2_WT_R4_R2_trim.fastq.gz.
+[Tue Jul 18 13:34:16 2023]
+Finished job 23.
+27 of 57 steps (47%) done
+Select jobs to execute...
+
+[Tue Jul 18 13:34:16 2023]
+Job 14: Creating Xrn2 cutadapt summary
+
+Submitted DRMAA job 14 with external jobid 126636.
+
+[Tue Jul 18 13:34:17 2023]
+Job 33: Aligning reads with Bowtie2 for 293flpin_Xrn2_WT_R4
+
+Submitted DRMAA job 33 with external jobid 126637.
+[Tue Jul 18 13:34:26 2023]
+Finished job 14.
+28 of 57 steps (49%) done
+Removing temporary output file Xrn2/UMI/293flpin_Xrn2_MT_R3_R1_trim.fastq.gz.
+[Tue Jul 18 13:36:57 2023]
+Finished job 29.
+29 of 57 steps (51%) done
+Select jobs to execute...
+
+[Tue Jul 18 13:36:57 2023]
+Job 36: Removing duplicates for 293flpin_Xrn2_MT_R3
+
+Submitted DRMAA job 36 with external jobid 126643.
+Removing temporary output file Xrn2/UMI/293flpin_Xrn2_MT_R4_R1_trim.fastq.gz.
+[Tue Jul 18 13:38:07 2023]
+Finished job 30.
+30 of 57 steps (53%) done
+Select jobs to execute...
+
+[Tue Jul 18 13:38:07 2023]
+Job 37: Removing duplicates for 293flpin_Xrn2_MT_R4
+
+Submitted DRMAA job 37 with external jobid 126644.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_WT_R3_hg38_220215_220218.bam.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_WT_R3_hg38_220215_220218.bam.bai.
+[Tue Jul 18 13:43:39 2023]
+Finished job 39.
+31 of 57 steps (54%) done
+Removing temporary output file Xrn2/UMI/293flpin_Xrn2_MT_R2_R1_trim.fastq.gz.
+[Tue Jul 18 13:43:49 2023]
+Finished job 28.
+32 of 57 steps (56%) done
+Select jobs to execute...
+
+[Tue Jul 18 13:43:49 2023]
+Job 35: Removing duplicates for 293flpin_Xrn2_MT_R2
+
+Submitted DRMAA job 35 with external jobid 126671.
+Removing temporary output file Xrn2/UMI/293flpin_Xrn2_WT_R4_R1_trim.fastq.gz.
+[Tue Jul 18 13:46:20 2023]
+Finished job 33.
+33 of 57 steps (58%) done
+Select jobs to execute...
+
+[Tue Jul 18 13:46:20 2023]
+Job 40: Removing duplicates for 293flpin_Xrn2_WT_R4
+
+Submitted DRMAA job 40 with external jobid 126672.
+
+[Tue Jul 18 13:46:20 2023]
+Job 27: Creating Xrn2 bowtie2 summary
+
+Submitted DRMAA job 27 with external jobid 126673.
+[Tue Jul 18 13:46:30 2023]
+Finished job 27.
+34 of 57 steps (60%) done
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_WT_R2_hg38_220215_220218.bam.bai.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_WT_R2_hg38_220215_220218.bam.
+[Tue Jul 18 13:53:42 2023]
+Finished job 38.
+35 of 57 steps (61%) done
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_MT_R3_hg38_220215_220218.bam.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_MT_R3_hg38_220215_220218.bam.bai.
+[Tue Jul 18 13:59:33 2023]
+Finished job 36.
+36 of 57 steps (63%) done
+Select jobs to execute...
+
+[Tue Jul 18 13:59:33 2023]
+Job 45: getting subsample norm for xrn2-r3
+
+Submitted DRMAA job 45 with external jobid 126708.
+[Tue Jul 18 13:59:53 2023]
+Finished job 45.
+37 of 57 steps (65%) done
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_MT_R4_hg38_220215_220218.bam.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_MT_R4_hg38_220215_220218.bam.bai.
+[Tue Jul 18 14:01:13 2023]
+Finished job 37.
+38 of 57 steps (67%) done
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_MT_R2_hg38_220215_220218.bam.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_MT_R2_hg38_220215_220218.bam.bai.
+[Tue Jul 18 14:08:05 2023]
+Finished job 35.
+39 of 57 steps (68%) done
+Select jobs to execute...
+
+[Tue Jul 18 14:08:05 2023]
+Job 44: getting subsample norm for xrn2-r2
+
+Submitted DRMAA job 44 with external jobid 126742.
+[Tue Jul 18 14:08:25 2023]
+Finished job 44.
+40 of 57 steps (70%) done
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_WT_R4_hg38_220215_220218.bam.bai.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_WT_R4_hg38_220215_220218.bam.
+[Tue Jul 18 14:14:56 2023]
+Finished job 40.
+41 of 57 steps (72%) done
+Select jobs to execute...
+
+[Tue Jul 18 14:14:56 2023]
+Job 34: Creating Xrn2 dedup summary
+
+Submitted DRMAA job 34 with external jobid 126743.
+
+[Tue Jul 18 14:14:56 2023]
+Job 46: getting subsample norm for xrn2-r4
+
+Submitted DRMAA job 46 with external jobid 126744.
+[Tue Jul 18 14:15:06 2023]
+Finished job 34.
+42 of 57 steps (74%) done
+[Tue Jul 18 14:15:16 2023]
+Finished job 46.
+43 of 57 steps (75%) done
+Select jobs to execute...
+
+[Tue Jul 18 14:15:16 2023]
+Job 43: Creating Xrn2 subsample summary
+
+Submitted DRMAA job 43 with external jobid 126745.
+Removing temporary output file Xrn2/bams/xrn2-r2_hg38_subsample_frac.txt.
+Removing temporary output file Xrn2/bams/xrn2-r3_hg38_subsample_frac.txt.
+Removing temporary output file Xrn2/bams/xrn2-r4_hg38_subsample_frac.txt.
+[Tue Jul 18 14:15:26 2023]
+Finished job 43.
+44 of 57 steps (77%) done
+Select jobs to execute...
+
+[Tue Jul 18 14:15:26 2023]
+Job 48: Subsampling reads for 293flpin_Xrn2_WT_R3 INDEX_SAMPLE 
+
+Submitted DRMAA job 48 with external jobid 126746.
+
+[Tue Jul 18 14:15:26 2023]
+Job 50: Subsampling reads for 293flpin_Xrn2_WT_R4 INDEX_SAMPLE 
+
+Submitted DRMAA job 50 with external jobid 126747.
+
+[Tue Jul 18 14:15:26 2023]
+Job 42: Subsampling reads for 293flpin_Xrn2_WT_R2 INDEX_SAMPLE 
+
+Submitted DRMAA job 42 with external jobid 126748.
+
+[Tue Jul 18 14:15:26 2023]
+Job 47: Subsampling reads for 293flpin_Xrn2_MT_R2 INDEX_SAMPLE 
+
+Submitted DRMAA job 47 with external jobid 126749.
+
+[Tue Jul 18 14:15:26 2023]
+Job 49: Subsampling reads for 293flpin_Xrn2_MT_R3 INDEX_SAMPLE 
+
+Submitted DRMAA job 49 with external jobid 126750.
+
+[Tue Jul 18 14:15:27 2023]
+Job 51: Subsampling reads for 293flpin_Xrn2_MT_R4 INDEX_SAMPLE 
+
+Submitted DRMAA job 51 with external jobid 126751.
+[Tue Jul 18 14:16:26 2023]
+Finished job 50.
+45 of 57 steps (79%) done
+[Tue Jul 18 14:16:26 2023]
+Finished job 47.
+46 of 57 steps (81%) done
+[Tue Jul 18 14:16:26 2023]
+Finished job 49.
+47 of 57 steps (82%) done
+[Tue Jul 18 14:16:26 2023]
+Finished job 51.
+48 of 57 steps (84%) done
+Select jobs to execute...
+
+[Tue Jul 18 14:16:26 2023]
+Job 56: stranded bigwigs 5prim or 3prim reads in R1-R2 orentation for xrn2-r4
+
+Submitted DRMAA job 56 with external jobid 126752.
+[Tue Jul 18 14:16:36 2023]
+Finished job 48.
+49 of 57 steps (86%) done
+Select jobs to execute...
+
+[Tue Jul 18 14:16:36 2023]
+Job 55: stranded bigwigs 5prim or 3prim reads in R1-R2 orentation for xrn2-r3
+
+Submitted DRMAA job 55 with external jobid 126753.
+[Tue Jul 18 14:16:37 2023]
+Finished job 42.
+50 of 57 steps (88%) done
+Select jobs to execute...
+
+[Tue Jul 18 14:16:37 2023]
+Job 54: stranded bigwigs 5prim or 3prim reads in R1-R2 orentation for xrn2-r2
+
+Submitted DRMAA job 54 with external jobid 126754.
+
+[Tue Jul 18 14:16:37 2023]
+Job 41: Creating Xrn2 subsample_whole summary
+
+Submitted DRMAA job 41 with external jobid 126755.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_WT_R2_hg38_dedup_subsample.txt.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_MT_R2_hg38_dedup_subsample.txt.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_WT_R3_hg38_dedup_subsample.txt.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_MT_R3_hg38_dedup_subsample.txt.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_WT_R4_hg38_dedup_subsample.txt.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_MT_R4_hg38_dedup_subsample.txt.
+[Tue Jul 18 14:16:47 2023]
+Finished job 41.
+51 of 57 steps (89%) done
+Select jobs to execute...
+
+[Tue Jul 18 14:16:47 2023]
+Job 52: getting final results
+
+Submitted DRMAA job 52 with external jobid 126756.
+[Tue Jul 18 14:17:06 2023]
+Finished job 52.
+52 of 57 steps (91%) done
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_WT_R2_hg38_220215_220218_dedup_subsample.bam.bai.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_WT_R2_hg38_220215_220218_dedup_subsample.bam.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_MT_R2_hg38_220215_220218_dedup_subsample.bam.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_MT_R2_hg38_220215_220218_dedup_subsample.bam.bai.
+[Tue Jul 18 14:37:53 2023]
+Finished job 54.
+53 of 57 steps (93%) done
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_WT_R3_hg38_220215_220218_dedup_subsample.bam.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_WT_R3_hg38_220215_220218_dedup_subsample.bam.bai.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_MT_R3_hg38_220215_220218_dedup_subsample.bam.bai.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_MT_R3_hg38_220215_220218_dedup_subsample.bam.
+[Tue Jul 18 14:40:33 2023]
+Finished job 55.
+54 of 57 steps (95%) done
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_WT_R4_hg38_220215_220218_dedup_subsample.bam.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_WT_R4_hg38_220215_220218_dedup_subsample.bam.bai.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_MT_R4_hg38_220215_220218_dedup_subsample.bam.
+Removing temporary output file Xrn2/bams/293flpin_Xrn2_MT_R4_hg38_220215_220218_dedup_subsample.bam.bai.
+[Tue Jul 18 14:42:13 2023]
+Finished job 56.
+55 of 57 steps (96%) done
+Select jobs to execute...
+
+[Tue Jul 18 14:42:13 2023]
+Job 53: Creating Xrn2 bamCoverage summary
+
+Submitted DRMAA job 53 with external jobid 126784.
+Removing temporary output file Xrn2/bw/xrn2-r2_bamCoverage_spike_stats.txt.
+Removing temporary output file Xrn2/bw/xrn2-r3_bamCoverage_spike_stats.txt.
+Removing temporary output file Xrn2/bw/xrn2-r4_bamCoverage_spike_stats.txt.
+[Tue Jul 18 14:42:23 2023]
+Finished job 53.
+56 of 57 steps (98%) done
+Select jobs to execute...
+
+[Tue Jul 18 14:42:23 2023]
+localrule all:
+    input: Xrn2/stats/Xrn2_fastqc.tsv, Xrn2/stats/Xrn2_cutadapt.tsv, Xrn2/stats/Xrn2_aligned.tsv, Xrn2/stats/Xrn2_hg38_dedup.tsv, Xrn2/stats/Xrn2_hg38_subsample.tsv, Xrn2/stats/Xrn2_results.tsv, Xrn2/URLS/Xrn2_hg38_subsample_bw_URL.txt
+    jobid: 0
+    resources: tmpdir=/tmp
+
+[Tue Jul 18 14:42:23 2023]
+Finished job 0.
+57 of 57 steps (100%) done
+The code used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-code-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-code-changes)'.
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI_findPauses/.snakemake/log/2023-07-18T120556.689048.snakemake.log

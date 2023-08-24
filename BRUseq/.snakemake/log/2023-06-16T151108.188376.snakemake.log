@@ -1,0 +1,4 @@
+AttributeError in line 118 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/BRUseq/pipelines/BrUseq_stranded_spikeIN.snake:
+'dict' object has no attribute 'remove'
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/BRUseq/pipelines/BrUseq_stranded_spikeIN.snake", line 122, in <module>
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/BRUseq/pipelines/BrUseq_stranded_spikeIN.snake", line 118, in _get_colors

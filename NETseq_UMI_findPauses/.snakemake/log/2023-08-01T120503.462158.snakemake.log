@@ -1,0 +1,3 @@
+SyntaxError in line 19 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI_findPauses/pipelines/rules/07_FP_plots.snake:
+invalid syntax
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI_findPauses/pipelines/mNETseq_pauses.snake", line 174, in <module>

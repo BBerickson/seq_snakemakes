@@ -1,0 +1,4 @@
+WorkflowError in line 166 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI/pipelines/mNETseq_UMI_spikeIN.snake:
+Failed to open source file /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI/pipelines/rules/02_UMI_bowtie_split_bam.snake
+FileNotFoundError: [Errno 2] No such file or directory: '/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI/pipelines/rules/02_UMI_bowtie_split_bam.snake'
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI/pipelines/mNETseq_UMI_spikeIN.snake", line 166, in <module>

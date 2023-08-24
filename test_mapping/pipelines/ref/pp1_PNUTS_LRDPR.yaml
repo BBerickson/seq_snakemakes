@@ -1,0 +1,9 @@
+#===== Config file for e_coli ===================
+
+# Path to mixed bowtie2 index and chrom name txt file
+GENELIST:
+    "LRDPR"
+INDEX_PATH:
+    "/beevol/home/erickson/ref/pp1_PNUTS/"
+INDEX_SAMPLE:
+    "pp1_PNUTS_LRDPR"

@@ -1,0 +1,9 @@
+#===== Config file for human Ribosomal ===================
+
+# Path to bowtie2 index files
+GENELIST:
+    "Ribo"
+INDEX_PATH:
+    "/beevol/home/erickson/ref/humRibosomal/"
+INDEX_SAMPLE:
+    "humRibosomal"

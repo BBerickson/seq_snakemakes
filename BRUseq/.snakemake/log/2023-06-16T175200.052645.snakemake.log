@@ -1,0 +1,3 @@
+NameError in line 48 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/BRUseq/pipelines/BrUseq_matrix.snake:
+name 'GRPS_UNIQ2' is not defined
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/BRUseq/pipelines/BrUseq_matrix.snake", line 48, in <module>
