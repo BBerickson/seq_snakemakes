@@ -41,7 +41,7 @@ SAMPLES:
 # spikeIN (mm10), chrM_spikeIN (chrM_mm10), 
 # OR, OR_enrich if input with spike in is paired up
 NORM:
-  "None"
+  "OR_enrich"
   
   # set RGB colors for bw urls and table files, 
   # list as many colors as samples (not inputs) 
@@ -65,7 +65,7 @@ USER:
   "User7"
   
 # file suffix
-#   ".fa.gz"
+#   ".fq.gz"
 #   ".fastq.gz"
 SFX:
   ".fastq.gz"

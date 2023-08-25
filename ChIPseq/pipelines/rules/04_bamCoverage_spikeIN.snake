@@ -63,7 +63,7 @@ rule calculating_OR:
     threads: 
         1
     script:
-        '/beevol/home/erickson/src/pipelines/R_scripts/count_OR.R'
+        '../R_scripts/count_OR.R'
   
 # gathering results
 rule gathering_OR_results:

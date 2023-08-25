@@ -124,7 +124,7 @@ def _get_matrixtype(normUsing, computeMatrix,genelist):
 
 
 NORM543 = _get_matrixtype(NORMS,CMD_PARAMS["standared543"],GENELIST)
-NORM5 = _get_matrixtype(NORMS,CMD_PARAMS["focus5"],GENELIST
+NORM5 = _get_matrixtype(NORMS,CMD_PARAMS["focus5"],GENELIST)
 NORM3 = _get_matrixtype(NORMS,CMD_PARAMS["standared3"],GENELIST)
 NORM5L = _get_matrixtype(NORMS,CMD_PARAMS["long5"],GENELIST)
 NORMPI = NORMS + GENELIST
