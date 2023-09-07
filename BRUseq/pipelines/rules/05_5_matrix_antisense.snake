@@ -84,7 +84,7 @@ rule my_5_url_a:
         job_name = PROJ + "_5_matrix_url",
         memory   = 4,
         color    = _get_col,
-        url_anti = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + PROJ + "/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5A + "_anti_matrix.gz",
+        url_anti = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5A + "_anti_matrix.gz",
         matrix2g = PROJ + "/matrix/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5A + "_anti_matrix"
     log:
         out = PROJ + "/logs/{group}_sense_5_matrix_url.out",
@@ -98,9 +98,9 @@ rule my_5_url_a:
         # fix for strange side affect that only the 1 line loads from sandbox
         gunzip {input.matrix2}
         gzip {params.matrix2g}
-        ssh amc-sandbox 'mkdir -p ./public_html/{PROJ}'
+        ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
         echo {params.url_anti} 5 5.{wildcards.group}_{SEQ_DATE}_anti {params.color} >> {output[0]}
-        scp {input.matrix2} amc-sandbox:./public_html/{PROJ}
+        scp {input.matrix2} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
         
         """
         

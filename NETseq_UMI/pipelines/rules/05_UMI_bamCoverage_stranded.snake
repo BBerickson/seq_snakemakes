@@ -24,8 +24,8 @@ rule bamCoverage:
         memory   = MEMORY * 2,
         args     = CMD_PARAMS["bamCoverage"],
         color    = _get_col,
-        url_fw   = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + PROJ + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
-        url_rev  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + PROJ + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw"
+        url_fw   = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
+        url_rev  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw"
     log:
         out = PROJ + "/logs/{sample}_bamCoverage.out",
         err = PROJ + "/logs/{sample}_bamCoverage.err"
@@ -52,9 +52,9 @@ rule bamCoverage:
         
         echo "track type=bigWig visibility=full name='{wildcards.sample}_{SEQ_DATE}_{NORMS}_fw' description='{wildcards.sample}_{SEQ_DATE}_{NORMS}_fw' color={params.color} bigDataUrl={params.url_fw}" > {output.stats}
         echo "track type=bigWig visibility=full name='{wildcards.sample}_{SEQ_DATE}_{NORMS}_rev' description='{wildcards.sample}_{SEQ_DATE}_{NORMS}_rev' color={params.color} bigDataUrl={params.url_rev}" >> {output.stats}
-        ssh amc-sandbox 'mkdir -p ./public_html/{PROJ}'
-        scp {output.fw} amc-sandbox:./public_html/{PROJ}
-        scp {output.rev} amc-sandbox:./public_html/{PROJ}
+        ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
+        scp {output.fw} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
+        scp {output.rev} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
         """
 
 

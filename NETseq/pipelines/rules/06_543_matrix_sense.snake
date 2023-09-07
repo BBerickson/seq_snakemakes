@@ -85,7 +85,7 @@ rule urls_543_sense_matrix:
         job_name = "{group}_sense_matrix",
         memory   = 20,
         color    = _get_col,
-        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + PROJ + "/543_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM543 + "_matrix.gz"
+        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/543_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM543 + "_matrix.gz"
     log:
         out = PROJ + "/logs/{group}_url_543_sense_matrix.out",
         err = PROJ + "/logs/{group}_url_543_sense_matrix.err"
@@ -98,8 +98,8 @@ rule urls_543_sense_matrix:
         # fix R appended file remote read error
         computeMatrixOperations relabel -m {input} -o {input}
         echo {params.url_out} 543 543.{wildcards.group}_{SEQ_DATE} {params.color} >> {output.urls}
-        ssh amc-sandbox 'mkdir -p ./public_html/{PROJ}'
-        scp {input} amc-sandbox:./public_html/{PROJ}
+        ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
+        scp {input} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
 
         """
                 

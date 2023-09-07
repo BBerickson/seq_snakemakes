@@ -3,7 +3,7 @@
 
 # Project name to use for naming summary files
 PROJ:
-    "230426_H66K_DRB"
+    "H66K_DRB"
     
 SEQ_DATE:
     "230426"
@@ -12,7 +12,7 @@ SEQ_DATE:
 # Multiple directories can be provided. The sample names must correspond
 # to the begining of the fastq name.
 RAW_DATA:
-    - "/beevol/home/bentleyd/fastq/230426_A00405_0683_AH2YTKDSX7"
+    - "/beevol/home/erickson/fastqs/230426_A00405_0683_AH2YTKDSX7"
     
 # The sample names must match the beginning of a fastq file in one of the
 # directories listed under RAW_DATA. If the sample name
@@ -37,8 +37,8 @@ SAMPLES:
       - "293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input"
       
       
-# norm bw with scaleFactor with : None, chrM_sample (chrM_hg38), 
-# spikeIN (mm10), chrM_spikeIN (chrM_mm10), 
+# norm bw with --scaleFactor, (if using --normalizeUsing set to None), 
+# sample (hg38), spikeIN (mm10), enrich (enrich_hg38 | enrich_mm10), 
 # OR, OR_enrich if input with spike in is paired up
 NORM:
   "OR_enrich"
@@ -57,7 +57,7 @@ CMD_PARAMS:
     clumpify:     " overwrite=t dedupe=t dupedist=12000 optical=f "
     bbduk:        " overwrite=t ftm=5 minlen=50 ktrim=r k=23 hdist=1 mink=11 tpe tbo ecco=t "
     bowtie2:      " --local "
-    bamCoverage:  " --binSize 10 --normalizeUsing CPM --skipNonCoveredRegions --extendReads 300 --centerReads "
+    bamCoverage:  " --binSize 10 --skipNonCoveredRegions --extendReads 300 --centerReads "
     fragment_size: " --maxFragmentLength 1000 "
     
 # sandbox User #

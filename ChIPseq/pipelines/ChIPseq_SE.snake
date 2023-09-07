@@ -139,8 +139,8 @@ def _get_normtype(normUsing, scaleFactor):
     else:
       word = ""
     if not re.search(r"(?i)None", scaleFactor):
-      word2 = scaleFactor.split("_")
-      word = word + "_" + word2[0]
+      word2 = scaleFactor
+      word = word + "_" + word2
     message = "norm" + word
     return message
 

@@ -12,7 +12,7 @@ SEQ_DATE:
 # Multiple directories can be provided. The sample names must correspond
 # to the begining of the fastq name.
 RAW_DATA:
-    - "/beevol/home/bentleyd/fastq/230316_VH01071_118_AACL7LNM5"
+    - "/beevol/home/erickson/fastqs/230316_VH01071_118_AACL7LNM5"
 
 # Sample groups, samples in a group will be subsampled to the smallest sample 
 # The sample names must match the beginning of a fastq file in one of the

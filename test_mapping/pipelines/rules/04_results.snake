@@ -19,6 +19,6 @@ rule gathering_results:
     threads: 
         1
     script:
-        '/beevol/home/erickson/src/pipelines/R_scripts/results.R'
+        '../R_scripts/results.R'
   
   

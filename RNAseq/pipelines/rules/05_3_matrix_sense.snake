@@ -85,7 +85,7 @@ rule my_3_url:
         job_name = PROJ + "_3_matrix_url",
         memory   = 4,
         color    = _get_col,
-        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + PROJ + "/3_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_matrix.gz",
+        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/3_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_matrix.gz",
         matrix1g = PROJ + "/matrix/3_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_matrix"
     log:
         out = PROJ + "/logs/{group}_sense_3_matrix_url.out",
@@ -100,8 +100,8 @@ rule my_3_url:
         gunzip {input.matrix1}
         gzip {params.matrix1g}
         echo {params.url_out} 3 3.{wildcards.group}_{SEQ_DATE} {params.color} >> {output[0]}
-        ssh amc-sandbox 'mkdir -p ./public_html/{PROJ}'
-        scp {input.matrix1} amc-sandbox:./public_html/{PROJ}
+        ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
+        scp {input.matrix1} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
         
         """
         

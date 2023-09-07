@@ -18,8 +18,9 @@ shell.prefix("source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; 
 PROJ          = config["PROJ"]
 SAMPLES       = config["SAMPLES"]
 SEQ_DATE      = config["SEQ_DATE"]
-INDEX_PATH    = config["INDEX_PATH"]
+IINDEX_MIX    = config["INDEX_MIX"]
 INDEX_SAMPLE  = config["INDEX_SAMPLE"]
+INDEX_SPIKE   = config["INDEX_SPIKE"]
 MY_REF        = config["MY_REF"]
 PI_REF        = config["PI_REF"]
 CMD_PARAMS    = config["CMD_PARAMS"]
@@ -79,8 +80,8 @@ def _get_normtype(normUsing, scaleFactor):
     else:
       word = ""
     if not re.search(r"(?i)None", scaleFactor):
-      word2 = scaleFactor.split("_")
-      word = word + "_" + word2[0]
+      word2 = scaleFactor
+      word = word + "_" + word2
     message = "norm" + word
     return message
 
@@ -132,6 +133,9 @@ NORMPI = NORMS + GENELIST
 # Final output files
 rule all:
     input:
+        # bamCoverage
+        PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + "_" + NORMS + "_bw_URL.txt",
+        
         # 543 matrix file
         PROJ + "/URLS/543_" + PROJ + "_" + INDEX_SAMPLE + "_" + NORM543 + "_matrix.url.txt",
         
@@ -148,6 +152,8 @@ rule all:
         PROJ + "/URLS/PI_" + PROJ + "_" + INDEX_SAMPLE + "_" + NORMPI + "_matrix.url.txt"
 
 
+# BW with deeptools bamCoverage
+include: "rules/04_bamCoverage_spikeIN.snake"
 # 543 matrix file
 include: "rules/05_543_matrix.snake"
 # 5 matrix file

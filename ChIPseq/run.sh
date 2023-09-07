@@ -60,8 +60,9 @@ run_snakemake $snake "$samples $config $genome"
 
 # # Run pipeline to make table files of spikeIN
 # genome=$pipe_dir1/mm10.yaml
-# snake=$pipe_dir/ChIPseq_PE.snake
-# config=$pipe_dir/ChIPseq_Matrix.yaml
+# run_snakemake $snake "$samples $genome"
+# snake=$pipe_dir/ChIPseq_Matrix.snake
+# config=$pipe_dir/ChIPseq_matrix.yaml
 # 
 # run_snakemake $snake "$samples $config $genome"
 

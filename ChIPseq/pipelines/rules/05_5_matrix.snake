@@ -71,7 +71,7 @@ rule my_5_url:
         job_name = PROJ + "_5_matrix_url",
         memory   = 4,
         color    = _get_col,
-        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + PROJ + "/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5 + "_matrix.gz"
+        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5 + "_matrix.gz"
     log:
         out = PROJ + "/logs/{group}_5_matrix_url.out",
         err = PROJ + "/logs/{group}_5_matrix_url.err"
@@ -84,8 +84,8 @@ rule my_5_url:
         # fix R appended file remote read error
         computeMatrixOperations relabel -m {input} -o {input}
         echo {params.url_out} 5 5.{wildcards.group}_{SEQ_DATE} {params.color} >> {output[0]}
-        ssh amc-sandbox 'mkdir -p ./public_html/{PROJ}'
-        scp {input[0]} amc-sandbox:./public_html/{PROJ}
+        ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
+        scp {input[0]} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
         
         """
  

@@ -51,7 +51,6 @@ rule bowtie:
       
         echo "{INDEX_SAMPLE} $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" >> {output.reads}
         echo "enrich_{INDEX_SAMPLE} $(samtools view {output.bam} -L {params.enrich} -c | awk ' {{print $0}}')" >> {output.reads}
-        echo "chrM_{INDEX_SAMPLE} $(samtools view {output.bam} chrM -c | awk ' {{print $0}}')" >> {output.reads}
         
         """
 

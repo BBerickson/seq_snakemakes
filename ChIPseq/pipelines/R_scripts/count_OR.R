@@ -10,7 +10,7 @@ if(length(snakemake@input)>1){
   input <- NULL
 }
 
-if((type == "OR" | type == "OR_enrich") & !is.null(input)){
+if(str_detect(type,"OR|OR_enrich") & !is.null(input)){
   sam_en <- snakemake@params[["sam_en"]]
   spk_en <- snakemake@params[["spk_en"]]
   in_sam <- snakemake@params[["in_sam"]]
@@ -34,9 +34,13 @@ if((type == "OR" | type == "OR_enrich") & !is.null(input)){
     summarise(value=round((value1*value2_en)/(value3*value4_en),digits = 5)) %>% 
     mutate(name= "test", type= "OR_enrich") %>% 
     bind_rows(out,.)
-  # out1 <- out %>% full_join(ChIP,.,by="name") %>% mutate(value=as.integer(value*value2)) %>% dplyr::select(-value2)
-  # out <- out %>% dplyr::mutate(type=c("OR_factor", "OR_enrich_factor")) %>% 
-  #   bind_rows(.,out1)  
+  out1 <- out %>% full_join(ChIP,.,by="name") %>% 
+    mutate(value=round(10000000/as.integer(value2/value),digits = 5), type=paste0(type,"_",in_sam)) %>% 
+    dplyr::select(-value2) 
+  out <- out %>% full_join(ChIPSpike,.,by="name") %>% 
+    mutate(value=round(10000000/as.integer(value4/value),digits = 5), type=paste0(type,"_",in_spk)) %>% 
+    dplyr::select(-value4) %>% 
+    bind_rows(out,out1,.)
 } else {
   ChIP <- filter(samp,str_detect(name,paste0("^",type,"$"))) %>% mutate(name="test","type"=type)
   out <- tibble(name="test", value = 1e6, type=type) %>% 

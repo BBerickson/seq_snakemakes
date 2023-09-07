@@ -141,7 +141,7 @@ rule my_bowtie_sample_url:
     params:
         job_name = PROJ + "_bowtie_sample_url",
         memory   = 4,
-        url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + PROJ + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam"
+        url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam"
     log:
         out = PROJ + "/logs/{sample}_" + PROJ + "_bowtie_sample_url.out",
         err = PROJ + "/logs/{sample}_" + PROJ + "_bowtie_sample_url.err"
@@ -152,8 +152,8 @@ rule my_bowtie_sample_url:
     shell:
         """
           echo "{params.url}" >> {output}
-          ssh amc-sandbox 'mkdir -p ./public_html/{PROJ}'
-          scp {input.bam}* amc-sandbox:./public_html/{PROJ}
+          ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
+          scp {input.bam}* amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
           
         """
         

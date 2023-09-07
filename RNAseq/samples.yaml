@@ -3,7 +3,7 @@
 
 # Project name to use for naming summary files
 PROJ:
-    "220812_RTF1_RNAseq"
+    "RTF1_RNAseq"
     
 SEQ_DATE:
   "220114_220121"

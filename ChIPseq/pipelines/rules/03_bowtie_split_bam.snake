@@ -91,8 +91,6 @@ rule bowtie_counts:
         echo "{INDEX_SPIKE} $(samtools idxstats {input.bam3} | awk '{{s+=$3}} END {{print s/2}}')" >> {output.stats2}
         echo "enrich_{INDEX_SAMPLE} $(samtools view {input.bam2} -L {params.enrich2} -c | awk ' {{print $0/2}}')" >> {output.stats2}
         echo "enrich_{INDEX_SPIKE} $(samtools view {input.bam3} -L {params.enrich3} -c | awk ' {{print $0/2}}')" >> {output.stats2}
-        echo "chrM_{INDEX_SAMPLE} $(samtools view {input.bam2} chrM -c | awk ' {{print $0/2}}')" >> {output.stats2}
-        echo "chrM_{INDEX_SPIKE} $(samtools view {input.bam3} chrM -c | awk ' {{print $0/2}}')" >> {output.stats2}
         
         """
 

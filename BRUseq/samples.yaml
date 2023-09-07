@@ -3,7 +3,7 @@
 
 # Project name to use for naming Directory and summary files
 PROJ:
-    "220812_RTF1_DRB_BrUseq"
+    "RTF1_DRB_BrUseq"
     
 SEQ_DATE:
     "220812"
@@ -12,7 +12,7 @@ SEQ_DATE:
 # Multiple directories can be provided. The sample names must correspond
 # to the begining of the fastq name.
 RAW_DATA:
-    - "/beevol/home/bentleyd/fastq/220812_A00405_0612_AHCLTGDSX5"
+    - "/beevol/home/erickson/fastqs/220812_A00405_0612_AHCLTGDSX5"
 
 # The sample names must match the beginning of a fastq file in one of the
 # directories listed under RAW_DATA. If the sample name
