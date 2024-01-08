@@ -43,13 +43,13 @@ run_snakemake() {
 pipe_dir=pipelines
 pipe_dir1=pipelines/ref
 # index and configs
-snake=$pipe_dir/mNETseq_UMI.snake
+snake=$pipe_dir/NETseq.snake
 genome=$pipe_dir1/hg38.yaml
 samples=samples.yaml
 
 run_snakemake $snake "$samples $genome"
 
-snake=$pipe_dir/BrUseq_matrix.snake
-config=$pipe_dir/matrix_BrUseq.yaml
-run_snakemake $snake "$samples $config $genome"
+# snake=$pipe_dir/Stranded_matrix_offset_nogroup.snake
+# config=$pipe_dir/Stranded_matrix_UMI.yaml
+# run_snakemake $snake "$samples $config $genome"
 

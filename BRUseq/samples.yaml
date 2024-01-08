@@ -35,28 +35,39 @@ SAMPLES:
       - "293flpIN_RTF1_MT_DRB_t0"
       
 
-# norm bw with scaleFactor with : None, chrM_sample (chrM_hg38), 
-# spikeIN (scer3), spikeIN_enrich (scer3_enrich), chrM_spikeIN (chrM_scer3) 
-# #  OR, OR_enrich, if input with spike in is paired up
+# norm bw with scaleFactor with : None, chrM, sample (hg38) sample_enrich (hg38_enrich)
+# spikeIN (scer3), spikeIN_enrich (scer3_enrich), 
+# #  OR, OR_enrich, (if input with spike in is paired up)
 NORM:
-  "chrM_hg38"
+  "chrM"
   
 # sandbox User #
 USER:
   "User7"
 
 CMD_PARAMS:
-    clumpify:     " overwrite=t dedupe=t dupedist=12000 optical=f "
-    bbduk:        " overwrite=t ftm=5 minlen=50 ktrim=r k=23 hdist=1 mink=11 tpe tbo ecco=t "
-    bowtie2:      " --end-to-end "
-    bamCoverage:  " --binSize 10 --normalizeUsing None --skipNonCoveredRegions "
+    clumpify:      " overwrite=t dedupe=t dupedist=12000 optical=f "
+    bbduk:         " overwrite=t ftm=5 minlen=50 ktrim=r k=23 hdist=1 mink=11 tpe tbo ecco=t "
+    bowtie2:       " --end-to-end --no-mixed --no-discordant "
+    samtools:      " -bF4q30 "
+    bamCoverage:   " --binSize 10 --normalizeUsing None --skipNonCoveredRegions "
+    bamCoveragef:  " forward " # R2-R1 = forward R1-R2 = reverse
+    bamCoverager:  " reverse " # R2-R1 = reverse R1-R2 = forward
     fragment_size: " --maxFragmentLength 1000 "
     
 # file suffix
-#   ".fa.gz"
+#   ".fq.gz"
 #   ".fastq.gz"
 SFX:
   ".fastq.gz"
+
+# Base memory to request for each rule
+# The acutal amount requested will be higher for rules that generally
+# require more memory
+# A value of 4 will result in rules requesting between 4Gb - 200Gb
+# request ~2 per GB of max raw.fastq.gz file
+MEMORY:
+    4  
   
 # barcode = illumina seq file
 #   CCATTGTT=AATGATACGGCGACCACCGAGATCTACACAACAATGGACACTCTTTCCCTACACGACGCTCTTCCGA

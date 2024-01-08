@@ -3,6 +3,7 @@
 #BSUB -J snake
 #BSUB -o logs/snake_%J.out
 #BSUB -e logs/snake_%J.err
+#BSUB -q rna
 
 set -o nounset -o pipefail -o errexit -x
 
@@ -17,7 +18,6 @@ module load bbtools/39.01
 module load bowtie2/2.3.2
 module load R/4.0.3
 module load fastqc/0.11.9
-module load subread
 
 # Function to run snakemake
 run_snakemake() {
@@ -39,19 +39,19 @@ run_snakemake() {
         --configfile $config_file
 }
 
-# Run pipeline to process ChIPseq reads
+# Run pipeline to process UMI Netseq 
 pipe_dir=pipelines
 pipe_dir1=pipelines/ref
 # index and configs
-#snake=$pipe_dir/mNETseq_UMI_spikeIN.snake
-snake=$pipe_dir/mNETseq_UMI.snake
+#snake=$pipe_dir/NETseq_UMI_spikein.snake
+snake=$pipe_dir/NETseq_UMI.snake
 genome=$pipe_dir1/hg38.yaml
 #genome=$pipe_dir1/hg38_HHV8.yaml
 samples=samples.yaml
 
 run_snakemake $snake "$samples $genome"
 
-# snake=$pipe_dir/BrUseq_matrix.snake
-# config=$pipe_dir/matrix_BrUseq.yaml
+# snake=$pipe_dir/Stranded_matrix_offset_nogroup.snake
+# config=$pipe_dir/Stranded_matrix_UMI.yaml
 # run_snakemake $snake "$samples $config $genome"
 

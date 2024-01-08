@@ -44,7 +44,6 @@ pipe_dir=pipelines
 pipe_dir1=pipelines/ref
 # index and configs
 snake=$pipe_dir/bowtie_test_PE.snake
-#snake=$pipe_dir/bowtie_test_PE_URL.snake
 genome=$pipe_dir1/ecoli.yaml
 samples=samples.yaml
 

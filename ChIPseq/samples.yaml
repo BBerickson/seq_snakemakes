@@ -54,10 +54,11 @@ COLORS:
 
 # program options  
 CMD_PARAMS:
-    clumpify:     " overwrite=t dedupe=t dupedist=12000 optical=f "
-    bbduk:        " overwrite=t ftm=5 minlen=50 ktrim=r k=23 hdist=1 mink=11 tpe tbo ecco=t "
-    bowtie2:      " --local "
-    bamCoverage:  " --binSize 10 --skipNonCoveredRegions --extendReads 300 --centerReads "
+    clumpify:      " overwrite=t dedupe=t dupedist=12000 optical=f "
+    bbduk:         " overwrite=t ftm=5 minlen=50 ktrim=r k=23 hdist=1 mink=11 tpe tbo ecco=t "
+    bowtie2:       " --local --no-mixed --no-discordant "
+    samtools:      " -bF4q30 "
+    bamCoverage:   " --binSize 10 --normalizeUsing None --skipNonCoveredRegions --extendReads 300 --centerReads "
     fragment_size: " --maxFragmentLength 1000 "
     
 # sandbox User #
