@@ -1,5 +1,5 @@
 ---
-title: <p style="font-size:45px;">Spt5 mNET-seq</p>
+title: <p style="font-size:45px;">mNET-seq</p>
 author: "Ryan Sheridan"
 date: "`r format(Sys.Date(), '%B %d, %Y')`"
 output: 

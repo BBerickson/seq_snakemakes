@@ -23,7 +23,7 @@ library(ensembldb)
 library(BiocManager)
 
 # Read functions
-source(here::here(plot_params$template_dir, "funs.R"))
+source("funs.R")
 
 ```
 

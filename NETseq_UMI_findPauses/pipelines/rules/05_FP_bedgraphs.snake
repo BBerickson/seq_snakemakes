@@ -70,12 +70,12 @@ rule create_bedgraphs:
 rule gene_subsample_test:
     input:
         pos = lambda wildcards: expand(
-            PROJ + "/bg/{sam_grp}_pos.bedgraph.gz",
-            sam_grp = GENE_SUB_GRPS
+            PROJ + "/bg/{sample}_{{group}}_{{sub_region}}_pos.bedgraph.gz",
+            sample = SAMPLES[wildcards.group]
         ),
         neg = lambda wildcards: expand(
-            PROJ + "/bg/{sam_grp}_neg.bedgraph.gz",
-            sam_grp = GENE_SUB_GRPS
+            PROJ + "/bg/{sample}_{{group}}_{{sub_region}}_neg.bedgraph.gz",
+            sample = SAMPLES[wildcards.group]
         )
     output:
         PROJ + "/stats/{group}_{sub_region}_test.tsv"
@@ -111,7 +111,7 @@ rule gene_subsample_test:
                         print
                     }}' \
                     | bedtools map -a "$genes" -b - -c 4 -o sum \
-                    | awk -v OFS="\t" '$6 == "+" {{gsub("\\.", 0, $7); print}}' \
+                    | awk -v OFS="\t" '$6 == "+" {{gsub(".", 0, $7); print}}' \
                     > "$res"
             done
         

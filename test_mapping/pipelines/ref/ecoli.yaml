@@ -4,6 +4,29 @@
 GENELIST:
     "e_coli"
 INDEX_PATH:
-    "/beevol/home/erickson/ref/e_coli/"
+    "/beevol/home/erickson/ref/test/e_coli/"
 INDEX_SAMPLE:
     "e_coli"
+ENRICHED_SAMPLE:
+  "/beevol/home/erickson/ref/test/e_coli/enrich.bed"
+INDEX_MAP:
+    "e_coli"
+INDEX_SPIKE:
+    ""
+MASK:
+  ""
+# fasta files for splitting bam file
+FA_SAMPLE:
+  "/beevol/home/erickson/ref/test/e_coli/e_coli_k12.v2.fa"
+FA_SPIKE:
+  ""
+ENRICHED_SPIKE:
+  ""
+MY_REF:
+  "/beevol/home/erickson/ref/test/e_coli/enrich.bed"
+FW_REF:
+  "/beevol/home/erickson/ref/test/e_coli/enrich.bed"
+REV_REF:
+  "/beevol/home/erickson/ref/test/e_coli/enrich.bed"
+PI_REF:
+  ""

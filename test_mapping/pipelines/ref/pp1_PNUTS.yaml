@@ -4,6 +4,31 @@
 GENELIST:
     "pp1_PNUTS"
 INDEX_PATH:
-    "/beevol/home/erickson/ref/pp1_PNUTS/"
+    "/beevol/home/erickson/ref/test/pp1_PNUTS/"
 INDEX_SAMPLE:
     "pp1PNUTS"
+ENRICHED_SAMPLE:
+  "/beevol/home/erickson/ref/hg38/ref/enrich.bed"
+INDEX_MAP:
+    "pp1PNUTS"
+INDEX_SPIKE:
+    ""
+MASK:
+  "/beevol/home/erickson/ref/hg38/ref/hg38_snoRNAs.bed"
+# fasta files for splitting bam file
+FA_SAMPLE:
+  "/beevol/home/erickson/ref/test/pp1_PNUTS/pp1_PNUTS2.ref"
+FA_SPIKE:
+  ""
+ENRICHED_SAMPLE:
+  "/beevol/home/erickson/ref/hg38/ref/enrich.bed"
+ENRICHED_SPIKE:
+  ""
+MY_REF:
+  "/beevol/home/erickson/ref/hg38/ref/hg38_gene.bed"
+FW_REF:
+  "/beevol/home/erickson/ref/hg38/ref/hg38_gene_fw.bed"
+REV_REF:
+  "/beevol/home/erickson/ref/hg38/ref/hg38_gene_rev.bed"
+PI_REF:
+  "/beevol/home/erickson/ref/hg38/ref/PI.bed"

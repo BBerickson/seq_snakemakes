@@ -42,6 +42,15 @@ SAMPLES:
 # OR, OR_enrich if input with spike in is paired up
 NORM:
   "OR_enrich"
+
+# Base memory to request for each rule
+# The acutal amount requested will be higher for rules that generally
+# require more memory
+# A value of 8 will result in rules requesting between 8Gb - 32Gb of
+# request ~2Gb/GB of fastq.gz file
+# memory
+MEMORY:
+    6
   
   # set RGB colors for bw urls and table files, 
   # list as many colors as samples (not inputs) 
@@ -59,6 +68,7 @@ CMD_PARAMS:
     bowtie2:       " --local --no-mixed --no-discordant "
     samtools:      " -bF4q30 "
     bamCoverage:   " --binSize 10 --normalizeUsing None --skipNonCoveredRegions --extendReads 300 --centerReads "
+    bamCoverageBL: ""
     fragment_size: " --maxFragmentLength 1000 "
     
 # sandbox User #

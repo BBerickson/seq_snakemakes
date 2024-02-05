@@ -6,8 +6,8 @@ stats_dir <- here(res_dir, "stats/")
 
 fq_sum     <- str_c(stats_dir, proj, "_fastqc.tsv")
 trim_sum   <- str_c(stats_dir, proj, "_cutadapt.tsv")
-bwt_sum    <- str_c(stats_dir, proj, "_aligned.tsv")
-dedup_sum  <- str_c(stats_dir, proj, "_", plot_grps$INDEX_SAMPLE, "_dedup.tsv")
+bwt_sum    <- str_c(stats_dir, proj, "_bowtie.tsv")
+dedup_sum  <- str_c(stats_dir, proj, "_", plot_grps$INDEX_MAP, "_UMI_dedup.tsv")
 counts_sum <- str_c(stats_dir, proj, "_featureCounts.tsv")
 filt_sum   <- str_c(stats_dir, proj, "_filt.tsv")
 sub_sum    <- str_c(stats_dir, proj, "_", plot_grps$INDEX_SAMPLE, "_subsample.tsv")
@@ -136,19 +136,19 @@ fq_sum %>%
 
 # Cutadapt stats
 mets <- c(
-  "Total read pairs processed",
-  "Pairs written (passing filters)",
-  "Pairs that were too short"
+  "Total_read_pairs_processed",
+  "Pairs_written_(passing_filters)",
+  "Pairs_that_were_too_short"
 )
 
 trim_sum <- trim_sum %>%
   vroom(col_names = c("sample", "metric", "value")) %>%
   dplyr::filter(metric %in% mets) %>%
-  
+  separate(.,value,c("value","per"),"\\(",convert=T) %>% dplyr::select(-per) %>% 
   pivot_wider(names_from = "metric", values_from = "value") %>%
-  mutate(Untrimmed = `Total read pairs processed` - (`Pairs that were too short` + `Pairs written (passing filters)`)) %>%
+  mutate(Untrimmed = `Total_read_pairs_processed` - (`Pairs_that_were_too_short` + `Pairs_written_(passing_filters)`)) %>%
   
-  dplyr::select(-`Total read pairs processed`) %>%
+  dplyr::select(-`Total_read_pairs_processed`) %>%
   pivot_longer(cols = -sample, names_to = "metric")
 
 # Create bar graphs
@@ -159,7 +159,7 @@ trim_sum %>%
     sam_lvls   = sams_shrt_2,
     met_lvls   = rev(c(mets[-1], "Untrimmed")),
     plot_cols  = theme_colors,
-    lab_metric = "Pairs written (passing filters)",
+    lab_metric = "Pairs_written_(passing_filters)",
     n_rows     = 2
   ) +
   qc_theme
@@ -223,7 +223,7 @@ dup_sum <- dedup_sum %>%
   ) %>%
   dplyr::select(-`Input Reads`) %>%
   pivot_longer(cols = -sample, names_to = "metric") 
-dup_sum <- separate(dup_sum,sample,c("sample","index"),paste0("_",plot_grps$INDEX_SAMPLE)) 
+dup_sum <- separate(dup_sum,sample,c("sample","index"),paste0("_",plot_grps$INDEX_MAP)) 
 
 # Create bar graphs
 dup_sum %>%
@@ -319,7 +319,8 @@ Unique reads were filtered to only include those that align within 5 kb of a pro
 ```{r "Sub summary", fig.width = 16, fig.height = 10}
 
 # Subsampling stats
-mets <- c("Sampled_reads", "Reads_removed")
+#mets <- c("Sampled_reads", "Reads_removed")
+mets <- c("Sampled_reads")
 
 sub_sums <- sub_sum %>%
   vroom(col_names = c("sample", "metric", "value")) 
@@ -327,7 +328,7 @@ sub_sums <- sub_sum %>%
 sub_sums <- separate(sub_sums,sample,c("sample","index"),paste0("_",plot_grps$INDEX_SAMPLE),fill = "right") %>% 
   dplyr::select(-index)
 sub_sums <- sub_sums %>%  pivot_wider(names_from = "metric", values_from = "value") %>%
-  mutate(`Reads_removed` = `Filtered_reads` - `Sampled_reads`) %>%
+  #mutate(`Reads_removed` = `Filtered_reads` - `Sampled_reads`) %>%
   pivot_longer(cols = -c(sample), names_to = "metric") %>%
   dplyr::filter(metric %in% mets)
 

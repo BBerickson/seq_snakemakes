@@ -1,18 +1,17 @@
 # ====== Rules for subsampleing ======================
 
 
-# Subsample libraries to equalize read counts for downstream analysis
+# Subsample libraries to equalize read counts for downstream analysis of each gene
 rule subsample_gene:
     input:
-        bam    = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_dedup.bam",
-        bai    = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_dedup.bam.bai",
-        stats  = PROJ + "/stats/" + PROJ + "_" + INDEX_SAMPLE + "_dedup.tsv"
+        bam    = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
+        bai    = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai"
     output:
         bam   = temp(PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_dedup_filtered_gene.bam"),
         bam2  = temp(PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_dedup_filtered_temp.bam"),
         bam3  = temp(PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_dedup_filtered_temp2.bam"),
         bai   = temp(PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_dedup_filtered_gene.bam.bai"),
-        stats = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_dedup_filtered.txt"
+        stats = PROJ + "/stats/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_gene_filtered.txt"
     params:
         job_name = "filtered_gene{sample}",
         genes    = GENES,
@@ -90,7 +89,7 @@ rule create_beds:
 rule filt_summary:
     input:
         expand(
-            PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_dedup_filtered.txt",
+            PROJ + "/stats/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_gene_filtered.txt",
             sample = SAMS_UNIQ
         ),
         expand(
@@ -126,8 +125,10 @@ rule subsample_metaplot_beds:
     input:
         PROJ + "/beds/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".3bed.gz"
     output:
-        S   = temp(PROJ + "/beds/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{sub_region}_S.bed.gz"),
-        S_N = temp(PROJ + "/beds/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{sub_region}_S_N.bed.gz")
+        S    = temp(PROJ + "/beds/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{sub_region}_S.bed.gz"),
+        AS   = temp(PROJ + "/beds/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{sub_region}_AS.bed.gz"),
+        S_N  = temp(PROJ + "/beds/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{sub_region}_S_N.bed.gz"),
+        AS_N = temp(PROJ + "/beds/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{sub_region}_AS_N.bed.gz")
     params:
         job_name = "{sample}_{sub_region}_metaplot_beds",
         memory   = MEMORY * 2,
@@ -150,6 +151,14 @@ rule subsample_metaplot_beds:
             {output.S} \
             {output.S_N} \
             "-wa -c -s"
+            
+        intersect_reads \
+            {input} \
+            {params.bed} \
+            {threads} \
+            {output.AS} \
+            {output.AS_N} \
+            "-wa -c -S"
 
         """
 

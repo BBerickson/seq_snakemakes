@@ -16,6 +16,7 @@ module load python/3.8.5
 module load samtools/1.9
 module load bbtools/39.01
 module load hisat2/2.1.0
+module load STAR/2.7.10a
 module load R/4.0.3
 module load fastqc/0.11.9
 
@@ -45,6 +46,8 @@ pipe_dir1=pipelines/ref
 # index and configs
 snake=$pipe_dir/RNAseq.snake
 genome=$pipe_dir1/hg38.yaml
+#snake=$pipe_dir/star.snake
+#genome=$pipe_dir1/hg38_star.yaml
 samples=samples.yaml
 
 run_snakemake $snake "$samples $genome"

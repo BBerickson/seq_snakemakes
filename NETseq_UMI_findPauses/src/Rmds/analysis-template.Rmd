@@ -105,7 +105,7 @@ pause_dir <- set_names(sams) %>%
   map_chr(~ here(res_dir, .x, "pauses"))
 
 meta_dir <- set_names(sams) %>%
-  map_chr(~ here(res_dir, .x, "metaplot_beds"))
+  map_chr(~ here(res_dir, .x, "beds"))
 
 # Subsample sample directories
 get_file_dir <- function(sam_dir, file_dir) {
@@ -118,7 +118,7 @@ sub_pause_dir <- sub_sams %>%
   map(get_file_dir, "pauses")
 
 sub_meta_dir <- sub_sams %>%
-  map(get_file_dir, "metaplot_beds")
+  map(get_file_dir, "beds")
 
 ```
 
@@ -156,7 +156,7 @@ if (grp == "WT") {
 # Load and merge bed files
 paths <- g_sams %>%
   imap(~ {
-    p <- here(res_dir, "metaplot_beds/")
+    p <- here(res_dir, "beds/")
     p <- str_c(p, str_c(.y, "_gene_S_N.bed.gz"))
     
     names(p) <- .x

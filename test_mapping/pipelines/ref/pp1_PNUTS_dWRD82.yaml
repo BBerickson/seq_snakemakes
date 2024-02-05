@@ -2,8 +2,33 @@
 
 # Path to mixed bowtie2 index and chrom name txt file
 GENELIST:
-    "dWRD82"
+    "prom_dWRD82"
 INDEX_PATH:
-    "/beevol/home/erickson/ref/pp1_PNUTS/"
+    "/beevol/home/erickson/ref/test/pp1_PNUTS/"
 INDEX_SAMPLE:
-    "pp1_PNUTS_dWRD82"
+    "prom_pp1_PNUTS_dWRD82"
+ENRICHED_SAMPLE:
+  "/beevol/home/erickson/ref/hg38/ref/enrich.bed"
+INDEX_MAP:
+    "prom_pp1_PNUTS_dWRD82"
+INDEX_SPIKE:
+    ""
+MASK:
+  "/beevol/home/erickson/ref/hg38/ref/hg38_snoRNAs.bed"
+# fasta files for splitting bam file
+FA_SAMPLE:
+  "/beevol/home/erickson/ref/test/pp1_PNUTS/pp1_PNUTS_dWRD82_w_promoter.ref"
+FA_SPIKE:
+  ""
+ENRICHED_SAMPLE:
+  "/beevol/home/erickson/ref/hg38/ref/enrich.bed"
+ENRICHED_SPIKE:
+  ""
+MY_REF:
+  "/beevol/home/erickson/ref/hg38/ref/hg38_gene.bed"
+FW_REF:
+  "/beevol/home/erickson/ref/hg38/ref/hg38_gene_fw.bed"
+REV_REF:
+  "/beevol/home/erickson/ref/hg38/ref/hg38_gene_rev.bed"
+PI_REF:
+  "/beevol/home/erickson/ref/hg38/ref/PI.bed"

@@ -6,7 +6,7 @@ PROJ:
   "RTF1_RNAseq"
     
 SEQ_DATE:
-  "220114_220121"
+  "220121"
 
 # Directories containing fastq files, this can be a relative path.
 # Multiple directories can be provided. The sample names must correspond
@@ -57,6 +57,7 @@ CMD_PARAMS:
     star2:         " --limitSjdbInsertNsj 2000000 --outSAMattributes NH HI AS nM MD --alignSJoverhangMin 10 "
     samtools:      " -bF4q1 "
     bamCoverage:   " --binSize 10 --normalizeUsing None --skipNonCoveredRegions "
+    bamCoverageBL: " --blackListFileName /beevol/home/erickson/ref/hg38/ref/filter_RNAs.bed "
     bamCoveragef:  " forward " # R2-R1 = forward R1-R2 = reverse
     bamCoverager:  " reverse " # R2-R1 = reverse R1-R2 = forward
     fragment_size: " --maxFragmentLength 1000 "
@@ -82,12 +83,12 @@ MEMORY:
 # barcode = illumina seq file looks like this
 #   CCATTGTT=AATGATACGGCGACCACCGAGATCTACACAACAATGGACACTCTTTCCCTACACGACGCTCTTCCGA
 #   CTACTTGT=CAAGCAGAAGACGGCATACGAGATACAAGTAGGTGACTGGAGTTCAGACGTGTGCTCTTCCGA
-#BARCODES:
-    #"pipelines/ref/truseq_i5i7.fa"
+BARCODES:
+    "pipelines/ref/truseq_i5i7.fa"
 # OR
 # TruSeq_Universal_Adapters 
-BARCODES:
-   "GATCGGAAGAGCACACGTCT,ACACTCTTTCCCTACACGACGCTCTTCCGATCT"
+#BARCODES:
+#   "GATCGGAAGAGCACACGTCT,ACACTCTTTCCCTACACGACGCTCTTCCGATCT"
     
 ## Additional common parameters for various processing steps
 ### Clumpify.py ##

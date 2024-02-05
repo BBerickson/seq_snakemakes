@@ -8,6 +8,14 @@ rule create_plots:
             sam_grp = GENE_SUB_GRPS, win = WIN_SIZE, grp = ALL_GROUPS
         ),
         expand(
+            PROJ + "/beds/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{sub_region}_S_N.bed.gz",
+            sample = SAMS_UNIQ, sub_region = GENE_SUB_REGS
+        ),
+        expand(
+            PROJ + "/beds/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{sub_region}_AS_N.bed.gz",
+            sample = SAMS_UNIQ, sub_region = GENE_SUB_REGS
+        ),
+        expand(
             PROJ + "/pauses/{sam_grp}_{win}{grp}pauses_{region}.bed.gz",
             sam_grp = GENE_SUB_GRPS, win = WIN_SIZE, grp = ALL_GROUPS, region = REGIONS
         )
@@ -15,7 +23,7 @@ rule create_plots:
         PROJ + "/" + PROJ + "_analysis.html"
     params:
         job_name = PROJ + "_plots",
-        ref_file = "pipeline/ref/" + GENELIST + ".yaml",
+        ref_file = "pipelines/ref/" + GENELIST + ".yaml",
         memory   = MEMORY * 4
     log:
         out = PROJ + "/logs/" + PROJ + "_plots.out",
@@ -29,7 +37,7 @@ rule create_plots:
         Rmd={SRC}/Rmds/analysis.Rmd
         script={SRC}/Rmds/knit_rmd.R
         yml={params.ref_file}
-        samp=samples.yaml
+        samp=samples_FP.yaml
 
         Rscript $script \
             -i $Rmd \

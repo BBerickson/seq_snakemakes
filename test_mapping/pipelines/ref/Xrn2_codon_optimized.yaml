@@ -4,6 +4,29 @@
 GENELIST:
     "Xrn2_codon_opti"
 INDEX_PATH:
-    "/beevol/home/erickson/ref/Xrn2_Int11_codon_optimized/"
+    "/beevol/home/erickson/ref/test/Xrn2_Int11_codon_optimized/"
 INDEX_SAMPLE:
     "Xrn2_codon_optimized"
+INDEX_MAP:
+    "Xrn2_codon_optimized"
+INDEX_SPIKE:
+    ""
+MASK:
+  ""
+# fasta files for splitting bam file
+FA_SAMPLE:
+  "/beevol/home/erickson/ref/test/Xrn2_Int11_codon_optimized/Xrn2_codon_optimized.fa"
+FA_SPIKE:
+  ""
+ENRICHED_SAMPLE:
+  "/beevol/home/erickson/ref/hg38/ref/enrich.bed"
+ENRICHED_SPIKE:
+  ""
+MY_REF:
+  ""
+FW_REF:
+  ""
+REV_REF:
+  ""
+PI_REF:
+  ""
