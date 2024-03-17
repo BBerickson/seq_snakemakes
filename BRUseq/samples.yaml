@@ -51,7 +51,7 @@ CMD_PARAMS:
     bowtie2:       " --end-to-end --no-mixed --no-discordant "
     samtools:      " -bF4q30 "
     bamCoverage:   " --binSize 10 --normalizeUsing None --skipNonCoveredRegions "
-    bamCoverageBL: " --blackListFileName /beevol/home/erickson/ref/hg38/ref/filter_RNAs.bed "
+    bamCoverageBL: "" #  " --blackListFileName /beevol/home/erickson/ref/hg38/ref/merge_filter_RNAs.bed "
     bamCoveragef:  " forward " # R2-R1 = forward R1-R2 = reverse
     bamCoverager:  " reverse " # R2-R1 = reverse R1-R2 = forward
     fragment_size: " --maxFragmentLength 1000 "

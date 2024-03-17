@@ -131,25 +131,27 @@ def _get_colors(sample_key, group_counts, sample_key2, color):
 
 COLS_DICT = _get_colors(SAMS_UNIQ, GRPS_UNIQ,  SAMS_UNIQ2, COLORS)
 
-def _get_normtype(normUsing, scaleFactor):
+def _get_normtype(normUsing, scaleFactor, blacklist):
     match = re.search(r"--normalizeUsing (\w+)", normUsing)
     if match:
       word = match.group(1)
-      if re.search(r"(?i)None", word):
+      if not word or word.isspace() or word.lower() == "none":
         word = ""
       else:
         word = "_" + word
     else:
       word = ""
-    if not re.search(r"(?i)None", scaleFactor):
+    if scaleFactor or scaleFactor.isspace() or scaleFactor.lower() == "none":
       word2 = scaleFactor
       word = word + "_" + word2
     if word == "":
       word = "_None"
+    if re.search(r"\S", blacklist):
+      word = word + "_BL"
     message = "norm" + word
-    return message
+    return " ".join(message.split())
 
-NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM)
+NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"])
 
 def _get_bampath(bampath):
     if bampath == "subsample":

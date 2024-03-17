@@ -15,7 +15,7 @@ module load python/3.8.5
 module load samtools/1.9
 module load bbtools/39.01
 module load bowtie2/2.3.2
-module load R/4.0.3
+module load R/4.2.2
 module load fastqc/0.11.9
 module load subread
 

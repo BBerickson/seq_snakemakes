@@ -19,10 +19,10 @@ RAW_DATA:
 # directories listed under RAW_DATA. If the sample name
 # matches multiple fastqs, an error will be thrown.
 #
-# group-name-1:
+# new-name-1:
 #     - "sample_1_file_prefix"
 #
-# group-name-2:
+# new-name-2:
 #     - "sample_2_file_prefix"
 #
 SAMPLES:
@@ -57,7 +57,7 @@ CMD_PARAMS:
     star2:         " --limitSjdbInsertNsj 2000000 --outSAMattributes NH HI AS nM MD --alignSJoverhangMin 10 "
     samtools:      " -bF4q1 "
     bamCoverage:   " --binSize 10 --normalizeUsing None --skipNonCoveredRegions "
-    bamCoverageBL: " --blackListFileName /beevol/home/erickson/ref/hg38/ref/filter_RNAs.bed "
+    bamCoverageBL: "" # " --blackListFileName /beevol/home/erickson/ref/hg38/ref/merge_filter_RNAs.bed "
     bamCoveragef:  " forward " # R2-R1 = forward R1-R2 = reverse
     bamCoverager:  " reverse " # R2-R1 = reverse R1-R2 = forward
     fragment_size: " --maxFragmentLength 1000 "
