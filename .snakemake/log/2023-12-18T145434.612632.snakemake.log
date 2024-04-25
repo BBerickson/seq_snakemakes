@@ -1,0 +1,134 @@
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                  count    min threads    max threads
+-----------------  -------  -------------  -------------
+all                      1              1              1
+bowtieR1                 4             12             12
+bowtieR1_summmary        1              1              1
+cutadapt                 4              6              6
+cutadapt_summary         1              1              1
+total                   11              1             12
+
+Select jobs to execute...
+
+[Mon Dec 18 14:54:35 2023]
+Job 13: Running cutadapt on PP1H66KpDS2Ser53
+
+Submitted DRMAA job 13 with external jobid 580300.
+
+[Mon Dec 18 14:54:35 2023]
+Job 11: Running cutadapt on PP1H66KmDS2Ser53
+
+Submitted DRMAA job 11 with external jobid 580301.
+
+[Mon Dec 18 14:54:35 2023]
+Job 15: Running cutadapt on PP1H66KmDoxS2Ser5
+
+Submitted DRMAA job 15 with external jobid 580302.
+
+[Mon Dec 18 14:54:36 2023]
+Job 17: Running cutadapt on PP1H66KpDoxS2Ser5
+
+Submitted DRMAA job 17 with external jobid 580303.
+Removing temporary output file Temp_NET/PP1H66KpDS2Ser53_R2_umi.fastq.gz.
+Removing temporary output file Temp_NET/PP1H66KpDS2Ser53_R1_umi.fastq.gz.
+Removing temporary output file Temp_NET/PP1H66KpDS2Ser53_R2.fastq.gz.
+[Mon Dec 18 14:56:06 2023]
+Finished job 13.
+1 of 11 steps (9%) done
+Select jobs to execute...
+
+[Mon Dec 18 14:56:06 2023]
+Job 21: Aligning reads with Bowtie2 for PP1H66KpDS2Ser53
+
+Submitted DRMAA job 21 with external jobid 580304.
+Removing temporary output file Temp_NET/PP1H66KmDoxS2Ser5_R1_umi.fastq.gz.
+Removing temporary output file Temp_NET/PP1H66KmDoxS2Ser5_R2_umi.fastq.gz.
+Removing temporary output file Temp_NET/PP1H66KmDoxS2Ser5_R2.fastq.gz.
+[Mon Dec 18 14:56:06 2023]
+Finished job 15.
+2 of 11 steps (18%) done
+Removing temporary output file Temp_NET/PP1H66KpDoxS2Ser5_R1_umi.fastq.gz.
+Removing temporary output file Temp_NET/PP1H66KpDoxS2Ser5_R2_umi.fastq.gz.
+Removing temporary output file Temp_NET/PP1H66KpDoxS2Ser5_R2.fastq.gz.
+[Mon Dec 18 14:56:06 2023]
+Finished job 17.
+3 of 11 steps (27%) done
+Select jobs to execute...
+
+[Mon Dec 18 14:56:06 2023]
+Job 22: Aligning reads with Bowtie2 for PP1H66KmDoxS2Ser5
+
+Submitted DRMAA job 22 with external jobid 580305.
+
+[Mon Dec 18 14:56:06 2023]
+Job 23: Aligning reads with Bowtie2 for PP1H66KpDoxS2Ser5
+
+Submitted DRMAA job 23 with external jobid 580306.
+Removing temporary output file Temp_NET/PP1H66KmDS2Ser53_R2_umi.fastq.gz.
+Removing temporary output file Temp_NET/PP1H66KmDS2Ser53_R1_umi.fastq.gz.
+Removing temporary output file Temp_NET/PP1H66KmDS2Ser53_R2.fastq.gz.
+[Mon Dec 18 14:56:16 2023]
+Finished job 11.
+4 of 11 steps (36%) done
+Select jobs to execute...
+
+[Mon Dec 18 14:56:16 2023]
+Job 20: Aligning reads with Bowtie2 for PP1H66KmDS2Ser53
+
+Submitted DRMAA job 20 with external jobid 580307.
+
+[Mon Dec 18 14:56:16 2023]
+Job 10: Creating Temp_NET cutadapt summary
+
+Submitted DRMAA job 10 with external jobid 580308.
+[Mon Dec 18 14:56:26 2023]
+Finished job 10.
+5 of 11 steps (45%) done
+Removing temporary output file Temp_NET/PP1H66KmDoxS2Ser5_R1.fastq.gz.
+Removing temporary output file Temp_NET/PP1H66KmDoxS2Ser5_hg38_mm10.bam.
+Removing temporary output file Temp_NET/PP1H66KmDoxS2Ser5_hg38_mm10.bam.bai.
+[Mon Dec 18 14:59:57 2023]
+Finished job 22.
+6 of 11 steps (55%) done
+Removing temporary output file Temp_NET/PP1H66KpDoxS2Ser5_R1.fastq.gz.
+Removing temporary output file Temp_NET/PP1H66KpDoxS2Ser5_hg38_mm10.bam.
+Removing temporary output file Temp_NET/PP1H66KpDoxS2Ser5_hg38_mm10.bam.bai.
+[Mon Dec 18 14:59:57 2023]
+Finished job 23.
+7 of 11 steps (64%) done
+Removing temporary output file Temp_NET/PP1H66KpDS2Ser53_R1.fastq.gz.
+Removing temporary output file Temp_NET/PP1H66KpDS2Ser53_hg38_mm10.bam.
+Removing temporary output file Temp_NET/PP1H66KpDS2Ser53_hg38_mm10.bam.bai.
+[Mon Dec 18 15:00:07 2023]
+Finished job 21.
+8 of 11 steps (73%) done
+Removing temporary output file Temp_NET/PP1H66KmDS2Ser53_R1.fastq.gz.
+Removing temporary output file Temp_NET/PP1H66KmDS2Ser53_hg38_mm10.bam.
+Removing temporary output file Temp_NET/PP1H66KmDS2Ser53_hg38_mm10.bam.bai.
+[Mon Dec 18 15:00:47 2023]
+Finished job 20.
+9 of 11 steps (82%) done
+Select jobs to execute...
+
+[Mon Dec 18 15:00:47 2023]
+Job 19:  R1 summmary Bowtie2 
+
+Submitted DRMAA job 19 with external jobid 580309.
+[Mon Dec 18 15:00:57 2023]
+Finished job 19.
+10 of 11 steps (91%) done
+Select jobs to execute...
+
+[Mon Dec 18 15:00:57 2023]
+localrule all:
+    input: Temp_NET/stats/Temp_NET_fastqc.tsv, Temp_NET/stats/Temp_NET_cutadapt.tsv, Temp_NET/stats/Temp_NET_aligned.tsv
+    jobid: 0
+    resources: tmpdir=/tmp
+
+[Mon Dec 18 15:00:57 2023]
+Finished job 0.
+11 of 11 steps (100%) done
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/log/2023-12-18T145434.612632.snakemake.log

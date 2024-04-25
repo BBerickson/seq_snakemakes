@@ -1,0 +1,95 @@
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                             count    min threads    max threads
+----------------------------  -------  -------------  -------------
+all                                 1              1              1
+bowtie_counts_spikein               4              1              1
+calculating_OR                      2              1              1
+calculating_subsample_spikin        2              1              1
+gathering_OR_results                1              1              1
+gathering_results                   1              1              1
+subsample_summary                   1              1              1
+subsample_summary_frac              1              1              1
+subsample_whole                     4             16             16
+total                              17              1             16
+
+Select jobs to execute...
+
+[Tue Dec 19 15:03:22 2023]
+Job 29: Bowtie2 counts_spikin for PP1H66KpDS2Ser53
+
+Submitted DRMAA job 29 with external jobid 581089.
+
+[Tue Dec 19 15:03:22 2023]
+Job 32: Bowtie2 counts_spikin for PP1H66KmDoxS2Ser5
+
+Submitted DRMAA job 32 with external jobid 581090.
+
+[Tue Dec 19 15:03:22 2023]
+Job 26: Bowtie2 counts_spikin for PP1H66KmDS2Ser53
+
+Submitted DRMAA job 26 with external jobid 581091.
+
+[Tue Dec 19 15:03:22 2023]
+Job 35: Bowtie2 counts_spikin for PP1H66KpDoxS2Ser5
+
+Submitted DRMAA job 35 with external jobid 581092.
+[Tue Dec 19 15:03:39 2023]
+Finished job 29.
+1 of 17 steps (6%) done
+[Tue Dec 19 15:03:39 2023]
+Finished job 32.
+2 of 17 steps (12%) done
+[Tue Dec 19 15:03:39 2023]
+Finished job 26.
+3 of 17 steps (18%) done
+Select jobs to execute...
+
+[Tue Dec 19 15:03:39 2023]
+Job 46: getting OR norm for PP1H66KSer5-r3
+
+Submitted DRMAA job 46 with external jobid 581093.
+
+[Tue Dec 19 15:03:39 2023]
+Job 41: getting subsample norm for PP1H66KSer5-r3
+
+Submitted DRMAA job 41 with external jobid 581094.
+[Tue Dec 19 15:03:39 2023]
+Finished job 35.
+4 of 17 steps (24%) done
+Select jobs to execute...
+
+[Tue Dec 19 15:03:39 2023]
+Job 40: getting subsample norm for PP1H66KSer5-r2
+
+Submitted DRMAA job 40 with external jobid 581095.
+
+[Tue Dec 19 15:03:39 2023]
+Job 47: getting OR norm for PP1H66KSer5-r2
+
+Submitted DRMAA job 47 with external jobid 581096.
+[Tue Dec 19 15:03:59 2023]
+Error in rule calculating_subsample_spikin:
+    jobid: 41
+    output: Temp_NET/bams_sub/PP1H66KSer5-r3_hg38_subsample_frac.txt
+    log: Temp_NET/logs/PP1H66KSer5-r3_subsample.out, Temp_NET/logs/PP1H66KSer5-r3_subsample.err (check log file(s) for error message)
+
+[Tue Dec 19 15:03:59 2023]
+Error executing rule calculating_subsample_spikin on cluster (jobid: 41, external: 581094, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/tmp.hod_k728/snakejob.calculating_subsample_spikin.41.sh). For error details see the cluster log and the log files of the involved rule(s).
+Finished job 46.
+5 of 17 steps (29%) done
+[Tue Dec 19 15:03:59 2023]
+Error in rule calculating_subsample_spikin:
+    jobid: 40
+    output: Temp_NET/bams_sub/PP1H66KSer5-r2_hg38_subsample_frac.txt
+    log: Temp_NET/logs/PP1H66KSer5-r2_subsample.out, Temp_NET/logs/PP1H66KSer5-r2_subsample.err (check log file(s) for error message)
+
+Error executing rule calculating_subsample_spikin on cluster (jobid: 40, external: 581095, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/tmp.hod_k728/snakejob.calculating_subsample_spikin.40.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Tue Dec 19 15:03:59 2023]
+Finished job 47.
+6 of 17 steps (35%) done
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/log/2023-12-19T150316.803488.snakemake.log

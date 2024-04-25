@@ -1,0 +1,4 @@
+NameError in line 32 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/02a_align_rmats.snake:
+name 'export' is not defined
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rmats.snake", line 197, in <module>
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/02a_align_rmats.snake", line 32, in <module>

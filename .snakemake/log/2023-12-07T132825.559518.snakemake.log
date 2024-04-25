@@ -1,0 +1,7 @@
+Building DAG of jobs...
+MissingInputException in line 58 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/04_bamCoverage.snake:
+Missing input files for rule gathering_OR_results:
+    output: Temp/counts/Temp_OR_summery.tsv
+    affected files:
+        Temp/bams/PP1H66KSer5-r2_OR_count.txt
+        Temp/bams/PP1H66KSer5-r3_OR_count.txt

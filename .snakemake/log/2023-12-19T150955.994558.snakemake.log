@@ -1,0 +1,53 @@
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                             count    min threads    max threads
+----------------------------  -------  -------------  -------------
+all                                 1              1              1
+calculating_subsample_spikin        2              1              1
+gathering_OR_results                1              1              1
+gathering_results                   1              1              1
+subsample_summary                   1              1              1
+subsample_summary_frac              1              1              1
+subsample_whole                     4             16             16
+total                              11              1             16
+
+Select jobs to execute...
+
+[Tue Dec 19 15:10:05 2023]
+Job 45: getting final results
+
+Submitted DRMAA job 45 with external jobid 581108.
+
+[Tue Dec 19 15:10:05 2023]
+Job 40: getting subsample norm for PP1H66KSer5-r2
+
+Submitted DRMAA job 40 with external jobid 581109.
+
+[Tue Dec 19 15:10:05 2023]
+Job 41: getting subsample norm for PP1H66KSer5-r3
+
+Submitted DRMAA job 41 with external jobid 581110.
+[Tue Dec 19 15:10:17 2023]
+Error in rule calculating_subsample_spikin:
+    jobid: 40
+    output: Temp_NET/bams_sub/PP1H66KSer5-r2_hg38_subsample_frac.txt
+    log: Temp_NET/logs/PP1H66KSer5-r2_subsample.out, Temp_NET/logs/PP1H66KSer5-r2_subsample.err (check log file(s) for error message)
+
+Removing temporary output file Temp_NET/counts/PP1H66KSer5-r3_OR_count.txt.
+Error executing rule calculating_subsample_spikin on cluster (jobid: 40, external: 581109, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/tmp.hrp9aciy/snakejob.calculating_subsample_spikin.40.sh). For error details see the cluster log and the log files of the involved rule(s).
+Removing temporary output file Temp_NET/counts/PP1H66KSer5-r2_OR_count.txt.
+[Tue Dec 19 15:10:17 2023]
+Finished job 45.
+1 of 11 steps (9%) done
+[Tue Dec 19 15:10:17 2023]
+Error in rule calculating_subsample_spikin:
+    jobid: 41
+    output: Temp_NET/bams_sub/PP1H66KSer5-r3_hg38_subsample_frac.txt
+    log: Temp_NET/logs/PP1H66KSer5-r3_subsample.out, Temp_NET/logs/PP1H66KSer5-r3_subsample.err (check log file(s) for error message)
+
+Error executing rule calculating_subsample_spikin on cluster (jobid: 41, external: 581110, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/tmp.hrp9aciy/snakejob.calculating_subsample_spikin.41.sh). For error details see the cluster log and the log files of the involved rule(s).
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/log/2023-12-19T150955.994558.snakemake.log

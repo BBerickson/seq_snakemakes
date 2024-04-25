@@ -1,0 +1,4 @@
+SyntaxError:
+Not all output, log and benchmark files of rule gathering_fastq_groups contain the same wildcards. This is crucial though, in order to avoid that two or more jobs write to the same file.
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rmats.snake", line 201, in <module>
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/02a_align_rmats.snake", line 24, in <module>

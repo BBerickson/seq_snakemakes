@@ -1,0 +1,515 @@
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                                      count    min threads    max threads
+-------------------------------------  -------  -------------  -------------
+align_filter_sample                          4             12             12
+align_filter_sample_spikein                  4             12             12
+align_filter_subsample_sample                4             12             12
+align_filter_subsample_sample_spikein        4             12             12
+all                                          1              1              1
+bamCoverage                                  2             12             12
+bamCoverage_spike                            2             12             12
+bamCoverage_spike_summary                    1              1              1
+bamCoverage_summary                          1              1              1
+bowtieR1                                     4             12             12
+bowtieR1_summmary                            1              1              1
+bowtie_counts_spikein                        4              1              1
+calculating_subsample_group                  2              1              1
+calculating_subsample_summary                1              1              1
+cutadapt                                     4              6              6
+cutadapt_summary                             1              1              1
+dedup_UMI                                    4              1              1
+dedup_summary                                1              1              1
+extract_umi                                  4              1              1
+gathering_results                            1              1              1
+subsample_dedup                              4             16             16
+subsample_summary                            1              1              1
+subsample_summary_spikein                    1              1              1
+total                                       56              1             16
+
+Select jobs to execute...
+
+[Thu Dec 21 14:24:27 2023]
+Job 16: Extracting UMIs for PP1H66KmDoxS2Ser5
+
+Submitted DRMAA job 16 with external jobid 588397.
+
+[Thu Dec 21 14:24:27 2023]
+Job 18: Extracting UMIs for PP1H66KpDoxS2Ser5
+
+Submitted DRMAA job 18 with external jobid 588398.
+
+[Thu Dec 21 14:24:27 2023]
+Job 12: Extracting UMIs for PP1H66KmDS2Ser53
+
+Submitted DRMAA job 12 with external jobid 588399.
+
+[Thu Dec 21 14:24:27 2023]
+Job 14: Extracting UMIs for PP1H66KpDS2Ser53
+
+Submitted DRMAA job 14 with external jobid 588400.
+[Thu Dec 21 14:43:00 2023]
+Finished job 16.
+1 of 56 steps (2%) done
+Select jobs to execute...
+
+[Thu Dec 21 14:43:00 2023]
+Job 15: Running cutadapt on PP1H66KmDoxS2Ser5
+
+Submitted DRMAA job 15 with external jobid 588406.
+[Thu Dec 21 14:43:50 2023]
+Finished job 18.
+2 of 56 steps (4%) done
+Select jobs to execute...
+
+[Thu Dec 21 14:43:50 2023]
+Job 17: Running cutadapt on PP1H66KpDoxS2Ser5
+
+Submitted DRMAA job 17 with external jobid 588407.
+[Thu Dec 21 14:44:20 2023]
+Finished job 14.
+3 of 56 steps (5%) done
+Select jobs to execute...
+
+[Thu Dec 21 14:44:20 2023]
+Job 13: Running cutadapt on PP1H66KpDS2Ser53
+
+Submitted DRMAA job 13 with external jobid 588408.
+[Thu Dec 21 14:44:30 2023]
+Finished job 12.
+4 of 56 steps (7%) done
+Select jobs to execute...
+
+[Thu Dec 21 14:44:30 2023]
+Job 11: Running cutadapt on PP1H66KmDS2Ser53
+
+Submitted DRMAA job 11 with external jobid 588409.
+Removing temporary output file Temp_NET/PP1H66KmDoxS2Ser5_R1_umi.fastq.gz.
+Removing temporary output file Temp_NET/PP1H66KmDoxS2Ser5_R2_umi.fastq.gz.
+Removing temporary output file Temp_NET/PP1H66KmDoxS2Ser5_R2.fastq.gz.
+[Thu Dec 21 14:44:40 2023]
+Finished job 15.
+5 of 56 steps (9%) done
+Select jobs to execute...
+
+[Thu Dec 21 14:44:40 2023]
+Job 22: Aligning reads with Bowtie2 for PP1H66KmDoxS2Ser5
+
+Submitted DRMAA job 22 with external jobid 588410.
+Removing temporary output file Temp_NET/PP1H66KpDoxS2Ser5_R1_umi.fastq.gz.
+Removing temporary output file Temp_NET/PP1H66KpDoxS2Ser5_R2_umi.fastq.gz.
+Removing temporary output file Temp_NET/PP1H66KpDoxS2Ser5_R2.fastq.gz.
+[Thu Dec 21 14:45:30 2023]
+Finished job 17.
+6 of 56 steps (11%) done
+Select jobs to execute...
+
+[Thu Dec 21 14:45:30 2023]
+Job 23: Aligning reads with Bowtie2 for PP1H66KpDoxS2Ser5
+
+Submitted DRMAA job 23 with external jobid 588411.
+Removing temporary output file Temp_NET/PP1H66KpDS2Ser53_R2_umi.fastq.gz.
+Removing temporary output file Temp_NET/PP1H66KpDS2Ser53_R1_umi.fastq.gz.
+Removing temporary output file Temp_NET/PP1H66KpDS2Ser53_R2.fastq.gz.
+[Thu Dec 21 14:46:11 2023]
+Finished job 13.
+7 of 56 steps (12%) done
+Select jobs to execute...
+
+[Thu Dec 21 14:46:11 2023]
+Job 21: Aligning reads with Bowtie2 for PP1H66KpDS2Ser53
+
+Submitted DRMAA job 21 with external jobid 588413.
+Removing temporary output file Temp_NET/PP1H66KmDS2Ser53_R2_umi.fastq.gz.
+Removing temporary output file Temp_NET/PP1H66KmDS2Ser53_R1_umi.fastq.gz.
+Removing temporary output file Temp_NET/PP1H66KmDS2Ser53_R2.fastq.gz.
+[Thu Dec 21 14:46:21 2023]
+Finished job 11.
+8 of 56 steps (14%) done
+Select jobs to execute...
+
+[Thu Dec 21 14:46:21 2023]
+Job 10: Creating Temp_NET cutadapt summary
+
+Submitted DRMAA job 10 with external jobid 588414.
+
+[Thu Dec 21 14:46:21 2023]
+Job 20: Aligning reads with Bowtie2 for PP1H66KmDS2Ser53
+
+Submitted DRMAA job 20 with external jobid 588415.
+[Thu Dec 21 14:46:31 2023]
+Finished job 10.
+9 of 56 steps (16%) done
+Removing temporary output file Temp_NET/PP1H66KmDoxS2Ser5_R1.fastq.gz.
+[Thu Dec 21 14:47:01 2023]
+Finished job 22.
+10 of 56 steps (18%) done
+Select jobs to execute...
+
+[Thu Dec 21 14:47:01 2023]
+Job 35: Removing duplicates for PP1H66KmDoxS2Ser5
+
+Submitted DRMAA job 35 with external jobid 588416.
+Removing temporary output file Temp_NET/PP1H66KpDoxS2Ser5_R1.fastq.gz.
+[Thu Dec 21 14:47:41 2023]
+Finished job 23.
+11 of 56 steps (20%) done
+Select jobs to execute...
+
+[Thu Dec 21 14:47:41 2023]
+Job 39: Removing duplicates for PP1H66KpDoxS2Ser5
+
+Submitted DRMAA job 39 with external jobid 588417.
+Removing temporary output file Temp_NET/PP1H66KpDS2Ser53_R1.fastq.gz.
+[Thu Dec 21 14:48:31 2023]
+Finished job 21.
+12 of 56 steps (21%) done
+Select jobs to execute...
+
+[Thu Dec 21 14:48:31 2023]
+Job 31: Removing duplicates for PP1H66KpDS2Ser53
+
+Submitted DRMAA job 31 with external jobid 588418.
+Removing temporary output file Temp_NET/PP1H66KmDS2Ser53_R1.fastq.gz.
+[Thu Dec 21 14:48:51 2023]
+Finished job 20.
+13 of 56 steps (23%) done
+Select jobs to execute...
+
+[Thu Dec 21 14:48:51 2023]
+Job 19:  R1 summmary Bowtie2 
+
+Submitted DRMAA job 19 with external jobid 588419.
+
+[Thu Dec 21 14:48:51 2023]
+Job 27: Removing duplicates for PP1H66KmDS2Ser53
+
+Submitted DRMAA job 27 with external jobid 588420.
+[Thu Dec 21 14:49:01 2023]
+Finished job 19.
+14 of 56 steps (25%) done
+Removing temporary output file Temp_NET/PP1H66KmDoxS2Ser5_hg38_mm10.bam.
+Removing temporary output file Temp_NET/PP1H66KmDoxS2Ser5_hg38_mm10.bam.bai.
+[Thu Dec 21 14:50:51 2023]
+Finished job 35.
+15 of 56 steps (27%) done
+Select jobs to execute...
+
+[Thu Dec 21 14:50:51 2023]
+Job 36: filtering spike in reads PP1H66KmDoxS2Ser5
+
+Submitted DRMAA job 36 with external jobid 588422.
+
+[Thu Dec 21 14:50:52 2023]
+Job 34: filtering reads PP1H66KmDoxS2Ser5
+
+Submitted DRMAA job 34 with external jobid 588423.
+[Thu Dec 21 14:51:11 2023]
+Finished job 36.
+16 of 56 steps (29%) done
+Removing temporary output file Temp_NET/PP1H66KpDoxS2Ser5_hg38_mm10.bam.
+Removing temporary output file Temp_NET/PP1H66KpDoxS2Ser5_hg38_mm10.bam.bai.
+[Thu Dec 21 14:51:32 2023]
+Finished job 39.
+17 of 56 steps (30%) done
+Select jobs to execute...
+
+[Thu Dec 21 14:51:32 2023]
+Job 38: filtering reads PP1H66KpDoxS2Ser5
+
+Submitted DRMAA job 38 with external jobid 588424.
+
+[Thu Dec 21 14:51:32 2023]
+Job 46: getting subsample norm for PP1H66KSer5-r2
+
+Submitted DRMAA job 46 with external jobid 588425.
+
+[Thu Dec 21 14:51:32 2023]
+Job 40: filtering spike in reads PP1H66KpDoxS2Ser5
+
+Submitted DRMAA job 40 with external jobid 588426.
+Removing temporary output file Temp_NET/bams/PP1H66KmDoxS2Ser5_temp.bam.
+Removing temporary output file Temp_NET/bams/PP1H66KmDoxS2Ser5_temp2.bam.
+[Thu Dec 21 14:51:42 2023]
+Finished job 34.
+18 of 56 steps (32%) done
+Select jobs to execute...
+
+[Thu Dec 21 14:51:42 2023]
+Job 33: Bowtie2 counts_spikin for PP1H66KmDoxS2Ser5
+
+Submitted DRMAA job 33 with external jobid 588427.
+Removing temporary output file Temp_NET/bams/PP1H66KmDoxS2Ser5_hg38_mm10_dedup.txt.
+Removing temporary output file Temp_NET/bams/PP1H66KpDoxS2Ser5_hg38_mm10_dedup.txt.
+[Thu Dec 21 14:51:52 2023]
+Finished job 46.
+19 of 56 steps (34%) done
+[Thu Dec 21 14:51:52 2023]
+Finished job 40.
+20 of 56 steps (36%) done
+[Thu Dec 21 14:52:02 2023]
+Finished job 33.
+21 of 56 steps (38%) done
+Removing temporary output file Temp_NET/bams/PP1H66KpDoxS2Ser5_temp.bam.
+Removing temporary output file Temp_NET/bams/PP1H66KpDoxS2Ser5_temp2.bam.
+[Thu Dec 21 14:52:12 2023]
+Finished job 38.
+22 of 56 steps (39%) done
+Select jobs to execute...
+
+[Thu Dec 21 14:52:12 2023]
+Job 37: Bowtie2 counts_spikin for PP1H66KpDoxS2Ser5
+
+Submitted DRMAA job 37 with external jobid 588428.
+[Thu Dec 21 14:52:32 2023]
+Finished job 37.
+23 of 56 steps (41%) done
+Removing temporary output file Temp_NET/PP1H66KpDS2Ser53_hg38_mm10.bam.
+Removing temporary output file Temp_NET/PP1H66KpDS2Ser53_hg38_mm10.bam.bai.
+[Thu Dec 21 14:52:42 2023]
+Finished job 31.
+24 of 56 steps (43%) done
+Select jobs to execute...
+
+[Thu Dec 21 14:52:42 2023]
+Job 32: filtering spike in reads PP1H66KpDS2Ser53
+
+Submitted DRMAA job 32 with external jobid 588429.
+
+[Thu Dec 21 14:52:42 2023]
+Job 30: filtering reads PP1H66KpDS2Ser53
+
+Submitted DRMAA job 30 with external jobid 588430.
+[Thu Dec 21 14:53:02 2023]
+Finished job 32.
+25 of 56 steps (45%) done
+Removing temporary output file Temp_NET/bams/PP1H66KpDS2Ser53_temp.bam.
+Removing temporary output file Temp_NET/bams/PP1H66KpDS2Ser53_temp2.bam.
+[Thu Dec 21 14:53:32 2023]
+Finished job 30.
+26 of 56 steps (46%) done
+Select jobs to execute...
+
+[Thu Dec 21 14:53:32 2023]
+Job 29: Bowtie2 counts_spikin for PP1H66KpDS2Ser53
+
+Submitted DRMAA job 29 with external jobid 588431.
+[Thu Dec 21 14:53:52 2023]
+Finished job 29.
+27 of 56 steps (48%) done
+Removing temporary output file Temp_NET/PP1H66KmDS2Ser53_hg38_mm10.bam.
+Removing temporary output file Temp_NET/PP1H66KmDS2Ser53_hg38_mm10.bam.bai.
+[Thu Dec 21 14:54:42 2023]
+Finished job 27.
+28 of 56 steps (50%) done
+Select jobs to execute...
+
+[Thu Dec 21 14:54:42 2023]
+Job 26: filtering reads PP1H66KmDS2Ser53
+
+Submitted DRMAA job 26 with external jobid 588433.
+
+[Thu Dec 21 14:54:42 2023]
+Job 28: filtering spike in reads PP1H66KmDS2Ser53
+
+Submitted DRMAA job 28 with external jobid 588434.
+
+[Thu Dec 21 14:54:42 2023]
+Job 62: Creating Temp_NET dedup summary
+
+Submitted DRMAA job 62 with external jobid 588435.
+
+[Thu Dec 21 14:54:42 2023]
+Job 47: getting subsample norm for PP1H66KSer5-r3
+
+Submitted DRMAA job 47 with external jobid 588436.
+[Thu Dec 21 14:54:52 2023]
+Finished job 62.
+29 of 56 steps (52%) done
+[Thu Dec 21 14:55:02 2023]
+Finished job 28.
+30 of 56 steps (54%) done
+Removing temporary output file Temp_NET/bams/PP1H66KmDS2Ser53_hg38_mm10_dedup.txt.
+Removing temporary output file Temp_NET/bams/PP1H66KpDS2Ser53_hg38_mm10_dedup.txt.
+[Thu Dec 21 14:55:02 2023]
+Finished job 47.
+31 of 56 steps (55%) done
+Select jobs to execute...
+
+[Thu Dec 21 14:55:02 2023]
+Job 45: Creating Temp_NET subsample summary
+
+Submitted DRMAA job 45 with external jobid 588437.
+Removing temporary output file Temp_NET/bams/PP1H66KSer5-r2_hg38_mm10_subsample_frac.txt.
+Removing temporary output file Temp_NET/bams/PP1H66KSer5-r3_hg38_mm10_subsample_frac.txt.
+[Thu Dec 21 14:55:12 2023]
+Finished job 45.
+32 of 56 steps (57%) done
+Select jobs to execute...
+
+[Thu Dec 21 14:55:12 2023]
+Job 49: Subsampling UMI_dedup reads for PP1H66KpDoxS2Ser5 INDEX_MAP 
+
+Submitted DRMAA job 49 with external jobid 588439.
+
+[Thu Dec 21 14:55:12 2023]
+Job 52: Subsampling UMI_dedup reads for PP1H66KmDS2Ser53 INDEX_MAP 
+
+Submitted DRMAA job 52 with external jobid 588440.
+
+[Thu Dec 21 14:55:12 2023]
+Job 54: Subsampling UMI_dedup reads for PP1H66KpDS2Ser53 INDEX_MAP 
+
+Submitted DRMAA job 54 with external jobid 588441.
+
+[Thu Dec 21 14:55:12 2023]
+Job 44: Subsampling UMI_dedup reads for PP1H66KmDoxS2Ser5 INDEX_MAP 
+
+Submitted DRMAA job 44 with external jobid 588442.
+Removing temporary output file Temp_NET/bams/PP1H66KmDS2Ser53_temp.bam.
+Removing temporary output file Temp_NET/bams/PP1H66KmDS2Ser53_temp2.bam.
+[Thu Dec 21 14:55:42 2023]
+Finished job 26.
+33 of 56 steps (59%) done
+Select jobs to execute...
+
+[Thu Dec 21 14:55:42 2023]
+Job 25: Bowtie2 counts_spikin for PP1H66KmDS2Ser53
+
+Submitted DRMAA job 25 with external jobid 588443.
+Removing temporary output file Temp_NET/bams/PP1H66KpDoxS2Ser5_hg38_mm10_230426_dedup.bam.
+Removing temporary output file Temp_NET/bams/PP1H66KpDoxS2Ser5_hg38_mm10_230426_dedup.bam.bai.
+[Thu Dec 21 14:55:43 2023]
+Finished job 49.
+34 of 56 steps (61%) done
+Removing temporary output file Temp_NET/bams/PP1H66KpDS2Ser53_hg38_mm10_230426_dedup.bam.bai.
+Removing temporary output file Temp_NET/bams/PP1H66KpDS2Ser53_hg38_mm10_230426_dedup.bam.
+[Thu Dec 21 14:55:43 2023]
+Finished job 54.
+35 of 56 steps (62%) done
+Removing temporary output file Temp_NET/bams/PP1H66KmDoxS2Ser5_hg38_mm10_230426_dedup.bam.bai.
+Removing temporary output file Temp_NET/bams/PP1H66KmDoxS2Ser5_hg38_mm10_230426_dedup.bam.
+[Thu Dec 21 14:55:43 2023]
+Finished job 44.
+36 of 56 steps (64%) done
+Select jobs to execute...
+
+[Thu Dec 21 14:55:43 2023]
+Job 43: filtering subsample reads PP1H66KmDoxS2Ser5
+
+Submitted DRMAA job 43 with external jobid 588444.
+
+[Thu Dec 21 14:55:43 2023]
+Job 48: filtering subsample reads PP1H66KpDoxS2Ser5
+
+Submitted DRMAA job 48 with external jobid 588445.
+
+[Thu Dec 21 14:55:43 2023]
+Job 57: filtering spikeaIN subsample reads PP1H66KmDoxS2Ser5
+
+Submitted DRMAA job 57 with external jobid 588446.
+
+[Thu Dec 21 14:55:43 2023]
+Job 61: filtering spikeaIN subsample reads PP1H66KpDS2Ser53
+
+Submitted DRMAA job 61 with external jobid 588447.
+
+[Thu Dec 21 14:55:43 2023]
+Job 53: filtering subsample reads PP1H66KpDS2Ser53
+
+Submitted DRMAA job 53 with external jobid 588448.
+
+[Thu Dec 21 14:55:43 2023]
+Job 58: filtering spikeaIN subsample reads PP1H66KpDoxS2Ser5
+
+Submitted DRMAA job 58 with external jobid 588449.
+Removing temporary output file Temp_NET/bams/PP1H66KmDS2Ser53_hg38_mm10_230426_dedup.bam.bai.
+Removing temporary output file Temp_NET/bams/PP1H66KmDS2Ser53_hg38_mm10_230426_dedup.bam.
+[Thu Dec 21 14:55:53 2023]
+Finished job 52.
+37 of 56 steps (66%) done
+Select jobs to execute...
+
+[Thu Dec 21 14:55:53 2023]
+Job 51: filtering subsample reads PP1H66KmDS2Ser53
+
+Submitted DRMAA job 51 with external jobid 588450.
+
+[Thu Dec 21 14:55:53 2023]
+Job 60: filtering spikeaIN subsample reads PP1H66KmDS2Ser53
+
+Submitted DRMAA job 60 with external jobid 588451.
+[Thu Dec 21 14:56:03 2023]
+Finished job 25.
+38 of 56 steps (68%) done
+Select jobs to execute...
+
+[Thu Dec 21 14:56:03 2023]
+Job 24: getting final results
+
+Submitted DRMAA job 24 with external jobid 588452.
+[Thu Dec 21 14:56:03 2023]
+Finished job 57.
+39 of 56 steps (70%) done
+[Thu Dec 21 14:56:03 2023]
+Finished job 61.
+40 of 56 steps (71%) done
+[Thu Dec 21 14:56:03 2023]
+Finished job 58.
+41 of 56 steps (73%) done
+[Thu Dec 21 14:56:03 2023]
+Finished job 60.
+42 of 56 steps (75%) done
+Select jobs to execute...
+
+[Thu Dec 21 14:56:03 2023]
+Job 64: Creating Temp_NET subsample_spikein summary
+
+Submitted DRMAA job 64 with external jobid 588453.
+[Thu Dec 21 14:56:13 2023]
+Error in rule gathering_results:
+    jobid: 24
+    output: Temp_NET/stats/Temp_NET_results.tsv
+    log: Temp_NET/logs/results.out, Temp_NET/logs/results.err (check log file(s) for error message)
+
+Error executing rule gathering_results on cluster (jobid: 24, external: 588452, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/tmp.0ek51ojz/snakejob.gathering_results.24.sh). For error details see the cluster log and the log files of the involved rule(s).
+Removing temporary output file Temp_NET/bams_sub/PP1H66KmDS2Ser53_mm10_subsample.txt.
+Removing temporary output file Temp_NET/bams_sub/PP1H66KpDS2Ser53_mm10_subsample.txt.
+Removing temporary output file Temp_NET/bams_sub/PP1H66KmDoxS2Ser5_mm10_subsample.txt.
+Removing temporary output file Temp_NET/bams_sub/PP1H66KpDoxS2Ser5_mm10_subsample.txt.
+[Thu Dec 21 14:56:13 2023]
+Finished job 64.
+43 of 56 steps (77%) done
+Removing temporary output file Temp_NET/bams/PP1H66KmDoxS2Ser5_hg38_mm10_230426_subsample.bam.bai.
+Removing temporary output file Temp_NET/bams/PP1H66KmDoxS2Ser5_hg38_mm10_230426_subsample.bam.
+Removing temporary output file Temp_NET/bams/PP1H66KmDoxS2Ser5_temp.bam.
+Removing temporary output file Temp_NET/bams/PP1H66KmDoxS2Ser5_temp2.bam.
+[Thu Dec 21 14:56:23 2023]
+Finished job 43.
+44 of 56 steps (79%) done
+Removing temporary output file Temp_NET/bams/PP1H66KpDoxS2Ser5_hg38_mm10_230426_subsample.bam.bai.
+Removing temporary output file Temp_NET/bams/PP1H66KpDoxS2Ser5_hg38_mm10_230426_subsample.bam.
+Removing temporary output file Temp_NET/bams/PP1H66KpDoxS2Ser5_temp.bam.
+Removing temporary output file Temp_NET/bams/PP1H66KpDoxS2Ser5_temp2.bam.
+[Thu Dec 21 14:56:23 2023]
+Finished job 48.
+45 of 56 steps (80%) done
+Removing temporary output file Temp_NET/bams/PP1H66KpDS2Ser53_hg38_mm10_230426_subsample.bam.
+Removing temporary output file Temp_NET/bams/PP1H66KpDS2Ser53_hg38_mm10_230426_subsample.bam.bai.
+Removing temporary output file Temp_NET/bams/PP1H66KpDS2Ser53_temp.bam.
+Removing temporary output file Temp_NET/bams/PP1H66KpDS2Ser53_temp2.bam.
+[Thu Dec 21 14:56:43 2023]
+Finished job 53.
+46 of 56 steps (82%) done
+Removing temporary output file Temp_NET/bams/PP1H66KmDS2Ser53_hg38_mm10_230426_subsample.bam.bai.
+Removing temporary output file Temp_NET/bams/PP1H66KmDS2Ser53_hg38_mm10_230426_subsample.bam.
+Removing temporary output file Temp_NET/bams/PP1H66KmDS2Ser53_temp.bam.
+Removing temporary output file Temp_NET/bams/PP1H66KmDS2Ser53_temp2.bam.
+[Thu Dec 21 14:56:43 2023]
+Finished job 51.
+47 of 56 steps (84%) done
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/log/2023-12-21T142424.896881.snakemake.log

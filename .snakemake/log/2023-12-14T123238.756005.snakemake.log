@@ -1,0 +1,36 @@
+Building DAG of jobs...
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                          count    min threads    max threads
+-------------------------  -------  -------------  -------------
+all                              1              1              1
+bamCoverage                      2             12             12
+bamCoverage_spike                2             12             12
+bamCoverage_spike_summary        1              1              1
+bamCoverage_summary              1              1              1
+gathering_results                1              1              1
+total                            8              1             12
+
+Select jobs to execute...
+
+[Thu Dec 14 12:32:40 2023]
+Job 34: getting final results
+
+Submitted DRMAA job 34 with external jobid 578934.
+[Thu Dec 14 12:33:00 2023]
+Error in rule gathering_results:
+    jobid: 34
+    output: Temp/stats/Temp_results.tsv
+    log: Temp/logs/results.out, Temp/logs/results.err (check log file(s) for error message)
+
+Error executing rule gathering_results on cluster (jobid: 34, external: 578934, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/tmp.56v6zth7/snakejob.gathering_results.34.sh). For error details see the cluster log and the log files of the involved rule(s).
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/log/2023-12-14T123238.756005.snakemake.log

@@ -1,0 +1,53 @@
+#===== Config file containing samples ==========================================
+# This gets appended to config
+
+# Sample groups. 
+# The sample names must match the beginning of a fastq file in one of the
+# directories listed under RAW_DATA. If the sample name
+# matches multiple fastqs, an error will be thrown.
+#
+# group-name-1:
+#     - "sample_1_R1_file_prefix"
+#     - "sample_1_R2_file_prefix"
+#
+# group-name-2:
+#     - "sample_2_R1_file_prefix"
+#     - "sample_2_R2_file_prefix"
+#
+SAMPLESr:
+    RTF1_WT:
+        - "293flpIN_RTF1_WT1"
+        - "293flpIN_RTF1_WT2"
+        - "293flpIN_RTF1_WT3"
+
+    RTF1_MTr:
+        - "293flpIN_RTF1_MT_R1"
+        - "293flpIN_RTF1_MT_R2"
+        - "293flpIN_RTF1_MT_R3"
+
+
+# set rMATS groups to compare
+#treatment:control
+GROUPS_COMP:
+   - "RTF1_MT:RTF1_WT"
+
+# program options  
+CMD_PARAMS:
+    rmats:         " -t paired --readLength 150 --libType fr-firststrand "
+    
+# optional arguments:
+#   --gtf GTF             An annotation of genes and transcripts in GTF format.
+# --b1 B1               BAM configuration file.
+# --b2 B2               BAM configuration file.
+# --od OD               output folder of post step.
+# -t {paired,single}    readtype, single or paired.
+# --libType {fr-unstranded,fr-firststrand,fr-secondstrand}
+# Library type. Default is unstranded (fr-unstranded).
+# Use fr-firststrand or fr-secondstrand for strand-
+#   specific data.
+# --readLength READLENGTH
+# The length of each read.
+# --nthread NTHREAD     The number of thread. The optimal number of thread
+# should be equal to the number of CPU core.
+
+    

@@ -1,0 +1,39 @@
+#===== Config file for standared hg38 genome  ===================
+
+# Path to mixed bowtie2 index and chrom name txt file
+GENELIST:
+    "enhancer"
+INDEX_PATH:
+    "/beevol/home/erickson/ref/hg38/"
+INDEX_MIX:
+    "hg38"
+INDEX_SAMPLE:
+    "hg38"
+INDEX_SPIKE:
+    "hg38"
+MASK:
+  ""
+GTF:
+  "/beevol/home/erickson/ref/hg38/ref/Homo_sapiens.GRCh38.95.gtf"
+# fasta files for splitting bam file
+FA_SAMPLE:
+  "/beevol/home/erickson/ref/hg38/Homo_sapiens.GRCh38.dna.primary_assembly.UCSC.fa"
+FA_SPIKE:
+  "/beevol/home/erickson/ref/hg38/Homo_sapiens.GRCh38.dna.primary_assembly.UCSC.fa"
+ENRICHED_SAMPLE:
+  "/beevol/home/erickson/ref/hg38/ref/enrich.bed"
+ENRICHED_SPIKE:
+  "/beevol/home/erickson/ref/hg38/ref/enrich.bed"
+MY_REF:
+  "/beevol/home/erickson/ref/hg38/ref/enhancer_midpoint_hg38.bed"
+FW_REF:
+  "/beevol/home/erickson/ref/hg38/ref/enhancer_midpoint_hg38.bed"
+REV_REF:
+  "/beevol/home/erickson/ref/hg38/ref/enhancer_midpoint_hg38.bed"
+PI_REF:
+  "/beevol/home/erickson/ref/hg38/ref/PI.bed"
+EI_FW_REF:
+  "/beevol/home/erickson/ref/hg38/ref/EI_anti_fw.bed"
+EI_REV_REF:
+  "/beevol/home/erickson/ref/hg38/ref/EI_anti_fw.bed"
+

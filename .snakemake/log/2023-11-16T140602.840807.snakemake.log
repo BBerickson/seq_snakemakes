@@ -1,0 +1,12 @@
+Building DAG of jobs...
+AmbiguousRuleException:
+Rules star_second_pass and bowtieR1 are ambiguous for the file Temp/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD_hg38.bam.
+Consider starting rule output with a unique prefix, constrain your wildcards, or use the ruleorder directive.
+Wildcards:
+	star_second_pass: sample=293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD
+	bowtieR1: sample=293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD
+Expected input files:
+	star_second_pass: Temp/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD_R1.fastq.gz Temp/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD_R2.fastq.gz Temp/bams/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD_Aligned.sortedByCoord.out.bam Temp/bams/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD_SJ.out.tab Temp/bams/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input_SJ.out.tab Temp/bams/293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_CTD_SJ.out.tab Temp/bams/293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input_SJ.out.tab
+	bowtieR1: Temp/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD_R1.fastq.gzExpected output files:
+	star_second_pass: Temp/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD_hg38.bam Temp/bams/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD_hg38_mm10_2pass_Log.final.out
+	bowtieR1: Temp/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD_hg38.bam Temp/bams/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD_hg38_mm10_bowtie_R1_stats.txt

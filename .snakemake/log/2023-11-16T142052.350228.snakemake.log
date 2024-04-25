@@ -1,0 +1,97 @@
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                            count    min threads    max threads
+---------------------------  -------  -------------  -------------
+align_filter_sample                4             12             12
+align_filter_sample_spikein        4             12             12
+all                                1              1              1
+bowtiePE                           4             12             12
+bowtiePE_summmary                  1              1              1
+bowtie_counts_spikein              4              1              1
+total                             18              1             12
+
+Select jobs to execute...
+
+[Thu Nov 16 14:20:54 2023]
+Job 7: Aligning reads with Bowtie2 for 293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD
+
+Submitted DRMAA job 7 with external jobid 567189.
+
+[Thu Nov 16 14:20:54 2023]
+Job 8: Aligning reads with Bowtie2 for 293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input
+
+Submitted DRMAA job 8 with external jobid 567190.
+
+[Thu Nov 16 14:20:54 2023]
+Job 9: Aligning reads with Bowtie2 for 293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_CTD
+
+Submitted DRMAA job 9 with external jobid 567191.
+
+[Thu Nov 16 14:20:55 2023]
+Job 10: Aligning reads with Bowtie2 for 293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input
+
+Submitted DRMAA job 10 with external jobid 567192.
+[Thu Nov 16 14:21:43 2023]
+Finished job 8.
+1 of 18 steps (6%) done
+Select jobs to execute...
+
+[Thu Nov 16 14:21:43 2023]
+Job 16: filtering spike in reads 293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input
+
+Submitted DRMAA job 16 with external jobid 567193.
+
+[Thu Nov 16 14:21:43 2023]
+Job 15: filtering reads 293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input
+
+Submitted DRMAA job 15 with external jobid 567194.
+[Thu Nov 16 14:21:53 2023]
+Error in rule align_filter_sample_spikein:
+    jobid: 16
+    output: Temp/bams/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input_mm10_230426.bam, Temp/bams/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input_mm10_230426.bam.bai
+    log: Temp/logs/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input_align_filter_spikein.out, Temp/logs/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input_align_filter_spikein.err (check log file(s) for error message)
+    shell:
+        
+        # filter
+        samtools view Temp/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input_hg38.bam $(head -n1 /beevol/home/erickson/ref/hg38_mm10/mm10.txt)         | sed 's/spike_*//g' | samtools view -bT /beevol/home/erickson/ref/mm10/mm10.fa -         | samtools sort - -T 293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input_spikein.temp -@ 12 -O bam         > Temp/bams/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input_mm10_230426.bam
+        
+        samtools index -@ 12 Temp/bams/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input_mm10_230426.bam
+        
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Error executing rule align_filter_sample_spikein on cluster (jobid: 16, external: 567193, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/tmp.8p8xzot6/snakejob.align_filter_sample_spikein.16.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Thu Nov 16 14:21:53 2023]
+Error in rule align_filter_sample:
+    jobid: 15
+    output: Temp/bams/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input_hg38_230426.bam, Temp/bams/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input_hg38_230426.bam.bai
+    log: Temp/logs/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input_align_filter.out, Temp/logs/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input_align_filter.err (check log file(s) for error message)
+    shell:
+        
+        # filter
+        samtools view Temp/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input_hg38.bam $(head -n1 /beevol/home/erickson/ref/hg38_mm10/hg38.txt)         | samtools view -bT /beevol/home/erickson/ref/hg38/Homo_sapiens.GRCh38.dna.primary_assembly.UCSC.fa -         | samtools sort - -T 293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input.temp -@ 12 -O bam         > Temp/bams/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input_hg38_230426.bam
+        
+        samtools index -@ 12 Temp/bams/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input_hg38_230426.bam
+        
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Error executing rule align_filter_sample on cluster (jobid: 15, external: 567194, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/tmp.8p8xzot6/snakejob.align_filter_sample.15.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Thu Nov 16 14:33:29 2023]
+Finished job 10.
+2 of 18 steps (11%) done
+Removing temporary output file Temp/293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_CTD_R1.fastq.gz.
+Removing temporary output file Temp/293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_CTD_R2.fastq.gz.
+[Thu Nov 16 15:31:51 2023]
+Finished job 9.
+3 of 18 steps (17%) done
+Removing temporary output file Temp/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD_R1.fastq.gz.
+Removing temporary output file Temp/293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD_R2.fastq.gz.
+[Thu Nov 16 15:40:53 2023]
+Finished job 7.
+4 of 18 steps (22%) done
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/log/2023-11-16T142052.350228.snakemake.log

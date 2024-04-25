@@ -1,0 +1,3 @@
+SyntaxError in line 7 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/02c_align_bowtie.snake:
+Unexpected keyword expand in rule definition (02c_align_bowtie.snake, line 7)
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/Bowtie.snake", line 165, in <module>

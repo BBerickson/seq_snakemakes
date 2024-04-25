@@ -1,0 +1,138 @@
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                             count    min threads    max threads
+----------------------------  -------  -------------  -------------
+all                                 1              1              1
+calculating_OR                      2              1              1
+calculating_subsample_spikin        2              1              1
+gathering_OR_results                1              1              1
+gathering_results                   1              1              1
+subsample_summary                   1              1              1
+subsample_summary_frac              1              1              1
+subsample_whole                     4             16             16
+total                              13              1             16
+
+Select jobs to execute...
+
+[Tue Dec 19 15:30:24 2023]
+Job 46: getting OR norm for PP1H66KSer5-r3
+
+Submitted DRMAA job 46 with external jobid 581172.
+
+[Tue Dec 19 15:30:25 2023]
+Job 40: getting subsample norm for PP1H66KSer5-r2
+
+Submitted DRMAA job 40 with external jobid 581173.
+
+[Tue Dec 19 15:30:25 2023]
+Job 47: getting OR norm for PP1H66KSer5-r2
+
+Submitted DRMAA job 47 with external jobid 581174.
+
+[Tue Dec 19 15:30:25 2023]
+Job 41: getting subsample norm for PP1H66KSer5-r3
+
+Submitted DRMAA job 41 with external jobid 581175.
+[Tue Dec 19 15:30:41 2023]
+Finished job 46.
+1 of 13 steps (8%) done
+[Tue Dec 19 15:30:41 2023]
+Finished job 40.
+2 of 13 steps (15%) done
+[Tue Dec 19 15:30:41 2023]
+Finished job 47.
+3 of 13 steps (23%) done
+Select jobs to execute...
+
+[Tue Dec 19 15:30:41 2023]
+Job 45: getting final results
+
+Submitted DRMAA job 45 with external jobid 581176.
+[Tue Dec 19 15:30:42 2023]
+Finished job 41.
+4 of 13 steps (31%) done
+Select jobs to execute...
+
+[Tue Dec 19 15:30:42 2023]
+Job 39: Creating Temp_NET subsample summary
+
+Submitted DRMAA job 39 with external jobid 581177.
+Removing temporary output file Temp_NET/counts/PP1H66KSer5-r3_OR_count.txt.
+Removing temporary output file Temp_NET/counts/PP1H66KSer5-r2_OR_count.txt.
+[Tue Dec 19 15:30:52 2023]
+Finished job 45.
+5 of 13 steps (38%) done
+Removing temporary output file Temp_NET/bams_sub/PP1H66KSer5-r2_hg38_subsample_frac.txt.
+Removing temporary output file Temp_NET/bams_sub/PP1H66KSer5-r3_hg38_subsample_frac.txt.
+[Tue Dec 19 15:30:52 2023]
+Finished job 39.
+6 of 13 steps (46%) done
+Select jobs to execute...
+
+[Tue Dec 19 15:30:52 2023]
+Job 43: Subsampling reads for PP1H66KmDoxS2Ser5 INDEX_SAMPLE 
+
+Submitted DRMAA job 43 with external jobid 581178.
+
+[Tue Dec 19 15:30:52 2023]
+Job 44: Subsampling reads for PP1H66KpDoxS2Ser5 INDEX_SAMPLE 
+
+Submitted DRMAA job 44 with external jobid 581179.
+
+[Tue Dec 19 15:30:52 2023]
+Job 26: Subsampling reads for PP1H66KmDS2Ser53 INDEX_SAMPLE 
+
+Submitted DRMAA job 26 with external jobid 581180.
+
+[Tue Dec 19 15:30:52 2023]
+Job 42: Subsampling reads for PP1H66KpDS2Ser53 INDEX_SAMPLE 
+
+Submitted DRMAA job 42 with external jobid 581181.
+[Tue Dec 19 15:31:22 2023]
+Finished job 43.
+7 of 13 steps (54%) done
+[Tue Dec 19 15:31:23 2023]
+Finished job 44.
+8 of 13 steps (62%) done
+[Tue Dec 19 15:31:23 2023]
+Finished job 26.
+9 of 13 steps (69%) done
+[Tue Dec 19 15:31:23 2023]
+Finished job 42.
+10 of 13 steps (77%) done
+Select jobs to execute...
+
+[Tue Dec 19 15:31:23 2023]
+Job 25: Creating Temp_NET subsample_whole summary
+
+Submitted DRMAA job 25 with external jobid 581182.
+Removing temporary output file Temp_NET/bams_sub/PP1H66KmDS2Ser53_hg38_subsample.txt.
+Removing temporary output file Temp_NET/bams_sub/PP1H66KpDS2Ser53_hg38_subsample.txt.
+Removing temporary output file Temp_NET/bams_sub/PP1H66KmDoxS2Ser5_hg38_subsample.txt.
+Removing temporary output file Temp_NET/bams_sub/PP1H66KpDoxS2Ser5_hg38_subsample.txt.
+[Tue Dec 19 15:31:33 2023]
+Finished job 25.
+11 of 13 steps (85%) done
+Select jobs to execute...
+
+[Tue Dec 19 15:31:33 2023]
+Job 24: getting final results
+
+Submitted DRMAA job 24 with external jobid 581183.
+[Tue Dec 19 15:31:53 2023]
+Finished job 24.
+12 of 13 steps (92%) done
+Select jobs to execute...
+
+[Tue Dec 19 15:31:53 2023]
+localrule all:
+    input: Temp_NET/stats/Temp_NET_fastqc.tsv, Temp_NET/stats/Temp_NET_cutadapt.tsv, Temp_NET/stats/Temp_NET_aligned.tsv, Temp_NET/stats/Temp_NET_results.tsv
+    jobid: 0
+    resources: tmpdir=/tmp
+
+[Tue Dec 19 15:31:53 2023]
+Finished job 0.
+13 of 13 steps (100%) done
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/log/2023-12-19T153018.323624.snakemake.log

@@ -1,0 +1,68 @@
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                 count    min threads    max threads
+----------------  -------  -------------  -------------
+all                     1              1              1
+bbduk_paired            2             12             12
+bbduk_summary           1              1              1
+bowtiePE                3             12             12
+clumpify_summary        1              1              1
+fastqc_summary          1              1              1
+total                   9              1             12
+
+Select jobs to execute...
+
+[Wed Nov 15 11:56:19 2023]
+Job 4: Removing duplicats for 293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD
+
+Submitted DRMAA job 4 with external jobid 566548.
+
+[Wed Nov 15 11:56:19 2023]
+Job 9: Aligning reads with Bowtie2 for 293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input
+
+Submitted DRMAA job 9 with external jobid 566549.
+
+[Wed Nov 15 11:56:19 2023]
+Job 1: Creating Temp FastQC summary
+
+Submitted DRMAA job 1 with external jobid 566550.
+
+[Wed Nov 15 11:56:20 2023]
+Job 5: Removing duplicats for 293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_CTD
+
+Submitted DRMAA job 5 with external jobid 566551.
+
+[Wed Nov 15 11:56:20 2023]
+Job 2: Creating Temp clumpify summary
+
+Submitted DRMAA job 2 with external jobid 566552.
+[Wed Nov 15 11:56:29 2023]
+Error in rule bowtiePE:
+    jobid: 9
+    output: Temp/293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input_hg38.bam, Temp/bams/293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input_bowtie_stats.txt
+    log: Temp/logs/293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input_bowtie.out, Temp/logs/293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input_bowtie.err (check log file(s) for error message)
+    shell:
+        
+        bowtie2             -p 12             -x /beevol/home/erickson/ref/hg38_mm10/hg38             -1 Temp/293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input_R1.fastq.gz             -2 Temp/293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input_R2.fastq.gz              --local --no-mixed --no-discordant              2> Temp/bams/293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input_bowtie_stats.txt             | samtools view  -bF4q30  -             > Temp/293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input_hg38.bam
+        
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Error executing rule bowtiePE on cluster (jobid: 9, external: 566549, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/tmp.ocolunef/snakejob.bowtiePE.9.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Wed Nov 15 11:56:29 2023]
+Finished job 1.
+1 of 9 steps (11%) done
+[Wed Nov 15 11:56:29 2023]
+Finished job 2.
+2 of 9 steps (22%) done
+[Wed Nov 15 11:59:50 2023]
+Finished job 5.
+3 of 9 steps (33%) done
+[Wed Nov 15 12:00:00 2023]
+Finished job 4.
+4 of 9 steps (44%) done
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/log/2023-11-15T115616.893433.snakemake.log

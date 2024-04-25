@@ -1,0 +1,4 @@
+NameError in line 7 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/01_fastqc.snake:
+name 'path' is not defined
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/Bowtie.snake", line 161, in <module>
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/01_fastqc.snake", line 7, in <module>

@@ -1,0 +1,71 @@
+# ====== Rules for filtering aligned reads with samtools =================================
+
+
+# filter aligned reads
+rule align_filter_sample:
+    input:
+        bam   = PROJ  + "/{sample}_" + INDEX_MAP + ".bam",
+        bai   = PROJ  + "/{sample}_" + INDEX_MAP + ".bam.bai"
+    output:
+        bam   = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
+        bai   = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai"
+    params:
+        job_name = "{sample}_align_filter",
+        memory   = MEMORY * 3,
+        idx      = INDEX_PATH + INDEX_SAMPLE + ".txt",
+        fa2      = FA_SAMPLE,
+        sortname = PROJ + "/{sample}.temp"
+    log:
+        out = PROJ + "/logs/{sample}_align_filter.out",
+        err = PROJ + "/logs/{sample}_align_filter.err"
+    message:
+        "filtering reads {wildcards.sample}"
+    threads: 
+        12
+    shell:
+        """
+        # filter
+        samtools view {input.bam} $(head -n1 {params.idx}) \
+        | samtools view -bT {params.fa2} - \
+        | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+        > {output.bam}
+        
+        samtools index -@ {threads} {output.bam}
+        
+        """
+
+# filter aligned spike in reads
+rule align_filter_sample_spikein:
+    input:
+        bam = PROJ + "/{sample}_" + INDEX_MAP + ".bam",
+        bai = PROJ + "/{sample}_" + INDEX_MAP + ".bam.bai"
+    output:
+        bam = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
+        bai = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam.bai"
+    params:
+        job_name = "{sample}_align_filter_spikein",
+        memory   = MEMORY * 3,
+        idx      = INDEX_PATH + INDEX_SPIKE + ".txt",
+        fa3      = FA_SPIKE,
+        sortname = PROJ + "/{sample}_spikein.temp"
+    log:
+        out = PROJ + "/logs/{sample}_align_filter_spikein.out",
+        err = PROJ + "/logs/{sample}_align_filter_spikein.err"
+    message:
+        "filtering spike in reads {wildcards.sample}"
+    threads: 
+        12
+    shell:
+        """
+        # filter
+        samtools view {input.bam} $(head -n1 {params.idx}) \
+        | sed 's/spike_*//g' | samtools view -bT {params.fa3} - \
+        | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+        > {output.bam}
+        
+        samtools index -@ {threads} {output.bam}
+        
+        """
+
+
+                    

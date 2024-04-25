@@ -1,0 +1,195 @@
+
+```{r "qc setup"}
+
+# png files
+heat_dir <- here::here(res_dir, "heatmap/")
+
+# Sample names and groups
+qc_sams <- plot_grpss$SAMPLES %>% bind_rows()
+
+# Create table of sample groups
+grp_key <- qc_sams %>%
+  imap_dfr(~ crossing(grp = .y, sample = .x))
+
+grps <- sort(distinct(grp_key,grp)$grp)
+grps1 <- sort(grp_key$grp)
+
+
+```
+
+## TSS plots
+
+```{r "5' plot overview", fig.width = 15, fig.height = 5}
+
+chunkSize <- 2
+pngFiles <- list.files(path = heat_dir, pattern = "^5_.*_profile.png$")
+if(length(pngFiles)>0){
+  pngFiles <- str_c(heat_dir, pngFiles)
+  nsize <- length(pngFiles)
+  for(i in 1:ceiling(nsize / chunkSize)){  
+    rl = lapply(sprintf(pngFiles[((i-1)*chunkSize+1):min(nsize,(i*chunkSize))]), png::readPNG)
+    gl = lapply(rl, grid::rasterGrob)
+    gridExtra::grid.arrange(grobs=gl,ncol=chunkSize)
+  }
+
+}
+
+```
+
+## TES plots
+
+```{r "3' plot overview", fig.width = 15, fig.height = 5}
+
+chunkSize <- 2
+pngFiles <- list.files(path = heat_dir, pattern = "^3_.*_profile.png$")
+if(length(pngFiles)>1){
+  pngFiles <- str_c(heat_dir, pngFiles)
+  nsize <- length(pngFiles)
+  for(i in 1:ceiling(nsize / chunkSize)){  
+    rl = lapply(sprintf(pngFiles[((i-1)*chunkSize+1):min(nsize,(i*chunkSize))]), png::readPNG)
+    gl = lapply(rl, grid::rasterGrob)
+    gridExtra::grid.arrange(grobs=gl,ncol=chunkSize)
+  }
+
+}
+
+
+```
+
+<br>
+
+## Heatmaps
+
+## TSS plots
+
+```{r "5' heatmap overview", fig.width = 10, fig.height = 10}
+
+chunkSize <- 1
+pngFiles <- list.files(path = heat_dir, pattern = "^5_.*.png$")
+pngFiles <- pngFiles[!str_detect(pngFiles, "_profile.png$") & !str_detect(pngFiles, "_cluster_sense.png")  & !str_detect(pngFiles, "_cluster_anti.png")]
+pngFiles <- sort(pngFiles)
+grps2 <-   sort(paste0("5_",grps,"_",index_Sample)) %>% str_remove(.,"5_") %>% str_remove(.,paste0("_",index_Sample))
+
+if(length(pngFiles)>1){
+  pngFiles <- str_c(heat_dir, pngFiles)
+  nsize <- length(pngFiles)
+  for(i in 1:ceiling(nsize / chunkSize)){  
+    rl = lapply(sprintf(pngFiles[((i-1)*chunkSize+1):min(nsize,(i*chunkSize))]), png::readPNG)
+    grp = textGrob(str_c(grps2[((i-1)*chunkSize+1):min(nsize,(i*chunkSize))], collapse = " "),
+                   gp=gpar(fontsize=18,font=3), 
+                   x = 0.5,  # Center horizontally
+                       y = unit(1, "npc") + unit(0.2, "cm"))
+    grp <- arrangeGrob(zeroGrob(), grp, 
+                    widths = unit(1, 'npc'), 
+                    heights = unit(c(2, 1), c('cm', 'npc')),
+                    as.table = FALSE)
+    gl = lapply(rl, grid::rasterGrob)
+    gridExtra::grid.arrange(grobs=gl,ncol=chunkSize,top=grp)
+  }
+
+}
+
+
+```
+
+## TES plots
+
+```{r "3' heatmap overview", fig.width = 10, fig.height = 10}
+
+chunkSize <- 1
+pngFiles <- list.files(path = heat_dir, pattern = "^3_.*.png$")
+pngFiles <- pngFiles[!str_detect(pngFiles, "_profile.png$") & !str_detect(pngFiles, "_cluster_sense.png")  & !str_detect(pngFiles, "_cluster_anti.png")]
+pngFiles <- sort(pngFiles)
+grps2 <-   sort(paste0("3_",grps,"_",index_Sample)) %>% str_remove(.,"3_") %>% str_remove(.,paste0("_",index_Sample))
+
+if(length(pngFiles)>1){
+  pngFiles <- str_c(heat_dir, pngFiles)
+  nsize <- length(pngFiles)
+  for(i in 1:ceiling(nsize / chunkSize)){  
+    rl = lapply(sprintf(pngFiles[((i-1)*chunkSize+1):min(nsize,(i*chunkSize))]), png::readPNG)
+    grp = textGrob(str_c(grps2[((i-1)*chunkSize+1):min(nsize,(i*chunkSize))], collapse = " "),
+                   gp=gpar(fontsize=18,font=3), 
+                   x = 0.5,  # Center horizontally
+                       y = unit(1, "npc") + unit(0.2, "cm"))
+    grp <- arrangeGrob(zeroGrob(), grp, 
+                    widths = unit(1, 'npc'), 
+                    heights = unit(c(2, 1), c('cm', 'npc')),
+                    as.table = FALSE)
+    gl = lapply(rl, grid::rasterGrob)
+    gridExtra::grid.arrange(grobs=gl,ncol=chunkSize,top=grp)
+  }
+
+}
+
+
+```
+
+## TSS cluster plots
+
+```{r "5' cluster heatmap overview", fig.width = 10, fig.height = 10}
+
+chunkSize <- 1
+pngFiles <- list.files(path = heat_dir, pattern = "^5_.*.png$")
+pngFiles <- c(pngFiles[str_detect(pngFiles, "_cluster_sense.png")], pngFiles[str_detect(pngFiles, "_cluster_anti.png")])
+pngFiles <- sort(pngFiles)
+grps2 <-   sort(paste0("5_",grps1,"_",index_Sample)) %>% str_remove(.,"5_") %>% str_remove(.,paste0("_",index_Sample))
+
+if(length(pngFiles)>1){
+  pngFiles <- str_c(heat_dir, pngFiles)
+  nsize <- length(pngFiles)
+  for(i in 1:ceiling(nsize / chunkSize)){  
+    rl = lapply(sprintf(pngFiles[((i-1)*chunkSize+1):min(nsize,(i*chunkSize))]), png::readPNG)
+    grp = textGrob(str_c(grps2[((i-1)*chunkSize+1):min(nsize,(i*chunkSize))], collapse = " "),
+                   gp=gpar(fontsize=18,font=3), 
+                   x = 0.5,  # Center horizontally
+                       y = unit(1, "npc") + unit(0.2, "cm"))
+    grp <- arrangeGrob(zeroGrob(), grp, 
+                    widths = unit(1, 'npc'), 
+                    heights = unit(c(2, 1), c('cm', 'npc')),
+                    as.table = FALSE)
+    gl = lapply(rl, grid::rasterGrob)
+    gridExtra::grid.arrange(grobs=gl,ncol=chunkSize,top=grp)
+  }
+
+}
+
+
+```
+
+## TES cluster plots
+
+```{r "3' cluster heatmap overview", fig.width = 10, fig.height = 10}
+
+chunkSize <- 1
+pngFiles <- list.files(path = heat_dir, pattern = "^3_.*.png$")
+pngFiles <- pngFiles[str_detect(pngFiles, "_cluster_sense.png")]
+pngFiles <- sort(pngFiles)
+grps2 <-   sort(paste0("3_",grps,"_",index_Sample)) %>% str_remove(.,"3_") %>% str_remove(.,paste0("_",index_Sample))
+
+if(length(pngFiles)>1){
+  pngFiles <- str_c(heat_dir, pngFiles)
+  nsize <- length(pngFiles)
+  for(i in 1:ceiling(nsize / chunkSize)){  
+    rl = lapply(sprintf(pngFiles[((i-1)*chunkSize+1):min(nsize,(i*chunkSize))]), png::readPNG)
+    grp = textGrob(str_c(grps2[((i-1)*chunkSize+1):min(nsize,(i*chunkSize))], collapse = " "),
+                   gp=gpar(fontsize=18,font=3), 
+                   x = 0.5,  # Center horizontally
+                       y = unit(1, "npc") + unit(0.2, "cm"))
+    grp <- arrangeGrob(zeroGrob(), grp, 
+                    widths = unit(1, 'npc'), 
+                    heights = unit(c(2, 1), c('cm', 'npc')),
+                    as.table = FALSE)
+    gl = lapply(rl, grid::rasterGrob)
+    gridExtra::grid.arrange(grobs=gl,ncol=chunkSize,top=grp)
+  }
+
+}
+
+
+```
+
+---
+
+<br>
+
+<br>

@@ -1,0 +1,109 @@
+# ====== Rules for making standard sense PI matrix files =================================
+
+# stranded sense matrix files
+rule my_PI_matrix:
+    input:
+        bw  =   PROJ   + "/bw/{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + ".bw"
+    output:
+        matrix = temp(PROJ   + "/matrix/{group}_temp0_PI_matrix.gz")
+    params:
+        job_name = "{group}_matrix",
+        memory   = 20,
+        args     = CMD_PARAMS["PI"]  + CMD_PARAMS["BL"],
+        my_ref   = PI_REF
+    log:
+        out = PROJ + "/logs/{group}_PI_matrix.out",
+        err = PROJ + "/logs/{group}_PI_matrix.err"
+    message:
+        "PI matrix files {wildcards.group}"
+    threads: 
+        12
+    shell:
+        """
+        # 
+        computeMatrix scale-regions \
+          {params.args} \
+          -R {params.my_ref} \
+          -S {input.bw} \
+          -p {threads} \
+          -o {output.matrix}
+
+        """
+
+# stranded sense matrix files
+rule fix_PI_matrix:
+    input:
+        PROJ   + "/matrix/{group}_temp0_PI_matrix.gz"
+    output:
+        PROJ + "/matrix/PI_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMPI + "_matrix.gz"
+    params:
+        job_name = "{group}_sense_matrix",
+        memory   = 20,
+        args    = CMD_PARAMS["filterPI"]
+    log:
+        out = PROJ + "/logs/{group}_fix_PI_matrix.out",
+        err = PROJ + "/logs/{group}_fix_PI_matrix.err"
+    message:
+        "fix standard PI matrix files {wildcards.group}"
+    threads: 
+        1
+    script:
+        '../R_scripts/MatrixTrim.R'
+        
+
+# make url's and scp to sandbox
+rule my_PI_url:
+    input:
+        PROJ + "/matrix/PI_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMPI + "_matrix.gz"
+    output:
+        temp(PROJ + "/matrix/PI.{group}_matrix.url.txt")
+    params:
+        job_name = PROJ + "_PI_matrix_url",
+        memory   = 4,
+        color    = _get_col,
+        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/PI_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMPI + "_matrix.gz"
+    log:
+        out = PROJ + "/logs/{group}_PI_matrix_url.out",
+        err = PROJ + "/logs/{group}_PI_matrix_url.err"
+    message:
+        "Creating PI_matrix url for {wildcards.group}"
+    threads:
+        1
+    shell:
+        """
+        # fix R appended file remote read error
+        computeMatrixOperations relabel -m {input} -o {input}
+        echo {params.url_out} PI PI.{wildcards.group}_{NORMS}_{SEQ_DATE} {params.color} >> {output[0]}
+        ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
+        scp {input[0]} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
+        
+        """
+        
+# Combine urls
+rule my_PI_url_summary:
+    input:
+        sorted(expand(
+            PROJ + "/matrix/PI.{group}_matrix.url.txt",
+            group = GRPS_UNIQ
+        ))
+    output:
+        PROJ + "/URLS/PI_" + PROJ + "_" + INDEX_SAMPLE + "_" + NORMPI + "_matrix.url.txt"
+    params:
+        job_name = PROJ + "_PI_matrix_url",
+        memory   = 4
+    log:
+        out = PROJ + "/logs/" + PROJ + "_PI_matrix_url.out",
+        err = PROJ + "/logs/" + PROJ + "_PI_matrix_url.err"
+    message:
+        "Creating " + PROJ + " sense PI_matrix url"
+    threads:
+        1
+    run:
+        with open(output[0], "w") as out:
+            for file in input:
+                for line in open(file, "r"):
+                    out.write(line)
+
+
+
+

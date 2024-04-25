@@ -1,0 +1,57 @@
+#!/usr/bin/env Rscript
+
+library("tidyverse")
+
+type <- snakemake@params[["type"]]
+samp <- read_delim(snakemake@input[[1]],col_names = c("name","value"),delim = " ",show_col_types = FALSE) 
+if(length(snakemake@input)>1){
+  input <- read_delim(snakemake@input[[2]],col_names = c("name","value"),delim = " ",show_col_types = FALSE)
+} else {
+  input <- NULL
+}
+
+if(!is.null(input)){
+  in_sam <- snakemake@params[["in_sam"]]
+  in_spk <- snakemake@params[["in_spk"]]
+  sam_en <- paste0("enrich_",in_sam)
+  spk_en <- paste0("enrich_",in_spk)
+  InputSpike <- filter(input,str_detect(name,paste0("^",in_spk,"$"))) %>% dplyr::rename(value1=value) %>% mutate(name="test")
+  ChIP_en <- filter(samp,str_detect(name,paste0("^",sam_en,"$"))) %>% dplyr::rename(value2_en=value) %>% mutate(name="test")
+  ChIP <- filter(samp,str_detect(name,paste0("^",in_sam,"$"))) %>% dplyr::rename(value2=value) %>% mutate(name="test")
+  Input <- filter(input,str_detect(name,paste0("^",in_sam,"$"))) %>% dplyr::rename(value3=value) %>% mutate(name="test")
+  ChIPSpike_en <- filter(samp,str_detect(name,paste0("^",spk_en,"$"))) %>% dplyr::rename(value4_en=value) %>% mutate(name="test")
+  ChIPSpike <- filter(samp,str_detect(name,paste0("^",in_spk,"$"))) %>% dplyr::rename(value4=value) %>% mutate(name="test")
+  
+  # OR = (InputSpike*ChIP)/(Input*ChIPSpike)
+  out <- full_join(ChIPSpike,ChIP,by="name") %>% 
+    full_join(Input,by="name") %>% 
+    full_join(InputSpike,by="name") %>% 
+    summarise(value=round((value1*value2)/(value3*value4),digits = 5)) %>% 
+    mutate(name= "test", type= "OR")
+  out <- full_join(ChIPSpike_en,ChIP_en,by="name") %>% 
+    full_join(Input,by="name") %>% 
+    full_join(InputSpike,by="name") %>% 
+    summarise(value=round((value1*value2_en)/(value3*value4_en),digits = 5)) %>% 
+    mutate(name= "test", type= "OR_enrich") %>% 
+    bind_rows(out,.)
+  out1 <- out %>% full_join(ChIP,.,by="name") %>% 
+    mutate(value=as.integer(value*value2)) %>% 
+    dplyr::select(-value2) %>% 
+    dplyr::mutate(type=paste0(type,"_",in_sam)) 
+  out <- out %>% full_join(ChIPSpike,.,by="name") %>% 
+    mutate(value=as.integer(value*value4)) %>% 
+    dplyr::select(-value4) %>% 
+    dplyr::mutate(type=paste0(type,"_",in_spk)) %>%
+    bind_rows(out,out1,.)
+} else {
+  out <- tibble(name="test", value = 1e6, type=type) 
+}
+
+out <- out %>% 
+  dplyr::mutate(mysamp=snakemake@input[[1]]) %>% 
+  separate(.,mysamp,c("temp","mysamp"),"/.*/") %>% 
+  mutate(mysamp=str_remove(mysamp,"_spikin_count.txt")) %>%  
+  select(mysamp,type,value)
+
+write_delim(out %>% select(-mysamp), snakemake@input[[1]],col_names = F,delim = " ", append = TRUE)
+write_delim(out, snakemake@output[[1]],col_names = F,delim = " ")

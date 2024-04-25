@@ -1,0 +1,10 @@
+Building DAG of jobs...
+InputFunctionException in line 12 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/01a_clumpify.snake:
+Error:
+  SystemExit: ERROR: no fastqs found for PP1-PNUTS-H66K_mdox_DRB_CTD*_R1_001.fastq.gz.
+Wildcards:
+  sample=PP1-PNUTS-H66K_mdox_DRB_CTD
+Traceback:
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/01a_clumpify.snake", line 5, in _get_fq_paths
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/01a_clumpify.snake", line 5, in <listcomp>
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/Bowtie.snake", line 97, in _get_fqs

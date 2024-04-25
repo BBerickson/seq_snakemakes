@@ -1,0 +1,176 @@
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                    count    min threads    max threads
+-------------------  -------  -------------  -------------
+align_filter_sample        4             12             12
+all                        1              1              1
+bbduk_paired               4             12             12
+bbduk_summary              1              1              1
+bowtie_counts              4              1              1
+clumpify_paired            4              1              1
+clumpify_summary           1              1              1
+fastqc                     8              6              6
+fastqc_summary             1              1              1
+fragment_size              1             12             12
+gathering_results          1              1              1
+star_2pass_summmary        1              4              4
+star_first_pass            4              4              4
+star_second_pass           4              4              4
+total                     39              1             12
+
+Select jobs to execute...
+
+[Fri Nov 17 16:10:33 2023]
+Job 14: Removing duplicats for PP1H66KpDoxS2Ser5
+
+Submitted DRMAA job 14 with external jobid 568054.
+
+[Fri Nov 17 16:10:33 2023]
+Job 2: Running FastQC on PP1H66KmDS2Ser53_CKDL230028616-1A_HCLMNDSX7_L4_1
+
+Submitted DRMAA job 2 with external jobid 568055.
+
+[Fri Nov 17 16:10:33 2023]
+Job 5: Running FastQC on PP1H66KpDS2Ser53_CKDL230028616-1A_HCLMNDSX7_L4_2
+
+Submitted DRMAA job 5 with external jobid 568056.
+
+[Fri Nov 17 16:10:33 2023]
+Job 7: Running FastQC on PP1H66KmDoxS2Ser5_CKDL230028616-1A_HCLMNDSX7_L4_2
+
+Submitted DRMAA job 7 with external jobid 568057.
+
+[Fri Nov 17 16:10:33 2023]
+Job 9: Running FastQC on PP1H66KpDoxS2Ser5_CKDL230028616-1A_HCLMNDSX7_L4_2
+
+Submitted DRMAA job 9 with external jobid 568058.
+
+[Fri Nov 17 16:10:33 2023]
+Job 11: Removing duplicats for PP1H66KmDS2Ser53
+
+Submitted DRMAA job 11 with external jobid 568059.
+
+[Fri Nov 17 16:10:33 2023]
+Job 12: Removing duplicats for PP1H66KpDS2Ser53
+
+Submitted DRMAA job 12 with external jobid 568060.
+
+[Fri Nov 17 16:10:33 2023]
+Job 3: Running FastQC on PP1H66KmDS2Ser53_CKDL230028616-1A_HCLMNDSX7_L4_2
+
+Submitted DRMAA job 3 with external jobid 568061.
+
+[Fri Nov 17 16:10:33 2023]
+Job 4: Running FastQC on PP1H66KpDS2Ser53_CKDL230028616-1A_HCLMNDSX7_L4_1
+
+Submitted DRMAA job 4 with external jobid 568062.
+
+[Fri Nov 17 16:10:33 2023]
+Job 6: Running FastQC on PP1H66KmDoxS2Ser5_CKDL230028616-1A_HCLMNDSX7_L4_1
+
+Submitted DRMAA job 6 with external jobid 568063.
+
+[Fri Nov 17 16:10:33 2023]
+Job 8: Running FastQC on PP1H66KpDoxS2Ser5_CKDL230028616-1A_HCLMNDSX7_L4_1
+
+Submitted DRMAA job 8 with external jobid 568064.
+
+[Fri Nov 17 16:10:33 2023]
+Job 13: Removing duplicats for PP1H66KmDoxS2Ser5
+
+Submitted DRMAA job 13 with external jobid 568065.
+[Fri Nov 17 16:12:00 2023]
+Finished job 12.
+1 of 39 steps (3%) done
+Select jobs to execute...
+
+[Fri Nov 17 16:12:00 2023]
+Job 17: Removing duplicats for PP1H66KpDS2Ser53
+
+Submitted DRMAA job 17 with external jobid 568069.
+[Fri Nov 17 16:12:55 2023]
+Finished job 14.
+2 of 39 steps (5%) done
+Select jobs to execute...
+
+[Fri Nov 17 16:12:55 2023]
+Job 19: Removing duplicats for PP1H66KpDoxS2Ser5
+
+Submitted DRMAA job 19 with external jobid 568070.
+Removing temporary output file Temp_star/PP1H66KpDS2Ser53_R2_clumpify.fastq.gz.
+Removing temporary output file Temp_star/PP1H66KpDS2Ser53_R1_clumpify.fastq.gz.
+[Fri Nov 17 16:13:18 2023]
+Finished job 17.
+3 of 39 steps (8%) done
+Select jobs to execute...
+
+[Fri Nov 17 16:13:18 2023]
+Job 23: running first pass star alignments 
+
+Submitted DRMAA job 23 with external jobid 568072.
+[Fri Nov 17 16:13:19 2023]
+Finished job 13.
+4 of 39 steps (10%) done
+Select jobs to execute...
+
+[Fri Nov 17 16:13:19 2023]
+Job 18: Removing duplicats for PP1H66KmDoxS2Ser5
+
+Submitted DRMAA job 18 with external jobid 568073.
+[Fri Nov 17 16:13:29 2023]
+Error in rule star_first_pass:
+    jobid: 23
+    output: Temp_star/bams/PP1H66KpDS2Ser53_SJ.out.tab, Temp_star/bams/PP1H66KpDS2Ser53_Aligned.sortedByCoord.out.bam
+    log: Temp_star/logs/PP1H66KpDS2Ser53_star.out, Temp_star/logs/PP1H66KpDS2Ser53_star.err (check log file(s) for error message)
+    shell:
+        
+        module load STAR/2.7.10a
+        
+        STAR           --genomeDir /beevol/home/erickson/ref/hg38_mm10/           --runThreadN 4           --readFilesIn Temp_star/PP1H66KpDS2Ser53_R1.fastq.gz Temp_star/PP1H66KpDS2Ser53_R2.fastq.gz           --outSAMtype BAM SortedByCoordinate           --limitBAMsortRAM 500000000000           --readFilesCommand gunzip -c           --outFileNamePrefix Temp_star/bams/PP1H66KpDS2Ser53_
+
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Error executing rule star_first_pass on cluster (jobid: 23, external: 568072, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/tmp.w5tj3emg/snakejob.star_first_pass.23.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Fri Nov 17 16:13:29 2023]
+Finished job 11.
+5 of 39 steps (13%) done
+Removing temporary output file Temp_star/PP1H66KpDoxS2Ser5_R1_clumpify.fastq.gz.
+Removing temporary output file Temp_star/PP1H66KpDoxS2Ser5_R2_clumpify.fastq.gz.
+[Fri Nov 17 16:13:51 2023]
+Finished job 19.
+6 of 39 steps (15%) done
+Removing temporary output file Temp_star/PP1H66KmDoxS2Ser5_R2_clumpify.fastq.gz.
+Removing temporary output file Temp_star/PP1H66KmDoxS2Ser5_R1_clumpify.fastq.gz.
+[Fri Nov 17 16:14:22 2023]
+Finished job 18.
+7 of 39 steps (18%) done
+[Fri Nov 17 16:15:43 2023]
+Finished job 7.
+8 of 39 steps (21%) done
+[Fri Nov 17 16:15:43 2023]
+Finished job 8.
+9 of 39 steps (23%) done
+[Fri Nov 17 16:15:53 2023]
+Finished job 6.
+10 of 39 steps (26%) done
+[Fri Nov 17 16:16:03 2023]
+Finished job 5.
+11 of 39 steps (28%) done
+[Fri Nov 17 16:16:03 2023]
+Finished job 9.
+12 of 39 steps (31%) done
+[Fri Nov 17 16:16:13 2023]
+Finished job 4.
+13 of 39 steps (33%) done
+[Fri Nov 17 16:16:23 2023]
+Finished job 2.
+14 of 39 steps (36%) done
+[Fri Nov 17 16:16:23 2023]
+Finished job 3.
+15 of 39 steps (38%) done
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/log/2023-11-17T161032.280947.snakemake.log

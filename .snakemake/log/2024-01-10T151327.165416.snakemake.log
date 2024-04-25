@@ -1,0 +1,263 @@
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                 count    min threads    max threads
+----------------  -------  -------------  -------------
+all                     1              1              1
+bbduk_paired            6             12             12
+bbduk_summary           1              1              1
+clumpify_paired         6              1              1
+clumpify_summary        1              1              1
+fastqc                 12              6              6
+fastqc_summary          1              1              1
+total                  28              1             12
+
+Select jobs to execute...
+
+[Wed Jan 10 15:13:29 2024]
+Job 15: Removing duplicats for 293flpIN_RTF1_WT1
+
+Submitted DRMAA job 15 with external jobid 609265.
+
+[Wed Jan 10 15:13:29 2024]
+Job 2: Running FastQC on 293flpIN_RTF1_WT1_S1_L004_R1_001
+
+Submitted DRMAA job 2 with external jobid 609266.
+
+[Wed Jan 10 15:13:30 2024]
+Job 16: Removing duplicats for 293flpIN_RTF1_WT2
+
+Submitted DRMAA job 16 with external jobid 609267.
+
+[Wed Jan 10 15:13:30 2024]
+Job 4: Running FastQC on 293flpIN_RTF1_WT2_S2_L004_R1_001
+
+Submitted DRMAA job 4 with external jobid 609268.
+
+[Wed Jan 10 15:13:30 2024]
+Job 18: Removing duplicats for 293flpIN_RTF1_MT_R1
+
+Submitted DRMAA job 18 with external jobid 609269.
+
+[Wed Jan 10 15:13:30 2024]
+Job 6: Running FastQC on 293flpIN_RTF1_WT3_S3_L004_R1_001
+
+Submitted DRMAA job 6 with external jobid 609270.
+
+[Wed Jan 10 15:13:30 2024]
+Job 20: Removing duplicats for 293flpIN_RTF1_MT_R3
+
+Submitted DRMAA job 20 with external jobid 609271.
+
+[Wed Jan 10 15:13:30 2024]
+Job 8: Running FastQC on 293flpIN_RTF1_MT_R1_S4_L004_R1_001
+
+Submitted DRMAA job 8 with external jobid 609272.
+
+[Wed Jan 10 15:13:30 2024]
+Job 10: Running FastQC on 293flpIN_RTF1_MT_R2_S5_L004_R1_001
+
+Submitted DRMAA job 10 with external jobid 609273.
+
+[Wed Jan 10 15:13:30 2024]
+Job 19: Removing duplicats for 293flpIN_RTF1_MT_R2
+
+Submitted DRMAA job 19 with external jobid 609274.
+
+[Wed Jan 10 15:13:30 2024]
+Job 12: Running FastQC on 293flpIN_RTF1_MT_R3_S6_L004_R1_001
+
+Submitted DRMAA job 12 with external jobid 609275.
+
+[Wed Jan 10 15:13:31 2024]
+Job 3: Running FastQC on 293flpIN_RTF1_WT1_S1_L004_R2_001
+
+Submitted DRMAA job 3 with external jobid 609276.
+
+[Wed Jan 10 15:13:31 2024]
+Job 17: Removing duplicats for 293flpIN_RTF1_WT3
+
+Submitted DRMAA job 17 with external jobid 609277.
+
+[Wed Jan 10 15:13:31 2024]
+Job 5: Running FastQC on 293flpIN_RTF1_WT2_S2_L004_R2_001
+
+Submitted DRMAA job 5 with external jobid 609278.
+
+[Wed Jan 10 15:13:31 2024]
+Job 7: Running FastQC on 293flpIN_RTF1_WT3_S3_L004_R2_001
+
+Submitted DRMAA job 7 with external jobid 609279.
+
+[Wed Jan 10 15:13:31 2024]
+Job 9: Running FastQC on 293flpIN_RTF1_MT_R1_S4_L004_R2_001
+
+Submitted DRMAA job 9 with external jobid 609280.
+
+[Wed Jan 10 15:13:31 2024]
+Job 11: Running FastQC on 293flpIN_RTF1_MT_R2_S5_L004_R2_001
+
+Submitted DRMAA job 11 with external jobid 609281.
+
+[Wed Jan 10 15:13:31 2024]
+Job 13: Running FastQC on 293flpIN_RTF1_MT_R3_S6_L004_R2_001
+
+Submitted DRMAA job 13 with external jobid 609282.
+[Wed Jan 10 15:17:32 2024]
+Finished job 15.
+1 of 28 steps (4%) done
+Select jobs to execute...
+
+[Wed Jan 10 15:17:32 2024]
+Job 22: Removing duplicats for 293flpIN_RTF1_WT1
+
+Submitted DRMAA job 22 with external jobid 609287.
+[Wed Jan 10 15:17:32 2024]
+Finished job 16.
+2 of 28 steps (7%) done
+[Wed Jan 10 15:17:32 2024]
+Finished job 18.
+3 of 28 steps (11%) done
+Select jobs to execute...
+
+[Wed Jan 10 15:17:32 2024]
+Job 23: Removing duplicats for 293flpIN_RTF1_WT2
+
+Submitted DRMAA job 23 with external jobid 609288.
+
+[Wed Jan 10 15:17:33 2024]
+Job 25: Removing duplicats for 293flpIN_RTF1_MT_R1
+
+Submitted DRMAA job 25 with external jobid 609289.
+[Wed Jan 10 15:17:44 2024]
+Finished job 17.
+4 of 28 steps (14%) done
+Select jobs to execute...
+
+[Wed Jan 10 15:17:44 2024]
+Job 24: Removing duplicats for 293flpIN_RTF1_WT3
+
+Submitted DRMAA job 24 with external jobid 609290.
+[Wed Jan 10 15:17:54 2024]
+Finished job 19.
+5 of 28 steps (18%) done
+Select jobs to execute...
+
+[Wed Jan 10 15:17:55 2024]
+Job 26: Removing duplicats for 293flpIN_RTF1_MT_R2
+
+Submitted DRMAA job 26 with external jobid 609291.
+[Wed Jan 10 15:18:06 2024]
+Finished job 20.
+6 of 28 steps (21%) done
+Select jobs to execute...
+
+[Wed Jan 10 15:18:06 2024]
+Job 14: Creating temp_RTF1_RNAseq clumpify summary
+
+Submitted DRMAA job 14 with external jobid 609292.
+
+[Wed Jan 10 15:18:06 2024]
+Job 27: Removing duplicats for 293flpIN_RTF1_MT_R3
+
+Submitted DRMAA job 27 with external jobid 609293.
+[Wed Jan 10 15:18:17 2024]
+Finished job 14.
+7 of 28 steps (25%) done
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT2_R1_clumpify.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT2_R2_clumpify.fastq.gz.
+[Wed Jan 10 15:20:30 2024]
+Finished job 23.
+8 of 28 steps (29%) done
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R1_R2_clumpify.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R1_R1_clumpify.fastq.gz.
+[Wed Jan 10 15:20:30 2024]
+Finished job 25.
+9 of 28 steps (32%) done
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R2_R1_clumpify.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R2_R2_clumpify.fastq.gz.
+[Wed Jan 10 15:20:41 2024]
+Finished job 26.
+10 of 28 steps (36%) done
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT1_R2_clumpify.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT1_R1_clumpify.fastq.gz.
+[Wed Jan 10 15:20:52 2024]
+Finished job 22.
+11 of 28 steps (39%) done
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT3_R2_clumpify.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT3_R1_clumpify.fastq.gz.
+[Wed Jan 10 15:20:53 2024]
+Finished job 24.
+12 of 28 steps (43%) done
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R3_R1_clumpify.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R3_R2_clumpify.fastq.gz.
+[Wed Jan 10 15:21:03 2024]
+Finished job 27.
+13 of 28 steps (46%) done
+Select jobs to execute...
+
+[Wed Jan 10 15:21:04 2024]
+Job 21: Creating temp_RTF1_RNAseq bbduk summary
+
+Submitted DRMAA job 21 with external jobid 609295.
+[Wed Jan 10 15:21:14 2024]
+Finished job 21.
+14 of 28 steps (50%) done
+[Wed Jan 10 15:32:52 2024]
+Finished job 3.
+15 of 28 steps (54%) done
+[Wed Jan 10 15:34:21 2024]
+Finished job 5.
+16 of 28 steps (57%) done
+[Wed Jan 10 15:34:21 2024]
+Finished job 7.
+17 of 28 steps (61%) done
+[Wed Jan 10 15:34:52 2024]
+Finished job 10.
+18 of 28 steps (64%) done
+[Wed Jan 10 15:35:02 2024]
+Finished job 8.
+19 of 28 steps (68%) done
+[Wed Jan 10 15:36:02 2024]
+Finished job 6.
+20 of 28 steps (71%) done
+[Wed Jan 10 15:36:43 2024]
+Finished job 2.
+21 of 28 steps (75%) done
+[Wed Jan 10 15:37:53 2024]
+Finished job 4.
+22 of 28 steps (79%) done
+[Wed Jan 10 15:37:53 2024]
+Finished job 9.
+23 of 28 steps (82%) done
+[Wed Jan 10 15:38:44 2024]
+Finished job 11.
+24 of 28 steps (86%) done
+[Wed Jan 10 15:39:04 2024]
+Finished job 13.
+25 of 28 steps (89%) done
+[Wed Jan 10 15:47:27 2024]
+Finished job 12.
+26 of 28 steps (93%) done
+Select jobs to execute...
+
+[Wed Jan 10 15:47:27 2024]
+Job 1: Creating temp_RTF1_RNAseq FastQC summary
+
+Submitted DRMAA job 1 with external jobid 609345.
+[Wed Jan 10 15:47:47 2024]
+Finished job 1.
+27 of 28 steps (96%) done
+Select jobs to execute...
+
+[Wed Jan 10 15:47:47 2024]
+localrule all:
+    input: temp_RTF1_RNAseq/stats/temp_RTF1_RNAseq_fastqc.tsv, temp_RTF1_RNAseq/stats/temp_RTF1_RNAseq_clumpify.tsv, temp_RTF1_RNAseq/stats/temp_RTF1_RNAseq_bbduk.tsv
+    jobid: 0
+    resources: tmpdir=/tmp
+
+[Wed Jan 10 15:47:47 2024]
+Finished job 0.
+28 of 28 steps (100%) done
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/log/2024-01-10T151327.165416.snakemake.log

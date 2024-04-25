@@ -1,0 +1,48 @@
+Building DAG of jobs...
+The code used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-code-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-code-changes)'.
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                          count    min threads    max threads
+-------------------------  -------  -------------  -------------
+all                              1              1              1
+bamCoverage                      2             12             12
+bamCoverage_spike                2             12             12
+bamCoverage_spike_summary        1              1              1
+bamCoverage_summary              1              1              1
+total                            7              1             12
+
+Select jobs to execute...
+
+[Thu Dec 14 15:34:16 2023]
+Job 46: Aligning reads with bamCoverage_spike for PP1H66KSer5-r2
+
+Submitted DRMAA job 46 with external jobid 579140.
+
+[Thu Dec 14 15:34:16 2023]
+Job 47: Aligning reads with bamCoverage_spike for PP1H66KSer5-r3
+
+Submitted DRMAA job 47 with external jobid 579141.
+
+[Thu Dec 14 15:34:16 2023]
+Job 43: Aligning reads with bamCoverage for PP1H66KSer5-r2
+
+Submitted DRMAA job 43 with external jobid 579142.
+
+[Thu Dec 14 15:34:16 2023]
+Job 44: Aligning reads with bamCoverage for PP1H66KSer5-r3
+
+Submitted DRMAA job 44 with external jobid 579143.
+Terminating processes on user request, this might take some time.
+The code used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-code-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-code-changes)'.
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/log/2023-12-14T153414.727810.snakemake.log

@@ -1,0 +1,4 @@
+WorkflowError in line 148 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/Stranded_matrix.snake:
+Failed to open source file /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/05_5_matrix_sense.snake
+FileNotFoundError: [Errno 2] No such file or directory: '/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/05_5_matrix_sense.snake'
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/Stranded_matrix.snake", line 148, in <module>

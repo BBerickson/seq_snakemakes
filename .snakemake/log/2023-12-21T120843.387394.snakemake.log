@@ -1,0 +1,3 @@
+SyntaxError in line 209 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/02b_align_UMI.snake:
+invalid syntax
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/NETseq_spikein.snake", line 190, in <module>

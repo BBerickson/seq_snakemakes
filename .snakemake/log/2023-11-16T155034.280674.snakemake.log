@@ -1,0 +1,5 @@
+SystemExit in line 90 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/Bowtie.snake:
+ERROR: no fastqs found for PP1H66KmDS2Ser53*_R1_001.fastq.gz.
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/Bowtie.snake", line 101, in <module>
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/Bowtie.snake", line 101, in <listcomp>
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/Bowtie.snake", line 90, in _get_fqs

@@ -1,0 +1,304 @@
+Building DAG of jobs...
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                    count    min threads    max threads
+-------------------  -------  -------------  -------------
+align_filter_sample        6             12             12
+all                        1              1              1
+gathering_results          1              1              1
+star_2pass_summmary        1              4              4
+star_counts                6              1              1
+star_first_pass            6              4              4
+star_second_pass           6              4              4
+total                     27              1             12
+
+Select jobs to execute...
+
+[Thu Jan 11 13:46:25 2024]
+Job 30: running first pass star alignments 
+
+Submitted DRMAA job 30 with external jobid 611134.
+
+[Thu Jan 11 13:46:25 2024]
+Job 33: running first pass star alignments 
+
+Submitted DRMAA job 33 with external jobid 611135.
+
+[Thu Jan 11 13:46:25 2024]
+Job 35: running first pass star alignments 
+
+Submitted DRMAA job 35 with external jobid 611136.
+
+[Thu Jan 11 13:46:25 2024]
+Job 31: running first pass star alignments 
+
+Submitted DRMAA job 31 with external jobid 611137.
+
+[Thu Jan 11 13:46:26 2024]
+Job 32: running first pass star alignments 
+
+Submitted DRMAA job 32 with external jobid 611138.
+
+[Thu Jan 11 13:46:26 2024]
+Job 34: running first pass star alignments 
+
+Submitted DRMAA job 34 with external jobid 611139.
+[Thu Jan 11 14:10:27 2024]
+Finished job 30.
+1 of 27 steps (4%) done
+[Thu Jan 11 14:10:47 2024]
+Finished job 31.
+2 of 27 steps (7%) done
+[Thu Jan 11 14:10:57 2024]
+Finished job 32.
+3 of 27 steps (11%) done
+[Thu Jan 11 14:11:28 2024]
+Finished job 35.
+4 of 27 steps (15%) done
+[Thu Jan 11 14:11:48 2024]
+Finished job 33.
+5 of 27 steps (19%) done
+[Thu Jan 11 14:18:00 2024]
+Finished job 34.
+6 of 27 steps (22%) done
+Select jobs to execute...
+
+[Thu Jan 11 14:18:00 2024]
+Job 29: running second pass star alignments 
+
+Submitted DRMAA job 29 with external jobid 611176.
+
+[Thu Jan 11 14:18:00 2024]
+Job 37: running second pass star alignments 
+
+Submitted DRMAA job 37 with external jobid 611177.
+
+[Thu Jan 11 14:18:00 2024]
+Job 39: running second pass star alignments 
+
+Submitted DRMAA job 39 with external jobid 611178.
+
+[Thu Jan 11 14:18:00 2024]
+Job 36: running second pass star alignments 
+
+Submitted DRMAA job 36 with external jobid 611179.
+
+[Thu Jan 11 14:18:00 2024]
+Job 38: running second pass star alignments 
+
+Submitted DRMAA job 38 with external jobid 611180.
+
+[Thu Jan 11 14:18:00 2024]
+Job 40: running second pass star alignments 
+
+Submitted DRMAA job 40 with external jobid 611181.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R2_R1.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R2_R2.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/bams/293flpIN_RTF1_MT_R2_Aligned.sortedByCoord.out.bam.
+[Thu Jan 11 14:56:40 2024]
+Finished job 39.
+7 of 27 steps (26%) done
+Select jobs to execute...
+
+[Thu Jan 11 14:56:41 2024]
+Job 51: filtering reads 293flpIN_RTF1_MT_R2
+
+Submitted DRMAA job 51 with external jobid 611200.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R3_R1.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R3_R2.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/bams/293flpIN_RTF1_MT_R3_Aligned.sortedByCoord.out.bam.
+[Thu Jan 11 14:57:51 2024]
+Finished job 40.
+8 of 27 steps (30%) done
+Select jobs to execute...
+
+[Thu Jan 11 14:57:51 2024]
+Job 53: filtering reads 293flpIN_RTF1_MT_R3
+
+Submitted DRMAA job 53 with external jobid 611201.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT1_R1.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT1_R2.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/bams/293flpIN_RTF1_WT1_Aligned.sortedByCoord.out.bam.
+[Thu Jan 11 14:58:11 2024]
+Finished job 29.
+9 of 27 steps (33%) done
+Select jobs to execute...
+
+[Thu Jan 11 14:58:11 2024]
+Job 43: filtering reads 293flpIN_RTF1_WT1
+
+Submitted DRMAA job 43 with external jobid 611202.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT2_R2.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT2_R1.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/bams/293flpIN_RTF1_WT2_Aligned.sortedByCoord.out.bam.
+[Thu Jan 11 14:58:21 2024]
+Finished job 36.
+10 of 27 steps (37%) done
+Select jobs to execute...
+
+[Thu Jan 11 14:58:21 2024]
+Job 45: filtering reads 293flpIN_RTF1_WT2
+
+Submitted DRMAA job 45 with external jobid 611203.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT3_R1.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT3_R2.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/bams/293flpIN_RTF1_WT3_Aligned.sortedByCoord.out.bam.
+[Thu Jan 11 14:58:41 2024]
+Finished job 37.
+11 of 27 steps (41%) done
+Select jobs to execute...
+
+[Thu Jan 11 14:58:41 2024]
+Job 47: filtering reads 293flpIN_RTF1_WT3
+
+Submitted DRMAA job 47 with external jobid 611204.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R1_R1.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R1_R2.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/bams/293flpIN_RTF1_MT_R1_SJ.out.tab.
+Removing temporary output file temp_RTF1_RNAseq/bams/293flpIN_RTF1_MT_R1_Aligned.sortedByCoord.out.bam.
+Removing temporary output file temp_RTF1_RNAseq/bams/293flpIN_RTF1_WT1_SJ.out.tab.
+Removing temporary output file temp_RTF1_RNAseq/bams/293flpIN_RTF1_WT2_SJ.out.tab.
+Removing temporary output file temp_RTF1_RNAseq/bams/293flpIN_RTF1_WT3_SJ.out.tab.
+Removing temporary output file temp_RTF1_RNAseq/bams/293flpIN_RTF1_MT_R2_SJ.out.tab.
+Removing temporary output file temp_RTF1_RNAseq/bams/293flpIN_RTF1_MT_R3_SJ.out.tab.
+[Thu Jan 11 14:59:32 2024]
+Finished job 38.
+12 of 27 steps (44%) done
+Select jobs to execute...
+
+[Thu Jan 11 14:59:32 2024]
+Job 28: summmary star alignments 
+
+Submitted DRMAA job 28 with external jobid 611205.
+
+[Thu Jan 11 14:59:33 2024]
+Job 49: filtering reads 293flpIN_RTF1_MT_R1
+
+Submitted DRMAA job 49 with external jobid 611206.
+[Thu Jan 11 14:59:42 2024]
+Finished job 28.
+13 of 27 steps (48%) done
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT1_hg38.bam.bai.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT1_hg38.bam.
+Removing temporary output file temp_RTF1_RNAseq/bams/293flpIN_RTF1_WT1_temp.bam.
+Removing temporary output file temp_RTF1_RNAseq/bams/293flpIN_RTF1_WT1_temp2.bam.
+[Thu Jan 11 15:42:37 2024]
+Finished job 43.
+14 of 27 steps (52%) done
+Select jobs to execute...
+
+[Thu Jan 11 15:42:37 2024]
+Job 42: star counts for 293flpIN_RTF1_WT1
+
+Submitted DRMAA job 42 with external jobid 611207.
+[Thu Jan 11 15:44:38 2024]
+Finished job 42.
+15 of 27 steps (56%) done
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT2_hg38.bam.bai.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT2_hg38.bam.
+Removing temporary output file temp_RTF1_RNAseq/bams/293flpIN_RTF1_WT2_temp.bam.
+Removing temporary output file temp_RTF1_RNAseq/bams/293flpIN_RTF1_WT2_temp2.bam.
+[Thu Jan 11 15:49:51 2024]
+Finished job 45.
+16 of 27 steps (59%) done
+Select jobs to execute...
+
+[Thu Jan 11 15:49:51 2024]
+Job 44: star counts for 293flpIN_RTF1_WT2
+
+Submitted DRMAA job 44 with external jobid 611209.
+[Thu Jan 11 15:51:52 2024]
+Finished job 44.
+17 of 27 steps (63%) done
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R3_hg38.bam.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R3_hg38.bam.bai.
+Removing temporary output file temp_RTF1_RNAseq/bams/293flpIN_RTF1_MT_R3_temp.bam.
+Removing temporary output file temp_RTF1_RNAseq/bams/293flpIN_RTF1_MT_R3_temp2.bam.
+[Thu Jan 11 16:01:06 2024]
+Finished job 53.
+18 of 27 steps (67%) done
+Select jobs to execute...
+
+[Thu Jan 11 16:01:06 2024]
+Job 52: star counts for 293flpIN_RTF1_MT_R3
+
+Submitted DRMAA job 52 with external jobid 611211.
+[Thu Jan 11 16:02:56 2024]
+Finished job 52.
+19 of 27 steps (70%) done
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R1_hg38.bam.bai.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R1_hg38.bam.
+Removing temporary output file temp_RTF1_RNAseq/bams/293flpIN_RTF1_MT_R1_temp.bam.
+Removing temporary output file temp_RTF1_RNAseq/bams/293flpIN_RTF1_MT_R1_temp2.bam.
+[Thu Jan 11 16:21:16 2024]
+Finished job 49.
+20 of 27 steps (74%) done
+Select jobs to execute...
+
+[Thu Jan 11 16:21:16 2024]
+Job 48: star counts for 293flpIN_RTF1_MT_R1
+
+Submitted DRMAA job 48 with external jobid 611213.
+[Thu Jan 11 16:23:16 2024]
+Finished job 48.
+21 of 27 steps (78%) done
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R2_hg38.bam.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R2_hg38.bam.bai.
+Removing temporary output file temp_RTF1_RNAseq/bams/293flpIN_RTF1_MT_R2_temp.bam.
+Removing temporary output file temp_RTF1_RNAseq/bams/293flpIN_RTF1_MT_R2_temp2.bam.
+[Thu Jan 11 16:31:50 2024]
+Finished job 51.
+22 of 27 steps (81%) done
+Select jobs to execute...
+
+[Thu Jan 11 16:31:50 2024]
+Job 50: star counts for 293flpIN_RTF1_MT_R2
+
+Submitted DRMAA job 50 with external jobid 611214.
+[Thu Jan 11 16:33:21 2024]
+Finished job 50.
+23 of 27 steps (85%) done
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT3_hg38.bam.bai.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT3_hg38.bam.
+Removing temporary output file temp_RTF1_RNAseq/bams/293flpIN_RTF1_WT3_temp.bam.
+Removing temporary output file temp_RTF1_RNAseq/bams/293flpIN_RTF1_WT3_temp2.bam.
+[Thu Jan 11 16:53:28 2024]
+Finished job 47.
+24 of 27 steps (89%) done
+Select jobs to execute...
+
+[Thu Jan 11 16:53:28 2024]
+Job 46: star counts for 293flpIN_RTF1_WT3
+
+Submitted DRMAA job 46 with external jobid 611217.
+[Thu Jan 11 16:55:18 2024]
+Finished job 46.
+25 of 27 steps (93%) done
+Select jobs to execute...
+
+[Thu Jan 11 16:55:18 2024]
+Job 41: getting final results
+
+Submitted DRMAA job 41 with external jobid 611218.
+[Thu Jan 11 16:55:38 2024]
+Finished job 41.
+26 of 27 steps (96%) done
+Select jobs to execute...
+
+[Thu Jan 11 16:55:38 2024]
+localrule all:
+    input: temp_RTF1_RNAseq/stats/temp_RTF1_RNAseq_fastqc.tsv, temp_RTF1_RNAseq/stats/temp_RTF1_RNAseq_clumpify.tsv, temp_RTF1_RNAseq/stats/temp_RTF1_RNAseq_bbduk.tsv, temp_RTF1_RNAseq/stats/temp_RTF1_RNAseq_aligned.tsv, temp_RTF1_RNAseq/stats/temp_RTF1_RNAseq_results.tsv
+    jobid: 0
+    resources: tmpdir=/tmp
+
+[Thu Jan 11 16:55:38 2024]
+Finished job 0.
+27 of 27 steps (100%) done
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/log/2024-01-11T134624.569560.snakemake.log

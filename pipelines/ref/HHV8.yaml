@@ -1,0 +1,39 @@
+#===== Config file for standared hg38 with HHV8 infection  ===================
+
+# Path to mixed bowtie2 index and chrom name txt file
+GENELIST:
+    "HHV8"
+INDEX_PATH:
+    "/beevol/home/erickson/ref/HHV8/"
+INDEX_MAP:
+    "HHV8"
+INDEX_SAMPLE:
+    "HHV8"
+INDEX_SPIKE:
+    ""
+MASK:
+  ""
+GTF:
+  ""
+# fasta files for splitting bam file
+FA_SAMPLE:
+  "/beevol/home/erickson/ref/HHV8/HHV8.fa"
+FA_SPIKE:
+  ""
+ENRICHED_SAMPLE:
+  "/beevol/home/erickson/ref/HHV8/KSHV_genes.bed"
+ENRICHED_SPIKE:
+  ""
+MY_REF:
+  "/beevol/home/erickson/ref/HHV8/KSHV_genes.bed"
+FW_REF:
+  "/beevol/home/erickson/ref/HHV8/KSHV_genes_fw.bed"
+REV_REF:
+  "/beevol/home/erickson/ref/HHV8/KSHV_genes_rev.bed"
+PI_REF:
+  ""
+EI_FW_REF:
+  ""
+EI_REV_REF:
+  ""
+  

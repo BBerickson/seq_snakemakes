@@ -1,0 +1,3 @@
+Building DAG of jobs...
+CyclicGraphException in line 4 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/03_results_spikeIN_UMI.snake:
+Cyclic dependency on rule gathering_results.

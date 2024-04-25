@@ -1,0 +1,93 @@
+# ====== Rules for getting overall results =================================
+
+# get read counts from bams spikein
+rule bowtie_counts_spikein:
+    input:
+        bam2   = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
+        bai2   = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai",
+        bam3   = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
+        bai3   = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam.bai"
+    output:
+        stats2 = PROJ + "/counts/{sample}_spikin_count.txt"
+    params:
+        job_name = "{sample}_bowtie_counts_spikin",
+        enrich2  = ENRICHED_SAMPLE,
+        enrich3  = ENRICHED_SPIKE,
+        memory   = MEMORY
+    log:
+        out = PROJ + "/logs/{sample}_bowtie_counts_spikin.out",
+        err = PROJ + "/logs/{sample}_bowtie_count_spikins.err"
+    message:
+        "Bowtie2 counts_spikin for {wildcards.sample}"
+    threads:
+        1
+    shell:
+        """
+        echo "{INDEX_SAMPLE} $(samtools idxstats {input.bam2} | awk '{{s+=$3}} END {{print s/2}}')" >> {output.stats2}
+        echo "{INDEX_SPIKE} $(samtools idxstats {input.bam3} | awk '{{s+=$3}} END {{print s/2}}')" >> {output.stats2}
+        echo "enrich_{INDEX_SAMPLE} $(samtools view {input.bam2} -L {params.enrich2} -c | awk ' {{print $0/2}}')" >> {output.stats2}
+        echo "enrich_{INDEX_SPIKE} $(samtools view {input.bam3} -L {params.enrich3} -c | awk ' {{print $0/2}}')" >> {output.stats2}
+        echo "chrM_{INDEX_SAMPLE} $(samtools view {input.bam2} chrM -c | awk ' {{print $0/2}}')" >> {output.stats2}
+        echo "chrM_{INDEX_SPIKE} $(samtools view {input.bam3} chrM -c | awk ' {{print $0/2}}')" >> {output.stats2}
+        
+        """
+
+
+# gathering results
+rule gathering_results:
+    input:
+        PROJ + "/stats/" + PROJ + "_cutadapt.tsv",
+        PROJ + "/stats/" + PROJ + "_aligned.tsv",
+        PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_UMI_dedup.tsv",
+        expand( PROJ + "/counts/{sample}_spikin_count.txt",
+            sample = SAMS_UNIQ
+        )
+    output:
+        PROJ + "/stats/" + PROJ + "_results.tsv"
+    params:
+        job_name  = "results",
+        index_map = INDEX_MAP,
+        project   = PROJ,
+        memory    = MEMORY
+    log:
+        out = PROJ + "/logs/results.out",
+        err = PROJ + "/logs/results.err"
+    message:
+        "getting final results"
+    threads: 
+        1
+    script:
+        '../R_scripts/results_UMI.R'
+  
+ rule create_plots:
+    input:
+        PROJ + "/stats/" + PROJ + "_results.tsv",
+        expand( PROJ + "/counts/{sample}_spikin_count.txt",
+            sample = SAMS_UNIQ
+        )
+    output:
+        PROJ + "/" + PROJ + "_" + INDEX_SAMPLE + "_qc_analysis.html"
+    params:
+        job_name   = PROJ + "_qc_plots",
+        memory     = MEMORY
+    log:
+        out = PROJ + "/logs/" + PROJ + "_qc_plots.out",
+        err = PROJ + "/logs/" + PROJ + "_qc_plots.err"
+    message:
+        "Creating qc plots for " + PROJ + " project"
+    threads:
+        1
+    shell:
+        """
+        Rmd=src/Rmds/analysis.Rmd
+        script=src/Rmds/knit_rmd.R
+        samp=samples.yaml
+
+        Rscript $script \
+            -i $Rmd \
+            -p {PROJ} \
+            -m {INDEX_MAP} \
+            -x {INDEX_SAMPLE} \
+            -s $samp 
+        """
+ 

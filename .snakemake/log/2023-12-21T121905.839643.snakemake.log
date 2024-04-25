@@ -1,0 +1,157 @@
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                                      count    min threads    max threads
+-------------------------------------  -------  -------------  -------------
+align_filter_sample                          4             12             12
+align_filter_sample_spikein                  4             12             12
+align_filter_subsample_sample                4             12             12
+align_filter_subsample_sample_spikein        4             12             12
+all                                          1              1              1
+bamCoverage                                  2             12             12
+bamCoverage_spike                            2             12             12
+bamCoverage_spike_summary                    1              1              1
+bamCoverage_summary                          1              1              1
+bowtieR1                                     4             12             12
+bowtieR1_summmary                            1              1              1
+bowtie_counts_spikein                        4              1              1
+calculating_subsample_group                  2              1              1
+calculating_subsample_summary                1              1              1
+cutadapt                                     4              6              6
+cutadapt_summary                             1              1              1
+dedup_UMI                                    4              1              1
+extract_umi                                  4              1              1
+fastqc                                       8              6              6
+fastqc_summary                               1              1              1
+gathering_results                            1              1              1
+subsample_dedup                              4             16             16
+total                                       62              1             16
+
+Select jobs to execute...
+
+[Thu Dec 21 12:19:07 2023]
+Job 4: Running FastQC on PP1H66KpDS2Ser53_CKDL230028616-1A_HCLMNDSX7_L4_1
+
+Submitted DRMAA job 4 with external jobid 588282.
+
+[Thu Dec 21 12:19:07 2023]
+Job 12: Extracting UMIs for PP1H66KmDS2Ser53
+
+Submitted DRMAA job 12 with external jobid 588283.
+
+[Thu Dec 21 12:19:07 2023]
+Job 16: Extracting UMIs for PP1H66KmDoxS2Ser5
+
+Submitted DRMAA job 16 with external jobid 588284.
+
+[Thu Dec 21 12:19:07 2023]
+Job 18: Extracting UMIs for PP1H66KpDoxS2Ser5
+
+Submitted DRMAA job 18 with external jobid 588285.
+
+[Thu Dec 21 12:19:07 2023]
+Job 8: Running FastQC on PP1H66KpDoxS2Ser5_CKDL230028616-1A_HCLMNDSX7_L4_1
+
+Submitted DRMAA job 8 with external jobid 588286.
+
+[Thu Dec 21 12:19:07 2023]
+Job 5: Running FastQC on PP1H66KpDS2Ser53_CKDL230028616-1A_HCLMNDSX7_L4_2
+
+Submitted DRMAA job 5 with external jobid 588287.
+
+[Thu Dec 21 12:19:07 2023]
+Job 14: Extracting UMIs for PP1H66KpDS2Ser53
+
+Submitted DRMAA job 14 with external jobid 588288.
+
+[Thu Dec 21 12:19:07 2023]
+Job 3: Running FastQC on PP1H66KmDS2Ser53_CKDL230028616-1A_HCLMNDSX7_L4_2
+
+Submitted DRMAA job 3 with external jobid 588289.
+
+[Thu Dec 21 12:19:07 2023]
+Job 2: Running FastQC on PP1H66KmDS2Ser53_CKDL230028616-1A_HCLMNDSX7_L4_1
+
+Submitted DRMAA job 2 with external jobid 588290.
+
+[Thu Dec 21 12:19:07 2023]
+Job 7: Running FastQC on PP1H66KmDoxS2Ser5_CKDL230028616-1A_HCLMNDSX7_L4_2
+
+Submitted DRMAA job 7 with external jobid 588291.
+
+[Thu Dec 21 12:19:07 2023]
+Job 6: Running FastQC on PP1H66KmDoxS2Ser5_CKDL230028616-1A_HCLMNDSX7_L4_1
+
+Submitted DRMAA job 6 with external jobid 588292.
+
+[Thu Dec 21 12:19:07 2023]
+Job 9: Running FastQC on PP1H66KpDoxS2Ser5_CKDL230028616-1A_HCLMNDSX7_L4_2
+
+Submitted DRMAA job 9 with external jobid 588293.
+[Thu Dec 21 12:23:19 2023]
+Finished job 5.
+1 of 62 steps (2%) done
+[Thu Dec 21 12:23:30 2023]
+Finished job 4.
+2 of 62 steps (3%) done
+[Thu Dec 21 12:23:30 2023]
+Finished job 8.
+3 of 62 steps (5%) done
+[Thu Dec 21 12:24:02 2023]
+Finished job 7.
+4 of 62 steps (6%) done
+[Thu Dec 21 12:24:12 2023]
+Finished job 6.
+5 of 62 steps (8%) done
+[Thu Dec 21 12:24:42 2023]
+Finished job 3.
+6 of 62 steps (10%) done
+[Thu Dec 21 12:24:42 2023]
+Finished job 9.
+7 of 62 steps (11%) done
+[Thu Dec 21 12:24:52 2023]
+Finished job 2.
+8 of 62 steps (13%) done
+Select jobs to execute...
+
+[Thu Dec 21 12:24:52 2023]
+Job 1: Creating Temp_NET FastQC summary
+
+Submitted DRMAA job 1 with external jobid 588294.
+[Thu Dec 21 12:25:02 2023]
+Finished job 1.
+9 of 62 steps (15%) done
+[Thu Dec 21 12:37:45 2023]
+Finished job 16.
+10 of 62 steps (16%) done
+Select jobs to execute...
+
+[Thu Dec 21 12:37:45 2023]
+Job 15: Running cutadapt on PP1H66KmDoxS2Ser5
+
+Submitted DRMAA job 15 with external jobid 588296.
+[Thu Dec 21 12:37:55 2023]
+Error in rule cutadapt:
+    jobid: 15
+    output: Temp_NET/PP1H66KmDoxS2Ser5_R1.fastq.gz, Temp_NET/PP1H66KmDoxS2Ser5_R2.fastq.gz, Temp_NET/UMI/PP1H66KmDoxS2Ser5_cutadapt_stats.txt
+    log: Temp_NET/logs/PP1H66KmDoxS2Ser5_cutadapt.out, Temp_NET/logs/PP1H66KmDoxS2Ser5_cutadapt.err (check log file(s) for error message)
+    shell:
+        
+        cutadapt              --pair-filter=first --discard-untrimmed --minimum-length 15 -O 10 -a 'AACTGTAGGCACCATCAAT' -A 'GATCGTCGGACTGTAGAACTCTGAAC'              -j 6             -o Temp_NET/PP1H66KmDoxS2Ser5_R1.fastq.gz             -p Temp_NET/PP1H66KmDoxS2Ser5_R2.fastq.gz             Temp_NET/PP1H66KmDoxS2Ser5_R1_umi.fastq.gz             Temp_NET/PP1H66KmDoxS2Ser5_R2_umi.fastq.gz             > Temp_NET/UMI/PP1H66KmDoxS2Ser5_cutadapt_stats.txt
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Error executing rule cutadapt on cluster (jobid: 15, external: 588296, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/tmp.bfoaapjy/snakejob.cutadapt.15.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Thu Dec 21 12:38:25 2023]
+Finished job 18.
+11 of 62 steps (18%) done
+[Thu Dec 21 12:38:55 2023]
+Finished job 12.
+12 of 62 steps (19%) done
+[Thu Dec 21 12:43:56 2023]
+Finished job 14.
+13 of 62 steps (21%) done
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/log/2023-12-21T121905.839643.snakemake.log

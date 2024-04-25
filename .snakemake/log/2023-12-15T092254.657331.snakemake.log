@@ -1,0 +1,90 @@
+Building DAG of jobs...
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                            count    min threads    max threads
+---------------------------  -------  -------------  -------------
+align_filter_sample                1             12             12
+align_filter_sample_spikein        1             12             12
+all                                1              1              1
+bamCoverage                        2             12             12
+bamCoverage_spike                  2             12             12
+bamCoverage_spike_summary          1              1              1
+bamCoverage_summary                1              1              1
+bowtiePE_summmary                  1              1              1
+bowtie_counts_spikein              2              1              1
+calculating_OR                     2              1              1
+fastqc_summary                     1              1              1
+fragment_size_samp                 1             12             12
+gathering_OR_results               1              1              1
+gathering_results                  1              1              1
+total                             18              1             12
+
+Select jobs to execute...
+
+[Fri Dec 15 09:22:56 2023]
+Job 26: filtering reads PP1H66KmDS2Ser53
+
+Submitted DRMAA job 26 with external jobid 579308.
+
+[Fri Dec 15 09:22:56 2023]
+Job 30: filtering spike in reads PP1H66KmDS2Ser53
+
+Submitted DRMAA job 30 with external jobid 579309.
+
+[Fri Dec 15 09:22:56 2023]
+Job 38: Bowtie2 counts_spikin for PP1H66KpDS2Ser53
+
+Submitted DRMAA job 38 with external jobid 579310.
+
+[Fri Dec 15 09:22:56 2023]
+Job 39: getting OR norm for PP1H66KSer5-r2
+
+Submitted DRMAA job 39 with external jobid 579311.
+
+[Fri Dec 15 09:22:56 2023]
+Job 1: Creating Temp2 FastQC summary
+
+Submitted DRMAA job 1 with external jobid 579312.
+
+[Fri Dec 15 09:22:56 2023]
+Job 20: summmary Bowtie2 for
+
+Submitted DRMAA job 20 with external jobid 579313.
+[Fri Dec 15 09:23:05 2023]
+Finished job 1.
+1 of 18 steps (6%) done
+Removing temporary output file Temp2/bams/PP1H66KmDS2Ser53_hg38_mm10_bowtie_stats.txt.
+Removing temporary output file Temp2/bams/PP1H66KpDS2Ser53_hg38_mm10_bowtie_stats.txt.
+Removing temporary output file Temp2/bams/PP1H66KmDoxS2Ser5_hg38_mm10_bowtie_stats.txt.
+Removing temporary output file Temp2/bams/PP1H66KpDoxS2Ser5_hg38_mm10_bowtie_stats.txt.
+[Fri Dec 15 09:23:05 2023]
+Finished job 20.
+2 of 18 steps (11%) done
+[Fri Dec 15 09:23:15 2023]
+Finished job 30.
+3 of 18 steps (17%) done
+[Fri Dec 15 09:23:15 2023]
+Error in rule calculating_OR:
+    jobid: 39
+    output: Temp2/counts/PP1H66KSer5-r2_OR_count.txt
+    log: Temp2/logs/PP1H66KSer5-r2_OR.out, Temp2/logs/PP1H66KSer5-r2_OR.err (check log file(s) for error message)
+
+[Fri Dec 15 09:23:15 2023]
+Error executing rule calculating_OR on cluster (jobid: 39, external: 579311, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/tmp.kcwjrohr/snakejob.calculating_OR.39.sh). For error details see the cluster log and the log files of the involved rule(s).
+Finished job 38.
+4 of 18 steps (22%) done
+Removing temporary output file Temp2/PP1H66KmDS2Ser53_hg38_mm10.bam.bai.
+Removing temporary output file Temp2/PP1H66KmDS2Ser53_hg38_mm10.bam.
+[Fri Dec 15 09:24:36 2023]
+Finished job 26.
+5 of 18 steps (28%) done
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/log/2023-12-15T092254.657331.snakemake.log

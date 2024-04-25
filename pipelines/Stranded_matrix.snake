@@ -1,0 +1,194 @@
+# ===== Snake file for processing mNET-seq data ================================
+
+from pytools.persistent_dict import PersistentDict
+import os
+import glob
+import re
+import subprocess
+import gzip
+import random
+
+
+# Configure shell for all rules
+shell.executable("/bin/bash")
+shell.prefix("source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; ")
+
+
+# Parameters from config.yaml
+PROJ            = config["PROJ"]
+SAMPLES         = config["SAMPLES"]
+SEQ_DATE        = config["SEQ_DATE"]
+INDEX_PATH      = config["INDEX_PATH"]
+INDEX_SAMPLE    = config["INDEX_SAMPLE"]
+INDEX_SPIKE     = ""
+FW_REF          = config["FW_REF"]
+REV_REF         = config["REV_REF"]
+CMD_PARAMS      = config["CMD_PARAMS"]
+COLORS          = config["COLORS"]
+NORM            = config["NORM"]
+USER            = config["USER"]
+GENELIST        = config["GENELIST"]
+MEMORY          = config["MEMORY"]
+
+# Sample and group lists
+SAMS = [[y, x] for y in SAMPLES for x in SAMPLES[y]]
+GRPS = [x[0] for x in SAMS]
+SAMS = [x[1] for x in SAMS]
+
+GRPS_UNIQ = list(dict.fromkeys(GRPS))
+SAMS_UNIQ = list(dict.fromkeys(SAMS))
+SAMS_UNIQ2 = list(dict.fromkeys(SAMS[::2]))
+
+# Print summary of samples and groups
+print("SAMS (%s): %s\n" % (len(SAMS), SAMS))
+print("GRPS (%s): %s\n" % (len(GRPS), GRPS))
+print("SAMS_UNIQ (%s): %s\n" % (len(SAMS_UNIQ), SAMS_UNIQ))
+print("GRPS_UNIQ (%s): %s\n" % (len(GRPS_UNIQ), GRPS_UNIQ))
+print("SAMS_UNIQ2 (%s): %s\n" % (len(SAMS_UNIQ2), SAMS_UNIQ2))
+
+# Wildcard constraints
+GRP_REGEX = "[a-zA-Z0-9_\-]+"
+
+wildcard_constraints:
+    sample  = "[a-zA-Z0-9_\-]+",
+    group   = GRP_REGEX,
+    sam_grp = "[a-zA-Z0-9_\-]+-[a-zA-Z0-9_\-]+"
+
+
+def _get_colors(sample_key, group_counts, sample_key2, color):
+    if len(sample_key) > len(group_counts):
+      sample_key = sample_key2
+    if len(sample_key) >= len(color):
+      color.extend(["0,0,0"]*len(set(sample_key)))
+    res = {}
+    for key in sample_key:
+      for value in color:
+        res[key] = value
+        color.remove(value)
+        break  
+    return(res)
+
+COLS_DICT = _get_colors(SAMS_UNIQ, GRPS_UNIQ,  SAMS_UNIQ2, COLORS)
+
+def _get_col(wildcards):
+    sample = SAMPLES[wildcards.group][0]
+  
+    if sample in COLS_DICT:
+      results = (COLS_DICT[sample])
+    else:
+      results = "0,0,0"
+    return(results)
+
+def _rgb2hex(wildcards):
+    sample = SAMPLES[wildcards.group][0]
+  
+    if sample in COLS_DICT:
+      results = (COLS_DICT[sample])
+    else:
+      results = "0,0,0"
+    results = tuple(map(int, results.split(",")))
+    return "#{:02x}{:02x}{:02x}".format(*results)
+
+def _get_normtype(normUsing, scaleFactor, blacklist):
+    match = re.search(r"--normalizeUsing (\w+)", normUsing)
+    if match:
+      word = match.group(1)
+      if not word or word.isspace() or word.lower() == "none":
+        word = ""
+      else:
+        word = "_" + word
+    else:
+      word = ""
+    if scaleFactor or scaleFactor.isspace() or scaleFactor.lower() == "none":
+      word2 = scaleFactor
+      word = word + "_" + word2
+    if word == "":
+      word = "_None"
+    if re.search(r"\S", blacklist):
+      word = word + "_BL"
+    message = "norm" + word
+    return " ".join(message.split())
+
+NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"])
+
+def _get_matrixtype(normUsing, computeMatrix,genelist):
+    if genelist != "":
+      genelist = "_" + genelist
+    if normUsing != "":
+      normUsing = "_" + normUsing
+    matchu = re.search(r"--upstream (\w+)", computeMatrix)
+    if matchu:
+      value = int(matchu.group(1))
+      result = str(value / 1000) + "k_"
+    else:
+      result = "0k_"
+    matchu5 = re.search(r"--unscaled5prime (\w+)", computeMatrix)
+    if matchu5:
+      value = int(matchu5.group(1))
+      result = result + str(value / 1000) + "k_"
+    matchb = re.search(r"--regionBodyLength (\w+)", computeMatrix)
+    if matchb:
+      value = int(matchb.group(1))
+      result = result + str(value / 1000) + "k_"
+    matchu3 = re.search(r"--unscaled3prime (\w+)", computeMatrix)
+    if matchu3:
+      value = int(matchu3.group(1))
+      result = result + str(value / 1000) + "k_"
+    matchd = re.search(r"--downstream (\w+)", computeMatrix)
+    if matchd:
+      value = int(matchd.group(1))
+      result = result + str(value / 1000) + "k_"
+    matchbin = re.search(r"--binSize (\w+)", computeMatrix)
+    if matchbin:
+      value = matchbin.group(1)
+      result = result + value + "bin"
+    else:
+      result = result + "0bin"
+    message = result + normUsing + genelist
+    return message
+
+NORM5S  = _get_matrixtype(NORMS,CMD_PARAMS["reference5"],GENELIST)
+NORM5A  = _get_matrixtype(NORMS,CMD_PARAMS["reference5a"],GENELIST)
+NORM543 = _get_matrixtype(NORMS,CMD_PARAMS["region543"],GENELIST)
+NORM3   = _get_matrixtype(NORMS,CMD_PARAMS["reference3"],GENELIST)
+
+def _get_bampath(bampath):
+    if bampath == "subsample":
+        word = "bams_sub"
+    else:
+        word = "bams"
+    return word
+
+BAM_PATH = _get_bampath(NORM)
+
+# Final output files
+rule all:
+    input:
+        # bamCoverage
+        PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + "_" + NORMS + "_bw_URL.txt",
+        
+        # 5 sense matrix file
+        PROJ + "/URLS/5_" + PROJ + "_" + INDEX_SAMPLE + "_" + NORM5S + "_sense_matrix.url.txt",
+        
+        # 5 antisense matrix file
+        PROJ + "/URLS/5_" + PROJ + "_" + INDEX_SAMPLE + "_" + NORM5A + "_antisense_matrix.url.txt"
+        #,
+        
+        # 543 matrix file
+        #PROJ + "/URLS/543_" + PROJ + "_" + INDEX_SAMPLE + "_" + NORM543 + "_sense_matrix.url.txt",
+        
+        # 3 matrix file
+        #PROJ + "/URLS/3_" + PROJ + "_" + INDEX_SAMPLE + "_" + NORM3 + "_sense_matrix.url.txt"
+
+
+# BW with deeptools bamCoverage
+include: "rules/04_bamCoverage_stranded.snake"
+# 5 sense matrix file
+include: "rules/05_5_matrix_sense.snake"
+# 5 antisense matrix file
+include: "rules/05_5_matrix_antisense.snake"
+# 543 matrix file
+include: "rules/05_543_matrix_sense.snake"
+# 3 matrix file
+include: "rules/05_3_matrix_sense.snake"
+

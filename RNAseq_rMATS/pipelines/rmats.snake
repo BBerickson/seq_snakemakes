@@ -1,0 +1,104 @@
+# ===== Snake file for processing Bowtie ================================
+
+from pytools.persistent_dict import PersistentDict
+import os
+import glob
+import re
+import subprocess
+import gzip
+import random
+
+# Configure shell for all rules
+shell.executable("/bin/bash")
+shell.prefix("source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; ")
+
+# Parameters from config.yaml
+PROJ            = config["PROJ"]
+RAW_DATA        = config["RAW_DATA"]
+SAMPLES         = config["SAMPLESr"]
+GROUPS_COMP     = config["GROUPS_COMP"]
+SEQ_DATE        = config["SEQ_DATE"]
+GTF             = config["GTF"]
+CMD_PARAMS      = config["CMD_PARAMS"]
+NORM            = config["NORM"]
+USER            = config["USER"]
+MEMORY          = config["MEMORY"]
+
+# Directories for data and scripts
+FASTQ_DIR = PROJ + "/fastqs"
+
+# Create symlinks for fastqs
+if not os.path.exists(FASTQ_DIR):
+    os.makedirs(FASTQ_DIR)
+
+# Sample and group lists
+SAMS = [[y, x] for y in SAMPLES for x in SAMPLES[y]]
+SAMS = [x[1] for x in SAMS]
+GRPS = [x for x in GROUPS_COMP]
+
+# Gene subsampling groups
+SAM_GRPS      = [x + "-" + y for y in SAMPLES for x in SAMPLES[y]]
+
+GRPS_UNIQ = list(dict.fromkeys(GRPS))
+SAMS_UNIQ = list(dict.fromkeys(SAMS))
+
+# Print summary of samples and groups
+print("SAMS (%s): %s\n" % (len(SAMS), SAMS))
+print("GRPS (%s): %s\n" % (len(GRPS), GRPS))
+print("SAMS_UNIQ (%s): %s\n" % (len(SAMS_UNIQ), SAMS_UNIQ))
+print("GRPS_UNIQ (%s): %s\n" % (len(GRPS_UNIQ), GRPS_UNIQ))
+print("SAM_GRPS (%s): %s\n" % (len(SAM_GRPS), SAM_GRPS))
+
+# Wildcard constraints
+GRP_REGEX = "[a-zA-Z0-9_\-,]+"
+
+wildcard_constraints:
+    sample  = "[a-zA-Z0-9_\-]+",
+    group   = GRP_REGEX,
+
+
+def _get_normtype(normUsing, scaleFactor, blacklist):
+    match = re.search(r"--normalizeUsing (\w+)", normUsing)
+    if match:
+      word = match.group(1)
+      if not word or word.isspace() or word.lower() == "none":
+        word = ""
+      else:
+        word = "_" + word
+    else:
+      word = ""
+    if scaleFactor or scaleFactor.isspace() or scaleFactor.lower() == "none":
+      word2 = scaleFactor
+      word = word + "_" + word2
+    if word == "":
+      word = "_None"
+    if re.search(r"\S", blacklist):
+      word = word + "_BL"
+    message = "norm" + word
+    return " ".join(message.split())
+
+NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"])
+
+def _get_bampath(bampath):
+    if bampath == "subsample":
+        word = "bams_sub"
+    else:
+        word = "bams"
+    return word
+
+BAM_PATH = _get_bampath(NORM)
+
+# Final output files
+rule all:
+    input:
+        # rmats
+        expand(
+          PROJ + "/rmats/{compgroups}/SE.MATS.JC.txt",
+            compgroups = GRPS_UNIQ
+        )
+
+
+# Run rMATS
+include: "rules/04_rmats.snake"
+
+

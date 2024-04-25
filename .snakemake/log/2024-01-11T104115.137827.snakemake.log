@@ -1,0 +1,6 @@
+Building DAG of jobs...
+MissingInputException in line 160 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rmats.snake:
+Missing input files for rule all:
+    affected files:
+        temp_RTF1_RNAseq/RTF1_WT,RTF1_MT_S1.txt
+        temp_RTF1_RNAseq/RTF1_WT,RTF1_MT_S2.txt

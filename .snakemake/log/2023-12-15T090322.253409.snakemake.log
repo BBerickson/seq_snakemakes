@@ -1,0 +1,320 @@
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                            count    min threads    max threads
+---------------------------  -------  -------------  -------------
+align_filter_sample                4             12             12
+align_filter_sample_spikein        4             12             12
+all                                1              1              1
+bamCoverage                        2             12             12
+bamCoverage_spike                  2             12             12
+bamCoverage_spike_summary          1              1              1
+bamCoverage_summary                1              1              1
+bbduk_paired                       4             12             12
+bbduk_summary                      1              1              1
+bowtiePE                           4             12             12
+bowtiePE_summmary                  1              1              1
+bowtie_counts_spikein              4              1              1
+calculating_OR                     2              1              1
+clumpify_paired                    4              1              1
+clumpify_summary                   1              1              1
+fastqc                             8              6              6
+fastqc_summary                     1              1              1
+fragment_size_samp                 1             12             12
+gathering_OR_results               1              1              1
+gathering_results                  1              1              1
+total                             48              1             12
+
+Select jobs to execute...
+
+[Fri Dec 15 09:03:23 2023]
+Job 12: Removing duplicats for PP1H66KpDS2Ser53
+
+Submitted DRMAA job 12 with external jobid 579192.
+
+[Fri Dec 15 09:03:23 2023]
+Job 2: Running FastQC on PP1H66KmDS2Ser53_CKDL230028616-1A_HCLMNDSX7_L4_1
+
+Submitted DRMAA job 2 with external jobid 579193.
+
+[Fri Dec 15 09:03:23 2023]
+Job 13: Removing duplicats for PP1H66KmDoxS2Ser5
+
+Submitted DRMAA job 13 with external jobid 579194.
+
+[Fri Dec 15 09:03:23 2023]
+Job 3: Running FastQC on PP1H66KmDS2Ser53_CKDL230028616-1A_HCLMNDSX7_L4_2
+
+Submitted DRMAA job 3 with external jobid 579195.
+
+[Fri Dec 15 09:03:23 2023]
+Job 5: Running FastQC on PP1H66KpDS2Ser53_CKDL230028616-1A_HCLMNDSX7_L4_2
+
+Submitted DRMAA job 5 with external jobid 579196.
+
+[Fri Dec 15 09:03:23 2023]
+Job 7: Running FastQC on PP1H66KmDoxS2Ser5_CKDL230028616-1A_HCLMNDSX7_L4_2
+
+Submitted DRMAA job 7 with external jobid 579197.
+
+[Fri Dec 15 09:03:23 2023]
+Job 9: Running FastQC on PP1H66KpDoxS2Ser5_CKDL230028616-1A_HCLMNDSX7_L4_2
+
+Submitted DRMAA job 9 with external jobid 579198.
+
+[Fri Dec 15 09:03:23 2023]
+Job 11: Removing duplicats for PP1H66KmDS2Ser53
+
+Submitted DRMAA job 11 with external jobid 579199.
+
+[Fri Dec 15 09:03:23 2023]
+Job 14: Removing duplicats for PP1H66KpDoxS2Ser5
+
+Submitted DRMAA job 14 with external jobid 579200.
+
+[Fri Dec 15 09:03:24 2023]
+Job 4: Running FastQC on PP1H66KpDS2Ser53_CKDL230028616-1A_HCLMNDSX7_L4_1
+
+Submitted DRMAA job 4 with external jobid 579201.
+
+[Fri Dec 15 09:03:24 2023]
+Job 6: Running FastQC on PP1H66KmDoxS2Ser5_CKDL230028616-1A_HCLMNDSX7_L4_1
+
+Submitted DRMAA job 6 with external jobid 579202.
+
+[Fri Dec 15 09:03:24 2023]
+Job 8: Running FastQC on PP1H66KpDoxS2Ser5_CKDL230028616-1A_HCLMNDSX7_L4_1
+
+Submitted DRMAA job 8 with external jobid 579203.
+[Fri Dec 15 09:04:50 2023]
+Finished job 12.
+1 of 48 steps (2%) done
+Select jobs to execute...
+
+[Fri Dec 15 09:04:50 2023]
+Job 17: Removing duplicats for PP1H66KpDS2Ser53
+
+Submitted DRMAA job 17 with external jobid 579217.
+[Fri Dec 15 09:05:57 2023]
+Finished job 13.
+2 of 48 steps (4%) done
+Select jobs to execute...
+
+[Fri Dec 15 09:05:57 2023]
+Job 18: Removing duplicats for PP1H66KmDoxS2Ser5
+
+Submitted DRMAA job 18 with external jobid 579232.
+[Fri Dec 15 09:05:57 2023]
+Finished job 14.
+3 of 48 steps (6%) done
+Select jobs to execute...
+
+[Fri Dec 15 09:05:57 2023]
+Job 19: Removing duplicats for PP1H66KpDoxS2Ser5
+
+Submitted DRMAA job 19 with external jobid 579233.
+Removing temporary output file Temp2/PP1H66KpDS2Ser53_R1_clumpify.fastq.gz.
+Removing temporary output file Temp2/PP1H66KpDS2Ser53_R2_clumpify.fastq.gz.
+[Fri Dec 15 09:06:08 2023]
+Finished job 17.
+4 of 48 steps (8%) done
+Select jobs to execute...
+
+[Fri Dec 15 09:06:08 2023]
+Job 22: Aligning reads with Bowtie2 for PP1H66KpDS2Ser53
+
+Submitted DRMAA job 22 with external jobid 579236.
+[Fri Dec 15 09:06:08 2023]
+Finished job 11.
+5 of 48 steps (10%) done
+Select jobs to execute...
+
+[Fri Dec 15 09:06:08 2023]
+Job 16: Removing duplicats for PP1H66KmDS2Ser53
+
+Submitted DRMAA job 16 with external jobid 579237.
+
+[Fri Dec 15 09:06:08 2023]
+Job 10: Creating Temp2 clumpify summary
+
+Submitted DRMAA job 10 with external jobid 579238.
+[Fri Dec 15 09:06:19 2023]
+Finished job 10.
+6 of 48 steps (12%) done
+Removing temporary output file Temp2/PP1H66KmDoxS2Ser5_R1_clumpify.fastq.gz.
+Removing temporary output file Temp2/PP1H66KmDoxS2Ser5_R2_clumpify.fastq.gz.
+[Fri Dec 15 09:07:03 2023]
+Finished job 18.
+7 of 48 steps (15%) done
+Select jobs to execute...
+
+[Fri Dec 15 09:07:03 2023]
+Job 23: Aligning reads with Bowtie2 for PP1H66KmDoxS2Ser5
+
+Submitted DRMAA job 23 with external jobid 579244.
+Removing temporary output file Temp2/PP1H66KpDoxS2Ser5_R2_clumpify.fastq.gz.
+Removing temporary output file Temp2/PP1H66KpDoxS2Ser5_R1_clumpify.fastq.gz.
+[Fri Dec 15 09:07:03 2023]
+Finished job 19.
+8 of 48 steps (17%) done
+Select jobs to execute...
+
+[Fri Dec 15 09:07:03 2023]
+Job 24: Aligning reads with Bowtie2 for PP1H66KpDoxS2Ser5
+
+Submitted DRMAA job 24 with external jobid 579245.
+Removing temporary output file Temp2/PP1H66KmDS2Ser53_R1_clumpify.fastq.gz.
+Removing temporary output file Temp2/PP1H66KmDS2Ser53_R2_clumpify.fastq.gz.
+[Fri Dec 15 09:07:25 2023]
+Finished job 16.
+9 of 48 steps (19%) done
+Select jobs to execute...
+
+[Fri Dec 15 09:07:25 2023]
+Job 21: Aligning reads with Bowtie2 for PP1H66KmDS2Ser53
+
+Submitted DRMAA job 21 with external jobid 579249.
+
+[Fri Dec 15 09:07:26 2023]
+Job 15: Creating Temp2 bbduk summary
+
+Submitted DRMAA job 15 with external jobid 579250.
+[Fri Dec 15 09:07:36 2023]
+Finished job 15.
+10 of 48 steps (21%) done
+[Fri Dec 15 09:09:28 2023]
+Finished job 8.
+11 of 48 steps (23%) done
+[Fri Dec 15 09:09:39 2023]
+Finished job 6.
+12 of 48 steps (25%) done
+[Fri Dec 15 09:10:22 2023]
+Finished job 7.
+13 of 48 steps (27%) done
+[Fri Dec 15 09:11:04 2023]
+Finished job 9.
+14 of 48 steps (29%) done
+[Fri Dec 15 09:11:14 2023]
+Finished job 4.
+15 of 48 steps (31%) done
+Removing temporary output file Temp2/PP1H66KmDoxS2Ser5_R1.fastq.gz.
+Removing temporary output file Temp2/PP1H66KmDoxS2Ser5_R2.fastq.gz.
+[Fri Dec 15 09:11:34 2023]
+Finished job 23.
+16 of 48 steps (33%) done
+Select jobs to execute...
+
+[Fri Dec 15 09:11:34 2023]
+Job 32: filtering spike in reads PP1H66KmDoxS2Ser5
+
+Submitted DRMAA job 32 with external jobid 579261.
+
+[Fri Dec 15 09:11:34 2023]
+Job 28: filtering reads PP1H66KmDoxS2Ser5
+
+Submitted DRMAA job 28 with external jobid 579262.
+Removing temporary output file Temp2/PP1H66KpDoxS2Ser5_R1.fastq.gz.
+Removing temporary output file Temp2/PP1H66KpDoxS2Ser5_R2.fastq.gz.
+[Fri Dec 15 09:11:34 2023]
+Finished job 24.
+17 of 48 steps (35%) done
+Select jobs to execute...
+
+[Fri Dec 15 09:11:34 2023]
+Job 33: filtering spike in reads PP1H66KpDoxS2Ser5
+
+Submitted DRMAA job 33 with external jobid 579263.
+
+[Fri Dec 15 09:11:34 2023]
+Job 29: filtering reads PP1H66KpDoxS2Ser5
+
+Submitted DRMAA job 29 with external jobid 579264.
+[Fri Dec 15 09:11:44 2023]
+Finished job 32.
+18 of 48 steps (38%) done
+[Fri Dec 15 09:11:44 2023]
+Finished job 33.
+19 of 48 steps (40%) done
+Removing temporary output file Temp2/PP1H66KpDS2Ser53_R2.fastq.gz.
+Removing temporary output file Temp2/PP1H66KpDS2Ser53_R1.fastq.gz.
+[Fri Dec 15 09:12:24 2023]
+Finished job 22.
+20 of 48 steps (42%) done
+Select jobs to execute...
+
+[Fri Dec 15 09:12:24 2023]
+Job 31: filtering spike in reads PP1H66KpDS2Ser53
+
+Submitted DRMAA job 31 with external jobid 579269.
+
+[Fri Dec 15 09:12:24 2023]
+Job 27: filtering reads PP1H66KpDS2Ser53
+
+Submitted DRMAA job 27 with external jobid 579270.
+Removing temporary output file Temp2/PP1H66KpDoxS2Ser5_hg38_mm10.bam.bai.
+Removing temporary output file Temp2/PP1H66KpDoxS2Ser5_hg38_mm10.bam.
+[Fri Dec 15 09:12:24 2023]
+Finished job 29.
+21 of 48 steps (44%) done
+Select jobs to execute...
+
+[Fri Dec 15 09:12:25 2023]
+Job 41: Bowtie2 counts_spikin for PP1H66KpDoxS2Ser5
+
+Submitted DRMAA job 41 with external jobid 579271.
+Removing temporary output file Temp2/PP1H66KmDoxS2Ser5_hg38_mm10.bam.bai.
+Removing temporary output file Temp2/PP1H66KmDoxS2Ser5_hg38_mm10.bam.
+[Fri Dec 15 09:12:34 2023]
+Finished job 28.
+22 of 48 steps (46%) done
+Select jobs to execute...
+
+[Fri Dec 15 09:12:34 2023]
+Job 40: Bowtie2 counts_spikin for PP1H66KmDoxS2Ser5
+
+Submitted DRMAA job 40 with external jobid 579274.
+[Fri Dec 15 09:12:45 2023]
+Finished job 31.
+23 of 48 steps (48%) done
+[Fri Dec 15 09:12:45 2023]
+Finished job 41.
+24 of 48 steps (50%) done
+[Fri Dec 15 09:12:55 2023]
+Finished job 40.
+25 of 48 steps (52%) done
+Select jobs to execute...
+
+[Fri Dec 15 09:12:55 2023]
+Job 39: getting OR norm for PP1H66KSer5-r2
+
+Submitted DRMAA job 39 with external jobid 579275.
+[Fri Dec 15 09:13:15 2023]
+Error in rule calculating_OR:
+    jobid: 39
+    output: Temp2/counts/PP1H66KSer5-r2_OR_count.txt
+    log: Temp2/logs/PP1H66KSer5-r2_OR.out, Temp2/logs/PP1H66KSer5-r2_OR.err (check log file(s) for error message)
+
+Error executing rule calculating_OR on cluster (jobid: 39, external: 579275, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/tmp.q7np0fcs/snakejob.calculating_OR.39.sh). For error details see the cluster log and the log files of the involved rule(s).
+Removing temporary output file Temp2/PP1H66KpDS2Ser53_hg38_mm10.bam.
+Removing temporary output file Temp2/PP1H66KpDS2Ser53_hg38_mm10.bam.bai.
+[Fri Dec 15 09:13:35 2023]
+Finished job 27.
+26 of 48 steps (54%) done
+[Fri Dec 15 09:13:45 2023]
+Finished job 2.
+27 of 48 steps (56%) done
+[Fri Dec 15 09:14:05 2023]
+Finished job 3.
+28 of 48 steps (58%) done
+[Fri Dec 15 09:14:15 2023]
+Finished job 5.
+29 of 48 steps (60%) done
+Removing temporary output file Temp2/PP1H66KmDS2Ser53_R1.fastq.gz.
+Removing temporary output file Temp2/PP1H66KmDS2Ser53_R2.fastq.gz.
+[Fri Dec 15 09:15:26 2023]
+Finished job 21.
+30 of 48 steps (62%) done
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/log/2023-12-15T090322.253409.snakemake.log

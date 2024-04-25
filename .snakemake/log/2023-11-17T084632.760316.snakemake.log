@@ -1,0 +1,5 @@
+TypeError in line 7 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/01_fastqc.snake:
+expected str, bytes or os.PathLike object, not list
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/Bowtie.snake", line 162, in <module>
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/01_fastqc.snake", line 7, in <module>
+  File "/cluster/software/modules-python/python/3.8.5/lib/python3.8/posixpath.py", line 76, in join

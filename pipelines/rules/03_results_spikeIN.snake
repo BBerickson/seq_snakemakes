@@ -1,0 +1,224 @@
+# ====== Rules for getting overall results =================================
+
+# get read counts from bams spikein
+rule bowtie_counts_spikein:
+    input:
+        bam2   = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
+        bai2   = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai",
+        bam3   = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
+        bai3   = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam.bai"
+    output:
+        stats2 = PROJ + "/counts/{sample}_spikin_count.txt"
+    params:
+        job_name = "{sample}_bowtie_counts_spikin",
+        enrich2  = ENRICHED_SAMPLE,
+        enrich3  = ENRICHED_SPIKE,
+        memory   = MEMORY
+    log:
+        out = PROJ + "/logs/{sample}_bowtie_counts_spikin.out",
+        err = PROJ + "/logs/{sample}_bowtie_count_spikins.err"
+    message:
+        "Bowtie2 counts_spikin for {wildcards.sample}"
+    threads:
+        1
+    shell:
+        """
+        echo "{INDEX_SAMPLE} $(samtools idxstats {input.bam2} | awk '{{s+=$3}} END {{print s/2}}')" >> {output.stats2}
+        echo "{INDEX_SPIKE} $(samtools idxstats {input.bam3} | awk '{{s+=$3}} END {{print s/2}}')" >> {output.stats2}
+        echo "enrich_{INDEX_SAMPLE} $(samtools view {input.bam2} -L {params.enrich2} -c | awk ' {{print $0/2}}')" >> {output.stats2}
+        echo "enrich_{INDEX_SPIKE} $(samtools view {input.bam3} -L {params.enrich3} -c | awk ' {{print $0/2}}')" >> {output.stats2}
+        echo "chrM_{INDEX_SAMPLE} $(samtools view {input.bam2} chrM -c | awk ' {{print $0/2}}')" >> {output.stats2}
+        echo "chrM_{INDEX_SPIKE} $(samtools view {input.bam3} chrM -c | awk ' {{print $0/2}}')" >> {output.stats2}
+        
+        """
+
+
+# calculating OR
+rule calculating_OR:
+    input:
+        lambda wildcards: expand(
+            PROJ  + "/counts/{sample}_spikin_count.txt",
+            sample = SAMPLES[wildcards.group]
+        )
+    output:
+        temp(PROJ + "/counts/{group}_OR_count.txt")
+    params:
+        job_name = "{group}_OR",
+        memory   = MEMORY,
+        type     = NORM,
+        in_sam   = INDEX_SAMPLE,
+        in_spk   = INDEX_SPIKE
+    log:
+        out = PROJ + "/logs/{group}_OR.out",
+        err = PROJ + "/logs/{group}_OR.err"
+    message:
+        "getting OR norm for {wildcards.group}"
+    threads: 
+        1
+    script:
+        '../R_scripts/count_OR.R'
+  
+# gathering results
+rule gathering_OR_results:
+    input:
+        expand(
+        PROJ      + "/counts/{group}_OR_count.txt",
+            group = GRPS_UNIQ
+        )
+    output:
+        PROJ + "/counts/" + PROJ + "_OR_summery.tsv"
+    params:
+        job_name = "ORresults",
+        memory   = MEMORY
+    log:
+        out = PROJ + "/logs/ORresults.out",
+        err = PROJ + "/logs/ORresults.err"
+    message:
+        "getting final results"
+    threads: 
+        1
+    run:
+        with open(output[0], "w") as out:
+            for file in input:
+                for line in open(file, "r"):
+                    out.write(line)  
+
+# gathering results
+rule gathering_results:
+    input:
+        PROJ + "/stats/" + PROJ + "_clumpify.tsv",
+        PROJ + "/stats/" + PROJ + "_bbduk.tsv",
+        PROJ + "/stats/" + PROJ + "_aligned.tsv",
+        PROJ + "/counts/" + PROJ + "_OR_summery.tsv",
+        expand( PROJ + "/counts/{sample}_spikin_count.txt",
+            sample = SAMS_UNIQ
+        )
+    output:
+        PROJ + "/stats/" + PROJ + "_results.tsv"
+    params:
+        job_name = "results",
+        project  = PROJ,
+        memory   = MEMORY
+    log:
+        out = PROJ + "/logs/results.out",
+        err = PROJ + "/logs/results.err"
+    message:
+        "getting final results"
+    threads: 
+        1
+    script:
+        '../R_scripts/results.R'
+  
+  
+# fragment size of mapped paired end reads
+rule fragment_size_samp:
+    input:
+      bam = expand(
+            PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
+            sample = SAMS_UNIQ
+        ),
+      bai =  expand(
+            PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai",
+            sample = SAMS_UNIQ
+        ),
+      bam2 = expand(
+            PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
+            sample = SAMS_UNIQ
+        ),
+      bai2 =  expand(
+            PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam.bai",
+            sample = SAMS_UNIQ
+        )
+    output:
+      log  =  PROJ + "/stats/" + PROJ + "_" + INDEX_SAMPLE + "_fragment.txt",
+      log2 =  PROJ + "/stats/" + PROJ + "_" + INDEX_SPIKE + "_fragment.txt",
+      pic  =  PROJ + "/stats/" + PROJ + "_" + INDEX_SAMPLE + "_fragmentSize.png",
+      pic2 =  PROJ + "/stats/" + PROJ + "_" + INDEX_SPIKE + "_fragmentSize.png"
+    params:
+        job_name = "PE_fragment_size_sample",
+        memory   = MEMORY * 16,
+        labels   = SAMS_UNIQ, 
+        args     = CMD_PARAMS["fragment_size"]
+    log:
+        out = PROJ + "/logs/PE_fragment_sample_size.out",
+        err = PROJ + "/logs/PE_fragment_sample_size.err"
+    message:
+        "fragment size of mapped paired end reads for sample"
+    threads: 
+        12
+    shell:
+        """
+        bamPEFragmentSize \
+          -hist {output.pic2} \
+          --numberOfProcessors {threads} \
+          -T "Fragment size of PE data" \
+          -b  {input.bam2} {params.args} \
+          --samplesLabel {params.labels} \
+          --table {output.log2} 
+    
+        bamPEFragmentSize \
+          -hist {output.pic} \
+          --numberOfProcessors {threads} \
+          -T "Fragment size of PE data" \
+          -b  {input.bam} {params.args} \
+          --samplesLabel {params.labels} \
+          --table {output.log} 
+        
+        """
+
+# gathering results fragment size
+rule fragment_results:
+    input:
+        PROJ + "/stats/" + PROJ + "_results.tsv",
+        PROJ + "/stats/" + PROJ + "_" + INDEX_SAMPLE + "_fragment.txt",
+        PROJ + "/stats/" + PROJ + "_" + INDEX_SPIKE + "_fragment.txt"
+    output:
+        PROJ + "/stats/" + PROJ + "_fragment_results.tsv"
+    params:
+        job_name = "fragment_results",
+        samp     = INDEX_SAMPLE,
+        spik     = INDEX_SPIKE,
+        memory   = MEMORY
+    log:
+        out = PROJ + "/logs/fragment_results.out",
+        err = PROJ + "/logs/fragment_results.err"
+    message:
+        "getting final fragment_results"
+    threads: 
+        1
+    script:
+        '../R_scripts/fragment_results.R'
+  
+rule create_plots:
+    input:
+        PROJ + "/stats/" + PROJ + "_results.tsv",
+        expand( PROJ + "/counts/{sample}_spikin_count.txt",
+            sample = SAMS_UNIQ
+        )
+    output:
+        PROJ + "/" + PROJ + "_" + INDEX_SAMPLE + "_qc_analysis.html"
+    params:
+        job_name   = PROJ + "_qc_plots",
+        memory     = MEMORY
+    log:
+        out = PROJ + "/logs/" + PROJ + "_qc_plots.out",
+        err = PROJ + "/logs/" + PROJ + "_qc_plots.err"
+    message:
+        "Creating qc plots for " + PROJ + " project"
+    threads:
+        1
+    shell:
+        """
+        Rmd=src/Rmds/analysis.Rmd
+        script=src/Rmds/knit_rmd.R
+        samp=samples.yaml
+
+        Rscript $script \
+            -i $Rmd \
+            -p {PROJ} \
+            -m {INDEX_MAP} \
+            -x {INDEX_SAMPLE} \
+            -s $samp 
+        """
+ 
+    

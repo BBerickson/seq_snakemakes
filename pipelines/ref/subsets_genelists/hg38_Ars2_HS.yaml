@@ -1,0 +1,35 @@
+#===== Config file for standared hg38 genome  ===================
+
+# Path to bowtie2 index ref files
+GENELIST:
+    "ARS2_HS"
+INDEX_PATH:
+    "/beevol/home/erickson/ref/hg38/"
+INDEX_MAP:
+    "hg38"
+INDEX_SAMPLE:
+    "hg38"
+INDEX_SPIKE:
+    ""
+MASK:
+  "/beevol/home/erickson/ref/hg38/ref/hg38_snoRNAs.bed"
+GTF:
+  "/beevol/home/erickson/ref/hg38/ref/Homo_sapiens.GRCh38.95.gtf"
+# fasta files for splitting bam file
+FA_SAMPLE:
+  "/beevol/home/erickson/ref/hg38/Homo_sapiens.GRCh38.dna.primary_assembly.UCSC.fa"
+FA_SPIKE:
+  ""
+ENRICHED_SAMPLE:
+  "/beevol/home/erickson/ref/hg38/ref/enrich.bed"
+ENRICHED_SPIKE:
+  ""
+MY_REF:
+  "/beevol/home/erickson/ref/hg38/ref/short_ARS2_High_sensitive_TUs.bed"
+FW_REF:
+  "/beevol/home/erickson/ref/hg38/ref/short_ARS2_High_sensitive_TUs_fw.bed"
+REV_REF:
+  "/beevol/home/erickson/ref/hg38/ref/short_ARS2_High_sensitive_TUs_rev.bed"
+PI_REF:
+  "/beevol/home/erickson/ref/hg38/ref/PI.bed"
+

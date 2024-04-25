@@ -1,0 +1,191 @@
+# ====== Rules for making standard sense 5 matrix files =================================
+
+# stranded sense matrix files
+rule my_5_sense_matrix2:
+    input:
+        fw  =   PROJ   + "/bw/{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
+        rev =   PROJ   + "/bw/{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw"
+    output:
+        sense   = temp(PROJ   + "/matrix/{group}_temp02_5_matrix.gz"),
+        sense1  = temp(PROJ   + "/matrix/{group}_temp12_5_matrix.gz"),
+        sense2  = temp(PROJ   + "/matrix/{group}_temp22_5_matrix.gz")
+    params:
+        job_name = "{group}_sense_matrix2",
+        memory   = MEMORY * 4,
+        args     = CMD_PARAMS["reference5"]  + CMD_PARAMS["BL"],
+        fw_ref   = FW_REF,
+        rev_ref  = REV_REF
+    log:
+        out = PROJ + "/logs/{group}_sense_5_matrix2.out",
+        err = PROJ + "/logs/{group}_sense_5_matrix2.err"
+    message:
+        "standard sense 5 matrix files {wildcards.group}"
+    threads: 
+        12
+    shell:
+        """
+        # no unscaled body
+        computeMatrix reference-point \
+          {params.args} \
+          -R {params.fw_ref} \
+          -S {input.fw} \
+          -p {threads} \
+          -o {output.sense1}
+
+        computeMatrix reference-point \
+          {params.args} \
+          -R {params.rev_ref} \
+          -S {input.rev} \
+          -p {threads} \
+          -o {output.sense2}
+
+        computeMatrixOperations rbind -m {output.sense1} {output.sense2} -o {output.sense}
+
+        """
+
+# stranded antisense matrix files
+rule my_5_amtisense_matrix2:
+    input:
+        fw  =   PROJ   + "/bw/{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
+        rev =   PROJ   + "/bw/{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw"
+    output:
+        asense   = temp(PROJ   + "/matrix/{group}_temp02_a5_matrix.gz"),
+        asense1  = temp(PROJ   + "/matrix/{group}_temp12_a5_matrix.gz"),
+        asense2  = temp(PROJ   + "/matrix/{group}_temp22_a5_matrix.gz")
+    params:
+        job_name = "{group}_5_antisense_matrix2",
+        memory   = MEMORY * 5,
+        args     = CMD_PARAMS["reference5a"] + "--scale -1 " + CMD_PARAMS["BL"],
+        fw_ref   = FW_REF,
+        rev_ref  = REV_REF
+    log:
+        out = PROJ + "/logs/{group}_antisense_5_matrix2.out",
+        err = PROJ + "/logs/{group}_antisense_5_matrix2.err"
+    message:
+        "standard antisense 5 matrix files {wildcards.group}"
+    threads: 
+        12
+    shell:
+        """
+        # no unscaled body
+        computeMatrix reference-point \
+          {params.args} \
+          -R {params.fw_ref} \
+          -S {input.rev} \
+          -p {threads} \
+          -o {output.asense1}
+
+        computeMatrix reference-point \
+          {params.args} \
+          -R {params.rev_ref} \
+          -S {input.fw} \
+          -p {threads} \
+          -o {output.asense2}
+
+        computeMatrixOperations rbind -m {output.asense1} {output.asense2} -o {output.asense}
+
+        """
+
+# stranded sense matrix files
+rule fix_5_sense_matrix2:
+    input:
+        PROJ   + "/matrix/{group}_temp02_5_matrix.gz"
+    output:
+        temp(PROJ   + "/matrix/{group}_temp02_fix_5_matrix.gz")
+    params:
+        job_name = "{group}_5_sense_matrix2",
+        memory   = MEMORY,
+        args    = CMD_PARAMS["filter5"]
+    log:
+        out = PROJ + "/logs/{group}_fix_5_sense_matrix.out",
+        err = PROJ + "/logs/{group}_fix_5_sense_matrix.err"
+    message:
+        "fix standard sense 5 matrix files {wildcards.group}"
+    threads: 
+        1
+    script:
+        '../R_scripts/MatrixTrim.R'
+        
+
+# stranded asense matrix files
+rule fix_5_asense_matrix2:
+    input:
+        PROJ   + "/matrix/{group}_temp02_a5_matrix.gz"
+    output:
+        temp(PROJ   + "/matrix/{group}_temp02_fix_a5_matrix.gz")
+    params:
+        job_name = "{group}_5_asense_matrix2",
+        memory   = MEMORY,
+        args    = CMD_PARAMS["filter5a"]
+    log:
+        out = PROJ + "/logs/{group}_fix_5_asense_matrix2.out",
+        err = PROJ + "/logs/{group}_fix_5_asense_matrix2.err"
+    message:
+        "fix standard asense 5 matrix files {wildcards.group}"
+    threads: 
+        1
+    script:
+        '../R_scripts/MatrixTrim.R'
+        
+# make url's and scp to sandbox
+rule my_5_url:
+    input:
+        matrix1 = PROJ   + "/matrix/{group}_temp02_fix_5_matrix.gz",
+        matrix2 = PROJ   + "/matrix/{group}_temp02_fix_a5_matrix.gz"
+    output:
+        temp(PROJ + "/matrix/5.{group}_matrix.url.txt"),
+        PROJ + "/matrix/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_matrix.gz",
+        PROJ + "/matrix/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_anti_matrix.gz"
+    params:
+        job_name = PROJ + "_5_matrix_url2",
+        memory   = 4,
+        color    = _get_col,
+        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + PROJ + "/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_matrix.gz",
+        url_anti = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + PROJ + "/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_anti_matrix.gz"
+    log:
+        out = PROJ + "/logs/{group}_sense_5_matrix_url2.out",
+        err = PROJ + "/logs/{group}_sense_5_matrix_url2.err"
+    message:
+        "Creating sense 5_matrix url for {wildcards.group}"
+    threads:
+        1
+    shell:
+        """
+        # fix for strange side affect that only the 1 line loads from sandbox
+        computeMatrixOperations relabel -m {input.matrix1} -o {output[1]}
+        computeMatrixOperations relabel -m {input.matrix2} -o {output[2]}
+        echo {params.url_out} 5 5.{wildcards.group}_{SEQ_DATE} {params.color} >> {output[0]}
+        ssh amc-sandbox 'mkdir -p ./public_html/{PROJ}'
+        scp {output[1]} amc-sandbox:./public_html/{PROJ}
+        echo {params.url_anti} 5 5.{wildcards.group}_{SEQ_DATE}_anti {params.color} >> {output[0]}
+        scp {output[2]} amc-sandbox:./public_html/{PROJ}
+        """
+        
+# Combine urls
+rule my_5_url_summary:
+    input:
+        sorted(expand(
+            PROJ + "/matrix/5.{group}_matrix.url.txt",
+            group = GRPS_UNIQ
+        ))
+    output:
+        PROJ + "/URLS/5_" + PROJ + "_" + INDEX_SAMPLE + "_" + NORM5S + "_matrix.url.txt"
+    params:
+        job_name = PROJ + "_sense_5_matrix_url",
+        memory   = 4
+    log:
+        out = PROJ + "/logs/" + PROJ + "_sense_5_matrix_url.out",
+        err = PROJ + "/logs/" + PROJ + "_sense_5_matrix_url.err"
+    message:
+        "Creating " + PROJ + " sense 5_matrix url"
+    threads:
+        1
+    run:
+        with open(output[0], "w") as out:
+            for file in input:
+                for line in open(file, "r"):
+                    out.write(line)
+
+
+
+

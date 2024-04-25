@@ -1,0 +1,121 @@
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                    count    min threads    max threads
+-------------------  -------  -------------  -------------
+align_filter_sample        4             12             12
+all                        1              1              1
+bamCoverage                2             12             12
+bamCoverage_summary        1              1              1
+bbduk_paired               4             12             12
+bbduk_summary              1              1              1
+bowtiePE                   4             12             12
+bowtiePE_summmary          1              1              1
+bowtie_counts              4              1              1
+clumpify_paired            4              1              1
+clumpify_summary           1              1              1
+fastqc                     8              6              6
+fastqc_summary             1              1              1
+fragment_size              1             12             12
+gathering_results          1              1              1
+total                     38              1             12
+
+Select jobs to execute...
+
+[Fri Dec 15 09:04:51 2023]
+Job 12: Removing duplicats for PP1H66KpDS2Ser53
+
+Submitted DRMAA job 12 with external jobid 579205.
+
+[Fri Dec 15 09:04:51 2023]
+Job 14: Removing duplicats for PP1H66KpDoxS2Ser5
+
+Submitted DRMAA job 14 with external jobid 579206.
+
+[Fri Dec 15 09:04:52 2023]
+Job 4: Running FastQC on PP1H66KpDS2Ser53_CKDL230028616-1A_HCLMNDSX7_L4_1
+
+Submitted DRMAA job 4 with external jobid 579207.
+
+[Fri Dec 15 09:04:57 2023]
+Job 6: Running FastQC on PP1H66KmDoxS2Ser5_CKDL230028616-1A_HCLMNDSX7_L4_1
+
+Submitted DRMAA job 6 with external jobid 579208.
+
+[Fri Dec 15 09:04:57 2023]
+Job 8: Running FastQC on PP1H66KpDoxS2Ser5_CKDL230028616-1A_HCLMNDSX7_L4_1
+
+WorkflowError:
+DRMAA Error: code 17: Submission failed: 'Bad host name, host group name or cluster name': 
+
+[Fri Dec 15 09:04:57 2023]
+Job 13: Removing duplicats for PP1H66KmDoxS2Ser5
+
+Submitted DRMAA job 13 with external jobid 579209.
+
+[Fri Dec 15 09:04:57 2023]
+Job 2: Running FastQC on PP1H66KmDS2Ser53_CKDL230028616-1A_HCLMNDSX7_L4_1
+
+Submitted DRMAA job 2 with external jobid 579210.
+
+[Fri Dec 15 09:04:57 2023]
+Job 3: Running FastQC on PP1H66KmDS2Ser53_CKDL230028616-1A_HCLMNDSX7_L4_2
+
+Submitted DRMAA job 3 with external jobid 579211.
+
+[Fri Dec 15 09:04:57 2023]
+Job 5: Running FastQC on PP1H66KpDS2Ser53_CKDL230028616-1A_HCLMNDSX7_L4_2
+
+Submitted DRMAA job 5 with external jobid 579212.
+
+[Fri Dec 15 09:04:57 2023]
+Job 7: Running FastQC on PP1H66KmDoxS2Ser5_CKDL230028616-1A_HCLMNDSX7_L4_2
+
+Submitted DRMAA job 7 with external jobid 579213.
+
+[Fri Dec 15 09:04:57 2023]
+Job 9: Running FastQC on PP1H66KpDoxS2Ser5_CKDL230028616-1A_HCLMNDSX7_L4_2
+
+Submitted DRMAA job 9 with external jobid 579214.
+
+[Fri Dec 15 09:04:58 2023]
+Job 11: Removing duplicats for PP1H66KmDS2Ser53
+
+Submitted DRMAA job 11 with external jobid 579215.
+[Fri Dec 15 09:06:19 2023]
+Finished job 12.
+1 of 38 steps (3%) done
+[Fri Dec 15 09:07:37 2023]
+Finished job 13.
+2 of 38 steps (5%) done
+[Fri Dec 15 09:07:48 2023]
+Finished job 14.
+3 of 38 steps (8%) done
+[Fri Dec 15 09:07:48 2023]
+Finished job 11.
+4 of 38 steps (11%) done
+[Fri Dec 15 09:10:50 2023]
+Finished job 9.
+5 of 38 steps (13%) done
+[Fri Dec 15 09:12:01 2023]
+Finished job 4.
+6 of 38 steps (16%) done
+[Fri Dec 15 09:12:01 2023]
+Finished job 7.
+7 of 38 steps (18%) done
+[Fri Dec 15 09:12:11 2023]
+Finished job 6.
+8 of 38 steps (21%) done
+[Fri Dec 15 09:12:31 2023]
+Finished job 3.
+9 of 38 steps (24%) done
+[Fri Dec 15 09:12:31 2023]
+Finished job 5.
+10 of 38 steps (26%) done
+[Fri Dec 15 09:13:01 2023]
+Finished job 2.
+11 of 38 steps (29%) done
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/log/2023-12-15T090450.709757.snakemake.log

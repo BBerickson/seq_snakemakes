@@ -1,0 +1,39 @@
+#===== Config file for standared hg38 with HHV8 infection  ===================
+
+# Path to mixed bowtie2 index and chrom name txt file
+GENELIST:
+    ""
+INDEX_PATH:
+    "/beevol/home/erickson/ref/HHV8/"
+INDEX_MAP:
+    "hg38_HHV8"
+INDEX_SAMPLE:
+    "hg38"
+INDEX_SPIKE:
+    "HHV8"
+MASK:
+  "/beevol/home/erickson/ref/hg38/ref/hg38_snoRNAs.bed"
+GTF:
+  "/beevol/home/erickson/ref/hg38/ref/Homo_sapiens.GRCh38.95.gtf"
+# fasta files for splitting bam file
+FA_SAMPLE:
+  "/beevol/home/erickson/ref/hg38/Homo_sapiens.GRCh38.dna.primary_assembly.UCSC.fa"
+FA_SPIKE:
+  "/beevol/home/erickson/ref/HHV8/HHV8.fa"
+ENRICHED_SAMPLE:
+  "/beevol/home/erickson/ref/hg38/ref/enrich.bed"
+ENRICHED_SPIKE:
+  ""
+MY_REF:
+  "/beevol/home/erickson/ref/hg38/ref/hg38_gene.bed"
+FW_REF:
+  "/beevol/home/erickson/ref/hg38/ref/hg38_gene_fw.bed"
+REV_REF:
+  "/beevol/home/erickson/ref/hg38/ref/hg38_gene_rev.bed"
+PI_REF:
+  "/beevol/home/erickson/ref/hg38/ref/PI.bed"
+EI_FW_REF:
+  "/beevol/home/erickson/ref/hg38/ref/EI_anti_fw.bed"
+EI_REV_REF:
+  "/beevol/home/erickson/ref/hg38/ref/EI_anti_fw.bed"
+  

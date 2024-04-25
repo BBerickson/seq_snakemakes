@@ -1,0 +1,57 @@
+# ====== Rules for running rMATS from bam files =================================
+
+# gathering results
+rule gathering_bams_groups:
+    input:
+        PROJ + "/stats/" + PROJ + "_results.tsv"
+    output:
+        PROJ + "/rmats/{compgroups}_S1.txt",
+        PROJ + "/rmats/{compgroups}_S2.txt"
+    params:
+        job_name = "{compgroups}_rmats_bams_groups",
+        project  = PROJ + "/" + BAM_PATH,
+        mygroup  = "{compgroups}",
+        mysamps  = SAM_GRPS,
+        memory   = 4
+    log:
+        out = PROJ + "/logs/rmats_bams_{compgroups}.out",
+        err = PROJ + "/logs/rmats_bams_{compgroups}.err"
+    message:
+        "getting final rmats_bams_groups  {wildcards.compgroups}"
+    threads: 
+        1
+    script:
+        '../R_scripts/rmats_groups.R'
+  
+
+# Align trimmed reads with star rmats
+rule fastq_rmats:
+    input:
+        S1 = PROJ + "/rmats/{compgroups}_S1.txt",
+        S2 = PROJ + "/rmats/{compgroups}_S2.txt"
+    output:
+        SE = PROJ + "/rmats/{compgroups}/SE.MATS.JC.txt"
+    params:
+        job_name = "{compgroups}_fastq_rmats",
+        outdir   = PROJ + "/rmats/{compgroups}",
+        memory   = 100,
+        gtf      = GTF,
+        args     = CMD_PARAMS["rmats"]
+    log:
+        out = PROJ + "/logs/{compgroups}_fastq_rmats.out",
+        err = PROJ + "/logs/{compgroups}_fastq_rmats.err"
+    message:
+        "Aligning reads with fastq_rmats for {wildcards.compgroups}"
+    threads: 
+        12
+    shell:
+        """
+        rmats.py --b1 {input.S1} --b2 {input.S2} \
+        --gtf {params.gtf} \
+        --od {params.outdir} \
+        --nthread {threads} \
+        {params.args}
+        """
+                    
+                    
+                    

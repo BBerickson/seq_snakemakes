@@ -1,0 +1,104 @@
+Building DAG of jobs...
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                    count    min threads    max threads
+-------------------  -------  -------------  -------------
+align_filter_sample        4             12             12
+all                        1              1              1
+bowtieR1                   4             12             12
+bowtieR1_summmary          1              1              1
+bowtie_counts              4              1              1
+gathering_results          1              1              1
+total                     15              1             12
+
+Select jobs to execute...
+
+[Fri Nov 17 13:13:41 2023]
+Job 21: Aligning reads with Bowtie2 for PP1H66KmDS2Ser53
+
+Submitted DRMAA job 21 with external jobid 567933.
+
+[Fri Nov 17 13:13:41 2023]
+Job 23: Aligning reads with Bowtie2 for PP1H66KmDoxS2Ser5
+
+Submitted DRMAA job 23 with external jobid 567934.
+
+[Fri Nov 17 13:13:42 2023]
+Job 22: Aligning reads with Bowtie2 for PP1H66KpDS2Ser53
+
+Submitted DRMAA job 22 with external jobid 567935.
+
+[Fri Nov 17 13:13:42 2023]
+Job 24: Aligning reads with Bowtie2 for PP1H66KpDoxS2Ser5
+
+Submitted DRMAA job 24 with external jobid 567936.
+[Fri Nov 17 13:24:15 2023]
+Error in rule bowtieR1:
+    jobid: 24
+    output: Temp_2/PP1H66KpDoxS2Ser5_hg38_mm10.bam, Temp_2/PP1H66KpDoxS2Ser5_hg38_mm10.bam.bai, Temp_2/bams/PP1H66KpDoxS2Ser5_hg38_mm10_bowtie_R1_stats.txt
+    log: Temp_2/logs/PP1H66KpDoxS2Ser5_bowtie_R1.out, Temp_2/logs/PP1H66KpDoxS2Ser5_bowtie_R1.err (check log file(s) for error message)
+    shell:
+        
+        bowtie2             -p 12             -x /beevol/home/erickson/ref/hg38_mm10/hg38_mm10             -U Temp_2/PP1H66KpDoxS2Ser5_R1.fastq.gz 
+             --local --no-mixed --no-discordant              2> Temp_2/bams/PP1H66KpDoxS2Ser5_hg38_mm10_bowtie_R1_stats.txt             | samtools view  -bF4q30  -             | samtools sort - -T PP1H66KpDoxS2Ser5.temp -@ 12 -O bam             > Temp_2/PP1H66KpDoxS2Ser5_hg38_mm10.bam
+        
+        samtools index -@ 12 Temp_2/PP1H66KpDoxS2Ser5_hg38_mm10.bam
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Error executing rule bowtieR1 on cluster (jobid: 24, external: 567936, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/tmp.ooyew6al/snakejob.bowtieR1.24.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Fri Nov 17 13:25:35 2023]
+Error in rule bowtieR1:
+    jobid: 23
+    output: Temp_2/PP1H66KmDoxS2Ser5_hg38_mm10.bam, Temp_2/PP1H66KmDoxS2Ser5_hg38_mm10.bam.bai, Temp_2/bams/PP1H66KmDoxS2Ser5_hg38_mm10_bowtie_R1_stats.txt
+    log: Temp_2/logs/PP1H66KmDoxS2Ser5_bowtie_R1.out, Temp_2/logs/PP1H66KmDoxS2Ser5_bowtie_R1.err (check log file(s) for error message)
+    shell:
+        
+        bowtie2             -p 12             -x /beevol/home/erickson/ref/hg38_mm10/hg38_mm10             -U Temp_2/PP1H66KmDoxS2Ser5_R1.fastq.gz 
+             --local --no-mixed --no-discordant              2> Temp_2/bams/PP1H66KmDoxS2Ser5_hg38_mm10_bowtie_R1_stats.txt             | samtools view  -bF4q30  -             | samtools sort - -T PP1H66KmDoxS2Ser5.temp -@ 12 -O bam             > Temp_2/PP1H66KmDoxS2Ser5_hg38_mm10.bam
+        
+        samtools index -@ 12 Temp_2/PP1H66KmDoxS2Ser5_hg38_mm10.bam
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Error executing rule bowtieR1 on cluster (jobid: 23, external: 567934, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/tmp.ooyew6al/snakejob.bowtieR1.23.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Fri Nov 17 13:27:46 2023]
+Error in rule bowtieR1:
+    jobid: 21
+    output: Temp_2/PP1H66KmDS2Ser53_hg38_mm10.bam, Temp_2/PP1H66KmDS2Ser53_hg38_mm10.bam.bai, Temp_2/bams/PP1H66KmDS2Ser53_hg38_mm10_bowtie_R1_stats.txt
+    log: Temp_2/logs/PP1H66KmDS2Ser53_bowtie_R1.out, Temp_2/logs/PP1H66KmDS2Ser53_bowtie_R1.err (check log file(s) for error message)
+    shell:
+        
+        bowtie2             -p 12             -x /beevol/home/erickson/ref/hg38_mm10/hg38_mm10             -U Temp_2/PP1H66KmDS2Ser53_R1.fastq.gz 
+             --local --no-mixed --no-discordant              2> Temp_2/bams/PP1H66KmDS2Ser53_hg38_mm10_bowtie_R1_stats.txt             | samtools view  -bF4q30  -             | samtools sort - -T PP1H66KmDS2Ser53.temp -@ 12 -O bam             > Temp_2/PP1H66KmDS2Ser53_hg38_mm10.bam
+        
+        samtools index -@ 12 Temp_2/PP1H66KmDS2Ser53_hg38_mm10.bam
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Error executing rule bowtieR1 on cluster (jobid: 21, external: 567933, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/tmp.ooyew6al/snakejob.bowtieR1.21.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Fri Nov 17 13:28:26 2023]
+Error in rule bowtieR1:
+    jobid: 22
+    output: Temp_2/PP1H66KpDS2Ser53_hg38_mm10.bam, Temp_2/PP1H66KpDS2Ser53_hg38_mm10.bam.bai, Temp_2/bams/PP1H66KpDS2Ser53_hg38_mm10_bowtie_R1_stats.txt
+    log: Temp_2/logs/PP1H66KpDS2Ser53_bowtie_R1.out, Temp_2/logs/PP1H66KpDS2Ser53_bowtie_R1.err (check log file(s) for error message)
+    shell:
+        
+        bowtie2             -p 12             -x /beevol/home/erickson/ref/hg38_mm10/hg38_mm10             -U Temp_2/PP1H66KpDS2Ser53_R1.fastq.gz 
+             --local --no-mixed --no-discordant              2> Temp_2/bams/PP1H66KpDS2Ser53_hg38_mm10_bowtie_R1_stats.txt             | samtools view  -bF4q30  -             | samtools sort - -T PP1H66KpDS2Ser53.temp -@ 12 -O bam             > Temp_2/PP1H66KpDS2Ser53_hg38_mm10.bam
+        
+        samtools index -@ 12 Temp_2/PP1H66KpDS2Ser53_hg38_mm10.bam
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Error executing rule bowtieR1 on cluster (jobid: 22, external: 567935, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/tmp.ooyew6al/snakejob.bowtieR1.22.sh). For error details see the cluster log and the log files of the involved rule(s).
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/log/2023-11-17T131338.980577.snakemake.log

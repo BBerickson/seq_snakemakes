@@ -1,0 +1,39 @@
+#===== Config file for mm10 ===================
+
+# Path to bowtie2 index ref files
+GENELIST:
+    ""
+INDEX_PATH:
+    "/beevol/home/erickson/ref/mm10/"
+INDEX_MAP:
+    "mm10"
+INDEX_SAMPLE:
+    "mm10"
+INDEX_SPIKE:
+    ""
+MASK:
+  ""
+GTF:
+  ""
+# fasta files for splitting bam file
+FA_SAMPLE:
+  "/beevol/home/erickson/ref/mm10/mm10.fa"
+FA_SPIKE:
+  ""
+ENRICHED_SAMPLE:
+  "/beevol/home/erickson/ref/mm10/ref/enrich.bed"
+ENRICHED_SPIKE:
+  ""
+MY_REF:
+  "/beevol/home/erickson/ref/mm10/ref/mm10gene.bed"
+FW_REF:
+  "/beevol/home/erickson/ref/mm10/ref/mm10gene_pos.bed"
+REV_REF:
+  "/beevol/home/erickson/ref/mm10/ref/mm10gene_neg.bed"
+PI_REF:
+  "/beevol/home/erickson/ref/mm10/ref/PI.bed"
+EI_FW_REF:
+  ""
+EI_REV_REF:
+  ""
+  

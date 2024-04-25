@@ -1,0 +1,66 @@
+Building DAG of jobs...
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                      count    min threads    max threads
+---------------------  -------  -------------  -------------
+all                          1              1              1
+bowtie_counts_spikein        4              1              1
+gathering_results            1              1              1
+total                        6              1              1
+
+Select jobs to execute...
+
+[Sun Nov 19 12:38:39 2023]
+Job 37: Bowtie2 counts_spikin for PP1H66KmDoxS2Ser5
+
+Submitted DRMAA job 37 with external jobid 568163.
+
+[Sun Nov 19 12:38:39 2023]
+Job 35: Bowtie2 counts_spikin for PP1H66KmDS2Ser53
+
+Submitted DRMAA job 35 with external jobid 568164.
+
+[Sun Nov 19 12:38:40 2023]
+Job 36: Bowtie2 counts_spikin for PP1H66KpDS2Ser53
+
+Submitted DRMAA job 36 with external jobid 568165.
+
+[Sun Nov 19 12:38:40 2023]
+Job 38: Bowtie2 counts_spikin for PP1H66KpDoxS2Ser5
+
+Submitted DRMAA job 38 with external jobid 568166.
+[Sun Nov 19 12:38:59 2023]
+Finished job 37.
+1 of 6 steps (17%) done
+[Sun Nov 19 12:38:59 2023]
+Finished job 35.
+2 of 6 steps (33%) done
+[Sun Nov 19 12:38:59 2023]
+Finished job 36.
+3 of 6 steps (50%) done
+[Sun Nov 19 12:38:59 2023]
+Finished job 38.
+4 of 6 steps (67%) done
+Select jobs to execute...
+
+[Sun Nov 19 12:38:59 2023]
+Job 34: getting final results
+
+Submitted DRMAA job 34 with external jobid 568167.
+[Sun Nov 19 12:39:19 2023]
+Error in rule gathering_results:
+    jobid: 34
+    output: Temp/stats/Temp_results.tsv
+    log: Temp/logs/results.out, Temp/logs/results.err (check log file(s) for error message)
+
+Error executing rule gathering_results on cluster (jobid: 34, external: 568167, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/tmp.730izqat/snakejob.gathering_results.34.sh). For error details see the cluster log and the log files of the involved rule(s).
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/log/2023-11-19T123837.866760.snakemake.log

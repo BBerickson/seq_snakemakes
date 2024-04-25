@@ -1,0 +1,7 @@
+Building DAG of jobs...
+MissingInputException in line 5 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/02b_align_mask.snake:
+Missing input files for rule align_filter_sample:
+    output: Temp_star/bams/PP1H66KmDS2Ser53_hg38_230426.bam, Temp_star/bams/PP1H66KmDS2Ser53_hg38_230426.bam.bai, Temp_star/bams/PP1H66KmDS2Ser53_temp.bam, Temp_star/bams/PP1H66KmDS2Ser53_temp2.bam
+    wildcards: sample=PP1H66KmDS2Ser53
+    affected files:
+        Temp_star/PP1H66KmDS2Ser53_hg38.bam

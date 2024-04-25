@@ -1,0 +1,127 @@
+Building DAG of jobs...
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                    count    min threads    max threads
+-------------------  -------  -------------  -------------
+align_filter_sample        4             12             12
+all                        1              1              1
+bowtie_counts              4              1              1
+gathering_results          1              1              1
+hisatPE_summmary           1              1              1
+total                     11              1             12
+
+Select jobs to execute...
+
+[Fri Nov 17 15:00:43 2023]
+Job 27: filtering reads PP1H66KmDS2Ser53
+
+Submitted DRMAA job 27 with external jobid 568016.
+
+[Fri Nov 17 15:00:43 2023]
+Job 29: filtering reads PP1H66KpDS2Ser53
+
+Submitted DRMAA job 29 with external jobid 568017.
+
+[Fri Nov 17 15:00:43 2023]
+Job 31: filtering reads PP1H66KmDoxS2Ser5
+
+Submitted DRMAA job 31 with external jobid 568018.
+
+[Fri Nov 17 15:00:43 2023]
+Job 33: filtering reads PP1H66KpDoxS2Ser5
+
+Submitted DRMAA job 33 with external jobid 568019.
+
+[Fri Nov 17 15:00:43 2023]
+Job 20: summmary hisat2 
+
+Submitted DRMAA job 20 with external jobid 568020.
+[Fri Nov 17 15:00:51 2023]
+Error in rule align_filter_sample:
+    jobid: 27
+    output: Temp_HS/bams/PP1H66KmDS2Ser53_hg38_230426.bam, Temp_HS/bams/PP1H66KmDS2Ser53_hg38_230426.bam.bai, Temp_HS/bams/PP1H66KmDS2Ser53_temp.bam, Temp_HS/bams/PP1H66KmDS2Ser53_temp2.bam
+    log: Temp_HS/logs/PP1H66KmDS2Ser53_align_filter.out, Temp_HS/logs/PP1H66KmDS2Ser53_align_filter.err (check log file(s) for error message)
+    shell:
+        
+        # filter
+        samtools view Temp_HS/bams/PP1H66KmDS2Ser53_hg38_230426.bam $(head -n1 /beevol/home/erickson/ref/hg38/hg38.txt)         | samtools view -bT /beevol/home/erickson/ref/hg38/Homo_sapiens.GRCh38.dna.primary_assembly.UCSC.fa -         | samtools view -L /beevol/home/erickson/ref/hg38/ref/hg38_snoRNAs.bed -b - -U Temp_HS/bams/PP1H66KmDS2Ser53_temp.bam > Temp_HS/bams/PP1H66KmDS2Ser53_temp2.bam
+        
+        samtools sort Temp_HS/bams/PP1H66KmDS2Ser53_temp.bam -T PP1H66KmDS2Ser53.temp -@ 12 -O bam         > Temp_HS/bams/PP1H66KmDS2Ser53_hg38_230426.bam
+        
+        samtools index -@ 12 Temp_HS/bams/PP1H66KmDS2Ser53_hg38_230426.bam
+        
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Error executing rule align_filter_sample on cluster (jobid: 27, external: 568016, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/tmp.1t9qtd83/snakejob.align_filter_sample.27.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Fri Nov 17 15:00:51 2023]
+Error in rule align_filter_sample:
+    jobid: 29
+    output: Temp_HS/bams/PP1H66KpDS2Ser53_hg38_230426.bam, Temp_HS/bams/PP1H66KpDS2Ser53_hg38_230426.bam.bai, Temp_HS/bams/PP1H66KpDS2Ser53_temp.bam, Temp_HS/bams/PP1H66KpDS2Ser53_temp2.bam
+    log: Temp_HS/logs/PP1H66KpDS2Ser53_align_filter.out, Temp_HS/logs/PP1H66KpDS2Ser53_align_filter.err (check log file(s) for error message)
+    shell:
+        
+        # filter
+        samtools view Temp_HS/bams/PP1H66KpDS2Ser53_hg38_230426.bam $(head -n1 /beevol/home/erickson/ref/hg38/hg38.txt)         | samtools view -bT /beevol/home/erickson/ref/hg38/Homo_sapiens.GRCh38.dna.primary_assembly.UCSC.fa -         | samtools view -L /beevol/home/erickson/ref/hg38/ref/hg38_snoRNAs.bed -b - -U Temp_HS/bams/PP1H66KpDS2Ser53_temp.bam > Temp_HS/bams/PP1H66KpDS2Ser53_temp2.bam
+        
+        samtools sort Temp_HS/bams/PP1H66KpDS2Ser53_temp.bam -T PP1H66KpDS2Ser53.temp -@ 12 -O bam         > Temp_HS/bams/PP1H66KpDS2Ser53_hg38_230426.bam
+        
+        samtools index -@ 12 Temp_HS/bams/PP1H66KpDS2Ser53_hg38_230426.bam
+        
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Error executing rule align_filter_sample on cluster (jobid: 29, external: 568017, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/tmp.1t9qtd83/snakejob.align_filter_sample.29.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Fri Nov 17 15:00:51 2023]
+Error in rule align_filter_sample:
+    jobid: 31
+    output: Temp_HS/bams/PP1H66KmDoxS2Ser5_hg38_230426.bam, Temp_HS/bams/PP1H66KmDoxS2Ser5_hg38_230426.bam.bai, Temp_HS/bams/PP1H66KmDoxS2Ser5_temp.bam, Temp_HS/bams/PP1H66KmDoxS2Ser5_temp2.bam
+    log: Temp_HS/logs/PP1H66KmDoxS2Ser5_align_filter.out, Temp_HS/logs/PP1H66KmDoxS2Ser5_align_filter.err (check log file(s) for error message)
+    shell:
+        
+        # filter
+        samtools view Temp_HS/bams/PP1H66KmDoxS2Ser5_hg38_230426.bam $(head -n1 /beevol/home/erickson/ref/hg38/hg38.txt)         | samtools view -bT /beevol/home/erickson/ref/hg38/Homo_sapiens.GRCh38.dna.primary_assembly.UCSC.fa -         | samtools view -L /beevol/home/erickson/ref/hg38/ref/hg38_snoRNAs.bed -b - -U Temp_HS/bams/PP1H66KmDoxS2Ser5_temp.bam > Temp_HS/bams/PP1H66KmDoxS2Ser5_temp2.bam
+        
+        samtools sort Temp_HS/bams/PP1H66KmDoxS2Ser5_temp.bam -T PP1H66KmDoxS2Ser5.temp -@ 12 -O bam         > Temp_HS/bams/PP1H66KmDoxS2Ser5_hg38_230426.bam
+        
+        samtools index -@ 12 Temp_HS/bams/PP1H66KmDoxS2Ser5_hg38_230426.bam
+        
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Error executing rule align_filter_sample on cluster (jobid: 31, external: 568018, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/tmp.1t9qtd83/snakejob.align_filter_sample.31.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Fri Nov 17 15:00:51 2023]
+Error in rule align_filter_sample:
+    jobid: 33
+    output: Temp_HS/bams/PP1H66KpDoxS2Ser5_hg38_230426.bam, Temp_HS/bams/PP1H66KpDoxS2Ser5_hg38_230426.bam.bai, Temp_HS/bams/PP1H66KpDoxS2Ser5_temp.bam, Temp_HS/bams/PP1H66KpDoxS2Ser5_temp2.bam
+    log: Temp_HS/logs/PP1H66KpDoxS2Ser5_align_filter.out, Temp_HS/logs/PP1H66KpDoxS2Ser5_align_filter.err (check log file(s) for error message)
+    shell:
+        
+        # filter
+        samtools view Temp_HS/bams/PP1H66KpDoxS2Ser5_hg38_230426.bam $(head -n1 /beevol/home/erickson/ref/hg38/hg38.txt)         | samtools view -bT /beevol/home/erickson/ref/hg38/Homo_sapiens.GRCh38.dna.primary_assembly.UCSC.fa -         | samtools view -L /beevol/home/erickson/ref/hg38/ref/hg38_snoRNAs.bed -b - -U Temp_HS/bams/PP1H66KpDoxS2Ser5_temp.bam > Temp_HS/bams/PP1H66KpDoxS2Ser5_temp2.bam
+        
+        samtools sort Temp_HS/bams/PP1H66KpDoxS2Ser5_temp.bam -T PP1H66KpDoxS2Ser5.temp -@ 12 -O bam         > Temp_HS/bams/PP1H66KpDoxS2Ser5_hg38_230426.bam
+        
+        samtools index -@ 12 Temp_HS/bams/PP1H66KpDoxS2Ser5_hg38_230426.bam
+        
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Error executing rule align_filter_sample on cluster (jobid: 33, external: 568019, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/tmp.1t9qtd83/snakejob.align_filter_sample.33.sh). For error details see the cluster log and the log files of the involved rule(s).
+Removing temporary output file Temp_HS/bams/PP1H66KmDS2Ser53_hg38_hisat_stats.txt.
+Removing temporary output file Temp_HS/bams/PP1H66KpDS2Ser53_hg38_hisat_stats.txt.
+Removing temporary output file Temp_HS/bams/PP1H66KmDoxS2Ser5_hg38_hisat_stats.txt.
+Removing temporary output file Temp_HS/bams/PP1H66KpDoxS2Ser5_hg38_hisat_stats.txt.
+[Fri Nov 17 15:00:52 2023]
+Finished job 20.
+1 of 11 steps (9%) done
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/log/2023-11-17T150040.277957.snakemake.log

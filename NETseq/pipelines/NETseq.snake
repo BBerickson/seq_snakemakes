@@ -1,0 +1,206 @@
+# ===== Snake file for processing Bowtie ================================
+
+from pytools.persistent_dict import PersistentDict
+import os
+import glob
+import re
+import subprocess
+import gzip
+import random
+
+# Configure shell for all rules
+shell.executable("/bin/bash")
+shell.prefix("source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; ")
+
+# Parameters from config.yaml
+PROJ            = config["PROJ"]
+RAW_DATA        = config["RAW_DATA"]
+SAMPLES         = config["SAMPLES"]
+SEQ_DATE        = config["SEQ_DATE"]
+INDEX_PATH      = config["INDEX_PATH"]
+INDEX_MAP       = config["INDEX_MAP"]
+INDEX_SAMPLE    = config["INDEX_SAMPLE"]
+INDEX_SPIKE     = config["INDEX_SPIKE"]
+FA_SAMPLE       = config["FA_SAMPLE"]
+FA_SPIKE        = config["FA_SPIKE"]
+MASK            = config["MASK"]
+ENRICHED_SAMPLE = config["ENRICHED_SAMPLE"]
+ENRICHED_SPIKE  = config["ENRICHED_SPIKE"]
+CMD_PARAMS      = config["CMD_PARAMS"]
+SFX             = config["SFX"]
+COLORS          = config["COLORS"]
+NORM            = config["NORM"]
+USER            = config["USER"]
+MEMORY          = config["MEMORY"]
+
+# Directories for data and scripts
+FASTQ_DIR = PROJ + "/fastqs"
+
+# Create symlinks for fastqs
+if not os.path.exists(FASTQ_DIR):
+    os.makedirs(FASTQ_DIR)
+
+# Sample and group lists
+SAMS = [[y, x] for y in SAMPLES for x in SAMPLES[y]]
+GRPS = [x[0] for x in SAMS]
+SAMS = [x[1] for x in SAMS]
+
+GRPS_UNIQ = list(dict.fromkeys(GRPS))
+SAMS_UNIQ = list(dict.fromkeys(SAMS))
+SAMS_UNIQ2 = list(dict.fromkeys(SAMS[::2]))
+
+# Gene subsampling groups
+SAM_GRPS      = [x + "-" + y for y in SAMPLES for x in SAMPLES[y]]
+
+# Print summary of samples and groups
+print("SAMS (%s): %s\n" % (len(SAMS), SAMS))
+print("SAMS_UNIQ (%s): %s\n" % (len(SAMS_UNIQ), SAMS_UNIQ))
+print("GRPS_UNIQ (%s): %s\n" % (len(GRPS_UNIQ), GRPS_UNIQ))
+print("SAM_GRPS (%s): %s\n" % (len(SAM_GRPS), SAM_GRPS))
+
+# Wildcard constraints
+GRP_REGEX = "[a-zA-Z0-9_\-]+"
+
+wildcard_constraints:
+    sample  = "[a-zA-Z0-9_\-]+",
+    group   = GRP_REGEX,
+    sam_grp = "[a-zA-Z0-9_\-]+-[a-zA-Z0-9_\-]+"
+
+def _get_sfx(sfx):
+    if sfx == ".fastq.gz":
+        outsfx = ["_" + x + "_001" + sfx for x in ["R1", "R2"]]
+    elif sfx == ".fq.gz":
+        outsfx = ["_" + x + sfx for x in ["1", "2"]]
+    else:
+        outsfx = sfx
+    return outsfx
+
+FQ_SFX = _get_sfx(SFX)
+
+def _get_fqs(sample, suffix):
+    fq_pat   = sample + "*" + suffix
+    fq_paths = []
+
+    # Retrieve paths for fastq files that start with sample name
+    for dir in RAW_DATA:
+        paths = os.path.join(dir, fq_pat)
+        paths = glob.glob(os.path.abspath(paths))
+
+        for path in paths:
+            fq_paths.append(path)
+
+    # Check for duplicate paths
+    if not fq_paths:
+        sys.exit("ERROR: no fastqs found for " + fq_pat + ".")
+
+    if len(fq_paths) > 1:
+        sys.exit("ERROR: Multiple fastqs found for " + fq_pat + ".") 
+
+    fq_paths = fq_paths[0]
+    fastq    = os.path.basename(fq_paths)
+    
+    # Create symlinks
+    # Using subprocess since os.symlink requires a target file instead of target directory
+    if not os.path.exists(FASTQ_DIR + "/" + fastq):
+        cmd = "ln -s " + fq_paths + " " + FASTQ_DIR
+
+        if cmd != "":
+            subprocess.run(cmd, shell = True)
+
+    # Return fastq file name
+    return(re.sub(SFX + "$", "", fastq))
+
+FASTQS = [_get_fqs(x, y) for x in SAMS_UNIQ for y in FQ_SFX]
+
+def _get_colors(sample_key, group_counts, sample_key2, color):
+    if len(sample_key) >= len(color):
+      color.extend(["0,0,0"]*len(set(sample_key)))
+    res = {}
+    for key in sample_key:
+      for value in color:
+        res[key] = value
+        color.remove(value)
+        break  
+    return(res)
+
+COLS_DICT = _get_colors(SAMS_UNIQ, GRPS_UNIQ,  SAMS_UNIQ2, COLORS)
+
+def _get_normtype(normUsing, scaleFactor, blacklist):
+    if re.search(r"\S", scaleFactor):
+        scaleFactor = "_norm_" + scaleFactor
+    else:
+        scaleFactor = ""
+    match = re.search(r"--Offset\s+(-?\d+)", normUsing)
+    if match:
+      num = int(match.group(1))
+      if num == -1:
+        word = "3end"
+      elif num == 1:
+        word = "5end"
+      else:
+        word = "offset_{offset_value}"
+    else:
+      word = ""
+    if re.search(r"\S", blacklist):
+      word = word + "_BL"
+    message = word + scaleFactor
+    return " ".join(message.split())
+
+NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"])
+
+def _get_bampath(bampath):
+    if bampath == "subsample":
+        word = "bams_sub"
+    else:
+        word = "bams"
+    return word
+
+BAM_PATH = _get_bampath(NORM)
+
+# Final output files
+rule all:
+    input:
+        # FastQC
+        PROJ + "/stats/" + PROJ + "_fastqc.tsv",
+        
+        # clumpify
+        PROJ + "/stats/" + PROJ + "_clumpify.tsv",
+        
+        # bbduk
+        PROJ + "/stats/" + PROJ + "_bbduk.tsv",
+
+        # Align reads
+        PROJ + "/stats/" + PROJ + "_aligned.tsv",
+        
+        # bam URL
+        #PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + "_bam_URL.txt",
+        
+        # subsample of all reads, and URL's
+        #PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + "_subsample_bam_URL.txt",
+        
+        # results
+        PROJ + "/stats/" + PROJ + "_results.tsv",
+        
+        # report
+        PROJ + "/" + PROJ + "_" + INDEX_SAMPLE + "_qc_analysis.html",
+        
+        # bamCoverage
+        PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + "_" + NORMS + "_bw_URL.txt"
+
+
+# Run FastQC
+include: "rules/01_fastqc.snake"
+# Run clumpify
+include: "rules/01a_clumpify.snake"
+# Run bbmerge
+include: "rules/01b_bbduk.snake"
+# Align reads 
+include: "rules/02a_align_bowtie.snake"
+include: "rules/02b_align_mask_UMI_sub_samp.snake"
+include: "rules/02c_align_URLS.snake"
+# Results
+include: "rules/03_results_UMI.snake"
+# BW with deeptools bamCoverage
+include: "rules/04_bamCoverage_stranded_nogroup.snake"
+
+

@@ -1,0 +1,124 @@
+# ====== Rules for aligning reads =================================
+
+
+# Align trimmed reads with star
+rule star_first_pass:
+    input:
+        R1  = PROJ + "/{sample}_R1.fastq.gz",
+        R2  = PROJ + "/{sample}_R2.fastq.gz"
+    output:
+        juc = temp(PROJ + "/bams/{sample}_SJ.out.tab"),
+        bam = temp(PROJ + "/bams/{sample}_Aligned.sortedByCoord.out.bam")
+    params:
+        job_name = "{sample}_star_pass_1",
+        out      = PROJ + "/bams/{sample}_",
+        memory   = 550
+    log:
+        out = PROJ + "/logs/{sample}_star.out",
+        err = PROJ + "/logs/{sample}_star.err"
+    message:
+        "running first pass star alignments "
+    threads: 
+        4
+    shell:
+        """
+        
+        STAR \
+          --genomeDir {INDEX_PATH} \
+          --runThreadN {threads} \
+          --readFilesIn {input.R1} {input.R2} \
+          --outSAMtype BAM SortedByCoordinate \
+          --limitBAMsortRAM 500000000000 \
+          --readFilesCommand gunzip -c \
+          --outFileNamePrefix {params.out}
+
+        """
+
+rule star_second_pass:
+    input:
+        R1        = PROJ + "/{sample}_R1.fastq.gz",
+        R2        = PROJ + "/{sample}_R2.fastq.gz",
+        first_bam = PROJ + "/bams/{sample}_Aligned.sortedByCoord.out.bam",
+        junctions = expand(PROJ + "/bams/{sample}_SJ.out.tab",
+          sample = SAMS_UNIQ)
+    output:
+        bam   = temp(PROJ + "/{sample}_" + INDEX_MAP + ".bam"),
+        bai   = temp(PROJ + "/{sample}_" + INDEX_MAP + ".bam.bai"),
+        stats = PROJ  + "/bams/{sample}_2pass_Log.final.out"
+    params:
+        job_name = "{sample}_star_pass_2",
+        out      = PROJ + "/bams/{sample}_2pass_",
+        memory   = 550,
+        bam_out  = PROJ + "/bams/{sample}_2pass_Aligned.sortedByCoord.out.bam",
+        args     = CMD_PARAMS["star2"]
+    log:
+        out = PROJ + "/logs/{sample}_2_star.out",
+        err = PROJ + "/logs/{sample}_2_star.err"
+    message:
+        "running second pass star alignments "
+    threads: 
+        4
+    shell:
+        """
+        
+        STAR \
+       --genomeDir {INDEX_PATH} \
+       --runThreadN {threads} \
+       --readFilesIn {input.R1} {input.R2} \
+       --outSAMtype BAM SortedByCoordinate \
+       --readFilesCommand gunzip -c \
+       --outFileNamePrefix {params.out} \
+       --limitBAMsortRAM 500000000000 \
+       --sjdbFileChrStartEnd {input.junctions} \
+       {params.args}
+
+       mv {params.bam_out} {output.bam}
+       
+       samtools index -@ {threads} {output.bam}
+       
+        """
+
+
+# ====== Rules for aligning reads summmary =================================
+
+
+# Align trimmed reads with star summmary
+rule star_2pass_summmary:
+    input:
+        expand(
+           PROJ  + "/bams/{sample}_2pass_Log.final.out",
+            sample = SAMS_UNIQ
+        )
+    output:
+        PROJ + "/stats/" + PROJ + "_aligned.tsv"
+    params:
+        job_name = "star_2pass_summmary",
+        memory   = MEMORY
+    log:
+        out = PROJ + "/logs/star_summmary.out",
+        err = PROJ + "/logs/star_summmary.err"
+    message:
+        "summmary star alignments "
+    threads: 
+        4
+    threads:
+        1
+    run:
+        with open(output[0], "w") as out:
+            for file in input:
+                name = os.path.basename(file)
+                name = re.sub("_2pass_Log.final.out", "", name)
+
+                for line in open(file, "r"):
+                    match = re.search(r"Uniquely mapped reads % \|\s+(.*)%", line)
+
+                    if match:
+                        num = match.group(1) + "%"
+                        met = "overall alignment rate"
+
+                        out.write("%s\t%s\t%s\n" % (name, met, num))
+                        
+                        
+
+
+                    

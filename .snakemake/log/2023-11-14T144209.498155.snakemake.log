@@ -1,0 +1,4 @@
+KeyError in line 84 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/02a_align.snake:
+'hisat2'
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/Bowtie.snake", line 176, in <module>
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/02a_align.snake", line 84, in <module>

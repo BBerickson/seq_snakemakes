@@ -1,0 +1,46 @@
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                             count    min threads    max threads
+----------------------------  -------  -------------  -------------
+all                                 1              1              1
+calculating_subsample_spikin        2              1              1
+gathering_results                   1              1              1
+subsample_summary                   1              1              1
+subsample_summary_frac              1              1              1
+subsample_whole                     4             16             16
+total                              10              1             16
+
+Select jobs to execute...
+
+[Tue Dec 19 15:14:22 2023]
+Job 40: getting subsample norm for PP1H66KSer5-r2
+
+Submitted DRMAA job 40 with external jobid 581125.
+
+[Tue Dec 19 15:14:22 2023]
+Job 41: getting subsample norm for PP1H66KSer5-r3
+
+Submitted DRMAA job 41 with external jobid 581126.
+[Tue Dec 19 15:14:39 2023]
+Finished job 40.
+1 of 10 steps (10%) done
+[Tue Dec 19 15:14:39 2023]
+Finished job 41.
+2 of 10 steps (20%) done
+Select jobs to execute...
+
+[Tue Dec 19 15:14:39 2023]
+Job 39: Creating Temp_NET subsample summary
+
+Submitted DRMAA job 39 with external jobid 581128.
+Removing temporary output file Temp_NET/bams_sub/PP1H66KSer5-r2_hg38_subsample_frac.txt.
+Removing temporary output file Temp_NET/bams_sub/PP1H66KSer5-r3_hg38_subsample_frac.txt.
+[Tue Dec 19 15:14:49 2023]
+Finished job 39.
+3 of 10 steps (30%) done
+Select jobs to execute...
+FileNotFoundError in line 8 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/02d_align_sub_spikeIN.snake:
+[Errno 2] No such file or directory: 'Temp_NET/stats/Temp_NET_hg38_subsample_frac.tsv'
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/02d_align_sub_spikeIN.snake", line 8, in _get_norm

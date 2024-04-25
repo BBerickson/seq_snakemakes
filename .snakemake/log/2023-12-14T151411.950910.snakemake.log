@@ -1,0 +1,27 @@
+Building DAG of jobs...
+The code used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-code-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-code-changes)'.
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                          count    min threads    max threads
+-------------------------  -------  -------------  -------------
+all                              1              1              1
+bamCoverage                      2             12             12
+bamCoverage_spike                2             12             12
+bamCoverage_spike_summary        1              1              1
+bamCoverage_summary              1              1              1
+total                            7              1             12
+
+Select jobs to execute...
+InputFunctionException in line 125 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/04_bamCoverage.snake:
+Error:
+  TypeError: expected str, bytes or os.PathLike object, not list
+Wildcards:
+  group=PP1H66KSer5-r2
+Traceback:
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/04_bamCoverage.snake", line 112, in _get_norm2

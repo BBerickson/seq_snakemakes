@@ -1,0 +1,389 @@
+# ====== Rules for filtering and subsampleing aligned reads with samtools =================================
+
+# gets number for norm fraction
+def _get_norm(wildcards):
+    sample = wildcards.sample + "_" + INDEX_MAP
+    filename =  PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_subsample_frac.tsv"
+    num = 0
+    with open(filename, "r") as file:
+      for line in file:
+        parts = line.strip().split('\t')
+        if len(parts) == 3 and parts[0] == sample:
+          num = parts[2]
+          break
+    return float(num)
+    
+
+# Remove duplicate reads
+rule dedup_UMI:
+    input:
+        bam   = PROJ  + "/{sample}_" + INDEX_MAP + ".bam",
+        bai   = PROJ  + "/{sample}_" + INDEX_MAP + ".bam.bai"
+    output:
+        bamp   = temp(PROJ + "/bams/{sample}_" + INDEX_MAP + "_" + SEQ_DATE + "_temp.bam"),
+        bampi  = temp(PROJ + "/bams/{sample}_" + INDEX_MAP + "_" + SEQ_DATE + "_temp.bam.bai"),
+        bam    = temp(PROJ + "/bams/{sample}_" + INDEX_MAP + "_" + SEQ_DATE + "_dedup.bam"),
+        bai    = temp(PROJ + "/bams/{sample}_" + INDEX_MAP + "_" + SEQ_DATE + "_dedup.bam.bai"),
+        bamt   = temp(PROJ + "/bams/{sample}_temp.bam"),
+        bait   = temp(PROJ + "/bams/{sample}_temp2.bam"),
+        counts = PROJ + "/UMI/{sample}_" + INDEX_MAP + "_dedup.txt",
+        stats  = PROJ + "/bams/{sample}_" + INDEX_MAP + "_UMI_dedup_stats.txt"
+    params:
+        job_name = "{sample}_dedup",
+        memory   = MEMORY * 3,
+        samp     = "{sample}_" + INDEX_MAP,
+        idx      = INDEX_PATH + INDEX_MAP + ".txt",
+        sortname = PROJ + "/{sample}.temp",
+        mask     = MASK,
+        args     = CMD_PARAMS["umi_tools"]
+    log:
+        out = PROJ + "/logs/{sample}_dedup.out",
+        err = PROJ + "/logs/{sample}_dedup.err"
+    message:
+        "Removing duplicates for {wildcards.sample}"
+    threads:
+        12
+    shell:
+        """
+        umi_tools dedup \
+            {params.args} \
+            -I {input.bam} \
+            -S {output.bamp} \
+            -L {output.stats}
+        
+        samtools index -@ {threads} {output.bamp}
+        
+        samtools view -h {output.bamp} $(head -n1 {params.idx}) \
+        | samtools view -L {params.mask} -b - -U {output.bamt} > {output.bait}
+        
+        samtools sort {output.bamt} -T {params.sortname} -@ {threads} -O bam \
+        > {output.bam}
+
+        samtools index {output.bam}
+        echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
+        
+        """
+
+        
+# calculating subsample numbers for group
+rule calculating_subsample_group:
+    input:
+        lambda wildcards: expand(
+            PROJ + "/UMI/{sample}_" + INDEX_MAP + "_dedup.txt",
+            sample = SAMPLES[wildcards.group]
+        )
+    output:
+        PROJ + "/bams/{group}_" + INDEX_MAP + "_subsample_frac.txt"
+    params:
+        job_name = "{group}_subsample",
+        group   = "{group}",
+        memory   = 4
+    log:
+        out = PROJ + "/logs/{group}_subsample.out",
+        err = PROJ + "/logs/{group}_subsample.err"
+    message:
+        "getting subsample norm for {wildcards.group}"
+    threads: 
+        1
+    script:
+        '../R_scripts/count_subsample.R'
+
+
+# Combine bamCoverage summaries
+rule calculating_subsample_summary:
+    input:
+        sorted(expand(
+            PROJ + "/bams/{group}_" + INDEX_MAP + "_subsample_frac.txt",
+            group = GRPS_UNIQ
+        ))
+    output:
+        PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_subsample_frac.tsv"
+    params:
+        job_name = PROJ + "_calculating_subsample_summary",
+        memory   = 4
+    log:
+        out = PROJ + "/logs/" + PROJ + "_calculating_subsample_summary.out",
+        err = PROJ + "/logs/" + PROJ + "_calculating_subsample_summary.err"
+    message:
+        "Creating " + PROJ + " subsample summary"
+    threads:
+        1
+    run:
+        with open(output[0], "w") as out:
+            for file in input:
+                for line in open(file, "r"):
+                    out.write(line)
+
+
+
+# output temp subsampled bamfile from dedup UMI
+rule subsample_dedup:
+    input:
+        bam    = PROJ + "/bams/{sample}_" + INDEX_MAP + "_" + SEQ_DATE + "_dedup.bam",
+        bai    = PROJ + "/bams/{sample}_" + INDEX_MAP + "_" + SEQ_DATE + "_dedup.bam.bai",
+        counts = PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_subsample_frac.tsv"
+    output:
+        bam    = temp(PROJ + "/bams/{sample}_" + INDEX_MAP + "_" + SEQ_DATE + "_subsample.bam"),
+        bai    = temp(PROJ + "/bams/{sample}_" + INDEX_MAP + "_" + SEQ_DATE + "_subsample.bam.bai"),
+        counts = PROJ + "/counts/{sample}_" + INDEX_MAP + "_subsample.txt"
+    params:
+        job_name = "subsample_dedup_{sample}",
+        memory   = MEMORY * 3,
+        samp     = "{sample}_" + INDEX_MAP,
+        scale    = _get_norm
+    log:
+        out = PROJ + "/logs/subsample_dedup_{sample}_" + INDEX_MAP + ".out",
+        err = PROJ + "/logs/subsample_dedup_{sample}_" + INDEX_MAP + ".err"
+    message:
+        "Subsampling UMI_dedup reads for {wildcards.sample} INDEX_MAP "
+    threads:
+        16
+    shell:
+        """
+          # find the min read count, calcuate the fraction of the reads to keep, samtools subset 
+          samtools view -@ {threads} -s {params.scale} -b {input.bam} > {output.bam}
+          
+          samtools index -@ {threads} {output.bam}
+        
+          echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
+        """
+
+
+# filter aligned subsample reads
+rule align_filter_subsample_sample:
+    input:
+        bam   = PROJ + "/bams/{sample}_" + INDEX_MAP + "_" + SEQ_DATE + "_subsample.bam",
+        bai   = PROJ + "/bams/{sample}_" + INDEX_MAP + "_" + SEQ_DATE + "_subsample.bam.bai"
+    output:
+        bam   = PROJ + "/bams_sub/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
+        bai   = PROJ + "/bams_sub/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai",
+        stats = PROJ + "/bams_sub/{sample}_" + INDEX_SAMPLE + "_subsample.txt"
+    params:
+        job_name = "{sample}_align_filter_subsample",
+        memory   = MEMORY * 3,
+        idx      = INDEX_PATH + INDEX_SAMPLE + ".txt",
+        fa2      = FA_SAMPLE,
+        sortname = PROJ + "/{sample}.temp",
+        mysample = "{sample}_" + INDEX_SAMPLE
+    log:
+        out = PROJ + "/logs/{sample}_align_filter_subsample.out",
+        err = PROJ + "/logs/{sample}_align_filter_subsample.err"
+    message:
+        "filtering subsample reads {wildcards.sample}"
+    threads: 
+        12
+    shell:
+        """
+        # filter
+        samtools view {input.bam} $(head -n1 {params.idx}) \
+        | samtools view -bT {params.fa2} - \
+        | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+        > {output.bam}
+        
+        samtools index -@ {threads} {output.bam}
+        
+        echo "{params.mysample} Sampled_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" >> {output.stats}
+        
+        """
+
+# Create duplication summary
+rule dedup_summary:
+    input:
+        sorted(expand(
+            PROJ + "/bams/{sample}_" + INDEX_MAP + "_UMI_dedup_stats.txt",
+            sample = SAMS_UNIQ
+        ))
+    output:
+        PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_UMI_dedup.tsv"
+    params:
+        job_name = PROJ + "_dedup_summary",
+        memory   = 4
+    log:
+        out = PROJ + "/logs/" + PROJ + "_dedup_summary.out",
+        err = PROJ + "/logs/" + PROJ + "_dedup_summary.err"
+    message:
+        "Creating " + PROJ + " dedup summary"
+    threads:
+        1
+    run:
+        with open(output[0], "w") as out:
+            metrics = [
+                "Input Reads: [0-9]+",
+                "Number of reads out: [0-9]+",
+                "Total number of positions deduplicated: [0-9]+",
+                "Mean number of unique UMIs per position: [0-9\.]+",
+                "Max. number of unique UMIs per position: [0-9]+"
+            ]
+
+            for file in input:
+                name  = os.path.basename(file)
+                name  = re.sub("_dedup_stats.txt", "", name)
+
+                for line in open(file, "r"):
+                    for metric in metrics:
+                        met = re.search(metric, line)
+
+                        if met:
+                            met = met.group(0)
+                            num = re.search("[0-9\.]+$", met).group(0)
+                            met = re.sub(": [0-9\.]+$", "", met)
+
+                            out.write("%s\t%s\t%s\n" % (name, met, num))
+
+
+# Create subsample_whole summary
+rule subsample_summary:
+    input:
+        expand(
+            PROJ + "/bams_sub/{sample}_" + INDEX_SAMPLE + "_subsample.txt",
+            sample =SAMS_UNIQ)
+    output:
+        PROJ + "/stats/" + PROJ + "_" + INDEX_SAMPLE + "_subsample.tsv"
+    params:
+        job_name = PROJ + "_subsample_whole_summary",
+        memory   = 4
+    log:
+        out = PROJ + "/logs/" + PROJ + "_subsample_sample_summary.out",
+        err = PROJ + "/logs/" + PROJ + "_subsample_sample_summary.err"
+    message:
+        "Creating " + PROJ + " subsample_whole summary"
+    threads:
+        1
+    run:
+        with open(output[0], "w") as out:
+            for file in input:
+                for line in open(file, "r"):
+                    out.write(line)
+
+
+# filter aligned subsample spike in reads
+rule align_filter_subsample_sample_spikein:
+    input:
+        bam = PROJ + "/bams/{sample}_" + INDEX_MAP + "_" + SEQ_DATE + "_subsample.bam",
+        bai = PROJ + "/bams/{sample}_" + INDEX_MAP + "_" + SEQ_DATE + "_subsample.bam.bai"
+    output:
+        bam   = PROJ + "/bams_sub/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
+        bai   = PROJ + "/bams_sub/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam.bai",
+        stats = PROJ + "/bams_sub/{sample}_" + INDEX_SPIKE + "_subsample.txt"
+    params:
+        job_name = "{sample}_align_filter_subsample_spikein",
+        memory   = MEMORY * 3,
+        idx      = INDEX_PATH + INDEX_SPIKE + ".txt",
+        fa3      = FA_SPIKE,
+        sortname = PROJ + "/{sample}_spikein.temp",
+        mysample = "{sample}_" + INDEX_SPIKE
+    log:
+        out = PROJ + "/logs/{sample}_align_filter_spikein_subsample.out",
+        err = PROJ + "/logs/{sample}_align_filter_spikein_subsample.err"
+    message:
+        "filtering spikeaIN subsample reads {wildcards.sample}"
+    threads: 
+        12
+    shell:
+        """
+        # filter
+        samtools view {input.bam} $(head -n1 {params.idx}) \
+        | sed 's/spike_*//g' | samtools view -bT {params.fa3} - \
+        | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+        > {output.bam}
+        
+        samtools index -@ {threads} {output.bam}
+        
+        echo "{params.mysample} Sampled_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" >> {output.stats}
+        
+        """
+
+# Create subsample_whole summary
+rule subsample_summary_spikein:
+    input:
+        expand(
+            PROJ + "/bams_sub/{sample}_" + INDEX_SPIKE + "_subsample.txt",
+            sample =SAMS_UNIQ)
+    output:
+        PROJ + "/stats/" + PROJ + "_" + INDEX_SPIKE + "_subsample.tsv"
+    params:
+        job_name = PROJ + "_subsample_spikein_summary",
+        memory   = 4
+    log:
+        out = PROJ + "/logs/" + PROJ + "_subsample_spikein_summary.out",
+        err = PROJ + "/logs/" + PROJ + "_subsample_spikein_summary.err"
+    message:
+        "Creating " + PROJ + " subsample_spikein summary"
+    threads:
+        1
+    run:
+        with open(output[0], "w") as out:
+            for file in input:
+                for line in open(file, "r"):
+                    out.write(line)
+
+
+# filter aligned reads
+rule align_filter_sample:
+    input:
+        bam    = PROJ + "/bams/{sample}_" + INDEX_MAP + "_" + SEQ_DATE + "_dedup.bam",
+        bai    = PROJ + "/bams/{sample}_" + INDEX_MAP + "_" + SEQ_DATE + "_dedup.bam.bai"
+    output:
+        bam   = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
+        bai   = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai"
+    params:
+        job_name = "{sample}_align_filter",
+        memory   = MEMORY * 3,
+        idx      = INDEX_PATH + INDEX_SAMPLE + ".txt",
+        fa2      = FA_SAMPLE,
+        sortname = PROJ + "/{sample}.temp"
+    log:
+        out = PROJ + "/logs/{sample}_align_filter.out",
+        err = PROJ + "/logs/{sample}_align_filter.err"
+    message:
+        "filtering reads {wildcards.sample}"
+    threads: 
+        12
+    shell:
+        """
+        # filter
+        samtools view {input.bam} $(head -n1 {params.idx}) \
+        | samtools view -bT {params.fa2} - \
+        | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+        > {output.bam}
+        
+        samtools index -@ {threads} {output.bam}
+        
+        """
+
+
+# filter aligned spike in reads
+rule align_filter_sample_spikein:
+    input:
+        bam    = PROJ + "/bams/{sample}_" + INDEX_MAP + "_" + SEQ_DATE + "_dedup.bam",
+        bai    = PROJ + "/bams/{sample}_" + INDEX_MAP + "_" + SEQ_DATE + "_dedup.bam.bai"
+    output:
+        bam = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
+        bai = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam.bai"
+    params:
+        job_name = "{sample}_align_filter_spikein",
+        memory   = MEMORY * 3,
+        idx      = INDEX_PATH + INDEX_SPIKE + ".txt",
+        fa3      = FA_SPIKE,
+        sortname = PROJ + "/{sample}_spikein.temp"
+    log:
+        out = PROJ + "/logs/{sample}_align_filter_spikein.out",
+        err = PROJ + "/logs/{sample}_align_filter_spikein.err"
+    message:
+        "filtering spike in reads {wildcards.sample}"
+    threads: 
+        12
+    shell:
+        """
+        # filter
+        samtools view {input.bam} $(head -n1 {params.idx}) \
+        | sed 's/spike_*//g' | samtools view -bT {params.fa3} - \
+        | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+        > {output.bam}
+        
+        samtools index -@ {threads} {output.bam}
+        
+        """
+
+
+                    

@@ -1,0 +1,37 @@
+Building DAG of jobs...
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job            count    min threads    max threads
+-----------  -------  -------------  -------------
+all                1              1              1
+fastq_rmats        1             12             12
+total              2              1             12
+
+Select jobs to execute...
+
+[Thu Jan 11 13:31:29 2024]
+Job 28: Aligning reads with fastq_rmats for RTF1_MT:RTF1_WT
+
+Submitted DRMAA job 28 with external jobid 611106.
+[Thu Jan 11 13:32:28 2024]
+Error in rule fastq_rmats:
+    jobid: 28
+    output: temp_RTF1_RNAseq/rmats/RTF1_MT:RTF1_WT/SE.MATS.JC.txt
+    log: temp_RTF1_RNAseq/logs/RTF1_MT:RTF1_WT_fastq_rmats.out, temp_RTF1_RNAseq/logs/RTF1_MT:RTF1_WT_fastq_rmats.err (check log file(s) for error message)
+    shell:
+        
+        rmats.py --s1 temp_RTF1_RNAseq/rmats/RTF1_MT:RTF1_WT_S1.txt --s2 temp_RTF1_RNAseq/rmats/RTF1_MT:RTF1_WT_S2.txt         --bi /beevol/home/erickson/ref/hg38/star_idx_hg38mask14add         --gtf /beevol/home/erickson/ref/hg38/ref/Homo_sapiens.GRCh38.95.gtf         --od RTF1_MT:RTF1_WT         --nthread 12          -t paired --readLength 150 --libType fr-firststrand 
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Error executing rule fastq_rmats on cluster (jobid: 28, external: 611106, jobscript: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/tmp.0a0s6_8c/snakejob.fastq_rmats.28.sh). For error details see the cluster log and the log files of the involved rule(s).
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/log/2024-01-11T133127.347745.snakemake.log

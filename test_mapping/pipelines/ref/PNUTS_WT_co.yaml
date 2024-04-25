@@ -1,0 +1,32 @@
+#===== Config file for e_coli ===================
+
+# Path to mixed bowtie2 index and chrom name txt file
+GENELIST:
+    "PNUTS_condon_optimized"
+INDEX_PATH:
+    "/beevol/home/erickson/ref/test/PNUTS_condon_optimized/"
+INDEX_SAMPLE:
+    "PNUTS_WT_co"
+INDEX_MAP:
+    "PNUTS_WT_co"
+INDEX_SPIKE:
+    ""
+MASK:
+  "/beevol/home/erickson/ref/hg38/ref/hg38_snoRNAs.bed"
+# fasta files for splitting bam file
+FA_SAMPLE:
+  "/beevol/home/erickson/ref/test/PNUTS_condon_optimized/PNUTS_WT_co.fasta"
+FA_SPIKE:
+  ""
+ENRICHED_SAMPLE:
+  "/beevol/home/erickson/ref/hg38/ref/enrich.bed"
+ENRICHED_SPIKE:
+  ""
+MY_REF:
+  "/beevol/home/erickson/ref/hg38/ref/hg38_gene.bed"
+FW_REF:
+  "/beevol/home/erickson/ref/hg38/ref/hg38_gene_fw.bed"
+REV_REF:
+  "/beevol/home/erickson/ref/hg38/ref/hg38_gene_rev.bed"
+PI_REF:
+  "/beevol/home/erickson/ref/hg38/ref/PI.bed"

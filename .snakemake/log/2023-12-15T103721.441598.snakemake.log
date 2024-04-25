@@ -1,0 +1,24 @@
+Building DAG of jobs...
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                   count    min threads    max threads
+------------------  -------  -------------  -------------
+all                       1              1              1
+fragment_size_samp        1             12             12
+total                     2              1             12
+
+Select jobs to execute...
+
+[Fri Dec 15 10:37:22 2023]
+Job 25: fragment size of mapped paired end reads for sample
+
+Submitted DRMAA job 25 with external jobid 579379.
+Terminating processes on user request, this might take some time.
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/log/2023-12-15T103721.441598.snakemake.log

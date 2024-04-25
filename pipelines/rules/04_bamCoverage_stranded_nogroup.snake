@@ -1,0 +1,210 @@
+# ====== Rules for aligning reads with bamCoverage and OR norm to spike in =================================
+
+# gets number for norm fraction
+def _get_norm(wildcards):
+    sample = wildcards.sample
+    patternfile = NORM
+    num = 1
+    if re.search("OR|OR_enrich|chrM", patternfile):
+      patternfile = patternfile + "_" + INDEX_SAMPLE
+      path = PROJ + "/counts/"
+      filename = glob.glob(path + sample + "*")[0]
+      for line in open(filename, "r"):
+        match = re.search(patternfile, line)
+        if match:
+          num = line.strip().split()
+          num = 1000000/float(num[1])
+          break
+    if isinstance(num, (int, float)):
+      return num
+    else:
+      return 1
+
+def _get_cols(wildcards):
+    sample = wildcards.sample
+    if sample in COLS_DICT:
+      results = (COLS_DICT[sample])
+    else:
+      results = "0,0,0"
+    return(results)
+        
+# Align trimmed reads with bamCoverage
+rule bamCoverage:
+    input:
+        bam = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
+        check_point = PROJ + "/stats/" + PROJ + "_results.tsv"
+    output:
+        fw      =   PROJ   + "/bw/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
+        rev     =   PROJ   + "/bw/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw",
+        stats   = temp(PROJ      + "/bw/{sample}_bamCoverage_stats.txt")
+    params:
+        job_name = "{sample}_bamCoverage",
+        memory   = 20,
+        args     = CMD_PARAMS["bamCoverage"] + CMD_PARAMS["bamCoverageBL"],
+        argsf    = CMD_PARAMS["bamCoveragef"],
+        argsr    = CMD_PARAMS["bamCoverager"],
+        scale    = _get_norm,
+        color    = _get_cols,
+        url_fw   = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
+        url_rev  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw"
+    log:
+        out = PROJ + "/logs/{sample}_bamCoverage.out",
+        err = PROJ + "/logs/{sample}_bamCoverage.err"
+    message:
+        "stranded bigwigs with reads in R2-R1 orentation for {wildcards.sample}"
+    threads: 
+        12
+    shell:
+        """
+        # R2-R1 or R1-R2 orentation
+        bamCoverage \
+          -b {input.bam} \
+          -of bigwig \
+          -o {output.fw} \
+          {params.args} \
+          --scaleFactor {params.scale} \
+          -p 12 --filterRNAstrand {params.argsf}
+
+        bamCoverage \
+          -b {input.bam} \
+          -of bigwig \
+          -o {output.rev} \
+          {params.args} \
+          --scaleFactor {params.scale} \
+          -p 12 --filterRNAstrand {params.argsr}
+        
+        echo "track type=bigWig visibility=full name='{wildcards.sample}_{SEQ_DATE}_{NORMS}_fw' description='{wildcards.sample}_{SEQ_DATE}_{NORMS}_fw' color={params.color} bigDataUrl={params.url_fw}" > {output.stats}
+        echo "track type=bigWig visibility=full name='{wildcards.sample}_{SEQ_DATE}_{NORMS}_rev' description='{wildcards.sample}_{SEQ_DATE}_{NORMS}_rev' color={params.color} bigDataUrl={params.url_rev}" >> {output.stats}
+        ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
+        scp {output.fw} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
+        scp {output.rev} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
+        
+        """
+
+
+# Combine bamCoverage summaries
+rule bamCoverage_summary:
+    input:
+        sorted(expand(
+            PROJ + "/bw/{sample}_bamCoverage_stats.txt",
+            sample = SAMS_UNIQ
+        ))
+    output:
+        PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + "_" + NORMS + "_bw_URL.txt"
+    params:
+        job_name = PROJ + "_bamCoverage_summary",
+        memory   = 4
+    log:
+        out = PROJ + "/logs/" + PROJ + "_bamCoverage_summary.out",
+        err = PROJ + "/logs/" + PROJ + "_bamCoverage_summary.err"
+    message:
+        "Creating " + PROJ + " bamCoverage summary"
+    threads:
+        1
+    run:
+        with open(output[0], "w") as out:
+            for file in input:
+                for line in open(file, "r"):
+                    out.write(line)
+
+
+# gets number for norm fraction
+def _get_norm2(wildcards):
+    sample = SAMPLES
+    patternfile = NORM
+    num = 1
+    if re.search("OR|OR_enrich|chrM", patternfile):
+      patternfile = patternfile + "_" + INDEX_SPIKE
+      path = PROJ + "/counts/"
+      filename = glob.glob(path + sample + "*")[0]
+      for line in open(filename, "r"):
+        match = re.search(patternfile, line)
+        if match:
+          num = line.strip().split()
+          num = 1000000/float(num[1])
+          break
+    if isinstance(num, (int, float)):
+      return num
+    else:
+      return 1
+        
+
+# Align trimmed reads with bamCoverage
+rule bamCoverage_spike:
+    input:
+        bam = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
+        check_point = PROJ + "/stats/" + PROJ + "_results.tsv"
+    output:
+        fw      =   PROJ   + "/bw/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
+        rev     =   PROJ   + "/bw/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw",
+        stats   = temp(PROJ      + "/bw/{sample}_spike_bamCoverage_stats.txt")
+    params:
+        job_name = "{sample}_spike_bamCoverage",
+        memory   = 20,
+        args     = CMD_PARAMS["bamCoverage"] + CMD_PARAMS["bamCoverageBL"],
+        argsf    = CMD_PARAMS["bamCoveragef"],
+        argsr    = CMD_PARAMS["bamCoverager"],
+        scale    = _get_norm2,
+        color    = _get_cols,
+        url_fw   = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
+        url_rev  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw"
+    log:
+        out = PROJ + "/logs/{sample}_spike_bamCoverage.out",
+        err = PROJ + "/logs/{sample}_spike_bamCoverage.err"
+    message:
+        "stranded bigwigs with reads in R2-R1 orentation for {wildcards.sample}"
+    threads: 
+        12
+    shell:
+        """
+        # R2-R1 or R1-R2 orentation
+        bamCoverage \
+          -b {input.bam} \
+          -of bigwig \
+          -o {output.fw} \
+          {params.args} \
+          --scaleFactor {params.scale} \
+          -p 12 --filterRNAstrand {params.argsf}
+
+        bamCoverage \
+          -b {input.bam} \
+          -of bigwig \
+          -o {output.rev} \
+          {params.args} \
+          --scaleFactor {params.scale} \
+          -p 12 --filterRNAstrand {params.argsr}
+        
+        echo "track type=bigWig visibility=full name='{wildcards.sample}_{SEQ_DATE}_{NORMS}_fw' description='{wildcards.sample}_{SEQ_DATE}_{NORMS}_fw' color={params.color} bigDataUrl={params.url_fw}" > {output.stats}
+        echo "track type=bigWig visibility=full name='{wildcards.sample}_{SEQ_DATE}_{NORMS}_rev' description='{wildcards.sample}_{SEQ_DATE}_{NORMS}_rev' color={params.color} bigDataUrl={params.url_rev}" >> {output.stats}
+        ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
+        scp {output.fw} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
+        scp {output.rev} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
+        
+        """
+
+
+# Combine bamCoverage summaries
+rule bamCoverage_spike_summary:
+    input:
+        sorted(expand(
+            PROJ + "/bw/{sample}_spike_bamCoverage_stats.txt",
+            sample = SAMS_UNIQ
+        ))
+    output:
+        PROJ + "/URLS/" + PROJ + "_" + INDEX_SPIKE + "_" + NORMS + "_bw_URL.txt"
+    params:
+        job_name = PROJ + "_bamCoverage_spike_summary",
+        memory   = 4
+    log:
+        out = PROJ + "/logs/" + PROJ + "_bamCoverage_spike_summary.out",
+        err = PROJ + "/logs/" + PROJ + "_bamCoverage_spike_summary.err"
+    message:
+        "Creating " + PROJ + " bamCoverage_spike summary"
+    threads:
+        1
+    run:
+        with open(output[0], "w") as out:
+            for file in input:
+                for line in open(file, "r"):
+                    out.write(line)
+

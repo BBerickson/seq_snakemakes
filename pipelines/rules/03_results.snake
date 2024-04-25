@@ -1,0 +1,149 @@
+# ====== Rules for getting overall results =================================
+
+# get read counts from bams
+rule bowtie_counts:
+    input:
+        bam2   = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
+        bai2   = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai"
+    output:
+        stats2 = PROJ + "/counts/{sample}_count.txt"
+    params:
+        job_name = "{sample}_bowtie_counts",
+        enrich2  = ENRICHED_SAMPLE,
+        memory   = MEMORY
+    log:
+        out = PROJ + "/logs/{sample}_bowtie_counts.out",
+        err = PROJ + "/logs/{sample}_bowtie_count.err"
+    message:
+        "Bowtie2 counts for {wildcards.sample}"
+    threads:
+        1
+    shell:
+        """
+        echo "{INDEX_SAMPLE} $(samtools idxstats {input.bam2} | awk '{{s+=$3}} END {{print s/2}}')" >> {output.stats2}
+        echo "enrich_{INDEX_SAMPLE} $(samtools view {input.bam2} -L {params.enrich2} -c | awk ' {{print $0/2}}')" >> {output.stats2}
+        echo "chrM_{INDEX_SAMPLE} $(samtools view {input.bam2} chrM -c | awk ' {{print $0/2}}')" >> {output.stats2}
+        
+        """
+
+
+# gathering results
+rule gathering_results:
+    input:
+        PROJ + "/stats/" + PROJ + "_clumpify.tsv",
+        PROJ + "/stats/" + PROJ + "_bbduk.tsv",
+        PROJ + "/stats/" + PROJ + "_aligned.tsv",
+        expand( PROJ + "/counts/{sample}_count.txt",
+            sample = SAMS_UNIQ
+        )
+    output:
+        PROJ + "/stats/" + PROJ + "_results.tsv"
+    params:
+        job_name = "results",
+        project  = PROJ,
+        memory   = MEMORY
+    log:
+        out = PROJ + "/logs/results.out",
+        err = PROJ + "/logs/results.err"
+    message:
+        "getting final results"
+    threads: 
+        1
+    script:
+        '../R_scripts/results.R'
+  
+
+# fragment size of mapped paired end reads
+rule fragment_size:
+    input:
+      bam = expand(
+            PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
+            sample = SAMS_UNIQ
+        ),
+      bai =  expand(
+            PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai",
+            sample = SAMS_UNIQ
+        )
+    output:
+      log =  PROJ + "/stats/" + PROJ + "_" + INDEX_SAMPLE + "_fragment.txt",
+      pic =  PROJ + "/stats/" + PROJ + "_" + INDEX_SAMPLE + "_fragmentSize.png"
+    params:
+        job_name = "PE_fragment_size",
+        memory   = MEMORY * 16,
+        labels   = SAMS_UNIQ,
+        args     = CMD_PARAMS["fragment_size"]
+    log:
+        out = PROJ + "/logs/PE_fragment_size.out",
+        err = PROJ + "/logs/PE_fragment_size.err"
+    message:
+        "fragment size of mapped paired end reads"
+    threads: 
+        12
+    shell:
+        """
+        bamPEFragmentSize \
+          -hist {output.pic} \
+          --numberOfProcessors {threads} \
+          -T "Fragment size of PE data" \
+          -b  {input.bam} {params.args} \
+          --samplesLabel {params.labels} \
+          --table {output.log}
+    
+        """
+
+# gathering results fragment size
+rule fragment_results:
+    input:
+        PROJ + "/stats/" + PROJ + "_results.tsv",
+        PROJ + "/stats/" + PROJ + "_" + INDEX_SAMPLE + "_fragment.txt"
+    output:
+        PROJ + "/stats/" + PROJ + "_fragment_results.tsv"
+    params:
+        job_name = "fragment_results",
+        samp     = INDEX_SAMPLE,
+        memory   = MEMORY
+    log:
+        out = PROJ + "/logs/fragment_results.out",
+        err = PROJ + "/logs/fragment_results.err"
+    message:
+        "getting final fragment_results"
+    threads: 
+        1
+    script:
+        '../R_scripts/fragment_results.R'
+
+rule create_plots:
+    input:
+        PROJ + "/stats/" + PROJ + "_results.tsv",
+        expand( PROJ + "/counts/{sample}_count.txt",
+            sample = SAMS_UNIQ
+        )
+    output:
+        PROJ + "/" + PROJ + "_" + INDEX_SAMPLE + "_qc_analysis.html"
+    params:
+        job_name   = PROJ + "_qc_plots",
+        memory     = MEMORY
+    log:
+        out = PROJ + "/logs/" + PROJ + "_qc_plots.out",
+        err = PROJ + "/logs/" + PROJ + "_qc_plots.err"
+    message:
+        "Creating qc plots for " + PROJ + " project"
+    threads:
+        1
+    shell:
+        """
+        Rmd=src/Rmds/analysis.Rmd
+        script=src/Rmds/knit_rmd.R
+        samp=samples.yaml
+        out="_qc_analysis"
+
+        Rscript $script \
+            -i $Rmd \
+            -o $out \
+            -p {PROJ} \
+            -m {INDEX_MAP} \
+            -x {INDEX_SAMPLE} \
+            -s $samp 
+        """
+  
+      

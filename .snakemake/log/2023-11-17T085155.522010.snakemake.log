@@ -1,0 +1,4 @@
+TypeError in line 38 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/Bowtie.snake:
+stat: path should be string, bytes, os.PathLike or integer, not list
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/Bowtie.snake", line 38, in <module>
+  File "/cluster/software/modules-python/python/3.8.5/lib/python3.8/genericpath.py", line 19, in exists

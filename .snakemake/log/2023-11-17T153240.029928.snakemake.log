@@ -1,0 +1,7 @@
+Building DAG of jobs...
+MissingInputException in line 4 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/03_resultsSE.snake:
+Missing input files for rule gathering_results:
+    output: Temp_UMI/stats/Temp_UMI_results.tsv
+    affected files:
+        Temp_UMI/stats/Temp_UMI_clumpify.tsv
+        Temp_UMI/stats/Temp_UMI_bbduk.tsv

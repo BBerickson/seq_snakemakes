@@ -1,0 +1,8 @@
+Building DAG of jobs...
+MissingInputException in line 139 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/04_bamCoverage_stranded.snake:
+Missing input files for rule bamCoverage_spike:
+    output: Temp_NET/bw/PP1H66KSer5-r2_mm10_230426_norm_3end_subsample_fw.bw, Temp_NET/bw/PP1H66KSer5-r2_mm10_230426_norm_3end_subsample_rev.bw, Temp_NET/bw/PP1H66KSer5-r2_spike_bamCoverage_stats.txt
+    wildcards: group=PP1H66KSer5-r2
+    affected files:
+        Temp_NET/bams_sub/PP1H66KpDoxS2Ser5_mm10_230426.bam
+        Temp_NET/bams_sub/PP1H66KmDoxS2Ser5_mm10_230426.bam

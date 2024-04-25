@@ -1,0 +1,92 @@
+Building DAG of jobs...
+The code used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-code-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-code-changes)'.
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                          count    min threads    max threads
+-------------------------  -------  -------------  -------------
+all                              1              1              1
+bamCoverage                      2             12             12
+bamCoverage_spike                2             12             12
+bamCoverage_spike_summary        1              1              1
+bamCoverage_summary              1              1              1
+total                            7              1             12
+
+Select jobs to execute...
+
+[Thu Dec 14 15:49:37 2023]
+Job 47: Aligning reads with bamCoverage_spike for PP1H66KSer5-r3
+
+Submitted DRMAA job 47 with external jobid 579147.
+
+[Thu Dec 14 15:49:37 2023]
+Job 43: Aligning reads with bamCoverage for PP1H66KSer5-r2
+
+Submitted DRMAA job 43 with external jobid 579148.
+
+[Thu Dec 14 15:49:37 2023]
+Job 44: Aligning reads with bamCoverage for PP1H66KSer5-r3
+
+Submitted DRMAA job 44 with external jobid 579149.
+
+[Thu Dec 14 15:49:37 2023]
+Job 46: Aligning reads with bamCoverage_spike for PP1H66KSer5-r2
+
+Submitted DRMAA job 46 with external jobid 579150.
+[Thu Dec 14 15:50:47 2023]
+Finished job 47.
+1 of 7 steps (14%) done
+[Thu Dec 14 15:50:47 2023]
+Finished job 46.
+2 of 7 steps (29%) done
+Select jobs to execute...
+
+[Thu Dec 14 15:50:47 2023]
+Job 45: Creating Temp bamCoverage_spike summary
+
+Submitted DRMAA job 45 with external jobid 579151.
+Removing temporary output file Temp/bw/PP1H66KSer5-r2_spike_bamCoverage_stats.txt.
+Removing temporary output file Temp/bw/PP1H66KSer5-r3_spike_bamCoverage_stats.txt.
+[Thu Dec 14 15:50:57 2023]
+Finished job 45.
+3 of 7 steps (43%) done
+[Thu Dec 14 15:51:17 2023]
+Finished job 43.
+4 of 7 steps (57%) done
+[Thu Dec 14 15:51:37 2023]
+Finished job 44.
+5 of 7 steps (71%) done
+Select jobs to execute...
+
+[Thu Dec 14 15:51:37 2023]
+Job 42: Creating Temp bamCoverage summary
+
+Submitted DRMAA job 42 with external jobid 579152.
+Removing temporary output file Temp/bw/PP1H66KSer5-r2_bamCoverage_stats.txt.
+Removing temporary output file Temp/bw/PP1H66KSer5-r3_bamCoverage_stats.txt.
+[Thu Dec 14 15:51:47 2023]
+Finished job 42.
+6 of 7 steps (86%) done
+Select jobs to execute...
+
+[Thu Dec 14 15:51:47 2023]
+localrule all:
+    input: Temp/stats/Temp_fastqc.tsv, Temp/stats/Temp_clumpify.tsv, Temp/stats/Temp_bbduk.tsv, Temp/stats/Temp_aligned.tsv, Temp/stats/Temp_hg38_fragmentSize.png, Temp/stats/Temp_mm10_fragmentSize.png, Temp/stats/Temp_results.tsv, Temp/URLS/Temp_hg38_norm_OR_enrich_bw_URL.txt, Temp/URLS/Temp_mm10_norm_OR_enrich_bw_URL.txt
+    jobid: 0
+    resources: tmpdir=/tmp
+
+[Thu Dec 14 15:51:47 2023]
+Finished job 0.
+7 of 7 steps (100%) done
+The code used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-code-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-code-changes)'.
+The params used to generate one or several output files has changed:
+    To inspect which output files have changes, run 'snakemake --list-params-changes'.
+    To trigger a re-run, use 'snakemake -R $(snakemake --list-params-changes)'.
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/log/2023-12-14T154935.754056.snakemake.log

@@ -1,0 +1,4 @@
+KeyError in line 25 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/01_UMI_cutadapt.snake:
+'umi_pattern'
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/NETseq_spikein.snake", line 179, in <module>
+  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/01_UMI_cutadapt.snake", line 25, in <module>

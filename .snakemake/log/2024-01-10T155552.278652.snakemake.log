@@ -1,0 +1,177 @@
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cluster nodes: 100
+Job stats:
+job                 count    min threads    max threads
+----------------  -------  -------------  -------------
+all                     1              1              1
+bbduk_paired            6             12             12
+bbduk_summary           1              1              1
+clumpify_paired         6              1              1
+clumpify_summary        1              1              1
+fastqc_summary          1              1              1
+total                  16              1             12
+
+Select jobs to execute...
+
+[Wed Jan 10 15:55:54 2024]
+Job 15: Removing duplicats for 293flpIN_RTF1_WT1
+
+Submitted DRMAA job 15 with external jobid 609451.
+
+[Wed Jan 10 15:55:54 2024]
+Job 16: Removing duplicats for 293flpIN_RTF1_WT2
+
+Submitted DRMAA job 16 with external jobid 609452.
+
+[Wed Jan 10 15:55:54 2024]
+Job 18: Removing duplicats for 293flpIN_RTF1_MT_R1
+
+Submitted DRMAA job 18 with external jobid 609453.
+
+[Wed Jan 10 15:55:54 2024]
+Job 20: Removing duplicats for 293flpIN_RTF1_MT_R3
+
+Submitted DRMAA job 20 with external jobid 609454.
+
+[Wed Jan 10 15:55:54 2024]
+Job 1: Creating temp_RTF1_RNAseq FastQC summary
+
+Submitted DRMAA job 1 with external jobid 609455.
+
+[Wed Jan 10 15:55:54 2024]
+Job 17: Removing duplicats for 293flpIN_RTF1_WT3
+
+Submitted DRMAA job 17 with external jobid 609456.
+
+[Wed Jan 10 15:55:54 2024]
+Job 19: Removing duplicats for 293flpIN_RTF1_MT_R2
+
+Submitted DRMAA job 19 with external jobid 609457.
+[Wed Jan 10 15:56:03 2024]
+Finished job 1.
+1 of 16 steps (6%) done
+[Wed Jan 10 15:59:45 2024]
+Finished job 15.
+2 of 16 steps (12%) done
+Select jobs to execute...
+
+[Wed Jan 10 15:59:45 2024]
+Job 22: Removing duplicats for 293flpIN_RTF1_WT1
+
+Submitted DRMAA job 22 with external jobid 609463.
+[Wed Jan 10 15:59:45 2024]
+Finished job 16.
+3 of 16 steps (19%) done
+[Wed Jan 10 15:59:45 2024]
+Finished job 18.
+4 of 16 steps (25%) done
+Select jobs to execute...
+
+[Wed Jan 10 15:59:45 2024]
+Job 23: Removing duplicats for 293flpIN_RTF1_WT2
+
+Submitted DRMAA job 23 with external jobid 609464.
+
+[Wed Jan 10 15:59:45 2024]
+Job 25: Removing duplicats for 293flpIN_RTF1_MT_R1
+
+Submitted DRMAA job 25 with external jobid 609465.
+[Wed Jan 10 15:59:55 2024]
+Finished job 17.
+5 of 16 steps (31%) done
+Select jobs to execute...
+
+[Wed Jan 10 15:59:55 2024]
+Job 24: Removing duplicats for 293flpIN_RTF1_WT3
+
+Submitted DRMAA job 24 with external jobid 609466.
+[Wed Jan 10 16:00:05 2024]
+Finished job 20.
+6 of 16 steps (38%) done
+Select jobs to execute...
+
+[Wed Jan 10 16:00:05 2024]
+Job 27: Removing duplicats for 293flpIN_RTF1_MT_R3
+
+Submitted DRMAA job 27 with external jobid 609467.
+[Wed Jan 10 16:00:25 2024]
+Finished job 19.
+7 of 16 steps (44%) done
+Select jobs to execute...
+
+[Wed Jan 10 16:00:25 2024]
+Job 14: Creating temp_RTF1_RNAseq clumpify summary
+
+Submitted DRMAA job 14 with external jobid 609470.
+
+[Wed Jan 10 16:00:25 2024]
+Job 26: Removing duplicats for 293flpIN_RTF1_MT_R2
+
+Submitted DRMAA job 26 with external jobid 609471.
+[Wed Jan 10 16:00:35 2024]
+Finished job 14.
+8 of 16 steps (50%) done
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT1_R2_clumpify.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT1_R1_clumpify.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT1_R1.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT1_R2.fastq.gz.
+[Wed Jan 10 16:02:26 2024]
+Finished job 22.
+9 of 16 steps (56%) done
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R1_R1_clumpify.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R1_R2_clumpify.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R1_R1.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R1_R2.fastq.gz.
+[Wed Jan 10 16:02:36 2024]
+Finished job 25.
+10 of 16 steps (62%) done
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R2_R1_clumpify.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R2_R2_clumpify.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R2_R1.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R2_R2.fastq.gz.
+[Wed Jan 10 16:02:37 2024]
+Finished job 26.
+11 of 16 steps (69%) done
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT2_R2_clumpify.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT2_R1_clumpify.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT2_R1.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT2_R2.fastq.gz.
+[Wed Jan 10 16:02:57 2024]
+Finished job 23.
+12 of 16 steps (75%) done
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT3_R1_clumpify.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT3_R2_clumpify.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT3_R1.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_WT3_R2.fastq.gz.
+[Wed Jan 10 16:02:57 2024]
+Finished job 24.
+13 of 16 steps (81%) done
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R3_R2_clumpify.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R3_R1_clumpify.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R3_R1.fastq.gz.
+Removing temporary output file temp_RTF1_RNAseq/293flpIN_RTF1_MT_R3_R2.fastq.gz.
+[Wed Jan 10 16:03:37 2024]
+Finished job 27.
+14 of 16 steps (88%) done
+Select jobs to execute...
+
+[Wed Jan 10 16:03:37 2024]
+Job 21: Creating temp_RTF1_RNAseq bbduk summary
+
+Submitted DRMAA job 21 with external jobid 609513.
+[Wed Jan 10 16:03:47 2024]
+Finished job 21.
+15 of 16 steps (94%) done
+Select jobs to execute...
+
+[Wed Jan 10 16:03:47 2024]
+localrule all:
+    input: temp_RTF1_RNAseq/stats/temp_RTF1_RNAseq_fastqc.tsv, temp_RTF1_RNAseq/stats/temp_RTF1_RNAseq_clumpify.tsv, temp_RTF1_RNAseq/stats/temp_RTF1_RNAseq_bbduk.tsv
+    jobid: 0
+    resources: tmpdir=/tmp
+
+[Wed Jan 10 16:03:47 2024]
+Finished job 0.
+16 of 16 steps (100%) done
+Complete log: /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/.snakemake/log/2024-01-10T155552.278652.snakemake.log

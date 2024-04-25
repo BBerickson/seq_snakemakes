@@ -1,0 +1,209 @@
+# ====== Rules for making bam URLs =================================
+
+
+# make URLS and copy files to sandbox
+rule my_bowtie_sample_url:
+    input:
+        bam   = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
+        bai   = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai",
+    output:
+        temp(PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_url.txt")
+    params:
+        job_name = PROJ + "_bowtie_sample_url",
+        memory   = MEMORY,
+        url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam"
+    log:
+        out = PROJ + "/logs/{sample}_" + PROJ + "_bowtie_sample_url.out",
+        err = PROJ + "/logs/{sample}_" + PROJ + "_bowtie_sample_url.err"
+    message:
+        "Creating " + PROJ + " bowtie_sample url"
+    threads:
+        1
+    shell:
+        """
+          echo "{params.url}" >> {output}
+          ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
+          scp {input.bam}* amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
+          
+        """
+        
+# Combine bowtie2 urls
+rule bowtie_sample_urls:
+    input:
+        expand(
+            PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_url.txt",
+            sample = SAMS_UNIQ
+        )
+    output:
+        PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + "_bam_URL.txt"
+    params:
+        job_name = PROJ + "_bowtie_url",
+        memory   = MEMORY
+    log:
+        out = PROJ + "/logs/" + PROJ + "_bowtie_sample_url.out",
+        err = PROJ + "/logs/" + PROJ + "_bowtie_sample_url.err"
+    message:
+        "Creating " + PROJ + " bowtie2 url"
+    threads:
+        1
+    run:
+        with open(output[0], "w") as out:
+            for file in input:
+                for line in open(file, "r"):
+                    out.write(line)
+                    
+ 
+ # make URLS and copy files to sandbox
+rule my_bowtie_spike_url:
+    input:
+        bam   = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
+        bai   = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam.bai",
+    output:
+        temp(PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_url.txt")
+    params:
+        job_name = PROJ + "_bowtie_sample_url",
+        memory   = MEMORY,
+        url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam"
+    log:
+        out = PROJ + "/logs/{sample}_" + PROJ + "_bowtie_spike_url.out",
+        err = PROJ + "/logs/{sample}_" + PROJ + "_bowtie_spike_url.err"
+    message:
+        "Creating " + PROJ + " bowtie_spike url"
+    threads:
+        1
+    shell:
+        """
+          echo "{params.url}" >> {output}
+          ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
+          scp {input.bam}* amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
+          
+        """
+# Combine bowtie2 urls
+rule bowtie_spike_urls:
+    input:
+        expand(
+            PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_url.txt",
+            sample = SAMS_UNIQ
+        )
+    output:
+        PROJ + "/URLS/" + PROJ + "_" + INDEX_SPIKE + "_bam_URL.txt"
+    params:
+        job_name = PROJ + "_bowtie_spike_url",
+        memory   = MEMORY
+    log:
+        out = PROJ + "/logs/" + PROJ + "_bowtie_spike_url.out",
+        err = PROJ + "/logs/" + PROJ + "_bowtie_spike_url.err"
+    message:
+        "Creating " + PROJ + " bowtie2 spike url"
+    threads:
+        1
+    run:
+        with open(output[0], "w") as out:
+            for file in input:
+                for line in open(file, "r"):
+                    out.write(line)
+                                       
+                                       
+# make URLS and copy files to sandbox
+rule my_subsample_whole_url:
+    input:
+        bam   = PROJ + "/bams_sub/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
+        bai   = PROJ + "/bams_sub/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai"
+    output:
+        temp(PROJ + "/bams_sub/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_subsample_url.txt")
+    params:
+        job_name = PROJ + "_subsample_whole_url",
+        memory   = 4,
+        url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + PROJ + "/bams_sub/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam"
+    log:
+        out = PROJ + "/logs/{sample}_" + PROJ + "_subsample_sample_url.out",
+        err = PROJ + "/logs/{sample}_" + PROJ + "_subsample_sample_url.err"
+    message:
+        "Creating " + PROJ + " subsample_sample url"
+    threads:
+        1
+    shell:
+        """
+          echo "{params.url}" >> {output}
+          ssh amc-sandbox 'mkdir -p ./public_html/{PROJ}/bams_sub'
+          scp {input.bam}* amc-sandbox:./public_html/{PROJ}/bams_sub
+          
+        """
+                    
+# Combine URLS
+rule my_subsample_whole_url_summary:
+    input:
+        sorted(expand(
+            PROJ + "/bams_sub/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_subsample_url.txt",
+            sample = SAMS_UNIQ
+        ))
+    output:
+        PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + "_subsample_bam_URL.txt"
+    params:
+        job_name = PROJ + "_subsample_whole_bam_URL",
+        memory   = 4
+    log:
+        out = PROJ + "/logs/" + PROJ + "_subsample_sample_bam_URL.out",
+        err = PROJ + "/logs/" + PROJ + "_subsample_sample_bam_URL.err"
+    message:
+        "Creating " + PROJ + " _subsample_sample_bam_URL"
+    threads:
+        1
+    run:
+        with open(output[0], "w") as out:
+            for file in input:
+                for line in open(file, "r"):
+                    out.write(line)
+                    
+# make URLS and copy files to sandbox
+rule my_subsample_spikein_whole_url:
+    input:
+        bam   = PROJ + "/bams_sub/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
+        bai   = PROJ + "/bams_sub/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam.bai"
+    output:
+        temp(PROJ + "/bams_sub/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_subsample_url.txt")
+    params:
+        job_name = PROJ + "_subsample_whole_url",
+        memory   = 4,
+        url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + PROJ + "/bams_sub/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam"
+    log:
+        out = PROJ + "/logs/{sample}_" + PROJ + "_subsample_spikein_url.out",
+        err = PROJ + "/logs/{sample}_" + PROJ + "_subsample_spikein_url.err"
+    message:
+        "Creating " + PROJ + " subsample_spikein url"
+    threads:
+        1
+    shell:
+        """
+          echo "{params.url}" >> {output}
+          ssh amc-sandbox 'mkdir -p ./public_html/{PROJ}/bams_sub'
+          scp {input.bam}* amc-sandbox:./public_html/{PROJ}/bams_sub
+          
+        """
+                    
+# Combine URLS
+rule my_subsample_spikein_whole_url_summary:
+    input:
+        sorted(expand(
+            PROJ + "/bams_sub/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_subsample_url.txt",
+            sample = SAMS_UNIQ
+        ))
+    output:
+        PROJ + "/URLS/" + PROJ + "_" + INDEX_SPIKE + "_subsample_bam_URL.txt"
+    params:
+        job_name = PROJ + "_subsample_spikein_bam_URL",
+        memory   = 4
+    log:
+        out = PROJ + "/logs/" + PROJ + "_subsample_spikein_bam_URL.out",
+        err = PROJ + "/logs/" + PROJ + "_subsample_spikein_bam_URL.err"
+    message:
+        "Creating " + PROJ + " _subsample_spikein_bam_URL"
+    threads:
+        1
+    run:
+        with open(output[0], "w") as out:
+            for file in input:
+                for line in open(file, "r"):
+                    out.write(line)
+
+                                       
