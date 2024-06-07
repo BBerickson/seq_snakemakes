@@ -19,26 +19,28 @@ RAW_DATA:
 # directories listed under RAW_DATA. If the sample name
 # matches multiple fastqs, an error will be thrown.
 #
-# new-name-1:
-#     - "sample_1_file_prefix"
+# new-name-1: "sample_1_file_prefix"
 #
-# new-name-2:
-#     - "sample_2_file_prefix"
+# new-name-2: "sample_2_file_prefix"
 #
+
 SAMPLES:
-    RTF1-r1:
-        - "293flpIN_RTF1_WT1"
+    SECTION-1:
+        SAMPLING-GROUP-1:
+            RTF1_WT1: "293flpIN_RTF1_WT1"
 
-    RTF1-r2:
-        - "293flpIN_RTF1_WT2"
+        SAMPLING-GROUP-2:
+            RTF1_WT2: "293flpIN_RTF1_WT2"
 
-    RTF1-r3:
-        - "293flpIN_RTF1_WT3"
-
+        SAMPLING-GROUP-3:
+            RTF1_WT3: "293flpIN_RTF1_WT3"
+      
 # norm bw with --scaleFactor, (if using --normalizeUsing set to None), 
-# chrM, sample (hg38), spikeIN (mm10), enrich, 
+# chrM, shRNA, sample (hg38), spikeIN (mm10), enrich, (hg38_enrich)
+# OR, OR_enrich, (if input with spike in is paired up)
+# "subsample" make bw and matix files from sub-sampled bam files (paired groups)
 NORM:
-  "chrM"
+  "None"
   
  # set RGB colors for bw urls and table files, 
   # list as many colors as samples (not inputs) 
@@ -70,13 +72,14 @@ USER:
 #   ".fa.gz"
 #   ".fastq.gz"
 SFX:
-  ".fastq.gz"
+  ".fq.gz"
   
 # Base memory to request for each rule
 # The acutal amount requested will be higher for rules that generally
 # require more memory
-# A value of 4 will result in rules requesting between 4Gb - 200Gb
-# request ~2 per GB of max raw.fastq.gz file
+# A value of 4 will result in rules requesting between 4Gb - 60Gb of
+# request ~2Gb/GB of fastq.gz file
+# memory
 MEMORY:
     4
     
@@ -292,4 +295,3 @@ BARCODES:
 #                         The minimum fragment length needed for read/pair inclusion. (Default: 0)
 #   --maxFragmentLength INT
 #                         The maximum fragment length needed for read/pair inclusion. (Default: 0)
-    

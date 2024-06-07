@@ -3,23 +3,24 @@
 # stranded sense matrix files
 rule my_5_sense_matrix:
     input:
-        fw  =   PROJ   + "/bw/{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
-        rev =   PROJ   + "/bw/{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw"
+        fw  =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
+        rev =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw"
     output:
-        sense   = temp(PROJ   + "/matrix/{group}_temp0_5_matrix.gz"),
-        sense1  = temp(PROJ   + "/matrix/{group}_temp1_5_matrix.gz"),
-        sense2  = temp(PROJ   + "/matrix/{group}_temp2_5_matrix.gz")
+        sense   = temp(PROJ   + "/matrix/{newnam}_temp0_5_matrix.gz"),
+        sense1  = temp(PROJ   + "/matrix/{newnam}_temp1_5_matrix.gz"),
+        sense2  = temp(PROJ   + "/matrix/{newnam}_temp2_5_matrix.gz")
     params:
-        job_name = "{group}_sense_matrix",
-        memory   = MEMORY * 4,
+        job_name = "{newnam}_sense_matrix",
         args     = CMD_PARAMS["reference5"]  + CMD_PARAMS["BL"],
         fw_ref   = FW_REF,
         rev_ref  = REV_REF
+    resources:
+        memory   = MEMORY * 5
     log:
-        out = PROJ + "/logs/{group}_sense_5_matrix.out",
-        err = PROJ + "/logs/{group}_sense_5_matrix.err"
+        out = PROJ + "/logs/{newnam}_sense_5_matrix.out",
+        err = PROJ + "/logs/{newnam}_sense_5_matrix.err"
     message:
-        "standard sense 5 matrix files {wildcards.group}"
+        "standard sense 5 matrix files {wildcards.newnam}"
     threads: 
         12
     shell:
@@ -47,18 +48,19 @@ rule my_5_sense_matrix:
 # stranded sense matrix files
 rule fix_5_sense_matrix:
     input:
-        PROJ   + "/matrix/{group}_temp0_5_matrix.gz"
+        PROJ   + "/matrix/{newnam}_temp0_5_matrix.gz"
     output:
-        temp(PROJ   + "/matrix/{group}_temp0_fix_5_matrix.gz")
+        temp(PROJ   + "/matrix/{newnam}_temp0_fix_5_matrix.gz")
     params:
-        job_name = "{group}_5_sense_matrix",
-        memory   = MEMORY,
+        job_name = "{newnam}_5_sense_matrix",
         args    = CMD_PARAMS["filter5"]
+    resources:
+        memory   = 4
     log:
-        out = PROJ + "/logs/{group}_fix_5_sense_matrix.out",
-        err = PROJ + "/logs/{group}_fix_5_sense_matrix.err"
+        out = PROJ + "/logs/{newnam}_fix_5_sense_matrix.out",
+        err = PROJ + "/logs/{newnam}_fix_5_sense_matrix.err"
     message:
-        "fix standard sense 5 matrix files {wildcards.group}"
+        "fix standard sense 5 matrix files {wildcards.newnam}"
     threads: 
         1
     script:
@@ -68,27 +70,28 @@ rule fix_5_sense_matrix:
 # make url's and scp to sandbox
 rule my_5_url_s:
     input:
-        PROJ   + "/matrix/{group}_temp0_fix_5_matrix.gz"
+        PROJ   + "/matrix/{newnam}_temp0_fix_5_matrix.gz"
     output:
-        temp(PROJ + "/matrix/5.{group}_matrixs.url.txt"),
-        PROJ + "/matrix/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_matrix.gz"
+        temp(PROJ + "/matrix/5.{newnam}_matrixs.url.txt"),
+        PROJ + "/matrix/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_matrix.gz"
     params:
         job_name = PROJ + "_5_matrix_url",
-        memory   = 4,
         color    = _get_col,
-        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_matrix.gz"
+        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_matrix.gz"
+    resources:
+        memory   = MEMORY
     log:
-        out = PROJ + "/logs/{group}_sense_5_matrix_url.out",
-        err = PROJ + "/logs/{group}_sense_5_matrix_url.err"
+        out = PROJ + "/logs/{newnam}_sense_5_matrix_url.out",
+        err = PROJ + "/logs/{newnam}_sense_5_matrix_url.err"
     message:
-        "Creating sense 5_matrix url for {wildcards.group}"
+        "Creating sense 5_matrix url for {wildcards.newnam}"
     threads:
         1
     shell:
         """
         # fix R appended file remote read error
         computeMatrixOperations relabel -m {input} -o {output[1]}
-        echo {params.url_out} 5 5.{wildcards.group}_{SEQ_DATE} {params.color} >> {output[0]}
+        echo {params.url_out} 5 5.{wildcards.newnam}_{SEQ_DATE} {params.color} >> {output[0]}
         ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
         scp {output[1]} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
         
@@ -98,13 +101,14 @@ rule my_5_url_s:
 rule my_5_url_s_summary:
     input:
         sorted(expand(
-            PROJ + "/matrix/5.{group}_matrixs.url.txt",
-            group = GRPS_UNIQ
+            PROJ + "/matrix/5.{newnam}_matrixs.url.txt",
+            newnam = NAMS_UNIQ
         ))
     output:
         PROJ + "/URLS/5_" + PROJ + "_" + INDEX_SAMPLE + "_" + NORM5S + "_sense_matrix.url.txt"
     params:
-        job_name = PROJ + "_sense_5_matrix_url",
+        job_name = PROJ + "_sense_5_matrix_url"
+    resources:
         memory   = 4
     log:
         out = PROJ + "/logs/" + PROJ + "_sense_5_matrix_url.out",

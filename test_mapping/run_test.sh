@@ -28,11 +28,11 @@ run_snakemake() {
         -oo {log.out} 
         -eo {log.err} 
         -J {params.job_name}
-        -R "rusage[mem={params.memory}] span[hosts=1]"
+        -R "rusage[mem={resources.memory}] span[hosts=1]"
         -n {threads}
         -q rna '
 
-    /beevol/home/erickson/.local/bin/snakemake \
+    snakemake \
         --snakefile $snake_file \
         --drmaa "$args" \
         --jobs 100 \

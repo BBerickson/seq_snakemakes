@@ -15,6 +15,10 @@ INDEX_SPIKE:
     ""
 MASK:
   ""
+SNRNA:
+  "/beevol/home/erickson/ref/test/e_coli/enrich.bed"
+SPIKE_SNRNA:
+  "/beevol/home/erickson/ref/test/e_coli/enrich.bed"
 # fasta files for splitting bam file
 FA_SAMPLE:
   "/beevol/home/erickson/ref/test/e_coli/e_coli_k12.v2.fa"

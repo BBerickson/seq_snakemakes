@@ -12,7 +12,7 @@ SEQ_DATE:
 # Multiple directories can be provided. The sample names must correspond
 # to the begining of the fastq name.
 RAW_DATA:
-    - "/beevol/home/erickson/fastqs/fastqs"
+    - "/beevol/home/erickson/Human/NetSeq/SRR1736063_mNET_CMA603_siLuc/fastqs"
 
 # Sample groups, samples in a group will be subsampled to the smallest sample 
 # The sample names must match the beginning of a fastq file in one of the
@@ -27,21 +27,24 @@ RAW_DATA:
 #     - "sample_2_file_prefix"
 #     - "treatment_2_file_prefix"
 #
-SAMPLES:
-    rep1-r1:
-        - "SRR1544602_8WG16_rep1"
-    rep1-r2:
-        - "SRR1736059_anti_Ser5-P_CM603_DMSO"
-        - "SRR1544602_8WG16_rep2"
 
+SAMPLES:
+    SECTION-1:
+        SAMPLING-GROUP-1:
+            8WG16_rep1: "SRR1544602_8WG16_rep1"
+
+        SAMPLING-GROUP-2:
+            CM603_DMSO: "SRR1736059_anti_Ser5-P_CM603_DMSO"
+            8WG16_rep2: "SRR1544602_8WG16_rep2"
+            
 # Base memory to request for each rule
 # The acutal amount requested will be higher for rules that generally
 # require more memory
-# A value of 8 will result in rules requesting between 8Gb - 32Gb of
+# A value of 4 will result in rules requesting between 4Gb - 60Gb of
 # request ~2Gb/GB of fastq.gz file
 # memory
 MEMORY:
-    32
+    4
 
 # set colors for bw urls and table files, if missing 0,0,0 is default
 # COLORS:
@@ -64,6 +67,7 @@ CMD_PARAMS:
     bamCoverageBL: "" # " --blackListFileName /beevol/home/erickson/ref/hg38/ref/merge_filter_RNAs.bed "
     bamCoveragef:  " reverse " # R2-R1 = forward R1-R2 = reverse
     bamCoverager:  " forward " # R2-R1 = reverse R1-R2 = forward
+    fragment_size: " --maxFragmentLength 1000 "
     
 # sandbox User #
 USER:
@@ -77,7 +81,7 @@ NORM:
 #   ".fq.gz"
 #   ".fastq.gz"
 SFX:
-  ".fastq.gz"
+  ".fq.gz"
 
 # barcode = illumina seq file
 #   CCATTGTT=AATGATACGGCGACCACCGAGATCTACACAACAATGGACACTCTTTCCCTACACGACGCTCTTCCGA
@@ -157,4 +161,3 @@ BARCODES:
 #                         The minimum fragment length needed for read/pair inclusion. (Default: 0)
 #   --maxFragmentLength INT
 #                         The maximum fragment length needed for read/pair inclusion. (Default: 0)
-    

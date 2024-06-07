@@ -12,11 +12,12 @@ rule hisatPE:
         stats = PROJ + "/bams/{sample}_" + INDEX_MAP + "_hisat_stats.txt"
     params:
         job_name = "{sample}_hisatPE",
-        memory   = MEMORY * 16,
         idx      = INDEX_PATH + INDEX_MAP,
         args     = CMD_PARAMS["hisat2"],
         args2    = CMD_PARAMS["samtools"],
         sortname = PROJ + "/{sample}.temp"
+    resources:
+        memory   = MEMORY * 3 + 10
     log:
         out = PROJ + "/logs/{sample}_hisat.out",
         err = PROJ + "/logs/{sample}_hisat.err"
@@ -53,8 +54,9 @@ rule hisatPE_summmary:
     output:
         PROJ + "/stats/" + PROJ + "_aligned.tsv"
     params:
-        job_name = "hisatPE_summmary",
-        memory   = MEMORY
+        job_name = "hisatPE_summmary"
+    resources:
+        memory   = 4
     log:
         out = PROJ + "/logs/hisat_summmary.out",
         err = PROJ + "/logs/_hisat_summmary.err"

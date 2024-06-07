@@ -13,7 +13,7 @@ sub_sum    <- str_c(stats_dir, proj, "_results.tsv")
 
 
 # Sample names and groups
-qc_sams <- plot_grpss$SAMPLES %>% bind_rows()
+qc_sams <- lapply(plot_grpss$SAMPLES[[1]], function(x) unlist(x)) %>% bind_cols() 
 
 
 # Create table of sample groups

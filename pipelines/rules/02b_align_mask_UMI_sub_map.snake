@@ -30,12 +30,13 @@ rule dedup_UMI:
         stats  = PROJ + "/bams/{sample}_" + INDEX_MAP + "_UMI_dedup_stats.txt"
     params:
         job_name = "{sample}_dedup",
-        memory   = MEMORY * 3,
         samp     = "{sample}_" + INDEX_MAP,
         idx      = INDEX_PATH + INDEX_MAP + ".txt",
         sortname = PROJ + "/{sample}.temp",
         mask     = MASK,
         args     = CMD_PARAMS["umi_tools"]
+    resources:
+        memory   = MEMORY * 3
     log:
         out = PROJ + "/logs/{sample}_dedup.out",
         err = PROJ + "/logs/{sample}_dedup.err"
@@ -70,13 +71,14 @@ rule calculating_subsample_group:
     input:
         lambda wildcards: expand(
             PROJ + "/UMI/{sample}_" + INDEX_MAP + "_dedup.txt",
-            sample = SAMPLES[wildcards.group]
+            sample = GROUPS[wildcards.group]
         )
     output:
         PROJ + "/bams/{group}_" + INDEX_MAP + "_subsample_frac.txt"
     params:
         job_name = "{group}_subsample",
-        group   = "{group}",
+        group   = "{group}"
+    resources:
         memory   = 4
     log:
         out = PROJ + "/logs/{group}_subsample.out",
@@ -99,7 +101,8 @@ rule calculating_subsample_summary:
     output:
         PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_subsample_frac.tsv"
     params:
-        job_name = PROJ + "_calculating_subsample_summary",
+        job_name = PROJ + "_calculating_subsample_summary"
+    resources:
         memory   = 4
     log:
         out = PROJ + "/logs/" + PROJ + "_calculating_subsample_summary.out",
@@ -128,9 +131,10 @@ rule subsample_dedup:
         counts = PROJ + "/counts/{sample}_" + INDEX_MAP + "_subsample.txt"
     params:
         job_name = "subsample_dedup_{sample}",
-        memory   = MEMORY * 3,
         samp     = "{sample}_" + INDEX_MAP,
         scale    = _get_norm
+    resources:
+        memory   = MEMORY * 3
     log:
         out = PROJ + "/logs/subsample_dedup_{sample}_" + INDEX_MAP + ".out",
         err = PROJ + "/logs/subsample_dedup_{sample}_" + INDEX_MAP + ".err"
@@ -160,11 +164,12 @@ rule align_filter_subsample_sample:
         stats = PROJ + "/bams_sub/{sample}_" + INDEX_SAMPLE + "_subsample.txt"
     params:
         job_name = "{sample}_align_filter_subsample",
-        memory   = MEMORY * 3,
         idx      = INDEX_PATH + INDEX_SAMPLE + ".txt",
         fa2      = FA_SAMPLE,
         sortname = PROJ + "/{sample}.temp",
         mysample = "{sample}_" + INDEX_SAMPLE
+    resources:
+        memory   = MEMORY * 3
     log:
         out = PROJ + "/logs/{sample}_align_filter_subsample.out",
         err = PROJ + "/logs/{sample}_align_filter_subsample.err"
@@ -197,6 +202,7 @@ rule dedup_summary:
         PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_UMI_dedup.tsv"
     params:
         job_name = PROJ + "_dedup_summary",
+    resources:
         memory   = 4
     log:
         out = PROJ + "/logs/" + PROJ + "_dedup_summary.out",
@@ -240,7 +246,8 @@ rule subsample_summary:
     output:
         PROJ + "/stats/" + PROJ + "_" + INDEX_SAMPLE + "_subsample.tsv"
     params:
-        job_name = PROJ + "_subsample_whole_summary",
+        job_name = PROJ + "_subsample_whole_summary"
+    resources:
         memory   = 4
     log:
         out = PROJ + "/logs/" + PROJ + "_subsample_sample_summary.out",
@@ -267,11 +274,12 @@ rule align_filter_subsample_sample_spikein:
         stats = PROJ + "/bams_sub/{sample}_" + INDEX_SPIKE + "_subsample.txt"
     params:
         job_name = "{sample}_align_filter_subsample_spikein",
-        memory   = MEMORY * 3,
         idx      = INDEX_PATH + INDEX_SPIKE + ".txt",
         fa3      = FA_SPIKE,
         sortname = PROJ + "/{sample}_spikein.temp",
         mysample = "{sample}_" + INDEX_SPIKE
+    resources:
+        memory   = MEMORY * 3
     log:
         out = PROJ + "/logs/{sample}_align_filter_spikein_subsample.out",
         err = PROJ + "/logs/{sample}_align_filter_spikein_subsample.err"
@@ -302,7 +310,8 @@ rule subsample_summary_spikein:
     output:
         PROJ + "/stats/" + PROJ + "_" + INDEX_SPIKE + "_subsample.tsv"
     params:
-        job_name = PROJ + "_subsample_spikein_summary",
+        job_name = PROJ + "_subsample_spikein_summary"
+    resources:
         memory   = 4
     log:
         out = PROJ + "/logs/" + PROJ + "_subsample_spikein_summary.out",
@@ -328,10 +337,11 @@ rule align_filter_sample:
         bai   = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai"
     params:
         job_name = "{sample}_align_filter",
-        memory   = MEMORY * 3,
         idx      = INDEX_PATH + INDEX_SAMPLE + ".txt",
         fa2      = FA_SAMPLE,
         sortname = PROJ + "/{sample}.temp"
+    resources:
+        memory   = MEMORY * 3
     log:
         out = PROJ + "/logs/{sample}_align_filter.out",
         err = PROJ + "/logs/{sample}_align_filter.err"
@@ -362,10 +372,11 @@ rule align_filter_sample_spikein:
         bai = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam.bai"
     params:
         job_name = "{sample}_align_filter_spikein",
-        memory   = MEMORY * 3,
         idx      = INDEX_PATH + INDEX_SPIKE + ".txt",
         fa3      = FA_SPIKE,
         sortname = PROJ + "/{sample}_spikein.temp"
+    resources:
+        memory   = MEMORY * 3
     log:
         out = PROJ + "/logs/{sample}_align_filter_spikein.out",
         err = PROJ + "/logs/{sample}_align_filter_spikein.err"

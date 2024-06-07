@@ -11,8 +11,9 @@ rule my_summary_npz:
         temp(PROJ + "/bw/multiBamSummary.npz")
     params:
         job_name = "multiBamSummary",
-        memory   = 20,
         my_ref   = ENRICHED_SAMPLE
+    resources:
+        memory   = MEMORY * 5
     log:
         out = PROJ + "/logs/multiBamSummary.out",
         err = PROJ + "/logs/multiBamSummary.err"
@@ -38,8 +39,9 @@ rule my_PCA_plot:
     output:
         PROJ + "/stats/multiBamSummary.png"
     params:
-        job_name = "PCA_plot",
-        memory   = 20
+        job_name = "PCA_plot"
+    resources:
+        memory   = 4
     log:
         out = PROJ + "/logs/PCA_plot.out",
         err = PROJ + "/logs/PCA_plot.err"

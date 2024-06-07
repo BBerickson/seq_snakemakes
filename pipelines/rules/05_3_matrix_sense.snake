@@ -5,23 +5,24 @@
 # stranded sense matrix files
 rule my_3_sense_matrix:
     input:
-        fw  =   PROJ   + "/bw/{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
-        rev =   PROJ   + "/bw/{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw"
+        fw  =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
+        rev =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw"
     output:
-        sense   = temp(PROJ   + "/matrix/{group}_temp0_3_matrix.gz"),
-        sense1  = temp(PROJ   + "/matrix/{group}_temp1_3_matrix.gz"),
-        sense2  = temp(PROJ   + "/matrix/{group}_temp2_3_matrix.gz")
+        sense   = temp(PROJ   + "/matrix/{newnam}_temp0_3_matrix.gz"),
+        sense1  = temp(PROJ   + "/matrix/{newnam}_temp1_3_matrix.gz"),
+        sense2  = temp(PROJ   + "/matrix/{newnam}_temp2_3_matrix.gz")
     params:
-        job_name = "{group}_sense_matrix",
-        memory   = MEMORY * 5,
+        job_name = "{newnam}_sense_matrix",
         args     = CMD_PARAMS["reference3"]  + CMD_PARAMS["BL"],
         fw_ref   = FW_REF,
         rev_ref  = REV_REF
+    resources:
+        memory   = MEMORY * 5
     log:
-        out = PROJ + "/logs/{group}_sense_3_matrix.out",
-        err = PROJ + "/logs/{group}_sense_3_matrix.err"
+        out = PROJ + "/logs/{newnam}_sense_3_matrix.out",
+        err = PROJ + "/logs/{newnam}_sense_3_matrix.err"
     message:
-        "standard sense 3 matrix files {wildcards.group}"
+        "standard sense 3 matrix files {wildcards.newnam}"
     threads: 
         12
     shell:
@@ -48,18 +49,19 @@ rule my_3_sense_matrix:
 # stranded sense matrix files
 rule fix_3_sense_matrix:
     input:
-        PROJ   + "/matrix/{group}_temp0_3_matrix.gz"
+        PROJ   + "/matrix/{newnam}_temp0_3_matrix.gz"
     output:
-        temp(PROJ   + "/matrix/{group}_temp0_fix_3_matrix.gz")
+        temp(PROJ   + "/matrix/{newnam}_temp0_fix_3_matrix.gz")
     params:
-        job_name = "{group}_3_sense_matrix",
-        memory   = MEMORY,
+        job_name = "{newnam}_3_sense_matrix",
         args    = CMD_PARAMS["filter3"]
+    resources:
+        memory   = MEMORY
     log:
-        out = PROJ + "/logs/{group}_fix_3_sense_matrix.out",
-        err = PROJ + "/logs/{group}_fix_3_sense_matrix.err"
+        out = PROJ + "/logs/{newnam}_fix_3_sense_matrix.out",
+        err = PROJ + "/logs/{newnam}_fix_3_sense_matrix.err"
     message:
-        "fix standard sense 3 matrix files {wildcards.group}"
+        "fix standard sense 3 matrix files {wildcards.newnam}"
     threads: 
         1
     script:
@@ -69,27 +71,28 @@ rule fix_3_sense_matrix:
 # make url's and scp to sandbox
 rule my_3_url:
     input:
-        PROJ   + "/matrix/{group}_temp0_fix_3_matrix.gz"
+        PROJ   + "/matrix/{newnam}_temp0_fix_3_matrix.gz"
     output:
-        temp(PROJ + "/matrix/3.{group}_matrix.url.txt"),
-        PROJ + "/matrix/3_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_matrix.gz"
+        temp(PROJ + "/matrix/3.{newnam}_matrix.url.txt"),
+        PROJ + "/matrix/3_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_matrix.gz"
     params:
         job_name = PROJ + "_3_matrix_url",
-        memory   = 4,
         color    = _get_col,
-        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/3_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_matrix.gz"
+        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/3_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_matrix.gz"
+    resources:
+        memory   = 4
     log:
-        out = PROJ + "/logs/{group}_sense_3_matrix_url.out",
-        err = PROJ + "/logs/{group}_sense_3_matrix_url.err"
+        out = PROJ + "/logs/{newnam}_sense_3_matrix_url.out",
+        err = PROJ + "/logs/{newnam}_sense_3_matrix_url.err"
     message:
-        "Creating sense 3_matrix url for {wildcards.group}"
+        "Creating sense 3_matrix url for {wildcards.newnam}"
     threads:
         1
     shell:
         """
         # fix R appended file remote read error
         computeMatrixOperations relabel -m {input} -o {output[1]}
-        echo {params.url_out} 3 3.{wildcards.group}_{SEQ_DATE} {params.color} >> {output[0]}
+        echo {params.url_out} 3 3.{wildcards.newnam}_{SEQ_DATE} {params.color} >> {output[0]}
         ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
         scp {output[1]} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
         
@@ -99,13 +102,14 @@ rule my_3_url:
 rule my_3_url_summary:
     input:
         sorted(expand(
-            PROJ + "/matrix/3.{group}_matrix.url.txt",
-            group = GRPS_UNIQ
+            PROJ + "/matrix/3.{newnam}_matrix.url.txt",
+            newnam = NAMS_UNIQ
         ))
     output:
         PROJ + "/URLS/3_" + PROJ + "_" + INDEX_SAMPLE + "_" + NORM3 + "_sense_matrix.url.txt"
     params:
-        job_name = PROJ + "_sense_3_matrix_url",
+        job_name = PROJ + "_sense_3_matrix_url"
+    resources:
         memory   = 4
     log:
         out = PROJ + "/logs/" + PROJ + "_sense_3_matrix_url.out",

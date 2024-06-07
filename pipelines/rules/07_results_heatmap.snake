@@ -3,26 +3,27 @@
 rule create_report:
     input:
         expand(
-            PROJ + "/heatmap/5_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + ".png",
-            group2 = GRP2_UNIQ
+            PROJ + "/heatmap/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + ".png",
+            group = GRPS_UNIQ
         ),
         expand(
-            PROJ + "/heatmap/3_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + ".png",
-            group2 = GRP2_UNIQ
+            PROJ + "/heatmap/3_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + ".png",
+            group = GRPS_UNIQ
         ),
         expand(
-            PROJ + "/heatmap/5_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_profile.png",
-            group2 = GRP2_UNIQ
+            PROJ + "/heatmap/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_profile.png",
+            group = GRPS_UNIQ
         ),
         expand(
-            PROJ + "/heatmap/3_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_profile.png",
-            group2 = GRP2_UNIQ
+            PROJ + "/heatmap/3_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_profile.png",
+            group = GRPS_UNIQ
         )
     output:
         PROJ + "/" + PROJ + "_" + INDEX_SAMPLE + "_heatmap_analysis.html"
     params:
-        job_name   = PROJ + "_heatmap_plots",
-        memory     = MEMORY
+        job_name   = PROJ + "_heatmap_plots"
+    resources:
+        memory   = MEMORY * 3
     log:
         out = PROJ + "/logs/" + PROJ + "_heatmap_plots.out",
         err = PROJ + "/logs/" + PROJ + "_heatmap_plots.err"

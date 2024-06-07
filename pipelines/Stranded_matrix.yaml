@@ -14,7 +14,7 @@ CMD_PARAMS:
     filter543:   "1000 1000 stranded"
     reference5:  " --referencePoint TSS --binSize 50 --upstream 1000 --downstream 5000 --missingDataAsZero --skipZeros -q "
     filter5:     "1000 1000 stranded"
-    reference5a: " --referencePoint TSS --binSize 50 --upstream 5000 --downstream 1000 --missingDataAsZero --skipZeros -q "
+    reference5a: " --scale -1 --referencePoint TSS --binSize 50 --upstream 5000 --downstream 1000 --missingDataAsZero --skipZeros -q "
     filter5a:    "1000 1000 stranded"
     reference3:  " --referencePoint TES --binSize 100 --upstream 1000 --downstream 5000 --missingDataAsZero --skipZeros -q "
     filter3:     "1000 5000 stranded"

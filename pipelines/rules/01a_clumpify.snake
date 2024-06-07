@@ -18,8 +18,9 @@ rule clumpify_paired:
         log = PROJ + "/clumpify/{sample}_clumpify.log"
     params:
         job_name = "{sample}_clumpify",
-        memory   = MEMORY * 20,
         args     = CMD_PARAMS["clumpify"]
+    resources:
+        memory   = MEMORY * 10 + 20
     log:
         out = PROJ + "/logs/{sample}_clumpify.out",
         err = PROJ + "/logs/{sample}_clumpify.err"
@@ -34,7 +35,7 @@ rule clumpify_paired:
         else:
             shell(
                 """
-                clumpify.sh -Xmx200g \
+                clumpify.sh -Xmx{resources.memory}g \
                     in1={input[0]} in2={input[1]} \
                     out1={output[0]} out2={output[1]} \
                     {params.args} 2>> {output[2]}
@@ -52,8 +53,9 @@ rule clumpify_summary:
     output:
         PROJ + "/stats/" + PROJ + "_clumpify.tsv"
     params:
-        job_name = PROJ + "_clumpify_summary",
-        memory   = MEMORY
+        job_name = PROJ + "_clumpify_summary"
+    resources:
+        memory   = 4
     log:
         out = PROJ + "/logs/" + PROJ + "_clumpify_summary.out",
         err = PROJ + "/logs/" + PROJ + "_clumpify_summary.err"

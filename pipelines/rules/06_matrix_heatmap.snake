@@ -3,25 +3,26 @@
 rule create_5_mixed_sense_antisense_matrix:
     input:
         lambda wildcards: expand(
-          PROJ + "/matrix/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_matrix.gz",
-          group = SAMPLES[wildcards.group2]
+          PROJ + "/matrix/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_matrix.gz",
+          newnam = GROUP2[wildcards.group]
         ),
         lambda wildcards: expand(
-          PROJ + "/matrix/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_anti_matrix.gz",
-          group = SAMPLES[wildcards.group2]
+          PROJ + "/matrix/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_anti_matrix.gz",
+          newnam = GROUP2[wildcards.group]
         )
     output:
-        PROJ + "/matrix2/5_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_sense_antisense.matrix.gz"
+        PROJ + "/matrix2/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_sense_antisense.matrix.gz"
     params:
-        job_name  = PROJ + "{group2}_5prim_mixed_sense_antisense_matrix",
-        samplab   = SAMPLES,
-        groulab   = "{group2}",
-        memory    = MEMORY
+        job_name  = PROJ + "{group}_5prim_mixed_sense_antisense_matrix",
+        samplab   = GROUP2,
+        groulab   = "{group}"
+    resources:
+        memory   = 4
     log:
-        out = PROJ + "/logs/" + PROJ + "_{group2}_5prim_mixed_sense_antisense_matrix.out",
-        err = PROJ + "/logs/" + PROJ + "_{group2}_5prim_mixed_sense_antisense_matrix.err"
+        out = PROJ + "/logs/" + PROJ + "_{group}_5prim_mixed_sense_antisense_matrix.out",
+        err = PROJ + "/logs/" + PROJ + "_{group}_5prim_mixed_sense_antisense_matrix.err"
     message:
-        "Creating merged 5prim matrix files for sense antisense {wildcards.group2}"
+        "Creating merged 5prim matrix files for sense antisense {wildcards.group}"
     threads: 
         1
     script:
@@ -30,21 +31,22 @@ rule create_5_mixed_sense_antisense_matrix:
 rule create_5_mixed_sense_matrix:
     input:
         lambda wildcards: expand(
-          PROJ + "/matrix/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_matrix.gz",
-          group = SAMPLES[wildcards.group2]
+          PROJ + "/matrix/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_matrix.gz",
+          newnam = GROUP2[wildcards.group]
         )
     output:
-        PROJ + "/matrix2/5_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_sense.matrix.gz"
+        PROJ + "/matrix2/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_sense.matrix.gz"
     params:
-        job_name  = PROJ + "{group2}_5prim_mixed_sense_matrix",
-        samplab   = SAMPLES,
-        groulab   = "{group2}",
-        memory    = MEMORY
+        job_name  = PROJ + "{group}_5prim_mixed_sense_matrix",
+        samplab   = GROUP2,
+        groulab   = "{group}"
+    resources:
+        memory   = 4
     log:
-        out = PROJ + "/logs/" + PROJ + "_{group2}_5prim_mixed_sense_matrix.out",
-        err = PROJ + "/logs/" + PROJ + "_{group2}_5prim_mixed_sense_matrix.err"
+        out = PROJ + "/logs/" + PROJ + "_{group}_5prim_mixed_sense_matrix.out",
+        err = PROJ + "/logs/" + PROJ + "_{group}_5prim_mixed_sense_matrix.err"
     message:
-        "Creating merged 5prim matrix files for sense {wildcards.group2}"
+        "Creating merged 5prim matrix files for sense {wildcards.group}"
     threads: 
         1
     script:
@@ -53,21 +55,22 @@ rule create_5_mixed_sense_matrix:
 rule create_5_mixed_antisense_matrix:
     input:
         lambda wildcards: expand(
-          PROJ + "/matrix/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5A + "_anti_matrix.gz",
-          group = SAMPLES[wildcards.group2]
+          PROJ + "/matrix/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5A + "_anti_matrix.gz",
+          newnam = GROUP2[wildcards.group]
         )
     output:
-        PROJ + "/matrix2/5_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5A + "_antisense.matrix.gz"
+        PROJ + "/matrix2/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5A + "_antisense.matrix.gz"
     params:
-        job_name  = PROJ + "{group2}_5prim_mixed_antisense_matrix",
-        samplab   = SAMPLES,
-        groulab   = "{group2}",
-        memory    = MEMORY
+        job_name  = PROJ + "{group}_5prim_mixed_antisense_matrix",
+        samplab   = GROUP2,
+        groulab   = "{group}"
+    resources:
+        memory   = 4
     log:
-        out = PROJ + "/logs/" + PROJ + "_{group2}_5prim_mixed_antisense_matrix.out",
-        err = PROJ + "/logs/" + PROJ + "_{group2}_5prim_mixed_antisense_matrix.err"
+        out = PROJ + "/logs/" + PROJ + "_{group}_5prim_mixed_antisense_matrix.out",
+        err = PROJ + "/logs/" + PROJ + "_{group}_5prim_mixed_antisense_matrix.err"
     message:
-        "Creating merged 5prim matrix files for antisense {wildcards.group2}"
+        "Creating merged 5prim matrix files for antisense {wildcards.group}"
     threads: 
         1
     script:
@@ -76,21 +79,22 @@ rule create_5_mixed_antisense_matrix:
 rule create_3_mixed_sense_matrix:
     input:
         lambda wildcards: expand(
-          PROJ + "/matrix/3_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_matrix.gz",
-          group = SAMPLES[wildcards.group2]
+          PROJ + "/matrix/3_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_matrix.gz",
+          newnam = GROUP2[wildcards.group]
         )
     output:
-        PROJ + "/matrix2/3_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_sense.matrix.gz"
+        PROJ + "/matrix2/3_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_sense.matrix.gz"
     params:
-        job_name  = PROJ + "{group2}_3prim_mixed_sense_matrix",
-        samplab   = SAMPLES,
-        groulab   = "{group2}",
-        memory    = MEMORY
+        job_name  = PROJ + "{group}_3prim_mixed_sense_matrix",
+        samplab   = GROUP2,
+        groulab   = "{group}"
+    resources:
+        memory   = 4
     log:
-        out = PROJ + "/logs/" + PROJ + "_{group2}_3prim_mixed_sense_matrix.out",
-        err = PROJ + "/logs/" + PROJ + "_{group2}_3prim_mixed_sense_matrix.err"
+        out = PROJ + "/logs/" + PROJ + "_{group}_3prim_mixed_sense_matrix.out",
+        err = PROJ + "/logs/" + PROJ + "_{group}_3prim_mixed_sense_matrix.err"
     message:
-        "Creating merged 3prim matrix files for {wildcards.group2}"
+        "Creating merged 3prim matrix files for {wildcards.group}"
     threads: 
         1
     script:
@@ -99,29 +103,30 @@ rule create_3_mixed_sense_matrix:
 
 rule create_5_sense_antisense_heatmap_plots:
     input:
-        PROJ + "/matrix2/5_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_sense_antisense.matrix.gz",
-        PROJ + "/matrix2/5_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_sense.matrix.gz",
-        PROJ + "/matrix2/5_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5A + "_antisense.matrix.gz"
+        PROJ + "/matrix2/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_sense_antisense.matrix.gz",
+        PROJ + "/matrix2/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_sense.matrix.gz",
+        PROJ + "/matrix2/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5A + "_antisense.matrix.gz"
     output:
-        temp(PROJ + "/heatmap/5_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + ".svg"),
-        temp(PROJ + "/heatmap/5_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_cluster_sense.svg"),
-        temp(PROJ + "/heatmap/5_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5A + "_cluster_anti.svg"),
-        PROJ + "/heatmap/5_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_cluster_sense.bed",
-        PROJ + "/heatmap/5_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5A + "_cluster_anti.bed"
+        temp(PROJ + "/heatmap/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + ".svg"),
+        temp(PROJ + "/heatmap/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_cluster_sense.svg"),
+        temp(PROJ + "/heatmap/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5A + "_cluster_anti.svg"),
+        PROJ + "/heatmap/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_cluster_sense.bed",
+        PROJ + "/heatmap/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5A + "_cluster_anti.bed"
     params:
-        job_name = PROJ + "_{group2}_5prim_heatmap_plots",
-        title    = "{group2}",
+        job_name = PROJ + "_{group}_5prim_heatmap_plots",
+        title    = "{group}",
         args     = CMD_PARAMS["heatmap"],
         args2    = CMD_PARAMS["csheatmap"],
         args3    = CMD_PARAMS["caheatmap"],
         setcol   = _rgb2hexplus,
-        setcol2  = _rgb2hexplus2,
-        memory   = MEMORY
+        setcol2  = _rgb2hexplus2
+    resources:
+        memory   = MEMORY * 2
     log:
-        out = PROJ + "/logs/" + PROJ + "_{group2}_5prim_heatmap_plots.out",
-        err = PROJ + "/logs/" + PROJ + "_{group2}_5prim_heatmap_plots.err"
+        out = PROJ + "/logs/" + PROJ + "_{group}_5prim_heatmap_plots.out",
+        err = PROJ + "/logs/" + PROJ + "_{group}_5prim_heatmap_plots.err"
     message:
-        "Creating 5prim heatmap plots for {wildcards.group2}"
+        "Creating 5prim heatmap plots for {wildcards.group}"
     threads:
         1
     shell:
@@ -156,23 +161,24 @@ rule create_5_sense_antisense_heatmap_plots:
         
 rule create_3_sense_heatmap_plots:
     input:
-        PROJ + "/matrix2/3_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_sense.matrix.gz"
+        PROJ + "/matrix2/3_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_sense.matrix.gz"
     output:
-        temp(PROJ + "/heatmap/3_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + ".svg"),
-        temp(PROJ + "/heatmap/3_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_cluster_sense.svg"),
-        PROJ + "/heatmap/3_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_cluster_sense.bed"
+        temp(PROJ + "/heatmap/3_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + ".svg"),
+        temp(PROJ + "/heatmap/3_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_cluster_sense.svg"),
+        PROJ + "/heatmap/3_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_cluster_sense.bed"
     params:
-        job_name = PROJ + "_{group2}_3prim_heatmap_plots",
-        title    = "{group2}",
+        job_name = PROJ + "_{group}_3prim_heatmap_plots",
+        title    = "{group}",
         args     = CMD_PARAMS["heatmap"],
         args2    = CMD_PARAMS["csheatmap"],
-        setcol   = _rgb2hexplus,
-        memory   = MEMORY
+        setcol   = _rgb2hexplus
+    resources:
+        memory   = MEMORY * 2
     log:
-        out = PROJ + "/logs/" + PROJ + "_{group2}_3prim_heatmap_plots.out",
-        err = PROJ + "/logs/" + PROJ + "_{group2}_3prim_heatmap_plots.err"
+        out = PROJ + "/logs/" + PROJ + "_{group}_3prim_heatmap_plots.out",
+        err = PROJ + "/logs/" + PROJ + "_{group}_3prim_heatmap_plots.err"
     message:
-        "Creating 3prim heatmap plots for {wildcards.group2}"
+        "Creating 3prim heatmap plots for {wildcards.group}"
     threads:
         1
     shell:
@@ -199,18 +205,19 @@ rule create_3_sense_heatmap_plots:
         
 rule create_5_sense_antisense_profile_plots:
     input:
-        PROJ + "/matrix2/5_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_sense_antisense.matrix.gz"
+        PROJ + "/matrix2/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_sense_antisense.matrix.gz"
     output:
-        PROJ + "/heatmap/5_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_profile.png"
+        PROJ + "/heatmap/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_profile.png"
     params:
-        job_name = PROJ + "_{group2}_5prim_profile_plots",
-        setcol   = _rgb2hex,
-        memory   = MEMORY
+        job_name = PROJ + "_{group}_5prim_profile_plots",
+        setcol   = _rgb2hex
+    resources:
+        memory   = MEMORY * 2
     log:
-        out = PROJ + "/logs/" + PROJ + "_{group2}_5prim_profile_plots.out",
-        err = PROJ + "/logs/" + PROJ + "_{group2}_5prim_profile_plots.err"
+        out = PROJ + "/logs/" + PROJ + "_{group}_5prim_profile_plots.out",
+        err = PROJ + "/logs/" + PROJ + "_{group}_5prim_profile_plots.err"
     message:
-        "Creating 5prim profile plots for {wildcards.group2}"
+        "Creating 5prim profile plots for {wildcards.group}"
     threads:
         1
     shell:
@@ -226,18 +233,19 @@ rule create_5_sense_antisense_profile_plots:
         
 rule create_3_sense_profile_plots:
     input:
-        PROJ + "/matrix2/3_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_sense.matrix.gz"
+        PROJ + "/matrix2/3_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_sense.matrix.gz"
     output:
-        PROJ + "/heatmap/3_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_profile.png"
+        PROJ + "/heatmap/3_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_profile.png"
     params:
-        job_name = PROJ + "_{group2}_5prim_profile_plots",
-        setcol   = _rgb2hex,
-        memory   = MEMORY
+        job_name = PROJ + "_{group}_5prim_profile_plots",
+        setcol   = _rgb2hex
+    resources:
+        memory   = MEMORY * 2
     log:
-        out = PROJ + "/logs/" + PROJ + "_{group2}_3prim_profile_plots.out",
-        err = PROJ + "/logs/" + PROJ + "_{group2}_3prim_profile_plots.err"
+        out = PROJ + "/logs/" + PROJ + "_{group}_3prim_profile_plots.out",
+        err = PROJ + "/logs/" + PROJ + "_{group}_3prim_profile_plots.err"
     message:
-        "Creating 3prim profile plots for {wildcards.group2}"
+        "Creating 3prim profile plots for {wildcards.group}"
     threads:
         1
     shell:
@@ -253,22 +261,23 @@ rule create_3_sense_profile_plots:
                 
 rule create_5_sense_antisense_heatmap_png:
     input:
-        PROJ + "/heatmap/5_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + ".svg",
-        PROJ + "/heatmap/5_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_cluster_sense.svg",
-        PROJ + "/heatmap/5_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5A + "_cluster_anti.svg"
+        PROJ + "/heatmap/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + ".svg",
+        PROJ + "/heatmap/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_cluster_sense.svg",
+        PROJ + "/heatmap/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5A + "_cluster_anti.svg"
     output:
-        PROJ + "/heatmap/5_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + ".png",
-        PROJ + "/heatmap/5_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_cluster_sense.png",
-        PROJ + "/heatmap/5_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5A + "_cluster_anti.png"
+        PROJ + "/heatmap/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + ".png",
+        PROJ + "/heatmap/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_cluster_sense.png",
+        PROJ + "/heatmap/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5A + "_cluster_anti.png"
     params:
-        job_name = PROJ + "_{group2}_5prim_heatmap_png",
-        texty    = "2 1.5 1.5",
-        memory   = MEMORY
+        job_name = PROJ + "_{group}_5prim_heatmap_png",
+        texty    = "2 1.5 1.5"
+    resources:
+        memory   = 4
     log:
-        out = PROJ + "/logs/" + PROJ + "_{group2}_5prim_heatmap_png.out",
-        err = PROJ + "/logs/" + PROJ + "_{group2}_5prim_heatmap_png.err"
+        out = PROJ + "/logs/" + PROJ + "_{group}_5prim_heatmap_png.out",
+        err = PROJ + "/logs/" + PROJ + "_{group}_5prim_heatmap_png.err"
     message:
-        "Creating 5prim heatmap png for {wildcards.group2}"
+        "Creating 5prim heatmap png for {wildcards.group}"
     threads:
         1
     script:
@@ -276,20 +285,21 @@ rule create_5_sense_antisense_heatmap_png:
         
 rule create_3_sense_heatmap_png:
     input:
-        PROJ + "/heatmap/3_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + ".svg",
-        PROJ + "/heatmap/3_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_cluster_sense.svg"
+        PROJ + "/heatmap/3_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + ".svg",
+        PROJ + "/heatmap/3_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_cluster_sense.svg"
     output:
-        PROJ + "/heatmap/3_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + ".png",
-        PROJ + "/heatmap/3_{group2}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_cluster_sense.png"
+        PROJ + "/heatmap/3_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + ".png",
+        PROJ + "/heatmap/3_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_cluster_sense.png"
     params:
-        job_name = PROJ + "_{group2}_3prim_heatmap_png",
-        texty    = "1.5 1.5",
-        memory   = MEMORY
+        job_name = PROJ + "_{group}_3prim_heatmap_png",
+        texty    = "1.5 1.5"
+    resources:
+        memory   = 4
     log:
-        out = PROJ + "/logs/" + PROJ + "_{group2}_3prim_heatmap_png.out",
-        err = PROJ + "/logs/" + PROJ + "_{group2}_3prim_heatmap_png.err"
+        out = PROJ + "/logs/" + PROJ + "_{group}_3prim_heatmap_png.out",
+        err = PROJ + "/logs/" + PROJ + "_{group}_3prim_heatmap_png.err"
     message:
-        "Creating 3prim heatmap png for {wildcards.group2}"
+        "Creating 3prim heatmap png for {wildcards.group}"
     threads:
         1
     script:

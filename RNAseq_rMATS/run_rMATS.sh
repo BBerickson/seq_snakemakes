@@ -14,12 +14,8 @@ mkdir -p logs
 module load modules modules-init modules-python
 module load python/3.8.5
 module load samtools/1.9
-module load bbtools/39.01
-module load hisat2/2.1.0
-module load STAR/2.7.10a
 module load rMATS/4.0.2
 module load R/4.2.2
-module load fastqc/0.11.9
 
 # Function to run snakemake
 run_snakemake() {
@@ -30,11 +26,11 @@ run_snakemake() {
         -oo {log.out} 
         -eo {log.err} 
         -J {params.job_name}
-        -R "rusage[mem={params.memory}] span[hosts=1]"
+        -R "rusage[mem={resources.memory}] span[hosts=1]"
         -n {threads}
         -q rna '
 
-    /beevol/home/erickson/.local/bin/snakemake \
+    snakemake \
         --snakefile $snake_file \
         --drmaa "$args" \
         --jobs 100 \
@@ -52,7 +48,4 @@ samples2=samples_rMATS.yaml
 
 run_snakemake $snake "$samples $samples2 $genome"
 
-# snake=$pipe_dir/Stranded_matrix_offset_nogroup.snake
-# config=$pipe_dir/Stranded_matrix.yaml
-# run_snakemake $snake "$samples $config $genome"
 

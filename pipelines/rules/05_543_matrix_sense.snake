@@ -4,24 +4,25 @@
 # stranded sense matrix files
 rule sense_543_matrix:
     input:
-        fw  =   PROJ   + "/bw/{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
-        rev =   PROJ   + "/bw/{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw"
+        fw  =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
+        rev =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw"
     output:
-        sense0  = temp(PROJ   + "/matrix/{group}_temp0_543_sense_matrix.gz"),
-        sense1  = temp(PROJ   + "/matrix/{group}_temp1_543_sense_matrix.gz"),
-        sense2  = temp(PROJ   + "/matrix/{group}_temp2_543_sense_matrix.gz")
+        sense0  = temp(PROJ   + "/matrix/{newnam}_temp0_543_sense_matrix.gz"),
+        sense1  = temp(PROJ   + "/matrix/{newnam}_temp1_543_sense_matrix.gz"),
+        sense2  = temp(PROJ   + "/matrix/{newnam}_temp2_543_sense_matrix.gz")
     params:
-        job_name = "{group}_sense_matrix",
-        memory   = MEMORY * 5,
+        job_name = "{newnam}_sense_matrix",
         args     = CMD_PARAMS["region543"]  + CMD_PARAMS["BL"],
         fw_ref   = FW_REF,
         rev_ref  = REV_REF,
         color    = _get_col
+    resources:
+        memory   = MEMORY * 5
     log:
-        out = PROJ + "/logs/{group}_543_sense_matrix.out",
-        err = PROJ + "/logs/{group}_543_sense_matrix.err"
+        out = PROJ + "/logs/{newnam}_543_sense_matrix.out",
+        err = PROJ + "/logs/{newnam}_543_sense_matrix.err"
     message:
-        "standard sense 543 matrix files {wildcards.group}"
+        "standard sense 543 matrix files {wildcards.newnam}"
     threads: 
         12
     shell:
@@ -48,18 +49,19 @@ rule sense_543_matrix:
 # stranded sense matrix files
 rule fix_543_sense_matrix:
     input:
-        PROJ   + "/matrix/{group}_temp0_543_sense_matrix.gz"
+        PROJ   + "/matrix/{newnam}_temp0_543_sense_matrix.gz"
     output:
-        temp(PROJ + "/matrix/{group}_temp0_fix_543_sense_matrix.gz")
+        temp(PROJ + "/matrix/{newnam}_temp0_fix_543_sense_matrix.gz")
     params:
-        job_name = "{group}_sense_matrix",
-        memory   = MEMORY,
+        job_name = "{newnam}_sense_matrix",
         args    = CMD_PARAMS["filter543"]
+    resources:
+        memory   = 4
     log:
-        out = PROJ + "/logs/{group}_fix_543_sense_matrix.out",
-        err = PROJ + "/logs/{group}_fix_543_sense_matrix.err"
+        out = PROJ + "/logs/{newnam}_fix_543_sense_matrix.out",
+        err = PROJ + "/logs/{newnam}_fix_543_sense_matrix.err"
     message:
-        "fix standard sense 543 matrix files {wildcards.group}"
+        "fix standard sense 543 matrix files {wildcards.newnam}"
     threads: 
         1
     script:
@@ -68,27 +70,28 @@ rule fix_543_sense_matrix:
 # stranded sense matrix files
 rule urls_543_sense_matrix:
     input:
-        PROJ + "/matrix/{group}_temp0_fix_543_sense_matrix.gz"
+        PROJ + "/matrix/{newnam}_temp0_fix_543_sense_matrix.gz"
     output:
-        temp(PROJ + "/matrix/543.{group}_matrix.url.txt"),
-        PROJ   + "/matrix/543_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM543 + "_matrix.gz"
+        temp(PROJ + "/matrix/543.{newnam}_matrix.url.txt"),
+        PROJ   + "/matrix/543_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM543 + "_matrix.gz"
     params:
-        job_name = "{group}_sense_matrix",
-        memory   = 4,
+        job_name = "{newnam}_sense_matrix",
         color    = _get_col,
-        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/543_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM543 + "_matrix.gz"
+        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/543_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM543 + "_matrix.gz"
+    resources:
+        memory   = MEMORY
     log:
-        out = PROJ + "/logs/{group}_url_543_sense_matrix.out",
-        err = PROJ + "/logs/{group}_url_543_sense_matrix.err"
+        out = PROJ + "/logs/{newnam}_url_543_sense_matrix.out",
+        err = PROJ + "/logs/{newnam}_url_543_sense_matrix.err"
     message:
-        "url standard sense 543 matrix files {wildcards.group}"
+        "url standard sense 543 matrix files {wildcards.newnam}"
     threads: 
         1
     shell:
         """
         # fix R appended file remote read error
         computeMatrixOperations relabel -m {input} -o {output[1]}
-        echo {params.url_out} 543 543.{wildcards.group}_{SEQ_DATE} {params.color} >> {output[0]}
+        echo {params.url_out} 543 543.{wildcards.newnam}_{SEQ_DATE} {params.color} >> {output[0]}
         ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
         scp {output[1]} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
 
@@ -98,13 +101,14 @@ rule urls_543_sense_matrix:
 rule sense_543_url_summary:
     input:
         sorted(expand(
-            PROJ + "/matrix/543.{group}_matrix.url.txt",
-            group = GRPS_UNIQ
+            PROJ + "/matrix/543.{newnam}_matrix.url.txt",
+            newnam = NAMS_UNIQ
         ))
     output:
         PROJ + "/URLS/543_" + PROJ + "_" + INDEX_SAMPLE + "_" + NORM543 + "_sense_matrix.url.txt"
     params:
-        job_name = PROJ + "_sense_543_matrix_url",
+        job_name = PROJ + "_sense_543_matrix_url"
+    resources:
         memory   = 4
     log:
         out = PROJ + "/logs/" + PROJ + "_sense_543_matrix_url.out",

@@ -10,8 +10,9 @@ rule fastqc:
         PROJ + "/fastqc/{fastq}_fastqc.html"
     params:
         job_name = "{fastq}_fastqc",
-        memory   = MEMORY * 5,
         out      = PROJ + "/fastqc"
+    resources:
+        memory   = MEMORY * 2
     log:
         out = PROJ + "/logs/{fastq}_fastqc.out",
         err = PROJ + "/logs/{fastq}_fastqc.err"
@@ -41,8 +42,9 @@ rule fastqc_summary:
     output:
         PROJ + "/stats/" + PROJ + "_fastqc.tsv"
     params:
-        job_name = PROJ + "_fastqc_summary",
-        memory   = MEMORY
+        job_name = PROJ + "_fastqc_summary"
+    resources:
+        memory   = 4
     log:
         out = PROJ + "/logs/" + PROJ + "_fastqc_summary.out",
         err = PROJ + "/logs/" + PROJ + "_fastqc_summary.err"

@@ -18,6 +18,7 @@ RAW_DATA:
 # directories listed under RAW_DATA. If the sample name
 # matches multiple fastqs, an error will be thrown.
 # If samples have a input pair with a spikeIN list together
+# or if doing subsampling ... needs work
 #
 # group-name-1:
 #     - "sample_1_file_prefix"
@@ -27,17 +28,22 @@ RAW_DATA:
 #     - "sample_2_file_prefix"
 #     - "input_2_file_prefix"
 #
+
 SAMPLES:
-    RTF1_WT_pDox_DRB_0:
-      - "293flpIN_RTF1_WT_DRB_t0"
-      
-    RTF1_MT_pDox_DRB_0:
-      - "293flpIN_RTF1_MT_DRB_t0"
+    SECTION-1:
+        SAMPLING-GROUP-1:
+            RTF1_WT_pDox_DRB_0: "293flpIN_RTF1_WT_DRB_t0"
+            RTF1_WT_pDox_DRB_15: "293flpIN_RTF1_WT_DRB_t15"
+
+        SAMPLING-GROUP-2:
+            RTF1_MT_pDox_DRB_0: "293flpIN_RTF1_MT_DRB_t0"
+            RTF1_WT_pDox_DRB_15: "293flpIN_RTF1_WT_DRB_t15"
       
 
-# norm bw with scaleFactor with : None, chrM, sample (hg38) sample_enrich (hg38_enrich)
-# spikeIN (scer3), spikeIN_enrich (scer3_enrich), 
-# #  OR, OR_enrich, (if input with spike in is paired up)
+# norm bw with --scaleFactor, (if using --normalizeUsing set to None), 
+# chrM, shRNA, index (hg38), spikeIN (mm10), enrich, (hg38_enrich)
+# OR, OR_enrich, (if input with spike in is paired up)
+# "subsample" make bw and matix files from sub-sampled bam files (paired groups)
 NORM:
   "chrM"
   
@@ -60,12 +66,12 @@ CMD_PARAMS:
 #   ".fq.gz"
 #   ".fastq.gz"
 SFX:
-  ".fastq.gz"
+  ".fq.gz"
 
 # Base memory to request for each rule
 # The acutal amount requested will be higher for rules that generally
 # require more memory
-# A value of 4 will result in rules requesting between 4Gb - 200Gb
+# A value of 4 will result in rules requesting between 4Gb - 60Gb
 # request ~2 per GB of max raw.fastq.gz file
 MEMORY:
     4  
@@ -306,4 +312,3 @@ COLORS:
 #                         The minimum fragment length needed for read/pair inclusion. (Default: 0)
 #   --maxFragmentLength INT
 #                         The maximum fragment length needed for read/pair inclusion. (Default: 0)
-  

@@ -27,18 +27,19 @@ RAW_DATA:
 #     - "sample_2_file_prefix"
 #     - "input_2_file_prefix"
 #
+
 SAMPLES:
-    PP1-PNUTS-H66K_mdox_DRB_CTD:
-      - "293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD"
-      - "293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input"
-      
-    PP1-PNUTS-H66K_pdox_DRB_CTD:
-      - "293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_CTD"
-      - "293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input"
-      
-      
+    SECTION-1:
+        SAMPLE-INPUT-PAIR-1:
+            PP1-PNUTS-H66K_mdox_DRB_CTD: "293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_CTD"
+            PP1-PNUTS-H66K_mdox_DRB_Input: "293flpIN_PP1-PNUTS-H66K_mdox_DRB_ChIPseq_input"
+
+        SAMPLE-INPUT-PAIR-2:
+            PP1-PNUTS-H66K_pdox_DRB_CTD: "293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_CTD"
+            PP1-PNUTS-H66K_pdox_DRB_Input: "293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input"
+                  
 # norm bw with --scaleFactor, (if using --normalizeUsing set to None), 
-# sample (hg38), spikeIN (mm10), enrich (enrich_hg38 | enrich_mm10), 
+# chrM, shRNA, sample (hg38), spikeIN (mm10), enrich (enrich_hg38 | enrich_mm10), 
 # OR, OR_enrich if input with spike in is paired up
 NORM:
   "OR_enrich"
@@ -46,11 +47,11 @@ NORM:
 # Base memory to request for each rule
 # The acutal amount requested will be higher for rules that generally
 # require more memory
-# A value of 8 will result in rules requesting between 8Gb - 32Gb of
+# A value of 4 will result in rules requesting between 4Gb - 60Gb of
 # request ~2Gb/GB of fastq.gz file
 # memory
 MEMORY:
-    6
+    4
   
   # set RGB colors for bw urls and table files, 
   # list as many colors as samples (not inputs) 
@@ -79,7 +80,7 @@ USER:
 #   ".fq.gz"
 #   ".fastq.gz"
 SFX:
-  ".fastq.gz"
+  ".fq.gz"
 
 # barcode = illumina seq file or string AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC ATCTCGTATGCCGTCTTCTGCTTG
 #   CCATTGTT=AATGATACGGCGACCACCGAGATCTACACAACAATGGACACTCTTTCCCTACACGACGCTCTTCCGA
@@ -290,6 +291,3 @@ BARCODES:
 #                         The minimum fragment length needed for read/pair inclusion. (Default: 0)
 #   --maxFragmentLength INT
 #                         The maximum fragment length needed for read/pair inclusion. (Default: 0)
-      
-
-  

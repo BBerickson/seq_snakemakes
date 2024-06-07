@@ -12,8 +12,9 @@ rule featureCounts:
         PROJ + "/stats/" + PROJ + "_featureCounts.tsv"
     params:
         job_name = PROJ + "_featureCounts",
-        memory   = MEMORY,
         args     = CMD_PARAMS["featureCounts"]
+    resources:
+        memory   = MEMORY
     log:
         out = PROJ + "/logs/" + PROJ + "_featureCounts.out",
         err = PROJ + "/logs/" + PROJ + "_featureCounts.err"

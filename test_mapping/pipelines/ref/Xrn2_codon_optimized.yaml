@@ -13,6 +13,10 @@ INDEX_SPIKE:
     ""
 MASK:
   ""
+SNRNA:
+  "/beevol/home/erickson/ref/hg38/ref/snRNAs.bed"
+SPIKE_SNRNA:
+  ""
 # fasta files for splitting bam file
 FA_SAMPLE:
   "/beevol/home/erickson/ref/test/Xrn2_Int11_codon_optimized/Xrn2_codon_optimized.fa"

@@ -4,23 +4,24 @@
 # stranded sense matrix files
 rule my_5_bidirectonal_matrix:
     input:
-        fw  =   PROJ   + "/bw/{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
-        rev =   PROJ   + "/bw/{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw"
+        fw  =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
+        rev =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw"
     output:
-        sense   = temp(PROJ   + "/matrix/{group}_temp0_5_matrix.gz"),
-        asense  = temp(PROJ   + "/matrix/{group}_temp0_a5_matrix.gz")
+        sense   = temp(PROJ   + "/matrix/{newnam}_temp0b_5_matrix.gz"),
+        asense  = temp(PROJ   + "/matrix/{newnam}_temp0b_a5_matrix.gz")
     params:
-        job_name = "{group}_bidirectonal_matrix",
-        memory   = MEMORY * 5,
+        job_name = "{newnam}_bidirectonal_matrix",
         args     = CMD_PARAMS["reference5"]  + CMD_PARAMS["BL"],
         argsa    = CMD_PARAMS["reference5a"]  + CMD_PARAMS["BL"],
         fw_ref   = FW_REF,
         rev_ref  = REV_REF
+    resources:
+        memory   = MEMORY * 5
     log:
-        out = PROJ + "/logs/{group}_bidirectonal_5_matrix.out",
-        err = PROJ + "/logs/{group}_bidirectonal_5_matrix.err"
+        out = PROJ + "/logs/{newnam}_bidirectonal_5_matrix.out",
+        err = PROJ + "/logs/{newnam}_bidirectonal_5_matrix.err"
     message:
-        "standard bidirectonal 5 matrix files {wildcards.group}"
+        "standard bidirectonal 5 matrix files {wildcards.newnam}"
     threads: 
         12
     shell:
@@ -45,18 +46,19 @@ rule my_5_bidirectonal_matrix:
 # stranded bidirectonal matrix files
 rule fix_5_sense_matrix:
     input:
-        PROJ   + "/matrix/{group}_temp0_5_matrix.gz"
+        PROJ   + "/matrix/{newnam}_temp0b_5_matrix.gz"
     output:
-        PROJ + "/matrix/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_pos_matrix.gz"
+        PROJ   + "/matrix/{newnam}_temp0b_5fix_matrix.gz"
     params:
-        job_name = "{group}_5_sense_matrix",
-        memory   = MEMORY * 5,
+        job_name = "{newnam}_5_sense_matrix",
         args    = CMD_PARAMS["filter5"]
+    resources:
+        memory   = 4
     log:
-        out = PROJ + "/logs/{group}_fix_5_sense_matrix.out",
-        err = PROJ + "/logs/{group}_fix_5_sense_matrix.err"
+        out = PROJ + "/logs/{newnam}_fix_5_sense_matrix.out",
+        err = PROJ + "/logs/{newnam}_fix_5_sense_matrix.err"
     message:
-        "fix standard sense 5 matrix files {wildcards.group}"
+        "fix standard sense 5 matrix files {wildcards.newnam}"
     threads: 
         1
     script:
@@ -65,18 +67,19 @@ rule fix_5_sense_matrix:
 # stranded asense matrix files
 rule fix_5_asense_matrix:
     input:
-        PROJ   + "/matrix/{group}_temp0_a5_matrix.gz"
+        PROJ   + "/matrix/{newnam}_temp0b_a5_matrix.gz"
     output:
-        PROJ + "/matrix/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5A + "_neg_matrix.gz"
+        PROJ   + "/matrix/{newnam}_temp0b_a5fix_matrix.gz"
     params:
-        job_name = "{group}_5_asense_matrix",
-        memory   = MEMORY * 5,
+        job_name = "{newnam}_5_asense_matrix",
         args    = CMD_PARAMS["filter5a"]
+    resources:
+        memory   = 4
     log:
-        out = PROJ + "/logs/{group}_fix_5_asense_matrix.out",
-        err = PROJ + "/logs/{group}_fix_5_asense_matrix.err"
+        out = PROJ + "/logs/{newnam}_fix_5_asense_matrix.out",
+        err = PROJ + "/logs/{newnam}_fix_5_asense_matrix.err"
     message:
-        "fix standard asense 5 matrix files {wildcards.group}"
+        "fix standard asense 5 matrix files {wildcards.newnam}"
     threads: 
         1
     script:
@@ -85,37 +88,37 @@ rule fix_5_asense_matrix:
 # make url's and scp to sandbox
 rule my_5_url_s:
     input:
-        matrix1 = PROJ + "/matrix/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_pos_matrix.gz",
-        matrix2 = PROJ + "/matrix/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5A + "_neg_matrix.gz"
+        matrix1 = PROJ  + "/matrix/{newnam}_temp0b_5fix_matrix.gz"
+        matrix2 = PROJ  + "/matrix/{newnam}_temp0b_a5fix_matrix.gz"
     output:
-        temp(PROJ + "/matrix/5.{group}_matrixs.url.txt")
+        temp(PROJ + "/matrix/5.{newnam}_matrixs.url.txt"),
+        PROJ + "/matrix/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_pos_matrix.gz",
+        PROJ + "/matrix/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5A + "_neg_matrix.gz"
     params:
         job_name = PROJ + "_bidirectonal_5_matrix_url",
-        memory   = 4,
         color    = _get_col,
-        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_pos_matrix.gz",
-        url_anti = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5A + "_neg_matrix.gz",
-        matrix1g = PROJ + "/matrix/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_pos_matrix",
-        matrix2g = PROJ + "/matrix/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5A + "_neg_matrix"
+        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_pos_matrix.gz",
+        url_anti = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5A + "_neg_matrix.gz"
+    resources:
+        memory   = MEMORY
     log:
-        out = PROJ + "/logs/{group}_bidirectonal_5_matrix_url.out",
-        err = PROJ + "/logs/{group}_bidirectonal_5_matrix_url.err"
+        out = PROJ + "/logs/{newnam}_bidirectonal_5_matrix_url.out",
+        err = PROJ + "/logs/{newnam}_bidirectonal_5_matrix_url.err"
     message:
-        "Creating bidirectonal 5_matrix url for {wildcards.group}"
+        "Creating bidirectonal 5_matrix url for {wildcards.newnam}"
     threads:
         1
     shell:
         """
-        # fix for strange side affect that only the 1 line loads from sandbox
-        gunzip {input.matrix1}
-        gzip {params.matrix1g}
-        gunzip {input.matrix2}
-        gzip {params.matrix2g}
-        echo {params.url_out} 5 5.{wildcards.group}_{SEQ_DATE}_pos {params.color} >> {output[0]}
-        echo {params.url_anti} 5 5.{wildcards.group}_{SEQ_DATE}_neg {params.color} >> {output[0]}
+        # fix R appended file remote read error
+        computeMatrixOperations relabel -m {input.matrix1} -o {output[1]}
+        computeMatrixOperations relabel -m {input.matrix2} -o {output[2]}
+        
+        echo {params.url_out} 5 5.{wildcards.newnam}_{SEQ_DATE}_pos {params.color} >> {output[0]}
+        echo {params.url_anti} 5 5.{wildcards.newnam}_{SEQ_DATE}_neg {params.color} >> {output[0]}
         ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
-        scp {input.matrix1} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
-        scp {input.matrix2} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
+        scp {output[1]} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
+        scp {output[2]} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
         
         """
         
@@ -123,13 +126,14 @@ rule my_5_url_s:
 rule my_5_url_s_summary:
     input:
         sorted(expand(
-            PROJ + "/matrix/5.{group}_matrixs.url.txt",
-            group = GRPS_UNIQ
+            PROJ + "/matrix/5.{newnam}_matrixs.url.txt",
+            newnam = NAMS_UNIQ
         ))
     output:
         PROJ + "/URLS/5_" + PROJ + "_" + INDEX_SAMPLE + "_" + NORM5S + "_bidirectonal_matrix.url.txt"
     params:
-        job_name = PROJ + "_bidirectonal_5_matrix_url",
+        job_name = PROJ + "_bidirectonal_5_matrix_url"
+    resources:
         memory   = 4
     log:
         out = PROJ + "/logs/" + PROJ + "_bidirectonal_5_matrix_url.out",

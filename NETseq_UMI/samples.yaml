@@ -20,26 +20,28 @@ RAW_DATA:
 # matches multiple fastqs, an error will be thrown.
 #
 # group-name-1:
-#     - "sample_1_file_prefix"
-#     - "treatment_1_file_prefix"
+#     new-name-1: "sample_2_file_prefix"
+#     new-name-2: "treatment_2_file_prefix"
 #
 # group-name-2:
-#     - "sample_2_file_prefix"
-#     - "treatment_2_file_prefix"
+#     new-name-1: "sample_2_file_prefix"
+#     new-name-2: "treatment_2_file_prefix"
 #
+
 SAMPLES:
-    PNUTS-r1:
-        - "siControl_S1"
-        - "siPNUTS_1_S2"
+    SECTION-1:
+        SAMPLING-GROUP-1:
+            Control: "siControl_S1"
+            PNUTS: "siPNUTS_1_S2"
 
 # Base memory to request for each rule
 # The acutal amount requested will be higher for rules that generally
 # require more memory
-# A value of 8 will result in rules requesting between 8Gb - 32Gb of
+# A value of 4 will result in rules requesting between 4Gb - 60Gb of
 # request ~2Gb/GB of fastq.gz file
 # memory
 MEMORY:
-    32
+    4
 
 # set colors for bw urls and table files, if missing 0,0,0 is default
 # COLORS:
@@ -81,7 +83,7 @@ NORM:
 #   ".fq.gz"
 #   ".fastq.gz"
 SFX:
-  ".fastq.gz"
+  ".fq.gz"
  
  
 ## Additional common parameters for various processing steps

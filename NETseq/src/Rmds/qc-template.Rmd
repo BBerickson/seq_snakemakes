@@ -10,7 +10,7 @@ bbduk_sum  <- str_c(stats_dir, proj, "_bbduk.tsv")
 bwt_sum    <- str_c(stats_dir, proj, "_aligned.tsv")
 
 # Sample names and groups
-qc_sams <- plot_grpss$SAMPLES %>% bind_rows()
+qc_sams <- lapply(plot_grpss$SAMPLES[[1]], function(x) unlist(x)) %>% bind_cols() 
 
 
 # Create table of sample groups
@@ -148,6 +148,26 @@ bwt_sum %>%
 
 ```
 
+
+
+## fragment size plots
+
+```{r "fragment size plots", fig.width = 16, fig.height = 10}
+
+chunkSize <- 2
+pngFiles <- list.files(path = stats_dir, pattern = "*_fragmentSize.png$")
+if(length(pngFiles)>0){
+  pngFiles <- str_c(stats_dir, pngFiles)
+  nsize <- length(pngFiles)
+  for(i in 1:ceiling(nsize / chunkSize)){  
+    rl = lapply(sprintf(pngFiles[((i-1)*chunkSize+1):min(nsize,(i*chunkSize))]), png::readPNG)
+    gl = lapply(rl, grid::rasterGrob)
+    gridExtra::grid.arrange(grobs=gl,ncol=chunkSize)
+  }
+
+}
+
+```
 
 
 ---

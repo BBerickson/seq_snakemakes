@@ -38,13 +38,13 @@ rule bbduk_paired:
     output:
         R1   = temp(PROJ + "/{sample}_R1.fastq.gz"),
         R2   = temp(PROJ + "/{sample}_R2.fastq.gz"),
-        log  = PROJ + "/bbduk/{sample}_bbduk.log",
-        log2 = PROJ + "/bbduk/{sample}_bbduk_KTrimmed.log"
+        log  = PROJ + "/bbduk/{sample}_bbduk.log"
     params:
         job_name = "{sample}_bbduk",
-        memory   = MEMORY * 30,
         args     = CMD_PARAMS["bbduk"],
         bar      = _get_barcodes
+    resources:
+        memory   = 30
     log:
         out = PROJ + "/logs/{sample}_bbduk.out",
         err = PROJ + "/logs/{sample}_bbduk.err"
@@ -59,10 +59,9 @@ rule bbduk_paired:
         else:
             shell(
                 """
-                bbduk.sh -Xmx100g threads=12 \
+                bbduk.sh -Xmx{resources.memory}g threads={threads} \
                     in1={input.R1} in2={input.R2} \
                     out1={output.R1} out2={output.R2} \
-                    stats={output.log2} \
                     literal={params.bar} {params.args} 2>> {output.log}
                 """
             )
@@ -77,8 +76,9 @@ rule bbduk_summary:
     output:
         PROJ + "/stats/" + PROJ + "_bbduk.tsv"
     params:
-        job_name = PROJ + "_bbduk_summary",
-        memory   = MEMORY
+        job_name = PROJ + "_bbduk_summary"
+    resources:
+        memory   = 4
     log:
         out = PROJ + "/logs/" + PROJ + "_bbduk_summary.out",
         err = PROJ + "/logs/" + PROJ + "_bbduk_summary.err"

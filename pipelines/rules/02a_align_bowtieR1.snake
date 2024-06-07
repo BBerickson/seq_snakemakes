@@ -11,11 +11,12 @@ rule bowtieR1:
         stats = PROJ + "/bams/{sample}_" + INDEX_MAP + "_bowtie_R1_stats.txt"
     params:
         job_name = "{sample}_bowtieR1",
-        memory   = MEMORY * 16,
         idx      = INDEX_PATH + INDEX_MAP,
         args     = CMD_PARAMS["bowtie2"],
         args2    = CMD_PARAMS["samtools"],
         sortname = PROJ + "/{sample}.temp"
+    resources:
+        memory   = MEMORY * 3 + 5
     log:
         out = PROJ + "/logs/{sample}_bowtie_R1.out",
         err = PROJ + "/logs/{sample}_bowtie_R1.err"
@@ -52,8 +53,9 @@ rule bowtieR1_summmary:
     output:
         PROJ + "/stats/" + PROJ + "_aligned.tsv"
     params:
-        job_name = "bowtieR1_summmary",
-        memory   = MEMORY
+        job_name = "bowtieR1_summmary"
+    resources:
+        memory   = 4
     log:
         out = PROJ + "/logs/bowtie_R1_summmary.out",
         err = PROJ + "/logs/bowtie_R1_summmary.err"

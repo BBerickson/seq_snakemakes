@@ -12,6 +12,9 @@ import random
 shell.executable("/bin/bash")
 shell.prefix("source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; ")
 
+#include my python common functions
+include: "commonFun.snake"
+
 # Parameters from config.yaml
 PROJ            = config["PROJ"]
 RAW_DATA        = config["RAW_DATA"]
@@ -57,34 +60,7 @@ wildcard_constraints:
     group   = GRP_REGEX,
 
 
-def _get_normtype(normUsing, scaleFactor, blacklist):
-    match = re.search(r"--normalizeUsing (\w+)", normUsing)
-    if match:
-      word = match.group(1)
-      if not word or word.isspace() or word.lower() == "none":
-        word = ""
-      else:
-        word = "_" + word
-    else:
-      word = ""
-    if scaleFactor or scaleFactor.isspace() or scaleFactor.lower() == "none":
-      word2 = scaleFactor
-      word = word + "_" + word2
-    if word == "":
-      word = "_None"
-    if re.search(r"\S", blacklist):
-      word = word + "_BL"
-    message = "norm" + word
-    return " ".join(message.split())
-
 NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"])
-
-def _get_bampath(bampath):
-    if bampath == "subsample":
-        word = "bams_sub"
-    else:
-        word = "bams"
-    return word
 
 BAM_PATH = _get_bampath(NORM)
 

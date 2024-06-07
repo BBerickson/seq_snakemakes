@@ -13,7 +13,10 @@ rule bowtie_counts_spikein:
         job_name = "{sample}_bowtie_counts_spikin",
         enrich2  = ENRICHED_SAMPLE,
         enrich3  = ENRICHED_SPIKE,
-        memory   = MEMORY
+        snrna    = SNRNA,
+        snrna2   = SPIKE_SNRNA
+    resources:
+        memory   = 4
     log:
         out = PROJ + "/logs/{sample}_bowtie_counts_spikin.out",
         err = PROJ + "/logs/{sample}_bowtie_count_spikins.err"
@@ -29,6 +32,8 @@ rule bowtie_counts_spikein:
         echo "enrich_{INDEX_SPIKE} $(samtools view {input.bam3} -L {params.enrich3} -c | awk ' {{print $0/2}}')" >> {output.stats2}
         echo "chrM_{INDEX_SAMPLE} $(samtools view {input.bam2} chrM -c | awk ' {{print $0/2}}')" >> {output.stats2}
         echo "chrM_{INDEX_SPIKE} $(samtools view {input.bam3} chrM -c | awk ' {{print $0/2}}')" >> {output.stats2}
+        echo "snRNA_{INDEX_SAMPLE} $(samtools view {input.bam2} -L {params.snrna} -c | awk ' {{print $0/2}}')" >> {output.stats2}
+        echo "snRNA_{INDEX_SPIKE} $(samtools view {input.bam3} -L {params.snrna2} -c | awk ' {{print $0/2}}')" >> {output.stats2}
         
         """
 
@@ -47,8 +52,9 @@ rule gathering_results:
     params:
         job_name  = "results",
         index_map = INDEX_MAP,
-        project   = PROJ,
-        memory    = MEMORY
+        project   = PROJ
+    resources:
+        memory   = 4
     log:
         out = PROJ + "/logs/results.out",
         err = PROJ + "/logs/results.err"
@@ -68,8 +74,9 @@ rule gathering_results:
     output:
         PROJ + "/" + PROJ + "_" + INDEX_SAMPLE + "_qc_analysis.html"
     params:
-        job_name   = PROJ + "_qc_plots",
-        memory     = MEMORY
+        job_name   = PROJ + "_qc_plots"
+    resources:
+        memory   = MEMORY * 5
     log:
         out = PROJ + "/logs/" + PROJ + "_qc_plots.out",
         err = PROJ + "/logs/" + PROJ + "_qc_plots.err"
@@ -82,9 +89,11 @@ rule gathering_results:
         Rmd=src/Rmds/analysis.Rmd
         script=src/Rmds/knit_rmd.R
         samp=samples.yaml
+        out="_qc_analysis"
 
         Rscript $script \
             -i $Rmd \
+            -o $out \
             -p {PROJ} \
             -m {INDEX_MAP} \
             -x {INDEX_SAMPLE} \

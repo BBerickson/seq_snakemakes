@@ -3,23 +3,24 @@
 # stranded antisense matrix files
 rule my_EI_amtisense_matrix2:
     input:
-        fw  =   PROJ   + "/bw/{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
-        rev =   PROJ   + "/bw/{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw"
+        fw  =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
+        rev =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw"
     output:
-        asense   = temp(PROJ   + "/matrix/{group}_temp02_aEI_matrix.gz"),
-        asense1  = temp(PROJ   + "/matrix/{group}_temp12_aEI_matrix.gz"),
-        asense2  = temp(PROJ   + "/matrix/{group}_temp22_aEI_matrix.gz")
+        asense   = temp(PROJ   + "/matrix/{newnam}_temp02_aEI_matrix.gz"),
+        asense1  = temp(PROJ   + "/matrix/{newnam}_temp12_aEI_matrix.gz"),
+        asense2  = temp(PROJ   + "/matrix/{newnam}_temp22_aEI_matrix.gz")
     params:
-        job_name = "{group}_EI_antisense_matrix2",
-        memory   = MEMORY * 4,
+        job_name = "{newnam}_EI_antisense_matrix2",
         args     = CMD_PARAMS["EI"] + CMD_PARAMS["BL"],
         fw_ref   = EI_FW_REF,
         rev_ref  = EI_REV_REF
+    resources:
+        memory   = MEMORY * 5
     log:
-        out = PROJ + "/logs/{group}_antisense_EI_matrix2.out",
-        err = PROJ + "/logs/{group}_antisense_EI_matrix2.err"
+        out = PROJ + "/logs/{newnam}_antisense_EI_matrix2.out",
+        err = PROJ + "/logs/{newnam}_antisense_EI_matrix2.err"
     message:
-        "standard antisense EI matrix files {wildcards.group}"
+        "standard antisense EI matrix files {wildcards.newnam}"
     threads: 
         12
     shell:
@@ -46,18 +47,19 @@ rule my_EI_amtisense_matrix2:
 # stranded asense matrix files
 rule fix_EI_asense_matrix2:
     input:
-        PROJ   + "/matrix/{group}_temp02_aEI_matrix.gz"
+        PROJ   + "/matrix/{newnam}_temp02_aEI_matrix.gz"
     output:
-        temp(PROJ   + "/matrix/{group}_temp02_fix_aEI_matrix.gz")
+        temp(PROJ   + "/matrix/{newnam}_temp02_fix_aEI_matrix.gz")
     params:
-        job_name = "{group}_EI_asense_matrix2",
-        memory   = MEMORY,
+        job_name = "{newnam}_EI_asense_matrix2",
         args    = CMD_PARAMS["filterEI"]
+    resources:
+        memory   = 4
     log:
-        out = PROJ + "/logs/{group}_fix_EI_asense_matrix2.out",
-        err = PROJ + "/logs/{group}_fix_EI_asense_matrix2.err"
+        out = PROJ + "/logs/{newnam}_fix_EI_asense_matrix2.out",
+        err = PROJ + "/logs/{newnam}_fix_EI_asense_matrix2.err"
     message:
-        "fix standard asense EI matrix files {wildcards.group}"
+        "fix standard asense EI matrix files {wildcards.newnam}"
     threads: 
         1
     script:
@@ -66,20 +68,21 @@ rule fix_EI_asense_matrix2:
 # make url's and scp to sandbox
 rule my_EI_url:
     input:
-        matrix2 = PROJ   + "/matrix/{group}_temp02_fix_aEI_matrix.gz"
+        matrix2 = PROJ   + "/matrix/{newnam}_temp02_fix_aEI_matrix.gz"
     output:
-        temp(PROJ + "/matrix/EI.{group}_matrix.url.txt"),
-        PROJ + "/matrix/EI_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMEI + "_anti_matrix.gz"
+        temp(PROJ + "/matrix/EI.{newnam}_matrix.url.txt"),
+        PROJ + "/matrix/EI_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMEI + "_anti_matrix.gz"
     params:
         job_name = PROJ + "_EI_matrix_url2",
-        memory   = 4,
         color    = _get_col,
-        url_anti = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + PROJ + "/EI_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMEI + "_anti_matrix.gz"
+        url_anti = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + PROJ + "/EI_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMEI + "_anti_matrix.gz"
+    resources:
+        memory   = MEMORY
     log:
-        out = PROJ + "/logs/{group}_sense_EI_matrix_url2.out",
-        err = PROJ + "/logs/{group}_sense_EI_matrix_url2.err"
+        out = PROJ + "/logs/{newnam}_sense_EI_matrix_url2.out",
+        err = PROJ + "/logs/{newnam}_sense_EI_matrix_url2.err"
     message:
-        "Creating sense EI_matrix url for {wildcards.group}"
+        "Creating sense EI_matrix url for {wildcards.newnam}"
     threads:
         1
     shell:
@@ -87,7 +90,7 @@ rule my_EI_url:
         # fix for strange side affect that only the 1 line loads from sandbox
         computeMatrixOperations relabel -m {input.matrix2} -o {output[1]}
         ssh amc-sandbox 'mkdir -p ./public_html/{PROJ}'
-        echo {params.url_anti} EI EI.{wildcards.group}_{SEQ_DATE}_anti {params.color} >> {output[0]}
+        echo {params.url_anti} EI EI.{wildcards.newnam}_{SEQ_DATE}_anti {params.color} >> {output[0]}
         scp {output[1]} amc-sandbox:./public_html/{PROJ}
         """
         
@@ -95,13 +98,14 @@ rule my_EI_url:
 rule my_EI_url_summary:
     input:
         sorted(expand(
-            PROJ + "/matrix/EI.{group}_matrix.url.txt",
-            group = GRPS_UNIQ
+            PROJ + "/matrix/EI.{newnam}_matrix.url.txt",
+            newnam = newnam
         ))
     output:
         PROJ + "/URLS/EI_" + PROJ + "_" + INDEX_SAMPLE + "_" + NORMEI + "_matrix.url.txt"
     params:
-        job_name = PROJ + "_sense_EI_matrix_url",
+        job_name = PROJ + "_sense_EI_matrix_url"
+    resources:
         memory   = 4
     log:
         out = PROJ + "/logs/" + PROJ + "_sense_EI_matrix_url.out",

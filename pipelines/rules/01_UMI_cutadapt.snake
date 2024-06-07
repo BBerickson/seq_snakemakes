@@ -21,8 +21,9 @@ rule extract_umi:
         log = PROJ + "/logs/{sample}_extract_umi.out"
     params:
         job_name = "{sample}_umi_extract",
-        memory   = MEMORY,
         umi_pat  = CMD_PARAMS["umi_pattern"]
+    resources:
+        memory   = MEMORY
     log:
         out = PROJ + "/logs/{sample}_extract_umi.out",
         err = PROJ + "/logs/{sample}_extract_umi.err"
@@ -55,8 +56,9 @@ rule cutadapt:
         stats = PROJ + "/cutadapt/{sample}_cutadapt_stats.txt"
     params:
         job_name = "{sample}_cutadapt",
-        memory   = MEMORY * 2,
         args     = CMD_PARAMS["cutadapt"]
+    resources:
+        memory   = MEMORY * 2
     log:
         out = PROJ + "/logs/{sample}_cutadapt.out",
         err = PROJ + "/logs/{sample}_cutadapt.err"
@@ -87,8 +89,9 @@ rule cutadapt_summary:
     output:
         PROJ + "/stats/" + PROJ + "_cutadapt.tsv"
     params:
-        job_name = PROJ + "_cutadapt_summary",
-        memory   = MEMORY
+        job_name = PROJ + "_cutadapt_summary"
+    resources:
+        memory   = 4
     log:
         out = PROJ + "/logs/" + PROJ + "_cutadapt_summary.out",
         err = PROJ + "/logs/" + PROJ + "_cutadapt_summary.err"

@@ -1,12 +1,21 @@
 # ====== Rules for aligning reads with bamCoverage and OR norm to spike in =================================
 
+# grab color from dict
+def _get_col(wildcards):
+    sample = wildcards.newnam
+    if sample in COLS_DICT:
+      results = (COLS_DICT[sample])
+    else:
+      results = "0,0,0"
+    return(results)
+        
 # gets number for norm fraction
 def _get_norm(wildcards):
-    group = wildcards.group
-    sample = SAMPLES[wildcards.group][0]
+    newnam = wildcards.newnam
+    sample = SAMPLES[wildcards.newnam][0]
     patternfile = NORM
     num = 1
-    if re.search("OR|OR_enrich|chrM", patternfile):
+    if re.search("OR|OR_enrich|chrM|snRNA", patternfile):
       patternfile = patternfile + "_" + INDEX_SAMPLE
       path = PROJ + "/counts/"
       filename = glob.glob(path + sample + "*")[0]
@@ -14,44 +23,40 @@ def _get_norm(wildcards):
         match = re.search(patternfile, line)
         if match:
           num = line.strip().split()
-          num = 1000000/float(num[1])
-          break
+          if not float(num[1]) == 0:
+            num = 1000000/float(num[1])
+            break
+          else:
+            num = 1
     if isinstance(num, (int, float)):
       return num
     else:
       return 1
-
-def _get_col(wildcards):
-    sample = SAMPLES[wildcards.group][0]
-    if sample in COLS_DICT:
-      results = (COLS_DICT[sample])
-    else:
-      results = "0,0,0"
-    return(results)
 
 # Align trimmed reads with bamCoverage
 rule bamCoverage:
     input:
         bam = lambda wildcards: expand(
             PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
-            sample = SAMPLES[wildcards.group]
+            sample = SAMPLES[wildcards.newnam]
         ),
         check_point = PROJ + "/stats/" + PROJ + "_results.tsv"
     output:
-        bigwig  = PROJ      + "/bw/{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + ".bw",
-        stats   = temp(PROJ      + "/bw/{group}_bamCoverage_stats.txt")
+        bigwig  = PROJ      + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + ".bw",
+        stats   = temp(PROJ      + "/bw/{newnam}_bamCoverage_stats.txt")
     params:
-        job_name = "{group}_bamCoverage",
-        memory   = MEMORY * 5,
+        job_name = "{newnam}_bamCoverage",
         args     = CMD_PARAMS["bamCoverage"] + CMD_PARAMS["bamCoverageBL"],
         scale    = _get_norm,
         color    = _get_col,
-        url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + ".bw"
+        url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + ".bw"
+    resources:
+        memory   = MEMORY * 5
     log:
-        out = PROJ + "/logs/{group}_bamCoverage.out",
-        err = PROJ + "/logs/{group}_bamCoverage.err"
+        out = PROJ + "/logs/{newnam}_bamCoverage.out",
+        err = PROJ + "/logs/{newnam}_bamCoverage.err"
     message:
-        "Aligning reads with bamCoverage for {wildcards.group}"
+        "Aligning reads with bamCoverage for {wildcards.newnam}"
     threads: 
         12
     shell:
@@ -65,7 +70,7 @@ rule bamCoverage:
           --scaleFactor {params.scale} \
           -p {threads} 
         
-        echo "track type=bigWig visibility=full name='{wildcards.group}_{SEQ_DATE}_{NORMS}' description='{wildcards.group}_{SEQ_DATE}_{NORMS}' color={params.color} bigDataUrl={params.url}" > {output.stats}
+        echo "track type=bigWig visibility=full name='{wildcards.newnam}_{SEQ_DATE}_{NORMS}' description='{wildcards.newnam}_{SEQ_DATE}_{NORMS}' color={params.color} bigDataUrl={params.url}" > {output.stats}
         ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
         scp {output.bigwig} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
         
@@ -76,13 +81,14 @@ rule bamCoverage:
 rule bamCoverage_summary:
     input:
         sorted(expand(
-            PROJ + "/bw/{group}_bamCoverage_stats.txt",
-            group = GRPS_UNIQ
+            PROJ + "/bw/{newnam}_bamCoverage_stats.txt",
+            newnam = NAMS_UNIQ
         ))
     output:
         PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + "_" + NORMS + "_bw_URL.txt"
     params:
-        job_name = PROJ + "_bamCoverage_summary",
+        job_name = PROJ + "_bamCoverage_summary"
+    resources:
         memory   = 4
     log:
         out = PROJ + "/logs/" + PROJ + "_bamCoverage_summary.out",
@@ -100,8 +106,8 @@ rule bamCoverage_summary:
 
 # gets number for norm fraction
 def _get_norm2(wildcards):
-    group = wildcards.group
-    sample = SAMPLES[wildcards.group][0]
+    newnam = wildcards.newnam
+    sample = SAMPLES[wildcards.newnam][0]
     patternfile = NORM
     num = 1
     if re.search("OR|OR_enrich|chrM", patternfile):
@@ -112,8 +118,11 @@ def _get_norm2(wildcards):
         match = re.search(patternfile, line)
         if match:
           num = line.strip().split()
-          num = 1000000/float(num[1])
-          break
+          if not float(num[1]) == 0:
+            num = 1000000/float(num[1])
+            break
+          else:
+            num = 1
     if isinstance(num, (int, float)):
       return num
     else:
@@ -125,24 +134,25 @@ rule bamCoverage_spike:
     input:
         bam = lambda wildcards: expand(
             PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
-            sample = SAMPLES[wildcards.group]
+            sample = SAMPLES[wildcards.newnam]
         ),
         check_point = PROJ + "/stats/" + PROJ + "_results.tsv"
     output:
-        bigwig  = PROJ      + "/bw/{group}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_" + NORMS + ".bw",
-        stats   = temp(PROJ      + "/bw/{group}_spike_bamCoverage_stats.txt")
+        bigwig  = PROJ      + "/bw/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_" + NORMS + ".bw",
+        stats   = temp(PROJ      + "/bw/{newnam}_spike_bamCoverage_stats.txt")
     params:
-        job_name = "{group}_bamCoverage_spike",
-        memory   = MEMORY * 5,
+        job_name = "{newnam}_bamCoverage_spike",
         args     = CMD_PARAMS["bamCoverage"] + CMD_PARAMS["bamCoverageBL"],
         scale    = _get_norm2,
         color    = _get_col,
-        url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{group}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_" + NORMS + ".bw"
+        url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_" + NORMS + ".bw"
+    resources:
+        memory   = MEMORY * 5
     log:
-        out = PROJ + "/logs/{group}_spike_bamCoverage.out",
-        err = PROJ + "/logs/{group}_spike_bamCoverage.err"
+        out = PROJ + "/logs/{newnam}_spike_bamCoverage.out",
+        err = PROJ + "/logs/{newnam}_spike_bamCoverage.err"
     message:
-        "Aligning reads with bamCoverage_spike for {wildcards.group}"
+        "Aligning reads with bamCoverage_spike for {wildcards.newnam}"
     threads: 
         12
     shell:
@@ -156,7 +166,7 @@ rule bamCoverage_spike:
           --scaleFactor {params.scale} \
           -p {threads} 
         
-        echo "track type=bigWig visibility=full name='{wildcards.group}_{SEQ_DATE}_{NORMS}' description='{wildcards.group}_{SEQ_DATE}_{NORMS}' color={params.color} bigDataUrl={params.url}" > {output.stats}
+        echo "track type=bigWig visibility=full name='{wildcards.newnam}_{SEQ_DATE}_{NORMS}' description='{wildcards.newnam}_{SEQ_DATE}_{NORMS}' color={params.color} bigDataUrl={params.url}" > {output.stats}
         ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
         scp {output.bigwig} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
         
@@ -167,13 +177,14 @@ rule bamCoverage_spike:
 rule bamCoverage_spike_summary:
     input:
         sorted(expand(
-            PROJ + "/bw/{group}_spike_bamCoverage_stats.txt",
-            group = GRPS_UNIQ
+            PROJ + "/bw/{newnam}_spike_bamCoverage_stats.txt",
+            newnam = NAMS_UNIQ
         ))
     output:
         PROJ + "/URLS/" + PROJ + "_" + INDEX_SPIKE + "_" + NORMS + "_bw_URL.txt"
     params:
-        job_name = PROJ + "_bamCoverage_spike_summary",
+        job_name = PROJ + "_bamCoverage_spike_summary"
+    resources:
         memory   = 4
     log:
         out = PROJ + "/logs/" + PROJ + "_bamCoverage_spike_summary.out",

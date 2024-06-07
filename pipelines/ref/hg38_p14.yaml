@@ -13,6 +13,10 @@ INDEX_SPIKE:
     ""
 MASK:
   "/beevol/home/erickson/ref/hg38_p14/base_ref/hg38_snoRNAs.bed"
+SNRNA:
+  "/beevol/home/erickson/ref/hg38_p14/base_ref/snRNAs.bed"
+SPIKE_SNRNA:
+  ""
 GTF:
   "/beevol/home/erickson/ref/hg38_p14/base_ref/Homo_sapiens.GRCh38.111.gtf.gz"
 # fasta files for splitting bam file

@@ -10,7 +10,9 @@ rule bowtie_counts:
     params:
         job_name = "{sample}_bowtie_counts",
         enrich2  = ENRICHED_SAMPLE,
-        memory   = MEMORY
+        snrna    = SNRNA
+    resources:
+        memory   = 4
     log:
         out = PROJ + "/logs/{sample}_bowtie_counts.out",
         err = PROJ + "/logs/{sample}_bowtie_count.err"
@@ -23,6 +25,7 @@ rule bowtie_counts:
         echo "{INDEX_SAMPLE} $(samtools idxstats {input.bam2} | awk '{{s+=$3}} END {{print s/2}}')" >> {output.stats2}
         echo "enrich_{INDEX_SAMPLE} $(samtools view {input.bam2} -L {params.enrich2} -c | awk ' {{print $0/2}}')" >> {output.stats2}
         echo "chrM_{INDEX_SAMPLE} $(samtools view {input.bam2} chrM -c | awk ' {{print $0/2}}')" >> {output.stats2}
+        echo "snRNA_{INDEX_SAMPLE} $(samtools view {input.bam2} -L {params.snrna} -c | awk ' {{print $0/2}}')" >> {output.stats2}
         
         """
 
@@ -40,8 +43,9 @@ rule gathering_results:
         PROJ + "/stats/" + PROJ + "_results.tsv"
     params:
         job_name = "results",
-        project  = PROJ,
-        memory   = MEMORY
+        project  = PROJ
+    resources:
+        memory   = 4
     log:
         out = PROJ + "/logs/results.out",
         err = PROJ + "/logs/results.err"
@@ -56,27 +60,22 @@ rule gathering_results:
 # fragment size of mapped paired end reads
 rule fragment_size:
     input:
-      bam = expand(
-            PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
-            sample = SAMS_UNIQ
-        ),
-      bai =  expand(
-            PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai",
-            sample = SAMS_UNIQ
-        )
+      bam = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
+      bai = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai"
     output:
-      log =  PROJ + "/stats/" + PROJ + "_" + INDEX_SAMPLE + "_fragment.txt",
-      pic =  PROJ + "/stats/" + PROJ + "_" + INDEX_SAMPLE + "_fragmentSize.png"
+      log =  PROJ + "/stats/{sample}_" + INDEX_SAMPLE + "_fragment.txt",
+      pic =  PROJ + "/stats/{sample}_" + INDEX_SAMPLE + "_fragmentSize.png"
     params:
-        job_name = "PE_fragment_size",
-        memory   = MEMORY * 16,
-        labels   = SAMS_UNIQ,
+        job_name = "{sample}_PE_fragment_size",
+        labels   = "{sample}", 
         args     = CMD_PARAMS["fragment_size"]
+    resources:
+        memory   = MEMORY * 5
     log:
-        out = PROJ + "/logs/PE_fragment_size.out",
-        err = PROJ + "/logs/PE_fragment_size.err"
+        out = PROJ + "/logs/{sample}_PE_fragment_size.out",
+        err = PROJ + "/logs/{sample}_PE_fragment_size.err"
     message:
-        "fragment size of mapped paired end reads"
+        "fragment size of mapped paired end {wildcards.sample} reads"
     threads: 
         12
     shell:
@@ -95,13 +94,18 @@ rule fragment_size:
 rule fragment_results:
     input:
         PROJ + "/stats/" + PROJ + "_results.tsv",
-        PROJ + "/stats/" + PROJ + "_" + INDEX_SAMPLE + "_fragment.txt"
+        sorted(expand(
+            PROJ + "/stats/{sample}_" + INDEX_SAMPLE + "_fragment.txt",
+            sample = SAMS_UNIQ
+        ))
     output:
         PROJ + "/stats/" + PROJ + "_fragment_results.tsv"
     params:
         job_name = "fragment_results",
         samp     = INDEX_SAMPLE,
-        memory   = MEMORY
+        project  = PROJ
+    resources:
+        memory   = 4
     log:
         out = PROJ + "/logs/fragment_results.out",
         err = PROJ + "/logs/fragment_results.err"
@@ -117,12 +121,14 @@ rule create_plots:
         PROJ + "/stats/" + PROJ + "_results.tsv",
         expand( PROJ + "/counts/{sample}_count.txt",
             sample = SAMS_UNIQ
-        )
+        ),
+        PROJ + "/stats/" + PROJ + "_fragment_results.tsv"
     output:
         PROJ + "/" + PROJ + "_" + INDEX_SAMPLE + "_qc_analysis.html"
     params:
-        job_name   = PROJ + "_qc_plots",
-        memory     = MEMORY
+        job_name   = PROJ + "_qc_plots"
+    resources:
+        memory   = MEMORY * 5
     log:
         out = PROJ + "/logs/" + PROJ + "_qc_plots.out",
         err = PROJ + "/logs/" + PROJ + "_qc_plots.err"

@@ -50,4 +50,3 @@ CMD_PARAMS:
 # --nthread NTHREAD     The number of thread. The optimal number of thread
 # should be equal to the number of CPU core.
 
-    
