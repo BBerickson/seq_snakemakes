@@ -5,26 +5,23 @@ GENELIST:
     "Xrn2_codon_opti"
 INDEX_PATH:
     "/beevol/home/erickson/ref/test/Xrn2_Int11_codon_optimized/"
-INDEX_SAMPLE:
-    "Xrn2_codon_optimized"
 INDEX_MAP:
+    "Xrn2_codon_optimized"
+INDEX_SAMPLE:
     "Xrn2_codon_optimized"
 INDEX_SPIKE:
     ""
 MASK:
   ""
-SNRNA:
-  "/beevol/home/erickson/ref/hg38/ref/snRNAs.bed"
-SPIKE_SNRNA:
+GTF:
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/Homo_sapiens.GRCh38.111.gtf"
+SAF:
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/enrich.saf"
+SAF_SPIKE:
   ""
-# fasta files for splitting bam file
 FA_SAMPLE:
   "/beevol/home/erickson/ref/test/Xrn2_Int11_codon_optimized/Xrn2_codon_optimized.fa"
 FA_SPIKE:
-  ""
-ENRICHED_SAMPLE:
-  "/beevol/home/erickson/ref/hg38/ref/enrich.bed"
-ENRICHED_SPIKE:
   ""
 MY_REF:
   ""
@@ -34,3 +31,8 @@ REV_REF:
   ""
 PI_REF:
   ""
+EI_FW_REF:
+  ""
+EI_REV_REF:
+  ""
+  

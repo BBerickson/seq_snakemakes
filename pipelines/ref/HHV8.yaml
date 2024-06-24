@@ -13,20 +13,15 @@ INDEX_SPIKE:
     ""
 MASK:
   ""
-SNRNA:
-  "/beevol/home/erickson/ref/HHV8/KSHV_genes.bed"
-SPIKE_SNRNA:
-  ""
 GTF:
   ""
-# fasta files for splitting bam file
+SAF:
+  ""
+SAF_SPIKE:
+  ""
 FA_SAMPLE:
   "/beevol/home/erickson/ref/HHV8/HHV8.fa"
 FA_SPIKE:
-  ""
-ENRICHED_SAMPLE:
-  "/beevol/home/erickson/ref/HHV8/KSHV_genes.bed"
-ENRICHED_SPIKE:
   ""
 MY_REF:
   "/beevol/home/erickson/ref/HHV8/KSHV_genes.bed"

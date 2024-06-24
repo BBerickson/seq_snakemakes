@@ -32,11 +32,8 @@ if(!is_empty(count_files)){
     unlist()
   
   paste0(mydirc,"/",count_files) -> count_files
-  if(length(snakemake@input)>3){
-    filter_type <- c("NONE|chrM")
-  } else {
-    filter_type <- c("NONE")
-  }
+  filter_type <- c("NONE")
+
   gg <- NULL
   for(i in seq_along(count_files)){
     gg <- read_delim(count_files[i],delim = " ",

@@ -1,13 +1,5 @@
 # ===== Snakefile for removing duplicates with clumpify =====================
 
-# Function to retrieve fastq paths
-def _get_fq_paths(wildcards):
-    fqs = [_get_fqs(wildcards.sample, x) for x in FQ_SFX]
-    fqs = [FASTQ_DIR + "/" + x + SFX for x in fqs]
-
-    return fqs
-
-
 # Run clumpify for single-end reads
 rule clumpify_paired:
     input:

@@ -1,19 +1,17 @@
 # ===== Snake file for processing Bowtie ================================
 
-from pytools.persistent_dict import PersistentDict
-import os
-import glob
-import re
-import subprocess
-import gzip
-import random
-
 # Configure shell for all rules
 shell.executable("/bin/bash")
 shell.prefix("source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; ")
 
-#include my python common functions
-include: "commonFun.snake"
+# python packages
+import os
+import glob
+import re
+import gzip
+
+# include my python common functions
+include: "funs.py"
 
 # Parameters from config.yaml
 PROJ            = config["PROJ"]
@@ -28,12 +26,9 @@ INDEX_SPIKE     = config["INDEX_SPIKE"]
 FA_SAMPLE       = config["FA_SAMPLE"]
 FA_SPIKE        = config["FA_SPIKE"]
 MASK            = config["MASK"]
-SNRNA           = config["SNRNA"]
-SPIKE_SNRNA     = config["SPIKE_SNRNA"]
-ENRICHED_SAMPLE = config["ENRICHED_SAMPLE"]
-ENRICHED_SPIKE  = config["ENRICHED_SPIKE"]
+SAF             = config["SAF"]
+SAF_SPIKE       = config["SAF_SPIKE"]
 CMD_PARAMS      = config["CMD_PARAMS"]
-SFX             = config["SFX"]
 COLORS          = config["COLORS"]
 NORM            = config["NORM"]
 USER            = config["USER"]
@@ -42,9 +37,7 @@ MEMORY          = config["MEMORY"]
 # Directories for data and scripts
 FASTQ_DIR = PROJ + "/fastqs"
 
-# Create symlinks for fastqs
-if not os.path.exists(FASTQ_DIR):
-    os.makedirs(FASTQ_DIR)
+os.makedirs(FASTQ_DIR, exist_ok = True)
 
 # Simplify ALL_SAMPLES dictionary
 # subsampling groups can be listed in multiple sections
@@ -99,9 +92,9 @@ wildcard_constraints:
     group   = GRP_REGEX,
     sam_grp = "[a-zA-Z0-9_\-]+-[a-zA-Z0-9_\-]+"
 
-FQ_SFX = _get_sfx(SFX)
-
-FASTQS = [_get_fqs(x, y) for x in SAMS_UNIQ for y in FQ_SFX]
+# Create symlinks for fastqs
+FASTQS = [_get_fqs(x, RAW_DATA, FASTQ_DIR) for x in SAMS_UNIQ]
+FASTQS = sum(FASTQS, [])
 
 COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
 

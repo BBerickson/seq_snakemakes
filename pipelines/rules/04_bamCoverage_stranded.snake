@@ -15,23 +15,26 @@ def _get_norm(wildcards):
     sample = SAMPLES[wildcards.newnam][0]
     patternfile = NORM
     num = 1
-    if re.search("OR|OR_enrich|chrM|snRNA", patternfile):
+    if patternfile.lower() not in ["subsample", "none"] and not patternfile.isspace():
       patternfile = patternfile + "_" + INDEX_SAMPLE
       path = PROJ + "/counts/"
-      filename = glob.glob(path + sample + "*")[0]
+      filename = glob.glob(path + sample + "*_count.txt")[0]
       for line in open(filename, "r"):
         match = re.search(patternfile, line)
         if match:
           num = line.strip().split()
           if not float(num[1]) == 0:
             num = 1000000/float(num[1])
-            break
           else:
             num = 1
+          break
+        else:
+          num = "fail"
     if isinstance(num, (int, float)):
       return num
     else:
-      return 1
+      return filename
+
 
 # Align trimmed reads with bamCoverage
 rule bamCoverage:
@@ -124,23 +127,25 @@ def _get_norm2(wildcards):
     sample = SAMPLES[wildcards.newnam][0]
     patternfile = NORM
     num = 1
-    if re.search("OR|OR_enrich|chrM", patternfile):
+    if patternfile.lower() not in ["subsample", "none"] and not patternfile.isspace():
       patternfile = patternfile + "_" + INDEX_SPIKE
       path = PROJ + "/counts/"
-      filename = glob.glob(path + sample + "*")[0]
+      filename = glob.glob(path + sample + "*_count.txt")[0]
       for line in open(filename, "r"):
         match = re.search(patternfile, line)
         if match:
           num = line.strip().split()
           if not float(num[1]) == 0:
             num = 1000000/float(num[1])
-            break
           else:
             num = 1
+          break
+        else:
+          num = "fail"
     if isinstance(num, (int, float)):
       return num
     else:
-      return 1
+      return filename
         
 
 # Align trimmed reads with bamCoverage

@@ -1,42 +1,87 @@
 # ====== Rules for getting overall results =================================
 
-# get read counts from bams spikein
-rule bowtie_counts_spikein:
+# get read counts from bams
+rule featureCounts:
     input:
-        bam2   = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
-        bai2   = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai",
-        bam3   = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
-        bai3   = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam.bai"
+        bam   = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
+        bai   = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai"
     output:
-        stats2 = PROJ + "/counts/{sample}_spikin_count.txt"
+        PROJ + "/counts/{sample}_" + INDEX_SAMPLE + "_featureCounts.tsv"
     params:
-        job_name = "{sample}_bowtie_counts_spikin",
-        enrich2  = ENRICHED_SAMPLE,
-        enrich3  = ENRICHED_SPIKE,
-        snrna    = SNRNA,
-        snrna2   = SPIKE_SNRNA
+        job_name = "{sample}_bowtie_featureCounts",
+        args     = CMD_PARAMS["featureCounts"],
+        saf      = SAF
     resources:
         memory   = 4
     log:
-        out = PROJ + "/logs/{sample}_bowtie_counts_spikin.out",
-        err = PROJ + "/logs/{sample}_bowtie_count_spikins.err"
+        out = PROJ + "/logs/{sample}_featureCounts.out",
+        err = PROJ + "/logs/{sample}_featureCounts.err"
     message:
-        "Bowtie2 counts_spikin for {wildcards.sample}"
+        "featureCounts for {wildcards.sample}"
     threads:
-        1
+        12
     shell:
         """
-        echo "{INDEX_SAMPLE} $(samtools idxstats {input.bam2} | awk '{{s+=$3}} END {{print s/2}}')" >> {output.stats2}
-        echo "{INDEX_SPIKE} $(samtools idxstats {input.bam3} | awk '{{s+=$3}} END {{print s/2}}')" >> {output.stats2}
-        echo "enrich_{INDEX_SAMPLE} $(samtools view {input.bam2} -L {params.enrich2} -c | awk ' {{print $0/2}}')" >> {output.stats2}
-        echo "enrich_{INDEX_SPIKE} $(samtools view {input.bam3} -L {params.enrich3} -c | awk ' {{print $0/2}}')" >> {output.stats2}
-        echo "chrM_{INDEX_SAMPLE} $(samtools view {input.bam2} chrM -c | awk ' {{print $0/2}}')" >> {output.stats2}
-        echo "chrM_{INDEX_SPIKE} $(samtools view {input.bam3} chrM -c | awk ' {{print $0/2}}')" >> {output.stats2}
-        echo "snRNA_{INDEX_SAMPLE} $(samtools view {input.bam2} -L {params.snrna} -c | awk ' {{print $0/2}}')" >> {output.stats2}
-        echo "snRNA_{INDEX_SPIKE} $(samtools view {input.bam3} -L {params.snrna2} -c | awk ' {{print $0/2}}')" >> {output.stats2}
+        featureCounts \
+            {params.args} \
+            -F SAF \
+            -a '{params.saf}' \
+            -o '{output}' \
+            -T {threads} \
+            {input.bam}
         
         """
 
+# get read counts from bams spikein
+rule featureCounts_spikein:
+    input:
+        bam   = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
+        bai   = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam.bai"
+    output:
+        PROJ + "/counts/{sample}_" + INDEX_SPIKE + "_featureCounts.tsv"
+    params:
+        job_name = "{sample}_bowtie_featureCounts_spikin",
+        args     = CMD_PARAMS["featureCounts"],
+        saf      = SAF_SPIKE
+    resources:
+        memory   = 4
+    log:
+        out = PROJ + "/logs/{sample}_featureCounts_spikin.out",
+        err = PROJ + "/logs/{sample}_featureCounts_spikins.err"
+    message:
+        "featureCounts for spikein {wildcards.sample}"
+    threads:
+        12
+    shell:
+        """
+        featureCounts \
+            {params.args} \
+            -F SAF \
+            -a '{params.saf}' \
+            -o '{output}' \
+            -T {threads} \
+            {input.bam}
+        
+        """
+
+# making count file
+rule featurecount_summary:
+    input:
+        PROJ + "/counts/{sample}_" + INDEX_SAMPLE + "_featureCounts.tsv",
+        PROJ + "/counts/{sample}_" + INDEX_SPIKE + "_featureCounts.tsv"
+    output:
+        PROJ  + "/counts/{sample}_spikin_count.txt"
+    params:
+        job_name = "{sample}_count_summary"
+    resources:
+        memory   = 4
+    log:
+        out = PROJ + "/logs/{sample}_count_summary.out",
+        err = PROJ + "/logs/{sample}_count_summary.err"
+    threads: 
+        1
+    script:
+        '../R_scripts/featurecount_summary.R'
 
 # calculating OR
 rule calculating_OR:

@@ -1,13 +1,5 @@
 # ===== Snakefile for trimming and filtering NET-seq reads =====================
 
-# Function to retrieve fastq paths
-def _get_fq_paths(wildcards):
-    fqs = [_get_fqs(wildcards.sample, x) for x in FQ_SFX]
-    fqs = [FASTQ_DIR + "/" + x + SFX for x in fqs]
-
-    return fqs
-
-
 # Extract UMI sequence
 # The UMI is the first 12 bases of read 2. By default umi_tools assumes
 # the given UMI pattern starts at the 5' end of the read. To account for

@@ -4,7 +4,7 @@
 GENELIST:
     ""
 INDEX_PATH:
-    "/beevol/home/erickson/ref/scer3/"
+    "/beevol/home/bentleyd/ref/scer3/"
 INDEX_MAP:
     "scer3"
 INDEX_SAMPLE:
@@ -14,24 +14,23 @@ INDEX_SPIKE:
 MASK:
   ""
 GTF:
+  "/beevol/home/bentleyd/ref/scer3/saccharomyces_cerevisiae.gff"
+SAF:
+  "/beevol/home/bentleyd/ref/scer3/enrich.saf"
+SAF_SPIKE:
   ""
-# fasta files for splitting bam file
 FA_SAMPLE:
-  "/beevol/home/erickson/ref/scer3/scer3.fa"
+  "/beevol/home/bentleyd/ref/scer3/scer3.fa"
 FA_SPIKE:
   ""
-ENRICHED_SAMPLE:
-  "/beevol/home/erickson/ref/scer3/table_scer3/enrich.bed"
-ENRICHED_SPIKE:
-  ""
 MY_REF:
-  "/beevol/home/erickson/ref/scer3/table_scer3/sgd3Gene.bed"
+  "/beevol/home/bentleyd/ref/scer3/sgd3Gene.bed"
 FW_REF:
-  "/beevol/home/erickson/ref/scer3/table_scer3/sgd3Gene_fw.bed"
+  "/beevol/home/bentleyd/ref/scer3/sgd3Gene_fw.bed"
 REV_REF:
-  "/beevol/home/erickson/ref/scer3/table_scer3/sgd3Gene_rev.bed"
+  "/beevol/home/bentleyd/ref/scer3/sgd3Gene_rev.bed"
 PI_REF:
-  "/beevol/home/erickson/ref/scer3/table_scer3/PI.bed"
+  "/beevol/home/bentleyd/ref/scer3/PI.bed"
 EI_FW_REF:
   ""
 EI_REV_REF:

@@ -1,19 +1,16 @@
 # ===== Snake file for processing Bowtie ================================
 
-from pytools.persistent_dict import PersistentDict
-import os
-import glob
-import re
-import subprocess
-import gzip
-import random
-
 # Configure shell for all rules
 shell.executable("/bin/bash")
 shell.prefix("source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; ")
 
-#include my python common functions
-include: "commonFun.snake"
+# python packages
+import os
+import glob
+import re
+
+# include my python common functions
+include: "funs.py"
 
 # Parameters from config.yaml
 PROJ            = config["PROJ"]
@@ -26,13 +23,6 @@ CMD_PARAMS      = config["CMD_PARAMS"]
 NORM            = config["NORM"]
 USER            = config["USER"]
 MEMORY          = config["MEMORY"]
-
-# Directories for data and scripts
-FASTQ_DIR = PROJ + "/fastqs"
-
-# Create symlinks for fastqs
-if not os.path.exists(FASTQ_DIR):
-    os.makedirs(FASTQ_DIR)
 
 # Sample and group lists
 SAMS = [[y, x] for y in SAMPLES for x in SAMPLES[y]]

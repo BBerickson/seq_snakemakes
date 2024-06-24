@@ -4,7 +4,7 @@
 GENELIST:
     ""
 INDEX_PATH:
-    "/beevol/home/erickson/ref/hg38_mm10/"
+    "/beevol/home/bentleyd/ref/hg38_mm10/"
 INDEX_MAP:
     "hg38_mm10"
 INDEX_SAMPLE:
@@ -12,32 +12,27 @@ INDEX_SAMPLE:
 INDEX_SPIKE:
     "mm10"
 MASK:
-  "/beevol/home/erickson/ref/hg38/ref/hg38_snoRNAs.bed"
-SNRNA:
-  "/beevol/home/erickson/ref/hg38/ref/snRNAs.bed"
-SPIKE_SNRNA:
-  "/beevol/home/erickson/ref/mm10/ref/snRNAs.bed"
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_snoRNAs.bed"
 GTF:
-  "/beevol/home/erickson/ref/hg38/ref/Homo_sapiens.GRCh38.95.gtf"
-# fasta files for splitting bam file
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/Homo_sapiens.GRCh38.111.gtf"
+SAF:
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/enrich.saf"
+SAF_SPIKE:
+  "/beevol/home/bentleyd/ref/mm10/ref_bed/enrich.saf"
 FA_SAMPLE:
-  "/beevol/home/erickson/ref/hg38/Homo_sapiens.GRCh38.dna.primary_assembly.UCSC.fa"
+  "/beevol/home/bentleyd/ref/hg38/genome/Homo_sapiens.GRCh38.dna.primary_assembly.fa"
 FA_SPIKE:
-  "/beevol/home/erickson/ref/mm10/mm10.fa"
-ENRICHED_SAMPLE:
-  "/beevol/home/erickson/ref/hg38/ref/enrich.bed"
-ENRICHED_SPIKE:
-  "/beevol/home/erickson/ref/mm10/ref/enrich.bed"
+  "/beevol/home/bentleyd/ref/mm10/mm10.fa"
 MY_REF:
-  "/beevol/home/erickson/ref/hg38/ref/hg38_gene.bed"
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_gene.bed"
 FW_REF:
-  "/beevol/home/erickson/ref/hg38/ref/hg38_gene_fw.bed"
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_gene_fw.bed"
 REV_REF:
-  "/beevol/home/erickson/ref/hg38/ref/hg38_gene_rev.bed"
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_gene_rev.bed"
 PI_REF:
-  "/beevol/home/erickson/ref/hg38/ref/PI.bed"
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/PI.bed"
 EI_FW_REF:
-  "/beevol/home/erickson/ref/hg38/ref/EI_anti_fw.bed"
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/EI_anti_fw.bed"
 EI_REV_REF:
-  "/beevol/home/erickson/ref/hg38/ref/EI_anti_fw.bed"
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/EI_anti_rev.bed"
   

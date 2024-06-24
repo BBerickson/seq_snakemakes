@@ -4,10 +4,10 @@
 # Run fastqc
 rule fastqc:
     input:
-        FASTQ_DIR + "/{fastq}" + SFX
+        FASTQ_DIR + "/{fastq}"
     output:
-        PROJ + "/fastqc/{fastq}_fastqc.zip",
-        PROJ + "/fastqc/{fastq}_fastqc.html"
+        zip  = PROJ + "/fastqc/{fastq}_fastqc.zip",
+        html = PROJ + "/fastqc/{fastq}_fastqc.html"
     params:
         job_name = "{fastq}_fastqc",
         out      = PROJ + "/fastqc"
@@ -22,13 +22,20 @@ rule fastqc:
         6
     shell:
         """
-        mkdir -p {params.out}
+        mkdir -p '{params.out}'
 
         fastqc \
             -t {threads} \
             -f fastq \
-            -o {params.out} \
-            {input}
+            -o '{params.out}' \
+            '{input}'
+
+        nm='{wildcards.fastq}'
+        nm="${{nm%.*}}"
+        nm="${{nm%.*}}"
+
+        mv "{params.out}/${{nm}}_fastqc.zip"  '{output.zip}'
+        mv "{params.out}/${{nm}}_fastqc.html" '{output.html}'
         """
 
 
@@ -56,10 +63,12 @@ rule fastqc_summary:
         """
         for dir in {input};
         do
-            name=$(basename -s .zip $dir)
+            nm=$(basename -s .zip "$dir")
+            nm="${{nm%.*}}"
+            nm="${{nm%.*}}_fastqc"
 
-            unzip -p $dir $name/summary.txt \
-                >> {output}
+            unzip -p "$dir" "$nm/summary.txt" \
+                >> '{output}'
         done
         """
 

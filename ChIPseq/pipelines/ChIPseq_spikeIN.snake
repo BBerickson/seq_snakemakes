@@ -1,19 +1,17 @@
 # ===== Snake file for processing Bowtie ================================
 
-from pytools.persistent_dict import PersistentDict
-import os
-import glob
-import re
-import subprocess
-import gzip
-import random
-
 # Configure shell for all rules
 shell.executable("/bin/bash")
 shell.prefix("source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; ")
 
-#include my python common functions
-include: "commonFun.snake"
+# python packages
+import os
+import glob
+import re
+import gzip
+
+# include my python common functions
+include: "funs.py"
 
 # Parameters from config.yaml
 PROJ            = config["PROJ"]
@@ -28,12 +26,9 @@ INDEX_SPIKE     = config["INDEX_SPIKE"]
 FA_SAMPLE       = config["FA_SAMPLE"]
 FA_SPIKE        = config["FA_SPIKE"]
 MASK            = config["MASK"]
-SNRNA           = config["SNRNA"]
-SPIKE_SNRNA     = config["SPIKE_SNRNA"]
-ENRICHED_SAMPLE = config["ENRICHED_SAMPLE"]
-ENRICHED_SPIKE  = config["ENRICHED_SPIKE"]
+SAF             = config["SAF"]
+SAF_SPIKE       = config["SAF_SPIKE"]
 CMD_PARAMS      = config["CMD_PARAMS"]
-SFX             = config["SFX"]
 COLORS          = config["COLORS"]
 NORM            = config["NORM"]
 USER            = config["USER"]
@@ -42,15 +37,14 @@ MEMORY          = config["MEMORY"]
 # Directories for data and scripts
 FASTQ_DIR = PROJ + "/fastqs"
 
-# Create symlinks for fastqs
-if not os.path.exists(FASTQ_DIR):
-    os.makedirs(FASTQ_DIR)
+os.makedirs(FASTQ_DIR, exist_ok = True)
 
 # Simplify ALL_SAMPLES dictionary
 # subsampling groups can be listed in multiple sections
 # collapse sections and combine subsampling groups
-SAMPLES = {} # SAMPLES {newname1:[fastq1],newname2:[fastq2]}
-GROUPS = {} # GROUPS {group:[fastq1,fastq2]} 
+SAMPLES = {} # SAMPLES {newname1:[fastq1],newname2:[fastq2],newname3:[fastq3],newname4:[fastq4]}
+GROUPS = {} # GROUPS {group1:[fastq1,fastq2],group2:[fastq3,fastq4]} 
+GROUP2 = {} # GROUP2={group1:[newname1],group2:[newname3]} 
 for _, d in ALL_SAMPLES.items():
     for key, value in d.items():
 
@@ -64,6 +58,9 @@ for _, d in ALL_SAMPLES.items():
             else:
                 GROUPS[key] = [sub_value]
                 
+            if key not in GROUP2:
+                GROUP2[key] = [sub_keys]
+                
             if sub_keys in SAMPLES:
                 if sub_value not in SAMPLES[sub_keys]:
                     SAMPLES[sub_keys].append(sub_value)
@@ -72,18 +69,19 @@ for _, d in ALL_SAMPLES.items():
                 SAMPLES[sub_keys] = [sub_value]
 
 # unpack samples and groups
-SAMS = [[y, x] for y in SAMPLES for x in SAMPLES[y]]
-NAMS = [x[0] for x in SAMS]
+SAMS = [[y, x] for y in GROUP2 for x in GROUP2[y]] # get only the first item
+NAMS = [x[1] for x in SAMS]
 GRPS = [[y, x] for y in GROUPS for x in GROUPS[y]]
 SAMS = [x[1] for x in GRPS]
 GRPS = [x[0] for x in GRPS]
-NAMS_UNIQ = list(dict.fromkeys(NAMS[::2])) # get only the first item
+NAMS_UNIQ = list(dict.fromkeys(NAMS)) 
 GRPS_UNIQ = list(dict.fromkeys(GRPS))
 SAMS_UNIQ = list(dict.fromkeys(SAMS))
 
 # Print summary of samples and groups
 print("SAMPLES (%s): %s\n" % (len(SAMPLES), SAMPLES))
 print("GROUPS (%s): %s\n" % (len(GROUPS), GROUPS))
+print("GROUP2 (%s): %s\n" % (len(GROUP2), GROUP2))
 print("SAMS (%s): %s\n" % (len(SAMS), SAMS))
 print("NAMS (%s): %s\n" % (len(NAMS), NAMS))
 print("GRPS (%s): %s\n" % (len(GRPS), GRPS))
@@ -99,9 +97,9 @@ wildcard_constraints:
     group   = GRP_REGEX,
     sam_grp = "[a-zA-Z0-9_\-]+-[a-zA-Z0-9_\-]+"
 
-FQ_SFX = _get_sfx(SFX)
-
-FASTQS = [_get_fqs(x, y) for x in SAMS_UNIQ for y in FQ_SFX]
+# Create symlinks for fastqs
+FASTQS = [_get_fqs(x, RAW_DATA, FASTQ_DIR) for x in SAMS_UNIQ]
+FASTQS = sum(FASTQS, [])
 
 COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
 

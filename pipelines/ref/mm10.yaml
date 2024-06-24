@@ -4,7 +4,7 @@
 GENELIST:
     ""
 INDEX_PATH:
-    "/beevol/home/erickson/ref/mm10/"
+    "/beevol/home/bentleyd/ref/mm10/"
 INDEX_MAP:
     "mm10"
 INDEX_SAMPLE:
@@ -12,30 +12,25 @@ INDEX_SAMPLE:
 INDEX_SPIKE:
     ""
 MASK:
-  ""
-SNRNA:
-  "/beevol/home/erickson/ref/mm10/ref/snRNAs.bed"
-SPIKE_SNRNA:
-  ""
+  "/beevol/home/bentleyd/ref/mm10/ref_bed/snoRNAs.bed"
 GTF:
+  "/beevol/home/bentleyd/ref/mm10/ref_bed/Mus_musculus.GRCm38.102.gff3"
+SAF:
+  "/beevol/home/bentleyd/ref/mm10/ref_bed/enrich.saf"
+SAF_SPIKE:
   ""
-# fasta files for splitting bam file
 FA_SAMPLE:
-  "/beevol/home/erickson/ref/mm10/mm10.fa"
+  "/beevol/home/bentleyd/ref/mm10/mm10.fa"
 FA_SPIKE:
   ""
-ENRICHED_SAMPLE:
-  "/beevol/home/erickson/ref/mm10/ref/enrich.bed"
-ENRICHED_SPIKE:
-  ""
 MY_REF:
-  "/beevol/home/erickson/ref/mm10/ref/mm10gene.bed"
+  "/beevol/home/bentleyd/ref/mm10/ref_bed/mm10gene.bed"
 FW_REF:
-  "/beevol/home/erickson/ref/mm10/ref/mm10gene_pos.bed"
+  "/beevol/home/bentleyd/ref/mm10/ref_bed/mm10gene_pos.bed"
 REV_REF:
-  "/beevol/home/erickson/ref/mm10/ref/mm10gene_neg.bed"
+  "/beevol/home/bentleyd/ref/mm10/ref_bed/mm10gene_neg.bed"
 PI_REF:
-  "/beevol/home/erickson/ref/mm10/ref/PI.bed"
+  "/beevol/home/bentleyd/ref/mm10/ref_bed/PI.bed"
 EI_FW_REF:
   ""
 EI_REV_REF:

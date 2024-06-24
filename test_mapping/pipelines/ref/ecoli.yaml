@@ -1,36 +1,42 @@
 #===== Config file for e_coli ===================
 
-# Path to mixed bowtie2 index and chrom name txt file
+# Path to bowtie2 index 
 GENELIST:
     "e_coli"
 INDEX_PATH:
     "/beevol/home/erickson/ref/test/e_coli/"
-INDEX_SAMPLE:
-    "e_coli"
-ENRICHED_SAMPLE:
-  "/beevol/home/erickson/ref/test/e_coli/enrich.bed"
 INDEX_MAP:
+    "e_coli"
+INDEX_SAMPLE:
     "e_coli"
 INDEX_SPIKE:
     ""
 MASK:
   ""
-SNRNA:
-  "/beevol/home/erickson/ref/test/e_coli/enrich.bed"
-SPIKE_SNRNA:
-  "/beevol/home/erickson/ref/test/e_coli/enrich.bed"
-# fasta files for splitting bam file
+GTF:
+  ""
+SAF:
+  ""
+SAF_SPIKE:
+  ""
 FA_SAMPLE:
   "/beevol/home/erickson/ref/test/e_coli/e_coli_k12.v2.fa"
 FA_SPIKE:
   ""
+ENRICHED_SAMPLE:
+  "/beevol/home/erickson/ref/test/e_coli/enrich.bed"
 ENRICHED_SPIKE:
   ""
 MY_REF:
-  "/beevol/home/erickson/ref/test/e_coli/enrich.bed"
+  ""
 FW_REF:
-  "/beevol/home/erickson/ref/test/e_coli/enrich.bed"
+  ""
 REV_REF:
-  "/beevol/home/erickson/ref/test/e_coli/enrich.bed"
+  ""
 PI_REF:
   ""
+EI_FW_REF:
+  ""
+EI_REV_REF:
+  ""
+  

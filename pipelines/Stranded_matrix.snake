@@ -1,20 +1,15 @@
 # ===== Snake file for processing mNET-seq data ================================
 
-from pytools.persistent_dict import PersistentDict
 import os
 import glob
 import re
-import subprocess
-import gzip
-import random
-
 
 # Configure shell for all rules
 shell.executable("/bin/bash")
 shell.prefix("source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; ")
 
 #include my python common functions
-include: "commonFun.snake"
+include: "funs.py"
 
 # Parameters from config.yaml
 PROJ            = config["PROJ"]
@@ -23,9 +18,6 @@ SEQ_DATE        = config["SEQ_DATE"]
 INDEX_PATH      = config["INDEX_PATH"]
 INDEX_SAMPLE    = config["INDEX_SAMPLE"]
 INDEX_SPIKE     = ""
-MASK            = config["MASK"]
-SNRNA           = config["SNRNA"]
-SPIKE_SNRNA     = config["SPIKE_SNRNA"]
 FW_REF          = config["FW_REF"]
 REV_REF         = config["REV_REF"]
 CMD_PARAMS      = config["CMD_PARAMS"]

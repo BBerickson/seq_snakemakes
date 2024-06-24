@@ -79,13 +79,6 @@ USER:
 NORM:
   "subsample"
   
-# file suffix
-#   ".fq.gz"
-#   ".fastq.gz"
-SFX:
-  ".fq.gz"
- 
- 
 ## Additional common parameters for various processing steps
 #### Cutadapt ####
 # --pair-filter=first - read filtering decisions are made based solely on R1

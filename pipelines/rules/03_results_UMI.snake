@@ -1,34 +1,56 @@
 # ====== Rules for getting overall results =================================
 
 # get read counts from bams
-rule bowtie_counts:
+rule featureCounts:
     input:
-        bam2   = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
-        bai2   = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai"
+        bam   = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
+        bai   = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai"
     output:
-        stats2 = PROJ + "/counts/{sample}_count.txt"
+        PROJ + "/counts/{sample}_" + INDEX_SAMPLE + "_featureCounts.tsv"
     params:
-        job_name = "{sample}_bowtie_counts",
-        enrich2  = ENRICHED_SAMPLE,
-        snrna    = SNRNA
+        job_name = "{sample}_bowtie_featureCounts",
+        args     = CMD_PARAMS["featureCounts"],
+        saf      = SAF
     resources:
         memory   = 4
     log:
-        out = PROJ + "/logs/{sample}_bowtie_counts.out",
-        err = PROJ + "/logs/{sample}_bowtie_count.err"
+        out = PROJ + "/logs/{sample}_featureCounts.out",
+        err = PROJ + "/logs/{sample}_featureCounts.err"
     message:
-        "Bowtie2 counts for {wildcards.sample}"
+        "featureCounts for {wildcards.sample}"
     threads:
-        1
+        12
     shell:
         """
-        echo "{INDEX_SAMPLE} $(samtools idxstats {input.bam2} | awk '{{s+=$3}} END {{print s/2}}')" >> {output.stats2}
-        echo "enrich_{INDEX_SAMPLE} $(samtools view {input.bam2} -L {params.enrich2} -c | awk ' {{print $0/2}}')" >> {output.stats2}
-        echo "chrM_{INDEX_SAMPLE} $(samtools view {input.bam2} chrM -c | awk ' {{print $0/2}}')" >> {output.stats2}
-        echo "snRNA_{INDEX_SAMPLE} $(samtools view {input.bam2} -L {params.snrna} -c | awk ' {{print $0/2}}')" >> {output.stats2}
+        featureCounts \
+            {params.args} \
+            -F SAF \
+            -a '{params.saf}' \
+            -o '{output}' \
+            -T {threads} \
+            {input.bam}
         
         """
 
+# making count file
+rule featurecount_summary:
+    input:
+        PROJ + "/counts/{sample}_" + INDEX_SAMPLE + "_featureCounts.tsv",
+        PROJ + "/counts/{sample}_" + INDEX_SPIKE + "_featureCounts.tsv"
+    output:
+        PROJ  + "/counts/{sample}_count.txt"
+    params:
+        job_name = "{sample}_count_summary"
+    resources:
+        memory   = 4
+    log:
+        out = PROJ + "/logs/{sample}_count_summary.out",
+        err = PROJ + "/logs/{sample}_count_summary.err"
+    threads: 
+        1
+    script:
+        '../R_scripts/featurecount_summary.R'
+  
 # gathering results
 rule gathering_results:
     input:

@@ -1,20 +1,15 @@
 # ===== Snake file for processing ChIP-seq data ================================
 
-from pytools.persistent_dict import PersistentDict
 import os
 import glob
 import re
-import subprocess
-import gzip
-import random
-
 
 # Configure shell for all rules
 shell.executable("/bin/bash")
 shell.prefix("source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; ")
 
 #include my python common functions
-include: "commonFun.snake"
+include: "funs.py"
 
 # Parameters from config.yaml
 PROJ          = config["PROJ"]
@@ -23,9 +18,6 @@ SEQ_DATE      = config["SEQ_DATE"]
 INDEX_PATH    = config["INDEX_PATH"]
 INDEX_SAMPLE  = config["INDEX_SAMPLE"]
 INDEX_SPIKE   = ""
-MASK          = config["MASK"]
-SNRNA         = config["SNRNA"]
-SPIKE_SNRNA   = config["SPIKE_SNRNA"]
 MY_REF        = config["MY_REF"]
 PI_REF        = config["PI_REF"]
 CMD_PARAMS    = config["CMD_PARAMS"]
@@ -38,8 +30,8 @@ MEMORY        = config["MEMORY"]
 # Simplify ALL_SAMPLES dictionary
 # subsampling groups can be listed in multiple sections
 # collapse sections and combine subsampling groups
-SAMPLES = {} # SAMPLES {newname1:[fastq1],newname2:[fastq2]}
-GROUPS = {} # GROUPS {group:[fastq1,fastq2]} 
+SAMPLES = {} # SAMPLES {newname1:[fastq1],newname2:[fastq2],newname3:[fastq3],newname4:[fastq4]}
+GROUPS = {} # GROUPS {group1:[fastq1,fastq2],group2:[fastq3,fastq4]} 
 GROUP2 = {} # GROUP2={group1:[newname1],group2:[newname3]} 
 for _, d in ALL_SAMPLES.items():
     for key, value in d.items():
@@ -56,7 +48,7 @@ for _, d in ALL_SAMPLES.items():
                 
             if key not in GROUP2:
                 GROUP2[key] = [sub_keys]
-            
+                
             if sub_keys in SAMPLES:
                 if sub_value not in SAMPLES[sub_keys]:
                     SAMPLES[sub_keys].append(sub_value)
@@ -65,19 +57,19 @@ for _, d in ALL_SAMPLES.items():
                 SAMPLES[sub_keys] = [sub_value]
 
 # unpack samples and groups
-SAMS = [[y, x] for y in SAMPLES for x in SAMPLES[y]]
-NAMS = [x[0] for x in SAMS]
+SAMS = [[y, x] for y in GROUP2 for x in GROUP2[y]] # get only the first item
+NAMS = [x[1] for x in SAMS]
 GRPS = [[y, x] for y in GROUPS for x in GROUPS[y]]
 SAMS = [x[1] for x in GRPS]
 GRPS = [x[0] for x in GRPS]
-NAMS_UNIQ = list(dict.fromkeys(NAMS[::2])) # limit to just every other ... first in the pair for ChIP Input pairs
+NAMS_UNIQ = list(dict.fromkeys(NAMS)) 
 GRPS_UNIQ = list(dict.fromkeys(GRPS))
 SAMS_UNIQ = list(dict.fromkeys(SAMS))
 
+# Print summary of samples and groups
 print("SAMPLES (%s): %s\n" % (len(SAMPLES), SAMPLES))
 print("GROUPS (%s): %s\n" % (len(GROUPS), GROUPS))
 print("GROUP2 (%s): %s\n" % (len(GROUP2), GROUP2))
-# Print summary of samples and groups
 print("SAMS (%s): %s\n" % (len(SAMS), SAMS))
 print("NAMS (%s): %s\n" % (len(NAMS), NAMS))
 print("GRPS (%s): %s\n" % (len(GRPS), GRPS))
@@ -107,7 +99,6 @@ rule all:
     input:
         # bamCoverage
         PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + "_" + NORMS + "_bw_URL.txt",
-        
         # 543 matrix file
         PROJ + "/URLS/543_" + PROJ + "_" + INDEX_SAMPLE + "_" + NORM543 + "_matrix.url.txt"
 

@@ -52,7 +52,7 @@ USER:
   "User7"
 
 CMD_PARAMS:
-    clumpify:      " overwrite=t dedupe=t dupedist=12000 optical=f "
+    clumpify:      " overwrite=t dedupe=t dupedist=12000 optical=f subs=0 "
     bbduk:         " overwrite=t ftm=5 minlen=50 ktrim=r k=23 hdist=1 mink=11 tpe tbo ecco=t "
     bowtie2:       " --end-to-end --no-mixed --no-discordant "
     samtools:      " -bF4q30 "
@@ -62,12 +62,6 @@ CMD_PARAMS:
     bamCoverager:  " reverse " # R2-R1 = reverse R1-R2 = forward
     fragment_size: " --maxFragmentLength 1000 "
     
-# file suffix
-#   ".fq.gz"
-#   ".fastq.gz"
-SFX:
-  ".fq.gz"
-
 # Base memory to request for each rule
 # The acutal amount requested will be higher for rules that generally
 # require more memory
