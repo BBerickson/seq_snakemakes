@@ -51,7 +51,7 @@ if(!is.null(my_files2)){
     
     if(str_detect(frag_temp$sample,"/bams/")){
       frag_temp <- frag_temp %>% separate(sample,into=c("dir","sample"),sep="/bams/") %>%
-        separate(sample,into=c("sample","file"),sep=paste0("_", "mm10")) %>%
+        separate(sample,into=c("sample","file"),sep=paste0("_", snakemake@params[["spik"]])) %>%
         dplyr::select(-dir,-file)
     }
       frag2 <- bind_rows(frag2,frag_temp)

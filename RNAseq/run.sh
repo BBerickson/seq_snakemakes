@@ -19,6 +19,7 @@ module load hisat2/2.1.0
 module load STAR/2.7.10a
 module load R/4.2.2
 module load fastqc/0.11.9
+module load subread
 
 # Function to run snakemake
 run_snakemake() {

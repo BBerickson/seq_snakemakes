@@ -3,8 +3,8 @@
 # stranded sense matrix files
 rule my_5_sense_matrix2:
     input:
-        fw  =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
-        rev =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw"
+        fw  =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_fw.bw",
+        rev =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_rev.bw"
     output:
         sense   = temp(PROJ   + "/matrix/{newnam}_temp02_5_matrix.gz"),
         sense1  = temp(PROJ   + "/matrix/{newnam}_temp12_5_matrix.gz"),
@@ -47,8 +47,8 @@ rule my_5_sense_matrix2:
 # stranded antisense matrix files
 rule my_5_amtisense_matrix2:
     input:
-        fw  =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
-        rev =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw"
+        fw  =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_fw.bw",
+        rev =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_rev.bw"
     output:
         asense   = temp(PROJ   + "/matrix/{newnam}_temp02_a5_matrix.gz"),
         asense1  = temp(PROJ   + "/matrix/{newnam}_temp12_a5_matrix.gz"),
@@ -59,7 +59,7 @@ rule my_5_amtisense_matrix2:
         fw_ref   = FW_REF,
         rev_ref  = REV_REF
     resources:
-        memory   = MEMORY * 5
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
     log:
         out = PROJ + "/logs/{newnam}_antisense_5_matrix2.out",
         err = PROJ + "/logs/{newnam}_antisense_5_matrix2.err"
@@ -138,15 +138,15 @@ rule my_5_url:
         matrix2 = PROJ   + "/matrix/{newnam}_temp02_fix_a5_matrix.gz"
     output:
         temp(PROJ + "/matrix/5.{newnam}_matrix.url.txt"),
-        PROJ + "/matrix/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_matrix.gz",
-        PROJ + "/matrix/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_anti_matrix.gz"
+        PROJ + "/matrix/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM5S + "_matrix.gz",
+        PROJ + "/matrix/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM5S + "_anti_matrix.gz"
     params:
         job_name = PROJ + "_5_matrix_url2",
         color    = _get_col,
-        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + PROJ + "/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_matrix.gz",
-        url_anti = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + PROJ + "/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_anti_matrix.gz"
+        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + PROJ + "/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM5S + "_matrix.gz",
+        url_anti = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + PROJ + "/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM5S + "_anti_matrix.gz"
     resources:
-        memory   = MEMORY
+        memory   = 4
     log:
         out = PROJ + "/logs/{newnam}_sense_5_matrix_url2.out",
         err = PROJ + "/logs/{newnam}_sense_5_matrix_url2.err"
@@ -159,10 +159,10 @@ rule my_5_url:
         # fix for strange side affect that only the 1 line loads from sandbox
         computeMatrixOperations relabel -m {input.matrix1} -o {output[1]}
         computeMatrixOperations relabel -m {input.matrix2} -o {output[2]}
-        echo {params.url_out} 5 5.{wildcards.newnam}_{SEQ_DATE} {params.color} >> {output[0]}
+        echo {params.url_out} self 5.{wildcards.newnam}_{SEQ_DATE} {params.color} >> {output[0]}
         ssh amc-sandbox 'mkdir -p ./public_html/{PROJ}'
         scp {output[1]} amc-sandbox:./public_html/{PROJ}
-        echo {params.url_anti} 5 5.{wildcards.newnam}_{SEQ_DATE}_anti {params.color} >> {output[0]}
+        echo {params.url_anti} self 5.{wildcards.newnam}_{SEQ_DATE}_anti {params.color} >> {output[0]}
         scp {output[2]} amc-sandbox:./public_html/{PROJ}
         """
         
@@ -174,7 +174,7 @@ rule my_5_url_summary:
             newnam = NAMS_UNIQ
         ))
     output:
-        PROJ + "/URLS/5_" + PROJ + "_" + INDEX_SAMPLE + "_" + NORM5S + "_matrix.url.txt"
+        PROJ + "/URLS/5_" + PROJ + "_" + INDEX_SAMPLE + NORM5S + "_matrix.url.txt"
     params:
         job_name = PROJ + "_sense_5_matrix_url"
     resources:

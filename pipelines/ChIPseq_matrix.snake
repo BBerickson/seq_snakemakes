@@ -23,9 +23,9 @@ PI_REF        = config["PI_REF"]
 CMD_PARAMS    = config["CMD_PARAMS"]
 COLORS        = config["COLORS"]
 NORM          = config["NORM"]
+ORENTATION    = config["ORENTATION"]
 USER          = config["USER"]
 GENELIST      = config["GENELIST"]
-MEMORY        = config["MEMORY"]
 
 # Simplify ALL_SAMPLES dictionary
 # subsampling groups can be listed in multiple sections
@@ -89,7 +89,7 @@ wildcard_constraints:
 
 COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
 
-NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"])
+NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"],ORENTATION)
 
 NORM543 = _get_matrixtype(NORMS,CMD_PARAMS["region543"],GENELIST)
 NORM5 = _get_matrixtype(NORMS,CMD_PARAMS["reference5"],GENELIST)
@@ -102,20 +102,20 @@ BAM_PATH = _get_bampath(NORM)
 rule all:
     input:
         # bamCoverage
-        PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + "_" + NORMS + "_bw_URL.txt",
+        PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + NORMS + "_bw_URL.txt",
         
         # 543 matrix file
-        PROJ + "/URLS/543_" + PROJ + "_" + INDEX_SAMPLE + "_" + NORM543 + "_matrix.url.txt",
+        PROJ + "/URLS/543_" + PROJ + "_" + INDEX_SAMPLE + NORM543 + "_matrix.url.txt",
         
         # 5 matrix file
-        PROJ + "/URLS/5_" + PROJ + "_" + INDEX_SAMPLE + "_" + NORM5 + "_matrix.url.txt",
+        PROJ + "/URLS/5_" + PROJ + "_" + INDEX_SAMPLE + NORM5 + "_matrix.url.txt",
         
         # 3 matrix file
-        PROJ + "/URLS/3_" + PROJ + "_" + INDEX_SAMPLE + "_" + NORM3 + "_matrix.url.txt"
+        PROJ + "/URLS/3_" + PROJ + "_" + INDEX_SAMPLE + NORM3 + "_matrix.url.txt"
         #,
         
         # PI matrix file
-        #PROJ + "/URLS/PI_" + PROJ + "_" + INDEX_SAMPLE + "_" + NORMPI + "_matrix.url.txt"
+        #PROJ + "/URLS/PI_" + PROJ + "_" + INDEX_SAMPLE + NORMPI + "_matrix.url.txt"
 
 
 # BW with deeptools bamCoverage

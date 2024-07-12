@@ -38,21 +38,15 @@ SAMPLES:
             PP1-PNUTS-H66K_pdox_DRB_CTD: "293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_CTD"
             PP1-PNUTS-H66K_pdox_DRB_Input: "293flpIN_PP1-PNUTS-H66K_pdox_DRB_ChIPseq_input"
                   
-# norm bw with --scaleFactor, (if using --normalizeUsing set to None), 
-# chrM, shRNA, sample (hg38), spikeIN (mm10), enrich (enrich_hg38 | enrich_mm10), 
-# OR, OR_enrich if input with spike in is paired up
+# Norm sample bw and matix files, spike-in is always CPM      
+# "RPKM","CPM","BPM","RPGC" 
+# Or with scaleFactor
+# chrM, shRNA, OR | OR_enrich (if input with spike in is paired up)
+# Or "subsample" : make bw and matix files from sub-sampled bam files (paired groups)
 NORM:
   "OR_enrich"
 
-# Base memory to request for each rule
-# The acutal amount requested will be higher for rules that generally
-# require more memory
-# A value of 4 will result in rules requesting between 4Gb - 60Gb of
-# request ~2Gb/GB of fastq.gz file
-# memory
-MEMORY:
-    4
-  
+
   # set RGB colors for bw urls and table files, 
   # list as many colors as samples (not inputs) 
   # applied in order of samples ignoring inputs
@@ -68,9 +62,10 @@ CMD_PARAMS:
     bbduk:         " overwrite=t ftm=5 minlen=50 ktrim=r k=23 hdist=1 mink=11 tpe tbo ecco=t "
     bowtie2:       " --local --no-mixed --no-discordant "
     samtools:      " -bF4q30 "
-    bamCoverage:   " --binSize 10 --normalizeUsing None --skipNonCoveredRegions --extendReads 300 --centerReads "
+    bamCoverage:   " --binSize 10 --skipNonCoveredRegions --extendReads 300 --centerReads "
     bamCoverageBL: ""
     fragment_size: " --maxFragmentLength 1000 "
+    featureCounts: " -g GeneID -p -B -C -O --countReadPairs -s 0 "
     
 # sandbox User #
 USER:
@@ -80,7 +75,9 @@ USER:
 #   CCATTGTT=AATGATACGGCGACCACCGAGATCTACACAACAATGGACACTCTTTCCCTACACGACGCTCTTCCGA
 #   CTACTTGT=CAAGCAGAAGACGGCATACGAGATACAAGTAGGTGACTGGAGTTCAGACGTGTGCTCTTCCGA
 BARCODES:
-    "pipelines/ref/truseq_i5i7.fa"
+    "pipelines/ref/truseq_i5i7.fa"     
+ORENTATION:
+    "R2R1" # R1R2
     
     
 ## Additional common parameters for various processing steps ###

@@ -1,19 +1,5 @@
 # ====== Rules for filtering and subsampleing aligned reads with samtools =================================
 
-# gets number for norm fraction sample
-def _get_norm_samp(wildcards):
-    sample = wildcards.sample + "_" + INDEX_SAMPLE
-    filename =  PROJ + "/stats/" + PROJ + "_" + INDEX_SAMPLE + "_subsample_frac.tsv"
-    num = 0
-    with open(filename, "r") as file:
-      for line in file:
-        parts = line.strip().split('\t')
-        if len(parts) == 3 and parts[0] == sample:
-          num = parts[2]
-          break
-    return float(num)
-    
-
 # Remove duplicate reads
 rule dedup_UMI:
     input:
@@ -29,7 +15,7 @@ rule dedup_UMI:
         samp     = "{sample}_" + INDEX_MAP,
         args     = CMD_PARAMS["umi_tools"]
     resources:
-        memory   = MEMORY * 3
+        memory   = lambda wildcards, input: memory_estimator(input, 3, 10)
     log:
         out = PROJ + "/logs/{sample}_dedup.out",
         err = PROJ + "/logs/{sample}_dedup.err"
@@ -70,7 +56,7 @@ rule align_filter_sample:
         mask     = MASK,
         sortname = PROJ + "/{sample}.temp"
     resources:
-        memory   = MEMORY * 3
+        memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
     log:
         out = PROJ + "/logs/{sample}_align_filter.out",
         err = PROJ + "/logs/{sample}_align_filter.err"
@@ -130,7 +116,7 @@ rule calculating_subsample_summary:
     params:
         job_name = PROJ + "_calculating_subsample_summary"
     resources:
-        memory   = 4
+        memory   = 1
     log:
         out = PROJ + "/logs/" + PROJ + "_calculating_subsample_summary.out",
         err = PROJ + "/logs/" + PROJ + "_calculating_subsample_summary.err"
@@ -161,7 +147,7 @@ rule subsample_dedup:
         samp     = "{sample}_" + INDEX_SAMPLE,
         scale    = _get_norm_samp
     resources:
-        memory   = MEMORY * 3
+        memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
     log:
         out = PROJ + "/logs/subsample_dedup_{sample}_" + INDEX_SAMPLE + ".out",
         err = PROJ + "/logs/subsample_dedup_{sample}_" + INDEX_SAMPLE + ".err"
@@ -191,7 +177,7 @@ rule dedup_summary:
     params:
         job_name = PROJ + "_dedup_summary"
     resources:
-        memory   = 4
+        memory   = 1
     log:
         out = PROJ + "/logs/" + PROJ + "_dedup_summary.out",
         err = PROJ + "/logs/" + PROJ + "_dedup_summary.err"
@@ -236,7 +222,7 @@ rule subsample_summary:
     params:
         job_name = PROJ + "_subsample_whole_summary"
     resources:
-        memory   = 4
+        memory   = 1
     log:
         out = PROJ + "/logs/" + PROJ + "_subsample_sample_summary.out",
         err = PROJ + "/logs/" + PROJ + "_subsample_sample_summary.err"
@@ -250,20 +236,6 @@ rule subsample_summary:
                 for line in open(file, "r"):
                     out.write(line)
 
-
-# gets number for norm fraction sample
-def _get_norm_spike(wildcards):
-    sample = wildcards.sample + "_" + INDEX_SPIKE
-    filename =  PROJ + "/stats/" + PROJ + "_" + INDEX_SPIKE + "_subsample_frac.tsv"
-    num = 0
-    with open(filename, "r") as file:
-      for line in file:
-        parts = line.strip().split('\t')
-        if len(parts) == 3 and parts[0] == sample:
-          num = parts[2]
-          break
-    return float(num)
-    
 
 # filter aligned reads
 rule align_filter_sample_spikeIN:
@@ -282,7 +254,7 @@ rule align_filter_sample_spikeIN:
         fa2      = FA_SPIKE,
         sortname = PROJ + "/{sample}_spike.temp"
     resources:
-        memory   = MEMORY * 3
+        memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
     log:
         out = PROJ + "/logs/{sample}_align_filter_spikeIN.out",
         err = PROJ + "/logs/{sample}_align_filter_spikeIN.err"
@@ -341,7 +313,7 @@ rule calculating_subsample_summary_spikeIN:
     params:
         job_name = PROJ + "_calculating_subsample_summary_spikeIN"
     resources:
-        memory   = 4
+        memory   = 1
     log:
         out = PROJ + "/logs/" + PROJ + "_calculating_subsample_summary_spikeIN.out",
         err = PROJ + "/logs/" + PROJ + "_calculating_subsample_summary_spikeIN.err"
@@ -372,7 +344,7 @@ rule subsample_dedup_spikeIN:
         samp     = "{sample}_" + INDEX_SPIKE,
         scale    = _get_norm_spike
     resources:
-        memory   = MEMORY * 3
+        memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
     log:
         out = PROJ + "/logs/subsample_dedup_{sample}_" + INDEX_SPIKE + ".out",
         err = PROJ + "/logs/subsample_dedup_{sample}_" + INDEX_SPIKE + ".err"
@@ -402,7 +374,7 @@ rule subsample_summary_spikeIN:
     params:
         job_name = PROJ + "_subsample_whole_summary_spikeIN"
     resources:
-        memory   = 4
+        memory   = 1
     log:
         out = PROJ + "/logs/" + PROJ + "_subsample_sample_summary_spikeIN.out",
         err = PROJ + "/logs/" + PROJ + "_subsample_sample_summary_spikeIN.err"

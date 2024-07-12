@@ -13,7 +13,7 @@ rule my_summary_npz:
         job_name = "multiBamSummary",
         my_ref   = MY_REF
     resources:
-        memory   = MEMORY * 3
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
     log:
         out = PROJ + "/logs/multiBamSummary.out",
         err = PROJ + "/logs/multiBamSummary.err"
@@ -41,7 +41,7 @@ rule my_PCA_plot:
     params:
         job_name = "PCA_plot"
     resources:
-        memory   = MEMORY * 2
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
     log:
         out = PROJ + "/logs/PCA_plot.out",
         err = PROJ + "/logs/PCA_plot.err"

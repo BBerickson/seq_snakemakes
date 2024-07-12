@@ -1,31 +1,5 @@
 # ===== Snakefile for trimming reads with bbduk =====================
 
-def _get_barcodes(wildcards):
-    import os.path
-    sample = wildcards.sample
-    patternfile = BARCODES
-    filename =  PROJ + "/" + sample + "_R1_clumpify.fastq.gz"
-    
-    if os.path.exists(patternfile):
-      with gzip.open(filename,'rt') as f:
-        line = f.readline().strip().split()
-        line2 = line[1].split(":")
-        my_indexs = line2[3].split("+")
-    
-      result = {}
-      for line in open(patternfile):
-        line2 = line.strip().split("=")
-        result[line2[0]] = line2[1]
-  
-      results = []
-      for k in my_indexs:
-        if k in result:
-          results.append(result[k])
-    else:
-      results=BARCODES.strip().split()
-    return ','.join(results)
-    
-    
 # Run bbduk
 rule bbduk_paired:
     input:
@@ -38,7 +12,7 @@ rule bbduk_paired:
         args     = CMD_PARAMS["bbduk"],
         bar      = _get_barcodes
     resources:
-        memory   = 30
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
     log:
         out = PROJ + "/logs/{sample}_bbduk.out",
         err = PROJ + "/logs/{sample}_bbduk.err"
@@ -49,7 +23,13 @@ rule bbduk_paired:
     run:
         # If no params are passed, make a symlink to original fastq
         if len(params.args) == 0:
-            os.symlink(input[0], output[0])
+            shell(
+                """
+                cp {input[0]} {output[0]}
+                echo "Total Removed:  0 reads (0.0%) 	0 bases (0.0%)" >> {output[1]}
+                
+                """
+              )
         else:
             shell(
                 """
@@ -73,7 +53,7 @@ rule bbduk_summary:
     params:
         job_name = PROJ + "_bbduk_summary"
     resources:
-        memory   = 4
+        memory   = 1
     log:
         out = PROJ + "/logs/" + PROJ + "_bbduk_summary.out",
         err = PROJ + "/logs/" + PROJ + "_bbduk_summary.err"

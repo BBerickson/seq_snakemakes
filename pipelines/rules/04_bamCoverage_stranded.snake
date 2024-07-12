@@ -1,40 +1,5 @@
 # ====== Rules for aligning reads with bamCoverage and OR norm to spike in =================================
 
-# grab color from dict
-def _get_col(wildcards):
-    sample = wildcards.newnam
-    if sample in COLS_DICT:
-      results = (COLS_DICT[sample])
-    else:
-      results = "0,0,0"
-    return(results)
-        
-# gets number for norm fraction
-def _get_norm(wildcards):
-    newnam = wildcards.newnam
-    sample = SAMPLES[wildcards.newnam][0]
-    patternfile = NORM
-    num = 1
-    if patternfile.lower() not in ["subsample", "none"] and not patternfile.isspace():
-      patternfile = patternfile + "_" + INDEX_SAMPLE
-      path = PROJ + "/counts/"
-      filename = glob.glob(path + sample + "*_count.txt")[0]
-      for line in open(filename, "r"):
-        match = re.search(patternfile, line)
-        if match:
-          num = line.strip().split()
-          if not float(num[1]) == 0:
-            num = 1000000/float(num[1])
-          else:
-            num = 1
-          break
-        else:
-          num = "fail"
-    if isinstance(num, (int, float)):
-      return num
-    else:
-      return filename
-
 
 # Align trimmed reads with bamCoverage
 rule bamCoverage:
@@ -45,20 +10,20 @@ rule bamCoverage:
         ),
         check_point = PROJ + "/stats/" + PROJ + "_results.tsv"
     output:
-        fw      =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
-        rev     =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw",
+        fw      =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_fw.bw",
+        rev     =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_rev.bw",
         stats   = temp(PROJ      + "/bw/{newnam}_bamCoverage_stats.txt")
     params:
         job_name = "{newnam}_bamCoverage",
         args     = CMD_PARAMS["bamCoverage"] + CMD_PARAMS["bamCoverageBL"],
-        argsf    = CMD_PARAMS["bamCoveragef"],
-        argsr    = CMD_PARAMS["bamCoverager"],
+        argsf    = _get_bamCov_strand("forward",ORENTATION),
+        argsr    = _get_bamCov_strand("reverse",ORENTATION),
         scale    = _get_norm,
         color    = _get_col,
-        url_fw   = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
-        url_rev  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw"
+        url_fw   = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_fw.bw",
+        url_rev  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_rev.bw"
     resources:
-        memory   = MEMORY * 5
+        memory   = lambda wildcards, input: memory_estimator(input.bam, 0.2, 5)
     log:
         out = PROJ + "/logs/{newnam}_bamCoverage.out",
         err = PROJ + "/logs/{newnam}_bamCoverage.err"
@@ -74,7 +39,7 @@ rule bamCoverage:
           -of bigwig \
           -o {output.fw} \
           {params.args} \
-          --scaleFactor {params.scale} \
+          {params.scale} \
           -p 12 --filterRNAstrand {params.argsf}
 
         bamCoverage \
@@ -82,11 +47,11 @@ rule bamCoverage:
           -of bigwig \
           -o {output.rev} \
           {params.args} \
-          --scaleFactor {params.scale} \
+          {params.scale} \
           -p 12 --filterRNAstrand {params.argsr}
         
-        echo "track type=bigWig visibility=full name='{wildcards.newnam}_{SEQ_DATE}_{NORMS}_fw' description='{wildcards.newnam}_{SEQ_DATE}_{NORMS}_fw' color={params.color} bigDataUrl={params.url_fw}" > {output.stats}
-        echo "track type=bigWig visibility=full name='{wildcards.newnam}_{SEQ_DATE}_{NORMS}_rev' description='{wildcards.newnam}_{SEQ_DATE}_{NORMS}_rev' color={params.color} bigDataUrl={params.url_rev}" >> {output.stats}
+        echo "track type=bigWig visibility=full name='{wildcards.newnam}_{SEQ_DATE}{NORMS}_fw' description='{wildcards.newnam}_{SEQ_DATE}{NORMS}_fw' color={params.color} bigDataUrl={params.url_fw}" > {output.stats}
+        echo "track type=bigWig visibility=full name='{wildcards.newnam}_{SEQ_DATE}{NORMS}_rev' description='{wildcards.newnam}_{SEQ_DATE}{NORMS}_rev' color={params.color} bigDataUrl={params.url_rev}" >> {output.stats}
         ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
         scp {output.fw} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
         scp {output.rev} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
@@ -102,11 +67,11 @@ rule bamCoverage_summary:
             newnam = NAMS_UNIQ
         ))
     output:
-        PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + "_" + NORMS + "_bw_URL.txt"
+        PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + NORMS + "_bw_URL.txt"
     params:
         job_name = PROJ + "_bamCoverage_summary"
     resources:
-        memory   = 4
+        memory   = 1
     log:
         out = PROJ + "/logs/" + PROJ + "_bamCoverage_summary.out",
         err = PROJ + "/logs/" + PROJ + "_bamCoverage_summary.err"
@@ -121,33 +86,6 @@ rule bamCoverage_summary:
                     out.write(line)
 
 
-# gets number for norm fraction
-def _get_norm2(wildcards):
-    newnam = wildcards.newnam
-    sample = SAMPLES[wildcards.newnam][0]
-    patternfile = NORM
-    num = 1
-    if patternfile.lower() not in ["subsample", "none"] and not patternfile.isspace():
-      patternfile = patternfile + "_" + INDEX_SPIKE
-      path = PROJ + "/counts/"
-      filename = glob.glob(path + sample + "*_count.txt")[0]
-      for line in open(filename, "r"):
-        match = re.search(patternfile, line)
-        if match:
-          num = line.strip().split()
-          if not float(num[1]) == 0:
-            num = 1000000/float(num[1])
-          else:
-            num = 1
-          break
-        else:
-          num = "fail"
-    if isinstance(num, (int, float)):
-      return num
-    else:
-      return filename
-        
-
 # Align trimmed reads with bamCoverage
 rule bamCoverage_spike:
     input:
@@ -157,20 +95,19 @@ rule bamCoverage_spike:
         ),
         check_point = PROJ + "/stats/" + PROJ + "_results.tsv"
     output:
-        fw      =   PROJ   + "/bw/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
-        rev     =   PROJ   + "/bw/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw",
+        fw      =   PROJ   + "/bw/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_norm_CPM_fw.bw",
+        rev     =   PROJ   + "/bw/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_norm_CPM_rev.bw",
         stats   = temp(PROJ      + "/bw/{newnam}_spike_bamCoverage_stats.txt")
     params:
         job_name = "{newnam}_spike_bamCoverage",
         args     = CMD_PARAMS["bamCoverage"] + CMD_PARAMS["bamCoverageBL"],
-        argsf    = CMD_PARAMS["bamCoveragef"],
-        argsr    = CMD_PARAMS["bamCoverager"],
-        scale    = _get_norm2,
+        argsf    = _get_bamCov_strand("forward",ORENTATION),
+        argsr    = _get_bamCov_strand("reverse",ORENTATION),
         color    = _get_col,
-        url_fw   = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
-        url_rev  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw"
+        url_fw   = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_norm_CPM_fw.bw",
+        url_rev  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_norm_CPM_rev.bw"
     resources:
-        memory   = MEMORY * 5
+        memory   = lambda wildcards, input: memory_estimator(input.bam, 0.2, 5)
     log:
         out = PROJ + "/logs/{newnam}_spike_bamCoverage.out",
         err = PROJ + "/logs/{newnam}_spike_bamCoverage.err"
@@ -186,7 +123,7 @@ rule bamCoverage_spike:
           -of bigwig \
           -o {output.fw} \
           {params.args} \
-          --scaleFactor {params.scale} \
+          --normalizeUsing CPM \
           -p 12 --filterRNAstrand {params.argsf}
 
         bamCoverage \
@@ -194,11 +131,11 @@ rule bamCoverage_spike:
           -of bigwig \
           -o {output.rev} \
           {params.args} \
-          --scaleFactor {params.scale} \
+          --normalizeUsing CPM \
           -p 12 --filterRNAstrand {params.argsr}
         
-        echo "track type=bigWig visibility=full name='{wildcards.newnam}_{SEQ_DATE}_{NORMS}_fw' description='{wildcards.newnam}_{SEQ_DATE}_{NORMS}_fw' color={params.color} bigDataUrl={params.url_fw}" > {output.stats}
-        echo "track type=bigWig visibility=full name='{wildcards.newnam}_{SEQ_DATE}_{NORMS}_rev' description='{wildcards.newnam}_{SEQ_DATE}_{NORMS}_rev' color={params.color} bigDataUrl={params.url_rev}" >> {output.stats}
+        echo "track type=bigWig visibility=full name='{wildcards.newnam}_{SEQ_DATE}_norm_CPM_fw' description='{wildcards.newnam}_{SEQ_DATE}_norm_CPM_fw' color={params.color} bigDataUrl={params.url_fw}" > {output.stats}
+        echo "track type=bigWig visibility=full name='{wildcards.newnam}_{SEQ_DATE}_norm_CPM_rev' description='{wildcards.newnam}_{SEQ_DATE}_norm_CPM_rev' color={params.color} bigDataUrl={params.url_rev}" >> {output.stats}
         ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
         scp {output.fw} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
         scp {output.rev} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
@@ -214,11 +151,11 @@ rule bamCoverage_spike_summary:
             newnam = NAMS_UNIQ
         ))
     output:
-        PROJ + "/URLS/" + PROJ + "_" + INDEX_SPIKE + "_" + NORMS + "_bw_URL.txt"
+        PROJ + "/URLS/" + PROJ + "_" + INDEX_SPIKE + "_norm_CPM_bw_URL.txt"
     params:
         job_name = PROJ + "_bamCoverage_spike_summary"
     resources:
-        memory   = 4
+        memory   = 1
     log:
         out = PROJ + "/logs/" + PROJ + "_bamCoverage_spike_summary.out",
         err = PROJ + "/logs/" + PROJ + "_bamCoverage_spike_summary.err"

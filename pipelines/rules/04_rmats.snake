@@ -38,7 +38,7 @@ rule fastq_rmats:
         gtf      = GTF,
         args     = CMD_PARAMS["rmats"]
     resources:
-        memory   = MEMORY * 10
+        memory   = 30
     log:
         out = PROJ + "/logs/{compgroups}_fastq_rmats.out",
         err = PROJ + "/logs/{compgroups}_fastq_rmats.err"

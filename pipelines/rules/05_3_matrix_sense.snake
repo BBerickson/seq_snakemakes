@@ -5,8 +5,8 @@
 # stranded sense matrix files
 rule my_3_sense_matrix:
     input:
-        fw  =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
-        rev =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw"
+        fw  =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_fw.bw",
+        rev =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_rev.bw"
     output:
         sense   = temp(PROJ   + "/matrix/{newnam}_temp0_3_matrix.gz"),
         sense1  = temp(PROJ   + "/matrix/{newnam}_temp1_3_matrix.gz"),
@@ -17,7 +17,7 @@ rule my_3_sense_matrix:
         fw_ref   = FW_REF,
         rev_ref  = REV_REF
     resources:
-        memory   = MEMORY * 5
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
     log:
         out = PROJ + "/logs/{newnam}_sense_3_matrix.out",
         err = PROJ + "/logs/{newnam}_sense_3_matrix.err"
@@ -56,7 +56,7 @@ rule fix_3_sense_matrix:
         job_name = "{newnam}_3_sense_matrix",
         args    = CMD_PARAMS["filter3"]
     resources:
-        memory   = MEMORY
+        memory   = 4
     log:
         out = PROJ + "/logs/{newnam}_fix_3_sense_matrix.out",
         err = PROJ + "/logs/{newnam}_fix_3_sense_matrix.err"
@@ -74,11 +74,11 @@ rule my_3_url:
         PROJ   + "/matrix/{newnam}_temp0_fix_3_matrix.gz"
     output:
         temp(PROJ + "/matrix/3.{newnam}_matrix.url.txt"),
-        PROJ + "/matrix/3_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_matrix.gz"
+        PROJ + "/matrix/3_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM3 + "_matrix.gz"
     params:
         job_name = PROJ + "_3_matrix_url",
         color    = _get_col,
-        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/3_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_matrix.gz"
+        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/3_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM3 + "_matrix.gz"
     resources:
         memory   = 4
     log:
@@ -92,7 +92,7 @@ rule my_3_url:
         """
         # fix R appended file remote read error
         computeMatrixOperations relabel -m {input} -o {output[1]}
-        echo {params.url_out} 3 3.{wildcards.newnam}_{SEQ_DATE} {params.color} >> {output[0]}
+        echo {params.url_out} self 3.{wildcards.newnam}_{SEQ_DATE} {params.color} >> {output[0]}
         ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
         scp {output[1]} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
         
@@ -106,11 +106,11 @@ rule my_3_url_summary:
             newnam = NAMS_UNIQ
         ))
     output:
-        PROJ + "/URLS/3_" + PROJ + "_" + INDEX_SAMPLE + "_" + NORM3 + "_sense_matrix.url.txt"
+        PROJ + "/URLS/3_" + PROJ + "_" + INDEX_SAMPLE + NORM3 + "_sense_matrix.url.txt"
     params:
         job_name = PROJ + "_sense_3_matrix_url"
     resources:
-        memory   = 4
+        memory   = 1
     log:
         out = PROJ + "/logs/" + PROJ + "_sense_3_matrix_url.out",
         err = PROJ + "/logs/" + PROJ + "_sense_3_matrix_url.err"

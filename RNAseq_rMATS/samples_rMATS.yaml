@@ -33,7 +33,9 @@ GROUPS_COMP:
 
 # program options  
 CMD_PARAMS:
-    rmats:         " -t paired --readLength 150 --libType fr-firststrand "
+    rmats:         " -t paired --readLength 150 --libType fr-firststrand "     
+ORENTATION:
+    "R2R1" # R1R2
     
 # optional arguments:
 #   --gtf GTF             An annotation of genes and transcripts in GTF format.

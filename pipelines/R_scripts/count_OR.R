@@ -43,15 +43,20 @@ if(!is.null(input)){
     dplyr::select(-value4) %>% 
     dplyr::mutate(type=paste0(type,"_",in_spk)) %>%
     bind_rows(out,out1,.)
+  out <- out %>% 
+    dplyr::mutate(mysamp=snakemake@input[[1]]) %>% 
+    separate(.,mysamp,c("temp","mysamp"),"/.*/") %>% 
+    mutate(mysamp=str_remove(mysamp,"_spikin_count.txt")) %>%  
+    select(mysamp,type,value)
+  
+  write_delim(out %>% select(-mysamp), snakemake@input[[1]],col_names = F,delim = " ", append = TRUE)
+  write_delim(out, snakemake@output[[1]],col_names = F,delim = " ")
 } else {
-  out <- tibble(name="test", value = 1e6, type=type) 
+  out <- tibble(mysamp=snakemake@input[[1]], type="OR", value = NA) %>% 
+    separate(.,mysamp,c("temp","mysamp"),"/.*/") %>% 
+    mutate(mysamp=str_remove(mysamp,"_spikin_count.txt")) %>%  
+    select(mysamp,type,value)
+  write_delim(out, snakemake@output[[1]],col_names = F,delim = " ")
 }
 
-out <- out %>% 
-  dplyr::mutate(mysamp=snakemake@input[[1]]) %>% 
-  separate(.,mysamp,c("temp","mysamp"),"/.*/") %>% 
-  mutate(mysamp=str_remove(mysamp,"_spikin_count.txt")) %>%  
-  select(mysamp,type,value)
 
-write_delim(out %>% select(-mysamp), snakemake@input[[1]],col_names = F,delim = " ", append = TRUE)
-write_delim(out, snakemake@output[[1]],col_names = F,delim = " ")

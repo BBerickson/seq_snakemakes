@@ -14,7 +14,7 @@ rule featureCounts:
         job_name = PROJ + "_featureCounts",
         args     = CMD_PARAMS["featureCounts"]
     resources:
-        memory   = MEMORY
+        memory   = lambda wildcards, input: memory_estimator(input, 0.5, 4)
     log:
         out = PROJ + "/logs/" + PROJ + "_featureCounts.out",
         err = PROJ + "/logs/" + PROJ + "_featureCounts.err"

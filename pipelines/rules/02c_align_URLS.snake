@@ -12,7 +12,7 @@ rule my_bowtie_sample_url:
         job_name = PROJ + "_bowtie_sample_url",
         url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam"
     resources:
-        memory   = 4
+        memory   = 1
     log:
         out = PROJ + "/logs/{sample}_" + PROJ + "_bowtie_sample_url.out",
         err = PROJ + "/logs/{sample}_" + PROJ + "_bowtie_sample_url.err"
@@ -40,7 +40,7 @@ rule bowtie_sample_urls:
     params:
         job_name = PROJ + "_bowtie_url"
     resources:
-        memory   = 4
+        memory   = 1
     log:
         out = PROJ + "/logs/" + PROJ + "_bowtie_sample_url.out",
         err = PROJ + "/logs/" + PROJ + "_bowtie_sample_url.err"
@@ -66,7 +66,7 @@ rule my_bowtie_spike_url:
         job_name = PROJ + "_bowtie_sample_url",
         url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam"
     resources:
-        memory   = 4
+        memory   = 1
     log:
         out = PROJ + "/logs/{sample}_" + PROJ + "_bowtie_spike_url.out",
         err = PROJ + "/logs/{sample}_" + PROJ + "_bowtie_spike_url.err"
@@ -93,7 +93,7 @@ rule bowtie_spike_urls:
     params:
         job_name = PROJ + "_bowtie_spike_url"
     resources:
-        memory   = 4
+        memory   = 1
     log:
         out = PROJ + "/logs/" + PROJ + "_bowtie_spike_url.out",
         err = PROJ + "/logs/" + PROJ + "_bowtie_spike_url.err"
@@ -119,7 +119,7 @@ rule my_subsample_whole_url:
         job_name = PROJ + "_subsample_whole_url",
         url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + PROJ + "/bams_sub/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam"
     resources:
-        memory   = 4
+        memory   = 1
     log:
         out = PROJ + "/logs/{sample}_" + PROJ + "_subsample_sample_url.out",
         err = PROJ + "/logs/{sample}_" + PROJ + "_subsample_sample_url.err"
@@ -147,7 +147,7 @@ rule my_subsample_whole_url_summary:
     params:
         job_name = PROJ + "_subsample_whole_bam_URL"
     resources:
-        memory   = 4
+        memory   = 1
     log:
         out = PROJ + "/logs/" + PROJ + "_subsample_sample_bam_URL.out",
         err = PROJ + "/logs/" + PROJ + "_subsample_sample_bam_URL.err"
@@ -172,7 +172,7 @@ rule my_subsample_spikein_whole_url:
         job_name = PROJ + "_subsample_whole_url",
         url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + PROJ + "/bams_sub/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam"
     resources:
-        memory   = 4
+        memory   = 1
     log:
         out = PROJ + "/logs/{sample}_" + PROJ + "_subsample_spikein_url.out",
         err = PROJ + "/logs/{sample}_" + PROJ + "_subsample_spikein_url.err"
@@ -200,7 +200,7 @@ rule my_subsample_spikein_whole_url_summary:
     params:
         job_name = PROJ + "_subsample_spikein_bam_URL"
     resources:
-        memory   = 4
+        memory   = 1
     log:
         out = PROJ + "/logs/" + PROJ + "_subsample_spikein_bam_URL.out",
         err = PROJ + "/logs/" + PROJ + "_subsample_spikein_bam_URL.err"

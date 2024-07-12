@@ -13,14 +13,14 @@ rule star_first_pass:
         job_name = "{sample}_star_pass_1",
         out      = PROJ + "/bams/{sample}_"
     resources:
-        memory   = 350
+        memory   = lambda wildcards, input: memory_estimator([input.R1, input.R2], 3, 30)
     log:
         out = PROJ + "/logs/{sample}_star.out",
         err = PROJ + "/logs/{sample}_star.err"
     message:
         "running first pass star alignments "
     threads: 
-        6
+        16
     shell:
         """
         
@@ -29,7 +29,7 @@ rule star_first_pass:
           --runThreadN {threads} \
           --readFilesIn {input.R1} {input.R2} \
           --outSAMtype BAM SortedByCoordinate \
-          --limitBAMsortRAM 300000000000 \
+          --limitBAMsortRAM {resources.memory}000000000 \
           --readFilesCommand gunzip -c \
           --outFileNamePrefix {params.out}
 
@@ -52,14 +52,14 @@ rule star_second_pass:
         bam_out  = PROJ + "/bams/{sample}_2pass_Aligned.sortedByCoord.out.bam",
         args     = CMD_PARAMS["star2"]
     resources:
-        memory   = 350
+        memory   = lambda wildcards, input: memory_estimator([input.R1, input.R2, input.first_bam], 2, 30)
     log:
         out = PROJ + "/logs/{sample}_2_star.out",
         err = PROJ + "/logs/{sample}_2_star.err"
     message:
         "running second pass star alignments "
     threads: 
-        6
+        16
     shell:
         """
         
@@ -70,7 +70,7 @@ rule star_second_pass:
        --outSAMtype BAM SortedByCoordinate \
        --readFilesCommand gunzip -c \
        --outFileNamePrefix {params.out} \
-       --limitBAMsortRAM 300000000000 \
+       --limitBAMsortRAM {resources.memory}000000000 \
        --sjdbFileChrStartEnd {input.junctions} \
        {params.args}
 
@@ -96,7 +96,7 @@ rule star_2pass_summmary:
     params:
         job_name = "star_2pass_summmary"
     resources:
-        memory   = 4
+        memory   = 1
     log:
         out = PROJ + "/logs/star_summmary.out",
         err = PROJ + "/logs/star_summmary.err"

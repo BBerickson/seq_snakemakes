@@ -4,8 +4,8 @@
 # stranded sense matrix files
 rule sense_543_matrix:
     input:
-        fw  =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
-        rev =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw"
+        fw  =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_fw.bw",
+        rev =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_rev.bw"
     output:
         sense0  = temp(PROJ   + "/matrix/{newnam}_temp0_543_sense_matrix.gz"),
         sense1  = temp(PROJ   + "/matrix/{newnam}_temp1_543_sense_matrix.gz"),
@@ -17,7 +17,7 @@ rule sense_543_matrix:
         rev_ref  = REV_REF,
         color    = _get_col
     resources:
-        memory   = MEMORY * 5
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
     log:
         out = PROJ + "/logs/{newnam}_543_sense_matrix.out",
         err = PROJ + "/logs/{newnam}_543_sense_matrix.err"
@@ -73,13 +73,13 @@ rule urls_543_sense_matrix:
         PROJ + "/matrix/{newnam}_temp0_fix_543_sense_matrix.gz"
     output:
         temp(PROJ + "/matrix/543.{newnam}_matrix.url.txt"),
-        PROJ   + "/matrix/543_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM543 + "_matrix.gz"
+        PROJ   + "/matrix/543_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM543 + "_matrix.gz"
     params:
         job_name = "{newnam}_sense_matrix",
         color    = _get_col,
-        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/543_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM543 + "_matrix.gz"
+        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/543_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM543 + "_matrix.gz"
     resources:
-        memory   = MEMORY
+        memory   = 4
     log:
         out = PROJ + "/logs/{newnam}_url_543_sense_matrix.out",
         err = PROJ + "/logs/{newnam}_url_543_sense_matrix.err"
@@ -91,7 +91,7 @@ rule urls_543_sense_matrix:
         """
         # fix R appended file remote read error
         computeMatrixOperations relabel -m {input} -o {output[1]}
-        echo {params.url_out} 543 543.{wildcards.newnam}_{SEQ_DATE} {params.color} >> {output[0]}
+        echo {params.url_out} self 543.{wildcards.newnam}_{SEQ_DATE} {params.color} >> {output[0]}
         ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
         scp {output[1]} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
 
@@ -105,11 +105,11 @@ rule sense_543_url_summary:
             newnam = NAMS_UNIQ
         ))
     output:
-        PROJ + "/URLS/543_" + PROJ + "_" + INDEX_SAMPLE + "_" + NORM543 + "_sense_matrix.url.txt"
+        PROJ + "/URLS/543_" + PROJ + "_" + INDEX_SAMPLE + NORM543 + "_sense_matrix.url.txt"
     params:
         job_name = PROJ + "_sense_543_matrix_url"
     resources:
-        memory   = 4
+        memory   = 1
     log:
         out = PROJ + "/logs/" + PROJ + "_sense_543_matrix_url.out",
         err = PROJ + "/logs/" + PROJ + "_sense_543_matrix_url.err"

@@ -4,8 +4,8 @@
 # stranded sense matrix files
 rule my_5_bidirectonal_matrix:
     input:
-        fw  =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
-        rev =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw"
+        fw  =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_fw.bw",
+        rev =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_rev.bw"
     output:
         sense   = temp(PROJ   + "/matrix/{newnam}_temp0b_5_matrix.gz"),
         asense  = temp(PROJ   + "/matrix/{newnam}_temp0b_a5_matrix.gz")
@@ -16,7 +16,7 @@ rule my_5_bidirectonal_matrix:
         fw_ref   = FW_REF,
         rev_ref  = REV_REF
     resources:
-        memory   = MEMORY * 5
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
     log:
         out = PROJ + "/logs/{newnam}_bidirectonal_5_matrix.out",
         err = PROJ + "/logs/{newnam}_bidirectonal_5_matrix.err"
@@ -92,15 +92,15 @@ rule my_5_url_s:
         matrix2 = PROJ  + "/matrix/{newnam}_temp0b_a5fix_matrix.gz"
     output:
         temp(PROJ + "/matrix/5.{newnam}_matrixs.url.txt"),
-        PROJ + "/matrix/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_pos_matrix.gz",
-        PROJ + "/matrix/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5A + "_neg_matrix.gz"
+        PROJ + "/matrix/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM5S + "_pos_matrix.gz",
+        PROJ + "/matrix/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM5A + "_neg_matrix.gz"
     params:
         job_name = PROJ + "_bidirectonal_5_matrix_url",
         color    = _get_col,
-        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_pos_matrix.gz",
-        url_anti = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5A + "_neg_matrix.gz"
+        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM5S + "_pos_matrix.gz",
+        url_anti = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM5A + "_neg_matrix.gz"
     resources:
-        memory   = MEMORY
+        memory   = 4
     log:
         out = PROJ + "/logs/{newnam}_bidirectonal_5_matrix_url.out",
         err = PROJ + "/logs/{newnam}_bidirectonal_5_matrix_url.err"
@@ -114,8 +114,8 @@ rule my_5_url_s:
         computeMatrixOperations relabel -m {input.matrix1} -o {output[1]}
         computeMatrixOperations relabel -m {input.matrix2} -o {output[2]}
         
-        echo {params.url_out} 5 5.{wildcards.newnam}_{SEQ_DATE}_pos {params.color} >> {output[0]}
-        echo {params.url_anti} 5 5.{wildcards.newnam}_{SEQ_DATE}_neg {params.color} >> {output[0]}
+        echo {params.url_out} self 5.{wildcards.newnam}_{SEQ_DATE}_pos {params.color} >> {output[0]}
+        echo {params.url_anti} self 5.{wildcards.newnam}_{SEQ_DATE}_neg {params.color} >> {output[0]}
         ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
         scp {output[1]} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
         scp {output[2]} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
@@ -130,11 +130,11 @@ rule my_5_url_s_summary:
             newnam = NAMS_UNIQ
         ))
     output:
-        PROJ + "/URLS/5_" + PROJ + "_" + INDEX_SAMPLE + "_" + NORM5S + "_bidirectonal_matrix.url.txt"
+        PROJ + "/URLS/5_" + PROJ + "_" + INDEX_SAMPLE + NORM5S + "_bidirectonal_matrix.url.txt"
     params:
         job_name = PROJ + "_bidirectonal_5_matrix_url"
     resources:
-        memory   = 4
+        memory   = 1
     log:
         out = PROJ + "/logs/" + PROJ + "_bidirectonal_5_matrix_url.out",
         err = PROJ + "/logs/" + PROJ + "_bidirectonal_5_matrix_url.err"

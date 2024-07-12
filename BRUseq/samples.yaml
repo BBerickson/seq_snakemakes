@@ -40,10 +40,11 @@ SAMPLES:
             RTF1_WT_pDox_DRB_15: "293flpIN_RTF1_WT_DRB_t15"
       
 
-# norm bw with --scaleFactor, (if using --normalizeUsing set to None), 
-# chrM, shRNA, index (hg38), spikeIN (mm10), enrich, (hg38_enrich)
-# OR, OR_enrich, (if input with spike in is paired up)
-# "subsample" make bw and matix files from sub-sampled bam files (paired groups)
+# Norm sample bw and matix files, spike-in is always CPM      
+# "RPKM","CPM","BPM","RPGC" 
+# Or with scaleFactor
+# chrM, shRNA, OR | OR_enrich (if input with spike in is paired up)
+# Or "subsample" : make bw and matix files from sub-sampled bam files (paired groups)
 NORM:
   "chrM"
   
@@ -56,20 +57,11 @@ CMD_PARAMS:
     bbduk:         " overwrite=t ftm=5 minlen=50 ktrim=r k=23 hdist=1 mink=11 tpe tbo ecco=t "
     bowtie2:       " --end-to-end --no-mixed --no-discordant "
     samtools:      " -bF4q30 "
-    bamCoverage:   " --binSize 10 --normalizeUsing None --skipNonCoveredRegions "
+    bamCoverage:   " --binSize 10 --skipNonCoveredRegions "
     bamCoverageBL: "" #  " --blackListFileName /beevol/home/erickson/ref/hg38/ref/merge_filter_RNAs.bed "
-    bamCoveragef:  " forward " # R2-R1 = forward R1-R2 = reverse
-    bamCoverager:  " reverse " # R2-R1 = reverse R1-R2 = forward
     fragment_size: " --maxFragmentLength 1000 "
+    featureCounts: " -g GeneID -p -B -C -O --countReadPairs -s 2 "
     
-# Base memory to request for each rule
-# The acutal amount requested will be higher for rules that generally
-# require more memory
-# A value of 4 will result in rules requesting between 4Gb - 60Gb
-# request ~2 per GB of max raw.fastq.gz file
-MEMORY:
-    4  
-  
 # barcode = illumina seq file
 #   CCATTGTT=AATGATACGGCGACCACCGAGATCTACACAACAATGGACACTCTTTCCCTACACGACGCTCTTCCGA
 #   CTACTTGT=CAAGCAGAAGACGGCATACGAGATACAAGTAGGTGACTGGAGTTCAGACGTGTGCTCTTCCGA
@@ -81,7 +73,8 @@ MEMORY:
     
 BARCODES:
     "pipelines/ref/truseq_i5i7.fa"     
-
+ORENTATION:
+    "R2R1" # R1R2
 # set colors for bw urls and table files, if missing 0,0,0 is default
 COLORS:
   - "0,0,0"

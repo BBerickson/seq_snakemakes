@@ -3,8 +3,8 @@
 # stranded antisense matrix files
 rule my_EI_amtisense_matrix2:
     input:
-        fw  =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_fw.bw",
-        rev =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMS + "_rev.bw"
+        fw  =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_fw.bw",
+        rev =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_rev.bw"
     output:
         asense   = temp(PROJ   + "/matrix/{newnam}_temp02_aEI_matrix.gz"),
         asense1  = temp(PROJ   + "/matrix/{newnam}_temp12_aEI_matrix.gz"),
@@ -15,7 +15,7 @@ rule my_EI_amtisense_matrix2:
         fw_ref   = EI_FW_REF,
         rev_ref  = EI_REV_REF
     resources:
-        memory   = MEMORY * 5
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
     log:
         out = PROJ + "/logs/{newnam}_antisense_EI_matrix2.out",
         err = PROJ + "/logs/{newnam}_antisense_EI_matrix2.err"
@@ -71,13 +71,13 @@ rule my_EI_url:
         matrix2 = PROJ   + "/matrix/{newnam}_temp02_fix_aEI_matrix.gz"
     output:
         temp(PROJ + "/matrix/EI.{newnam}_matrix.url.txt"),
-        PROJ + "/matrix/EI_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMEI + "_anti_matrix.gz"
+        PROJ + "/matrix/EI_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMEI + "_anti_matrix.gz"
     params:
         job_name = PROJ + "_EI_matrix_url2",
         color    = _get_col,
-        url_anti = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + PROJ + "/EI_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORMEI + "_anti_matrix.gz"
+        url_anti = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + PROJ + "/EI_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMEI + "_anti_matrix.gz"
     resources:
-        memory   = MEMORY
+        memory   = 4
     log:
         out = PROJ + "/logs/{newnam}_sense_EI_matrix_url2.out",
         err = PROJ + "/logs/{newnam}_sense_EI_matrix_url2.err"
@@ -90,7 +90,7 @@ rule my_EI_url:
         # fix for strange side affect that only the 1 line loads from sandbox
         computeMatrixOperations relabel -m {input.matrix2} -o {output[1]}
         ssh amc-sandbox 'mkdir -p ./public_html/{PROJ}'
-        echo {params.url_anti} EI EI.{wildcards.newnam}_{SEQ_DATE}_anti {params.color} >> {output[0]}
+        echo {params.url_anti} self EI.{wildcards.newnam}_{SEQ_DATE}_anti {params.color} >> {output[0]}
         scp {output[1]} amc-sandbox:./public_html/{PROJ}
         """
         
@@ -102,11 +102,11 @@ rule my_EI_url_summary:
             newnam = newnam
         ))
     output:
-        PROJ + "/URLS/EI_" + PROJ + "_" + INDEX_SAMPLE + "_" + NORMEI + "_matrix.url.txt"
+        PROJ + "/URLS/EI_" + PROJ + "_" + INDEX_SAMPLE + NORMEI + "_matrix.url.txt"
     params:
         job_name = PROJ + "_sense_EI_matrix_url"
     resources:
-        memory   = 4
+        memory   = 1
     log:
         out = PROJ + "/logs/" + PROJ + "_sense_EI_matrix_url.out",
         err = PROJ + "/logs/" + PROJ + "_sense_EI_matrix_url.err"

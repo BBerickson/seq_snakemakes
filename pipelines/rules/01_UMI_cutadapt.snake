@@ -15,7 +15,7 @@ rule extract_umi:
         job_name = "{sample}_umi_extract",
         umi_pat  = CMD_PARAMS["umi_pattern"]
     resources:
-        memory   = MEMORY
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 5)
     log:
         out = PROJ + "/logs/{sample}_extract_umi.out",
         err = PROJ + "/logs/{sample}_extract_umi.err"
@@ -23,18 +23,26 @@ rule extract_umi:
         "Extracting UMIs for {wildcards.sample}"
     threads:
         1
-    shell:
-        """
-        umi_tools extract \
-            -I {input[1]} \
-            --extract-method=string \
-            --bc-pattern={params.umi_pat} \
-            --read2-in={input[0]} \
-            --read2-out={output.R1} \
-            -L {output.log} \
-            | gzip \
-            > {output.R2}
-        """
+    run:
+        # If no params are passed, make a symlink to original fastq
+        if len(params.umi_pat) == 0:
+            os.symlink(input[0], output.R1)
+            os.symlink(input[1], output.R2)
+            shell("touch {output.log}")
+        else:
+            shell(
+                """
+                umi_tools extract \
+                  -I {input[1]} \
+                  --extract-method=string \
+                  --bc-pattern={params.umi_pat} \
+                  --read2-in={input[0]} \
+                  --read2-out={output.R1} \
+                  -L {output.log} \
+                  | gzip \
+                  > {output.R2}
+                """
+            )
 
 
 # Trim reads with cutadapt
@@ -50,7 +58,7 @@ rule cutadapt:
         job_name = "{sample}_cutadapt",
         args     = CMD_PARAMS["cutadapt"]
     resources:
-        memory   = MEMORY * 2
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
     log:
         out = PROJ + "/logs/{sample}_cutadapt.out",
         err = PROJ + "/logs/{sample}_cutadapt.err"
@@ -58,17 +66,25 @@ rule cutadapt:
         "Running cutadapt on {wildcards.sample}"
     threads:
         6
-    shell:
-        """
-        cutadapt \
-            {params.args} \
-            -j {threads} \
-            -o {output.R1} \
-            -p {output.R2} \
-            {input.R1} \
-            {input.R2} \
-            > {output.stats}
-        """
+    run:
+        # If no params are passed, make a symlink to original fastq
+        if len(params.args) == 0:
+            os.symlink(input[0], output.R1)
+            os.symlink(input[1], output.R2)
+            shell("touch {output.stats}")
+        else:
+            shell(
+                """
+                cutadapt \
+                  {params.args} \
+                  -j {threads} \
+                  -o {output.R1} \
+                  -p {output.R2} \
+                  {input.R1} \
+                  {input.R2} \
+                  > {output.stats}
+                """
+            )
 
 
 # Create cutadapt summary
@@ -83,7 +99,7 @@ rule cutadapt_summary:
     params:
         job_name = PROJ + "_cutadapt_summary"
     resources:
-        memory   = 4
+        memory   = 1
     log:
         out = PROJ + "/logs/" + PROJ + "_cutadapt_summary.out",
         err = PROJ + "/logs/" + PROJ + "_cutadapt_summary.err"

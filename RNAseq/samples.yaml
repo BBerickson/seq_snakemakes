@@ -35,12 +35,14 @@ SAMPLES:
         SAMPLING-GROUP-3:
             RTF1_WT3: "293flpIN_RTF1_WT3"
       
-# norm bw with --scaleFactor, (if using --normalizeUsing set to None), 
-# chrM, shRNA, sample (hg38), spikeIN (mm10), enrich, (hg38_enrich)
-# OR, OR_enrich, (if input with spike in is paired up)
-# "subsample" make bw and matix files from sub-sampled bam files (paired groups)
+# Norm sample bw and matix files, spike-in is CPM      
+# with "RPKM","CPM","BPM","RPGC" 
+# Or with scaleFactor
+# chrM, shRNA, if input with spike in is paired up OR, OR_enrich 
+# Or "subsample" : make bw and matix files from sub-sampled bam files (paired groups)
 NORM:
-  "None"
+  "RPKM"
+
   
  # set RGB colors for bw urls and table files, 
   # list as many colors as samples (not inputs) 
@@ -58,25 +60,15 @@ CMD_PARAMS:
     hisat2:        " --add-chrname --no-softclip --no-mixed --no-discordant "
     star2:         " --limitSjdbInsertNsj 2000000 --outSAMattributes NH HI AS nM MD --alignSJoverhangMin 10 "
     samtools:      " -bF4q1 "
-    bamCoverage:   " --binSize 10 --normalizeUsing None --skipNonCoveredRegions "
+    bamCoverage:   " --binSize 10 --skipNonCoveredRegions "
     bamCoverageBL: "" # " --blackListFileName /beevol/home/erickson/ref/hg38/ref/merge_filter_RNAs.bed "
-    bamCoveragef:  " forward " # R2-R1 = forward R1-R2 = reverse
-    bamCoverager:  " reverse " # R2-R1 = reverse R1-R2 = forward
     fragment_size: " --maxFragmentLength 1000 "
+    featureCounts: " -g GeneID -p -B -C -O --countReadPairs -s 2 "
     
 # sandbox User #
 USER:
   "User7"
   
-# Base memory to request for each rule
-# The acutal amount requested will be higher for rules that generally
-# require more memory
-# A value of 4 will result in rules requesting between 4Gb - 60Gb of
-# request ~2Gb/GB of fastq.gz file
-# memory
-MEMORY:
-    4
-    
 # barcode = illumina seq file looks like this
 #   CCATTGTT=AATGATACGGCGACCACCGAGATCTACACAACAATGGACACTCTTTCCCTACACGACGCTCTTCCGA
 #   CTACTTGT=CAAGCAGAAGACGGCATACGAGATACAAGTAGGTGACTGGAGTTCAGACGTGTGCTCTTCCGA
@@ -85,7 +77,9 @@ BARCODES:
 # OR
 # TruSeq_Universal_Adapters 
 #BARCODES:
-#   "GATCGGAAGAGCACACGTCT,ACACTCTTTCCCTACACGACGCTCTTCCGATCT"
+#   "GATCGGAAGAGCACACGTCT,ACACTCTTTCCCTACACGACGCTCTTCCGATCT"     
+ORENTATION:
+    "R2R1" # R1R2
     
 ## Additional common parameters for various processing steps
 ### Clumpify.py ##

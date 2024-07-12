@@ -3,19 +3,19 @@
 rule create_report:
     input:
         expand(
-            PROJ + "/heatmap/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + ".png",
+            PROJ + "/heatmap/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM5S + ".png",
             group = GRPS_UNIQ
         ),
         expand(
-            PROJ + "/heatmap/3_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + ".png",
+            PROJ + "/heatmap/3_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM3 + ".png",
             group = GRPS_UNIQ
         ),
         expand(
-            PROJ + "/heatmap/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM5S + "_profile.png",
+            PROJ + "/heatmap/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM5S + "_profile.png",
             group = GRPS_UNIQ
         ),
         expand(
-            PROJ + "/heatmap/3_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_" + NORM3 + "_profile.png",
+            PROJ + "/heatmap/3_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM3 + "_profile.png",
             group = GRPS_UNIQ
         )
     output:
@@ -23,7 +23,7 @@ rule create_report:
     params:
         job_name   = PROJ + "_heatmap_plots"
     resources:
-        memory   = MEMORY * 3
+        memory   = 4
     log:
         out = PROJ + "/logs/" + PROJ + "_heatmap_plots.out",
         err = PROJ + "/logs/" + PROJ + "_heatmap_plots.err"

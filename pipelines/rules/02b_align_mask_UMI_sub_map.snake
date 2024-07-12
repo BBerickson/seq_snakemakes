@@ -1,19 +1,5 @@
 # ====== Rules for filtering and subsampleing aligned reads with samtools =================================
 
-# gets number for norm fraction
-def _get_norm(wildcards):
-    sample = wildcards.sample + "_" + INDEX_MAP
-    filename =  PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_subsample_frac.tsv"
-    num = 0
-    with open(filename, "r") as file:
-      for line in file:
-        parts = line.strip().split('\t')
-        if len(parts) == 3 and parts[0] == sample:
-          num = parts[2]
-          break
-    return float(num)
-    
-
 # Remove duplicate reads
 rule dedup_UMI:
     input:
@@ -36,7 +22,7 @@ rule dedup_UMI:
         mask     = MASK,
         args     = CMD_PARAMS["umi_tools"]
     resources:
-        memory   = MEMORY * 3
+        memory   = lambda wildcards, input: memory_estimator(input, 3, 10)
     log:
         out = PROJ + "/logs/{sample}_dedup.out",
         err = PROJ + "/logs/{sample}_dedup.err"
@@ -103,7 +89,7 @@ rule calculating_subsample_summary:
     params:
         job_name = PROJ + "_calculating_subsample_summary"
     resources:
-        memory   = 4
+        memory   = 1
     log:
         out = PROJ + "/logs/" + PROJ + "_calculating_subsample_summary.out",
         err = PROJ + "/logs/" + PROJ + "_calculating_subsample_summary.err"
@@ -132,9 +118,9 @@ rule subsample_dedup:
     params:
         job_name = "subsample_dedup_{sample}",
         samp     = "{sample}_" + INDEX_MAP,
-        scale    = _get_norm
+        scale    = _get_norm_sub_map
     resources:
-        memory   = MEMORY * 3
+        memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
     log:
         out = PROJ + "/logs/subsample_dedup_{sample}_" + INDEX_MAP + ".out",
         err = PROJ + "/logs/subsample_dedup_{sample}_" + INDEX_MAP + ".err"
@@ -169,7 +155,7 @@ rule align_filter_subsample_sample:
         sortname = PROJ + "/{sample}.temp",
         mysample = "{sample}_" + INDEX_SAMPLE
     resources:
-        memory   = MEMORY * 3
+        memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
     log:
         out = PROJ + "/logs/{sample}_align_filter_subsample.out",
         err = PROJ + "/logs/{sample}_align_filter_subsample.err"

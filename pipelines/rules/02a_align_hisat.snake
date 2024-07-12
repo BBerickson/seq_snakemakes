@@ -17,7 +17,7 @@ rule hisatPE:
         args2    = CMD_PARAMS["samtools"],
         sortname = PROJ + "/{sample}.temp"
     resources:
-        memory   = MEMORY * 3 + 10
+        memory   = lambda wildcards, input: memory_estimator([input.R1, input.R2], 3, 18)
     log:
         out = PROJ + "/logs/{sample}_hisat.out",
         err = PROJ + "/logs/{sample}_hisat.err"
@@ -56,7 +56,7 @@ rule hisatPE_summmary:
     params:
         job_name = "hisatPE_summmary"
     resources:
-        memory   = 4
+        memory   = 1
     log:
         out = PROJ + "/logs/hisat_summmary.out",
         err = PROJ + "/logs/_hisat_summmary.err"

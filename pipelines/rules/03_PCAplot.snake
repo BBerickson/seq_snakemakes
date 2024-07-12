@@ -11,9 +11,9 @@ rule my_summary_npz:
         temp(PROJ + "/bw/multiBamSummary.npz")
     params:
         job_name = "multiBamSummary",
-        my_ref   = ENRICHED_SAMPLE
+        my_ref   = MY_REF
     resources:
-        memory   = MEMORY * 5
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 10)
     log:
         out = PROJ + "/logs/multiBamSummary.out",
         err = PROJ + "/logs/multiBamSummary.err"

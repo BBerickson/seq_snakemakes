@@ -31,8 +31,8 @@ SAF_SPIKE       = config["SAF_SPIKE"]
 CMD_PARAMS      = config["CMD_PARAMS"]
 COLORS          = config["COLORS"]
 NORM            = config["NORM"]
+ORENTATION      = config["ORENTATION"]
 USER            = config["USER"]
-MEMORY          = config["MEMORY"]
 GENELIST        = config["GENELIST"]
 
 PROJ          =  PROJ + "_" + GENELIST
@@ -101,8 +101,6 @@ FASTQS = sum(FASTQS, [])
 
 COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
 
-NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"])
-
 BAM_PATH = _get_bampath(NORM)
 
 
@@ -132,5 +130,5 @@ include: "rules/02a_align_bowtie.snake"
 include: "rules/02b_align.snake"
 include: "rules/02c_align_URLS.snake"
 # Results
-include: "rules/03_results.snake"
+include: "rules/03_results_test.snake"
 

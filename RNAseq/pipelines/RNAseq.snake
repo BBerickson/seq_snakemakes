@@ -28,11 +28,12 @@ FA_SPIKE        = config["FA_SPIKE"]
 MASK            = config["MASK"]
 SAF             = config["SAF"]
 SAF_SPIKE       = config["SAF_SPIKE"]
+MY_REF          = config["MY_REF"]
 CMD_PARAMS      = config["CMD_PARAMS"]
 COLORS          = config["COLORS"]
 NORM            = config["NORM"]
+ORENTATION      = config["ORENTATION"]
 USER            = config["USER"]
-MEMORY          = config["MEMORY"]
 
 # Directories for data and scripts
 FASTQ_DIR = PROJ + "/fastqs"
@@ -98,7 +99,7 @@ FASTQS = sum(FASTQS, [])
 
 COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
 
-NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"])
+NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"],ORENTATION)
 
 BAM_PATH = _get_bampath(NORM)
 
@@ -129,7 +130,7 @@ rule all:
         PROJ + "/" + PROJ + "_" + INDEX_SAMPLE + "_qc_analysis.html",
         
         # bamCoverage
-        PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + "_" + NORMS + "_bw_URL.txt"
+        PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + NORMS + "_bw_URL.txt"
 
 
 # Run FastQC

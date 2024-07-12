@@ -21,8 +21,8 @@ SEQ_DATE        = config["SEQ_DATE"]
 GTF             = config["GTF"]
 CMD_PARAMS      = config["CMD_PARAMS"]
 NORM            = config["NORM"]
+ORENTATION      = config["ORENTATION"]
 USER            = config["USER"]
-MEMORY          = config["MEMORY"]
 
 # Sample and group lists
 SAMS = [[y, x] for y in SAMPLES for x in SAMPLES[y]]
@@ -48,9 +48,6 @@ GRP_REGEX = "[a-zA-Z0-9_\-,]+"
 wildcard_constraints:
     sample  = "[a-zA-Z0-9_\-]+",
     group   = GRP_REGEX,
-
-
-NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"])
 
 BAM_PATH = _get_bampath(NORM)
 

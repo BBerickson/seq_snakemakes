@@ -24,9 +24,9 @@ REV_REF         = config["REV_REF"]
 CMD_PARAMS      = config["CMD_PARAMS"]
 COLORS          = config["COLORS"]
 NORM            = config["NORM"]
+ORENTATION      = config["ORENTATION"]
 USER            = config["USER"]
 GENELIST        = config["GENELIST"]
-MEMORY          = config["MEMORY"]
 
 # Simplify ALL_SAMPLES dictionary
 # subsampling groups can be listed in multiple sections
@@ -92,7 +92,7 @@ wildcard_constraints:
 
 COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
 
-NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"])
+NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"],ORENTATION)
 
 NORM5S = _get_matrixtype(NORMS,CMD_PARAMS["reference5"],GENELIST)
 NORM5A = _get_matrixtype(NORMS,CMD_PARAMS["reference5a"],GENELIST)
@@ -103,10 +103,10 @@ BAM_PATH = _get_bampath(NORM)
 rule all:
     input:
         # bamCoverage
-        PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + "_" + NORMS + "_bw_URL.txt",
+        PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + NORMS + "_bw_URL.txt",
         
         # 5 sense matrix file
-        PROJ + "/URLS/5_" + PROJ + "_" + INDEX_SAMPLE + "_" + NORM5S + "_bidirectonal_matrix.url.txt"
+        PROJ + "/URLS/5_" + PROJ + "_" + INDEX_SAMPLE + NORM5S + "_bidirectonal_matrix.url.txt"
 
 # BW with deeptools bamCoverage
 include: "rules/04_bamCoverage_stranded.snake"

@@ -31,8 +31,8 @@ GTF             = config["GTF"]
 CMD_PARAMS      = config["CMD_PARAMS"]
 COLORS          = config["COLORS"]
 NORM            = config["NORM"]
+ORENTATION      = config["ORENTATION"]
 USER            = config["USER"]
-MEMORY          = config["MEMORY"]
 
 # Directories for data and scripts
 FASTQ_DIR = PROJ + "/fastqs"
@@ -98,7 +98,7 @@ FASTQS = sum(FASTQS, [])
 
 COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
 
-NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"])
+NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"],ORENTATION)
 
 BAM_PATH = _get_bampath(NORM)
 
@@ -129,8 +129,8 @@ rule all:
         PROJ + "/" + PROJ + "_" + INDEX_SAMPLE + "_qc_analysis.html",
         
         # bamCoverage
-        PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + "_" + NORMS + "_bw_URL.txt",
-        PROJ + "/URLS/" + PROJ + "_" + INDEX_SPIKE + "_" + NORMS + "_bw_URL.txt"
+        PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + NORMS + "_bw_URL.txt",
+        PROJ + "/URLS/" + PROJ + "_" + INDEX_SPIKE + "_norm_CPM_bw_URL.txt"
 
 
 # Run FastQC

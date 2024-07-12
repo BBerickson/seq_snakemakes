@@ -1,35 +1,5 @@
 # ===== Snakefile for trimming reads with bbduk =====================
 
-def _get_barcodes(wildcards):
-    import os.path
-    import re
-    sample = wildcards.sample
-    patternfile = BARCODES
-    filename =  PROJ + "/" + sample + "_R1_clumpify.fastq.gz"
-    
-    if os.path.exists(patternfile):
-      with gzip.open(filename,'rt') as f:
-        header = f.readline().strip().split()
-        header2 = header[1].split(":")
-        my_indexs = header2[-1].split("+")
-      
-      index_patterns = {}
-      for line in open(patternfile):
-        index, pattern = line.strip().split("=")
-        index_patterns[index] = pattern
-        
-      results = []
-      for t in my_indexs:
-        for p in index_patterns:
-          match = re.search(p, t)
-          if match:
-            results.append(index_patterns[p])
-            break  # Exit the loop if a match is found
-    else:
-      results=BARCODES.strip().split()
-    return ','.join(results)
-    
-    
 # Run bbduk
 rule bbduk_paired:
     input:
@@ -44,7 +14,7 @@ rule bbduk_paired:
         args     = CMD_PARAMS["bbduk"],
         bar      = _get_barcodes
     resources:
-        memory   = 30
+        memory   = lambda wildcards, input: memory_estimator([input.R1, input.R2], 2, 5)
     log:
         out = PROJ + "/logs/{sample}_bbduk.out",
         err = PROJ + "/logs/{sample}_bbduk.err"
@@ -55,7 +25,14 @@ rule bbduk_paired:
     run:
         # If no params are passed, make a symlink to original fastq
         if len(params.args) == 0:
-            os.symlink(input[0], output[0])
+            shell(
+                """
+                cp {input[0]} {output[0]}
+                cp {input[1]} {output[1]}
+                echo "Total Removed:  0 reads (0.0%) 	0 bases (0.0%)" >> {output[2]}
+                
+                """
+              )
         else:
             shell(
                 """
@@ -78,7 +55,7 @@ rule bbduk_summary:
     params:
         job_name = PROJ + "_bbduk_summary"
     resources:
-        memory   = 4
+        memory   = 1
     log:
         out = PROJ + "/logs/" + PROJ + "_bbduk_summary.out",
         err = PROJ + "/logs/" + PROJ + "_bbduk_summary.err"

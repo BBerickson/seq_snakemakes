@@ -11,7 +11,7 @@ rule clumpify_paired:
         job_name = "{sample}_clumpify",
         args     = CMD_PARAMS["clumpify"]
     resources:
-        memory   = MEMORY * 10 + 10
+        memory   = lambda wildcards, input: memory_estimator(input, 6, 15)
     log:
         out = PROJ + "/logs/{sample}_clumpify.out",
         err = PROJ + "/logs/{sample}_clumpify.err"
@@ -22,7 +22,14 @@ rule clumpify_paired:
     run:
         # If no params are passed, make a symlink to original fastq
         if len(params.args) == 0:
-            os.symlink(input[0], output[0])
+            shell(
+                """
+                cp {input[0]} {output[0]}
+                echo "Reads In:  0,0" >> {output[1]}
+                echo "Duplicates Found:  0,0" >> {output[1]}
+                
+                """
+              )
         else:
             shell(
                 """
@@ -46,7 +53,7 @@ rule clumpify_summary:
     params:
         job_name = PROJ + "_clumpify_summary"
     resources:
-        memory   = 4
+        memory   = 1
     log:
         out = PROJ + "/logs/" + PROJ + "_clumpify_summary.out",
         err = PROJ + "/logs/" + PROJ + "_clumpify_summary.err"

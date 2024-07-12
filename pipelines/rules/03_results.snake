@@ -12,7 +12,7 @@ rule featureCounts:
         args     = CMD_PARAMS["featureCounts"],
         saf      = SAF
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 0.5, 4)
     log:
         out = PROJ + "/logs/{sample}_featureCounts.out",
         err = PROJ + "/logs/{sample}_featureCounts.err"
@@ -35,8 +35,7 @@ rule featureCounts:
 # making count file
 rule featurecount_summary:
     input:
-        PROJ + "/counts/{sample}_" + INDEX_SAMPLE + "_featureCounts.tsv",
-        PROJ + "/counts/{sample}_" + INDEX_SPIKE + "_featureCounts.tsv"
+        PROJ + "/counts/{sample}_" + INDEX_SAMPLE + "_featureCounts.tsv"
     output:
         PROJ  + "/counts/{sample}_count.txt"
     params:
@@ -92,7 +91,7 @@ rule fragment_size:
         labels   = "{sample}", 
         args     = CMD_PARAMS["fragment_size"]
     resources:
-        memory   = MEMORY * 5
+        memory   = lambda wildcards, input: memory_estimator(input, 0.2, 5)
     log:
         out = PROJ + "/logs/{sample}_PE_fragment_size.out",
         err = PROJ + "/logs/{sample}_PE_fragment_size.err"
@@ -150,7 +149,7 @@ rule create_plots:
     params:
         job_name   = PROJ + "_qc_plots"
     resources:
-        memory   = MEMORY * 5
+        memory   = 4
     log:
         out = PROJ + "/logs/" + PROJ + "_qc_plots.out",
         err = PROJ + "/logs/" + PROJ + "_qc_plots.err"
@@ -160,6 +159,7 @@ rule create_plots:
         1
     shell:
         """
+        touch .here
         Rmd=src/Rmds/analysis.Rmd
         script=src/Rmds/knit_rmd.R
         samp=samples.yaml
