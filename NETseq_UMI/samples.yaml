@@ -56,7 +56,7 @@ CMD_PARAMS:
     umi_tools:     " --method unique --read-length "
     bowtie2:       " --end-to-end "
     samtools:      " -bF4q5 "
-    featureCounts: " --extraAttributes 'gene_name,gene_biotype' -s 0 -t gene -O "
+    featureCounts: "GTF"
     bamCoverage:   " --binSize 1 --skipNonCoveredRegions --Offset -1 " # --Offset -1 = last bp --Offset 1 = first bp
     bamCoverageBL: " --blackListFileName /beevol/home/erickson/ref/hg38/ref/merge_filter_RNAs.bed "
     
@@ -68,7 +68,7 @@ USER:
 NORM:
   "subsample"     
 ORENTATION:
-    "R1R2" # R2R1
+    "R1" # R2
   
 ## Additional common parameters for various processing steps
 #### Cutadapt ####

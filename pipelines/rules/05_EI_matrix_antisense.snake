@@ -11,7 +11,7 @@ rule my_EI_amtisense_matrix2:
         asense2  = temp(PROJ   + "/matrix/{newnam}_temp22_aEI_matrix.gz")
     params:
         job_name = "{newnam}_EI_antisense_matrix2",
-        args     = CMD_PARAMS["EI"] + CMD_PARAMS["BL"],
+        args     = CMD_PARAMS["EI"] + CMD_PARAMS["bamCoverageBL"],
         fw_ref   = EI_FW_REF,
         rev_ref  = EI_REV_REF
     resources:
@@ -52,7 +52,7 @@ rule fix_EI_asense_matrix2:
         temp(PROJ   + "/matrix/{newnam}_temp02_fix_aEI_matrix.gz")
     params:
         job_name = "{newnam}_EI_asense_matrix2",
-        args    = CMD_PARAMS["filterEI"]
+        args    = CMD_PARAMS["EI"] + " unstranded"
     resources:
         memory   = 4
     log:
@@ -71,11 +71,12 @@ rule my_EI_url:
         matrix2 = PROJ   + "/matrix/{newnam}_temp02_fix_aEI_matrix.gz"
     output:
         temp(PROJ + "/matrix/EI.{newnam}_matrix.url.txt"),
-        PROJ + "/matrix/EI_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMEI + "_anti_matrix.gz"
+        PROJ + "/matrix/EI_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMEI[1] + "_anti_matrix.gz"
     params:
         job_name = PROJ + "_EI_matrix_url2",
         color    = _get_col,
-        url_anti = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + PROJ + "/EI_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMEI + "_anti_matrix.gz"
+        groupkey = lambda wildcards: next((k for k, v in GROUP2.items() if wildcards.newnam in v), "self"),
+        url_anti = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + PROJ + "/EI_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMEI[1] + "_anti_matrix.gz"
     resources:
         memory   = 4
     log:
@@ -90,7 +91,7 @@ rule my_EI_url:
         # fix for strange side affect that only the 1 line loads from sandbox
         computeMatrixOperations relabel -m {input.matrix2} -o {output[1]}
         ssh amc-sandbox 'mkdir -p ./public_html/{PROJ}'
-        echo {params.url_anti} self EI.{wildcards.newnam}_{SEQ_DATE}_anti {params.color} >> {output[0]}
+        echo {params.url_anti} {params.groupkey} EI.{wildcards.newnam}_{SEQ_DATE}_anti {params.color} >> {output[0]}
         scp {output[1]} amc-sandbox:./public_html/{PROJ}
         """
         
@@ -102,7 +103,7 @@ rule my_EI_url_summary:
             newnam = newnam
         ))
     output:
-        PROJ + "/URLS/EI_" + PROJ + "_" + INDEX_SAMPLE + NORMEI + "_matrix.url.txt"
+        PROJ + "/URLS/EI_" + PROJ + "_" + INDEX_SAMPLE + NORMEI[1] + "_matrix.url.txt"
     params:
         job_name = PROJ + "_sense_EI_matrix_url"
     resources:

@@ -160,6 +160,22 @@ if(!is_empty(count_files)){
   }
 }
 
+frag_files <- list.files(path = mydirf, pattern = '_fragment_results.tsv',recursive = T)
+if(!is_empty(frag_files)){
+  frag_files <- paste0(mydirf,"/",frag_files)
+  gg <- NULL
+  for(i in seq_along(frag_files)){
+    gg <- read_tsv(frag_files[i],
+                   show_col_types = FALSE) %>% 
+      mutate(sample=str_remove(sample,"_spike")) %>% 
+      pivot_longer(cols = !sample,names_to = "type",values_to = "length") %>% 
+      bind_rows(gg)
+    
+  }
+  
+  hh <- gg %>% pivot_wider(names_from = type,values_from = length) %>% 
+    full_join(hh,.,by="sample")
+}
 
 
 hh %>% 

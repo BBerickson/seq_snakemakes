@@ -94,8 +94,7 @@ COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
 
 NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"],ORENTATION)
 
-NORM5S = _get_matrixtype(NORMS,CMD_PARAMS["reference5"],GENELIST)
-NORM5A = _get_matrixtype(NORMS,CMD_PARAMS["reference5a"],GENELIST)
+NORM5 = _get_matrixtype("5_",NORMS,CMD_PARAMS["reference5"],GENELIST)
 
 BAM_PATH = _get_bampath(NORM)
 
@@ -106,7 +105,7 @@ rule all:
         PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + NORMS + "_bw_URL.txt",
         
         # 5 sense matrix file
-        PROJ + "/URLS/5_" + PROJ + "_" + INDEX_SAMPLE + NORM5S + "_bidirectonal_matrix.url.txt"
+        PROJ + "/URLS/"+ NORM5[0] + PROJ + "_" + INDEX_SAMPLE + NORM5[1] + "_bidirectonal_matrix.url.txt"
 
 # BW with deeptools bamCoverage
 include: "rules/04_bamCoverage_stranded.snake"

@@ -3,24 +3,10 @@
 library("tidyverse")
 
 samp <- paste(snakemake@params[["samp"]],c("Frag_Len_Mean", "Read_Len_Mean"),sep = "_")
-resl <- read_tsv(snakemake@input[[1]], show_col_types = FALSE) 
-
-mydir <- snakemake@params[["project"]]
-mydirf <- paste0(mydir,"/stats")
-
-my_files <- list.files(path = mydirf, pattern = '_fragment.txt',recursive = T) 
-my_files1 <- paste0(mydirf,"/",my_files[str_detect(my_files,pattern = snakemake@params[["samp"]])])
-
-if(length(my_files) > length(my_files1)){
-  my_files2 <- paste0(mydirf,"/",my_files[str_detect(my_files,pattern = snakemake@params[["spik"]])])
-} else {
-  my_files2 <- NULL
-}
-
 
 frag <- NULL
-for(i in my_files1){
-  frag_temp <- read_tsv(i, show_col_types = FALSE) %>% 
+for(i in seq_along(snakemake@input)){
+  frag_temp <- read_tsv(snakemake@input[[i]], show_col_types = FALSE) %>% 
     dplyr::rename(sample=`...1`) %>% 
     dplyr::select(sample,`Frag. Len. Mean`, `Read Len. Mean`) %>%
     dplyr::mutate(`Frag. Len. Mean` = round(`Frag. Len. Mean`,digits = 5),
@@ -35,33 +21,5 @@ for(i in my_files1){
   frag <- bind_rows(frag,frag_temp)
 }
 
-
-
-
-if(!is.null(my_files2)){
-  frag2 <- NULL
-  spik <-paste(snakemake@params[["spik"]],c("Frag_Len_Mean", "Read_Len_Mean"),sep = "_")
-  for(i in my_files2){
-    frag_temp <- read_tsv(i, show_col_types = FALSE) %>% 
-      dplyr::rename(sample=`...1`) %>% 
-      dplyr::select(sample,`Frag. Len. Mean`, `Read Len. Mean`) %>%
-      dplyr::mutate(`Frag. Len. Mean` = round(`Frag. Len. Mean`,digits = 5),
-                    `Read Len. Mean` = round(`Read Len. Mean`,digits = 5)) %>% 
-      dplyr::rename(!!spik[1] := `Frag. Len. Mean`, !!spik[2] := `Read Len. Mean`) 
-    
-    if(str_detect(frag_temp$sample,"/bams/")){
-      frag_temp <- frag_temp %>% separate(sample,into=c("dir","sample"),sep="/bams/") %>%
-        separate(sample,into=c("sample","file"),sep=paste0("_", snakemake@params[["spik"]])) %>%
-        dplyr::select(-dir,-file)
-    }
-      frag2 <- bind_rows(frag2,frag_temp)
-  }
-  
-  frag <- full_join(frag2, frag,.,by="sample")
-} 
-
-full_join(resl,frag,by="sample") %>%
-  arrange(sample) %>% 
-  write_tsv(., snakemake@input[[1]])
 
 write_tsv(frag, snakemake@output[[1]])

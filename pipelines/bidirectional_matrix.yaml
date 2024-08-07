@@ -9,16 +9,15 @@
 #        gene_seperation >= upstream and/or downstream
 
 CMD_PARAMS:
-    BL:          ""
     bamCoverageBL:    " --blackListFileName /beevol/home/erickson/ref/hg38/ref/merge_filter_RNAs.bed "
-    region543:   " --regionBodyLength 2000 --binSize 100 --unscaled5prime 0 --unscaled3prime 0 --upstream 1000 --downstream 1000 --missingDataAsZero --skipZeros -q "
-    filter543:   "0 0 unstranded"
-    reference5:  " --referencePoint TSS --binSize 20 --upstream 1000 --downstream 1000 --missingDataAsZero --skipZeros -q "
-    filter5:     "0 0 unstranded"
-    reference5a: " --scale -1 --referencePoint TSS --binSize 20 --upstream 1000 --downstream 1000 --missingDataAsZero --skipZeros -q "
-    filter5a:    "0 0 unstranded"
-    reference3:  " --referencePoint TES --binSize 100 --upstream 1000 --downstream 1000 --missingDataAsZero --skipZeros -q "
-    filter3:     "0 0 unstranded"
+    region543:        " --regionBodyLength 2000 --binSize 100 --unscaled5prime 0 --unscaled3prime 0 --upstream 1000 --downstream 1000 --missingDataAsZero --skipZeros -q "
+    reference5:       " --referencePoint TSS --binSize 20 --upstream 1000 --downstream 1000 --missingDataAsZero --skipZeros -q "
+    reference3:       " --referencePoint TES --binSize 100 --upstream 1000 --downstream 1000 --missingDataAsZero --skipZeros -q "
+    PI:               " --regionBodyLength 330 --binSize 330 --unscaled5prime 0 --unscaled3prime 0 --upstream 330 --downstream 0 --missingDataAsZero --skipZeros -q "
+    EI:               " --regionBodyLength 1000 --binSize 1000 --unscaled5prime 0 --unscaled3prime 0 --upstream 0 --downstream 1000 --missingDataAsZero --skipZeros -q "
+    heatmap:          " --sortUsing mean --regionsLabel '' --whatToShow 'plot, heatmap and colorbar' --zMin auto --zMax auto "
+    csheatmap:        " --sortUsing mean --hclust 4 --whatToShow 'heatmap and colorbar' --zMin 0  --zMax auto  "
+    caheatmap:        " --sortUsing mean --hclust 4 --whatToShow 'heatmap and colorbar' --zMin auto --zMax 0  "
     
 
 

@@ -17,7 +17,7 @@ ALL_SAMPLES   = config["SAMPLES"]
 SEQ_DATE      = config["SEQ_DATE"]
 INDEX_PATH    = config["INDEX_PATH"]
 INDEX_SAMPLE  = config["INDEX_SAMPLE"]
-INDEX_SPIKE   = ""
+INDEX_SPIKE   = config["INDEX_SPIKE"]
 MY_REF        = config["MY_REF"]
 PI_REF        = config["PI_REF"]
 CMD_PARAMS    = config["CMD_PARAMS"]
@@ -91,10 +91,10 @@ COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
 
 NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"],ORENTATION)
 
-NORM543 = _get_matrixtype(NORMS,CMD_PARAMS["region543"],GENELIST)
-NORM5 = _get_matrixtype(NORMS,CMD_PARAMS["reference5"],GENELIST)
-NORM3 = _get_matrixtype(NORMS,CMD_PARAMS["reference3"],GENELIST)
-NORMPI = NORMS + GENELIST
+NORM543 = _get_matrixtype("543_", NORMS,CMD_PARAMS["region543"],GENELIST)
+NORM5 = _get_matrixtype("5_",NORMS,CMD_PARAMS["reference5"],GENELIST)
+NORM3 = _get_matrixtype("3_",NORMS,CMD_PARAMS["reference3"],GENELIST)
+NORMPI = _get_matrixtype("PI_",NORMS,"",GENELIST)
 
 BAM_PATH = _get_bampath(NORM)
 
@@ -105,17 +105,17 @@ rule all:
         PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + NORMS + "_bw_URL.txt",
         
         # 543 matrix file
-        PROJ + "/URLS/543_" + PROJ + "_" + INDEX_SAMPLE + NORM543 + "_matrix.url.txt",
+        PROJ + "/URLS/" + NORM543[0] + PROJ + "_" + INDEX_SAMPLE + NORM543[1] + "_matrix.url.txt",
         
         # 5 matrix file
-        PROJ + "/URLS/5_" + PROJ + "_" + INDEX_SAMPLE + NORM5 + "_matrix.url.txt",
+        PROJ + "/URLS/"+ NORM5[0] + PROJ + "_" + INDEX_SAMPLE + NORM5[1] + "_matrix.url.txt",
         
         # 3 matrix file
-        PROJ + "/URLS/3_" + PROJ + "_" + INDEX_SAMPLE + NORM3 + "_matrix.url.txt"
+        PROJ + "/URLS/"+ NORM3[0] + PROJ + "_" + INDEX_SAMPLE + NORM3[1] + "_matrix.url.txt"
         #,
         
         # PI matrix file
-        #PROJ + "/URLS/PI_" + PROJ + "_" + INDEX_SAMPLE + NORMPI + "_matrix.url.txt"
+        #PROJ + "/URLS/"+ NORMPI[0] + PROJ + "_" + INDEX_SAMPLE + NORMPI[1] + "_matrix.url.txt"
 
 
 # BW with deeptools bamCoverage

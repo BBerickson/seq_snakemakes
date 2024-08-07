@@ -33,7 +33,9 @@ rule clumpify_paired:
         else:
             shell(
                 """
-                clumpify.sh -Xmx{resources.memory}g \
+                reduced_mem=$(awk "BEGIN {{print int({resources.memory} * 0.9)}}")
+                clumpify.sh -Xmx${{reduced_mem}}g \
+                    groups=${{reduced_mem}} \
                     in={input[0]} \
                     out={output[0]} \
                     {params.args} 2>> {output[1]}

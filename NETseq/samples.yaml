@@ -50,14 +50,14 @@ COLORS:
   
 # program options  
 CMD_PARAMS:
-    clumpify:      " overwrite=t dedupe=t dupedist=2500 optical=f subs=0 "
+    clumpify:      " lowcomplexity=t overwrite=t dedupe=t dupedist=2500 optical=f subs=0 "
     bbduk:         " overwrite=t ftm=5 minlen=15 ktrim=r k=23 hdist=1 mink=11 tpe tbo ecco=t "
     bowtie2:       " --end-to-end --no-mixed --no-discordant "
     samtools:      " -bF4q30 "
     bamCoverage:   " --binSize 1 --skipNonCoveredRegions --Offset -1 " # --Offset -1 = last bp --Offset 1 = first bp
     bamCoverageBL: "" # " --blackListFileName /beevol/home/erickson/ref/hg38/ref/merge_filter_RNAs.bed "
     fragment_size: " --maxFragmentLength 1000 "
-    featureCounts: " -g GeneID -p -B -C -O --countReadPairs -s 1 "
+    featureCounts: "SAF"
     
 # sandbox User #
 USER:

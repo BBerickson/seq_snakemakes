@@ -44,8 +44,7 @@ rule align_filter_sample_spikein:
         bai = PROJ + "/{sample}_" + INDEX_MAP + ".bam.bai"
     output:
         bam    = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
-        bai    = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam.bai",
-        counts = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_count.txt"
+        bai    = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam.bai"
     params:
         job_name = "{sample}_align_filter_spikein",
         idx      = INDEX_PATH + INDEX_SPIKE + ".txt",
@@ -70,7 +69,6 @@ rule align_filter_sample_spikein:
         > {output.bam}
         
         samtools index -@ {threads} {output.bam}
-        echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
         
         """
 

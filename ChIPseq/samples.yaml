@@ -65,7 +65,7 @@ CMD_PARAMS:
     bamCoverage:   " --binSize 10 --skipNonCoveredRegions --extendReads 300 --centerReads "
     bamCoverageBL: ""
     fragment_size: " --maxFragmentLength 1000 "
-    featureCounts: " -g GeneID -p -B -C -O --countReadPairs -s 0 "
+    featureCounts: "SAF"
     
 # sandbox User #
 USER:
@@ -77,7 +77,7 @@ USER:
 BARCODES:
     "pipelines/ref/truseq_i5i7.fa"     
 ORENTATION:
-    "R2R1" # R1R2
+    "Unstranded" 
     
     
 ## Additional common parameters for various processing steps ###

@@ -9,21 +9,16 @@ rule bamCoverage:
         ),
         check_point = PROJ + "/stats/" + PROJ + "_results.tsv"
     output:
-        bigwig  = PROJ      + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + ".bw",
-        stats   = temp(PROJ      + "/bw/{newnam}_bamCoverage_stats.txt")
+        bigwig  = PROJ      + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + ".bw"
     params:
         job_name = "{newnam}_bamCoverage",
         args     = CMD_PARAMS["bamCoverage"] + CMD_PARAMS["bamCoverageBL"],
-        scale    = _get_norm,
-        color    = _get_col,
-        url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + ".bw"
+        scale    = _get_norm
     resources:
         memory   = lambda wildcards, input: memory_estimator(input.bam, 0.2, 5)
     log:
         out = PROJ + "/logs/{newnam}_bamCoverage.out",
         err = PROJ + "/logs/{newnam}_bamCoverage.err"
-    message:
-        "Aligning reads with bamCoverage for {wildcards.newnam}"
     threads: 
         12
     shell:
@@ -37,12 +32,33 @@ rule bamCoverage:
           {params.scale} \
           -p {threads} 
         
+        """
+        
+# Align trimmed reads with bamCoverage
+rule bamCoverageURL:
+    input:
+        bigwig  = PROJ + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + ".bw"
+    output:
+        stats   = temp(PROJ + "/bw/{newnam}_bamCoverage_stats.txt")
+    params:
+        job_name = "{newnam}_bamCoverage_URL",
+        color    = _get_col,
+        url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + ".bw"
+    resources:
+        memory   = 4
+    log:
+        out = PROJ + "/logs/{newnam}_bamCoverage_URL.out",
+        err = PROJ + "/logs/{newnam}_bamCoverage_URL.err"
+    threads: 
+        1
+    shell:
+        """
+        
         echo "track type=bigWig visibility=full name='{wildcards.newnam}_{SEQ_DATE}{NORMS}' description='{wildcards.newnam}_{SEQ_DATE}{NORMS}' color={params.color} bigDataUrl={params.url}" > {output.stats}
         ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
-        scp {output.bigwig} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
+        scp {input.bigwig} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
         
         """
-
 
 # Combine bamCoverage summaries
 rule bamCoverage_summary:
@@ -80,20 +96,15 @@ rule bamCoverage_spike:
         ),
         check_point = PROJ + "/stats/" + PROJ + "_results.tsv"
     output:
-        bigwig  = PROJ      + "/bw/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_norm_CPM.bw",
-        stats   = temp(PROJ      + "/bw/{newnam}_spike_bamCoverage_stats.txt")
+        bigwig  = PROJ      + "/bw/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_norm_CPM.bw"
     params:
         job_name = "{newnam}_bamCoverage_spike",
-        args     = CMD_PARAMS["bamCoverage"] + CMD_PARAMS["bamCoverageBL"],
-        color    = _get_col,
-        url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_norm_CPM.bw"
+        args     = CMD_PARAMS["bamCoverage"] + CMD_PARAMS["bamCoverageBL"]
     resources:
         memory   = lambda wildcards, input: memory_estimator(input.bam, 0.2, 5)
     log:
         out = PROJ + "/logs/{newnam}_spike_bamCoverage.out",
         err = PROJ + "/logs/{newnam}_spike_bamCoverage.err"
-    message:
-        "Aligning reads with bamCoverage_spike for {wildcards.newnam}"
     threads: 
         12
     shell:
@@ -107,9 +118,31 @@ rule bamCoverage_spike:
           --normalizeUsing CPM \
           -p {threads} 
         
+        """
+
+# Align trimmed reads with bamCoverage
+rule bamCoverage_spike_URL:
+    input:
+        bigwig  = PROJ      + "/bw/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_norm_CPM.bw"
+    output:
+        stats   = temp(PROJ      + "/bw/{newnam}_spike_bamCoverage_stats.txt")
+    params:
+        job_name = "{newnam}_bamCoverage_spikeURL",
+        color    = _get_col,
+        url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_norm_CPM.bw"
+    resources:
+        memory   = 4
+    log:
+        out = PROJ + "/logs/{newnam}_spike_bamCoverage_URL.out",
+        err = PROJ + "/logs/{newnam}_spike_bamCoverage_URL.err"
+    threads: 
+        1
+    shell:
+        """
+        
         echo "track type=bigWig visibility=full name='{wildcards.newnam}_{SEQ_DATE}_norm_CPM' description='{wildcards.newnam}_{SEQ_DATE}_norm_CPM' color={params.color} bigDataUrl={params.url}" > {output.stats}
         ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
-        scp {output.bigwig} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
+        scp {input.bigwig} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
         
         """
 

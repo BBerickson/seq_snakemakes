@@ -12,7 +12,7 @@ rule clumpify_paired:
         job_name = "{sample}_clumpify",
         args     = CMD_PARAMS["clumpify"]
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 6, 15)
+        memory   = lambda wildcards, input: memory_estimator(input, 10, 15)
     log:
         out = PROJ + "/logs/{sample}_clumpify.out",
         err = PROJ + "/logs/{sample}_clumpify.err"
@@ -35,7 +35,9 @@ rule clumpify_paired:
         else:
             shell(
                 """
-                clumpify.sh -Xmx{resources.memory}g \
+                reduced_mem=$(awk "BEGIN {{print int({resources.memory} * 0.9)}}")
+                clumpify.sh -Xmx${{reduced_mem}}g \
+                    groups=${{reduced_mem}} \
                     in1={input[0]} in2={input[1]} \
                     out1={output[0]} out2={output[1]} \
                     {params.args} 2>> {output[2]}

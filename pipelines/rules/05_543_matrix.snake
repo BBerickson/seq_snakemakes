@@ -3,20 +3,18 @@
 # matrix files
 rule standared543_matrix:
     input:
-        bw  =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + ".bw"
+        bw  =   PROJ + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + ".bw"
     output:
-        matrix = temp(PROJ   + "/matrix/{newnam}_temp0_543_matrix.gz")
+        matrix = temp(PROJ + "/matrix/{newnam}_temp_" + NORM543[0] + NORM543[1] + "_543_matrix.gz")
     params:
-        job_name = "{newnam}_matrix",
-        args     = CMD_PARAMS["region543"]  + CMD_PARAMS["BL"],
+        job_name = NORM543[0] + NORM543[1] + "_{newnam}_matrix",
+        args     = CMD_PARAMS["region543"]  + CMD_PARAMS["bamCoverageBL"],
         my_ref   = MY_REF
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
     log:
-        out = PROJ + "/logs/{newnam}_matrix.out",
-        err = PROJ + "/logs/{newnam}_matrix.err"
-    message:
-        "standard sense 543 matrix files {wildcards.newnam}"
+        out = PROJ + "/logs/" + NORM543[0] + NORM543[1] + "_{newnam}_matrix.out",
+        err = PROJ + "/logs/" + NORM543[0] + NORM543[1] + "_{newnam}_matrix.err"
     threads: 
         12
     shell:
@@ -34,19 +32,17 @@ rule standared543_matrix:
 # stranded sense matrix files
 rule fix_543_matrix:
     input:
-        PROJ   + "/matrix/{newnam}_temp0_543_matrix.gz"
+        PROJ + "/matrix/{newnam}_temp_" + NORM543[0] + NORM543[1] + "_543_matrix.gz"
     output:
-        PROJ + "/matrix/543_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM543 + "_matrix.gz"
+        PROJ + "/matrix/" + NORM543[0] + "{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM543[1] + "_matrix.gz"
     params:
-        job_name = "{newnam}_sense_matrix",
-        args    = CMD_PARAMS["filter543"]
+        job_name = NORM543[0] + NORM543[1] + "_{newnam}_fix_matrix",
+        args     = CMD_PARAMS["region543"] + " unstranded"
     resources:
         memory   = 4
     log:
-        out = PROJ + "/logs/{newnam}_fix_543_matrix.out",
-        err = PROJ + "/logs/{newnam}_fix_543_matrix.err"
-    message:
-        "fix standard 543 matrix files {wildcards.newnam}"
+        out = PROJ + "/logs/" + NORM543[0] + NORM543[1] + "_{newnam}_fix_matrix.out",
+        err = PROJ + "/logs/" + NORM543[0] + NORM543[1] + "_{newnam}_fix_matrix.err"
     threads: 
         1
     script:
@@ -55,20 +51,19 @@ rule fix_543_matrix:
 # make url's and scp to sandbox
 rule standared543_url:
     input:
-        PROJ + "/matrix/543_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM543 + "_matrix.gz"
+        PROJ + "/matrix/" + NORM543[0] + "{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM543[1] + "_matrix.gz"
     output:
-        temp(PROJ + "/matrix/543.{newnam}_matrix.url.txt")
+        temp(PROJ + "/matrix/" + NORM543[0] + NORM543[1] + "_{newnam}_matrix.url.txt")
     params:
-        job_name = PROJ + "_543_matrix_url",
+        job_name = PROJ + NORM543[0] + NORM543[1] + "_543_matrix_url",
         color    = _get_col,
-        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/543_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM543 + "_matrix.gz"
+        groupkey = lambda wildcards: next((k for k, v in GROUP2.items() if wildcards.newnam in v), "self"),
+        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/" + NORM543[0] + "{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM543[1] + "_matrix.gz"
     resources:
         memory   = 4
     log:
-        out = PROJ + "/logs/{newnam}_543_matrix_url.out",
-        err = PROJ + "/logs/{newnam}_543_matrix_url.err"
-    message:
-        "Creating sense 543_matrix url for {wildcards.newnam}"
+        out = PROJ + "/logs/" + NORM543[0] + NORM543[1] + "_{newnam}_matrix_url.out",
+        err = PROJ + "/logs/" + NORM543[0] + NORM543[1] + "_{newnam}_matrix_url.err"
     threads:
         1
     shell:
@@ -76,7 +71,7 @@ rule standared543_url:
         
         # fix R appended file remote read error
         computeMatrixOperations relabel -m {input} -o {input}
-        echo {params.url_out} self 543.{wildcards.newnam}{NORMS}_{SEQ_DATE} {params.color} >> {output[0]}
+        echo {params.url_out} {params.groupkey} {wildcards.newnam}{NORMS}_{SEQ_DATE} {params.color} >> {output[0]}
         ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
         scp {input[0]} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
         """
@@ -85,20 +80,18 @@ rule standared543_url:
 rule sense_url_summary:
     input:
         sorted(expand(
-            PROJ + "/matrix/543.{newnam}_matrix.url.txt",
+            PROJ + "/matrix/" + NORM543[0] + NORM543[1] + "_{newnam}_matrix.url.txt",
             newnam = NAMS_UNIQ
         ))
     output:
-        PROJ + "/URLS/543_" + PROJ + "_" + INDEX_SAMPLE + NORM543 + "_matrix.url.txt"
+        PROJ + "/URLS/" + NORM543[0] + PROJ + "_" + INDEX_SAMPLE + NORM543[1] + "_matrix.url.txt"
     params:
-        job_name = PROJ + "_543_matrix_url"
+        job_name = PROJ + NORM543[0] + NORM543[1] + "_matrix_url"
     resources:
         memory   = 4
     log:
-        out = PROJ + "/logs/" + PROJ + "_543_matrix_url.out",
-        err = PROJ + "/logs/" + PROJ + "_543_matrix_url.err"
-    message:
-        "Creating " + PROJ + " sense 543_matrix url"
+        out = PROJ + "/logs/" + PROJ + NORM543[0] + NORM543[1] + "_matrix_url.out",
+        err = PROJ + "/logs/" + PROJ + NORM543[0] + NORM543[1] + "_matrix_url.err"
     threads:
         1
     run:

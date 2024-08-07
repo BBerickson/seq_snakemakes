@@ -8,7 +8,7 @@ rule my_5_matrix:
         matrix = temp(PROJ   + "/matrix/{newnam}_temp0_5_matrix.gz")
     params:
         job_name = "{newnam}_matrix",
-        args     = CMD_PARAMS["reference5"]  + CMD_PARAMS["BL"],
+        args     = CMD_PARAMS["reference5"]  + CMD_PARAMS["bamCoverageBL"],
         my_ref   = MY_REF
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
@@ -36,10 +36,10 @@ rule fix_5_matrix:
     input:
         PROJ   + "/matrix/{newnam}_temp0_5_matrix.gz"
     output:
-        PROJ + "/matrix/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM5 + "_matrix.gz"
+        PROJ + "/matrix/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM5[1] + "_matrix.gz"
     params:
         job_name = "{newnam}_sense_matrix",
-        args    = CMD_PARAMS["filter5"]
+        args    = CMD_PARAMS["reference5"] + " unstranded"
     resources:
         memory   = 4
     log:
@@ -55,13 +55,14 @@ rule fix_5_matrix:
 # make url's and scp to sandbox
 rule my_5_url:
     input:
-        PROJ + "/matrix/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM5 + "_matrix.gz"
+        PROJ + "/matrix/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM5[1] + "_matrix.gz"
     output:
         temp(PROJ + "/matrix/5.{newnam}_matrix.url.txt")
     params:
         job_name = PROJ + "_5_matrix_url",
         color    = _get_col,
-        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM5 + "_matrix.gz"
+        groupkey = lambda wildcards: next((k for k, v in GROUP2.items() if wildcards.newnam in v), "self"),
+        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM5[1] + "_matrix.gz"
     resources:
         memory   = 4
     log:
@@ -75,7 +76,7 @@ rule my_5_url:
         """
         # fix R appended file remote read error
         computeMatrixOperations relabel -m {input} -o {input}
-        echo {params.url_out} self 5.{wildcards.newnam}{NORMS}_{SEQ_DATE} {params.color} >> {output[0]}
+        echo {params.url_out} {params.groupkey} 5.{wildcards.newnam}{NORMS}_{SEQ_DATE} {params.color} >> {output[0]}
         ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
         scp {input[0]} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
         
@@ -89,7 +90,7 @@ rule my_5_url_summary:
             newnam = NAMS_UNIQ
         ))
     output:
-        PROJ + "/URLS/5_" + PROJ + "_" + INDEX_SAMPLE + NORM5 + "_matrix.url.txt"
+        PROJ + "/URLS/5_" + PROJ + "_" + INDEX_SAMPLE + NORM5[1] + "_matrix.url.txt"
     params:
         job_name = PROJ + "_5_matrix_url"
     resources:

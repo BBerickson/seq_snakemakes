@@ -90,7 +90,8 @@ COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
 
 NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"],ORENTATION)
 
-NORM543 = _get_matrixtype(NORMS,CMD_PARAMS["region543"],GENELIST)
+NORM543 = _get_matrixtype("543_", NORMS,CMD_PARAMS["region543"],GENELIST)
+
 
 BAM_PATH = _get_bampath(NORM)
 
@@ -99,8 +100,9 @@ rule all:
     input:
         # bamCoverage
         PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + NORMS + "_bw_URL.txt",
+        
         # 543 matrix file
-        PROJ + "/URLS/543_" + PROJ + "_" + INDEX_SAMPLE + NORM543 + "_matrix.url.txt"
+        PROJ + "/URLS/" + NORM543[0] + PROJ + "_" + INDEX_SAMPLE + NORM543[1] + "_matrix.url.txt"
 
 
 # BW with deeptools bamCoverage

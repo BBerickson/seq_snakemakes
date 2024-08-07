@@ -25,9 +25,6 @@ INDEX_SPIKE     = config["INDEX_SPIKE"]
 FA_SAMPLE       = config["FA_SAMPLE"]
 FA_SPIKE        = config["FA_SPIKE"]
 MASK            = config["MASK"]
-SAF             = config["SAF"]
-SAF_SPIKE       = config["SAF_SPIKE"]
-GTF             = config["GTF"]
 CMD_PARAMS      = config["CMD_PARAMS"]
 COLORS          = config["COLORS"]
 NORM            = config["NORM"]
@@ -36,6 +33,10 @@ USER            = config["USER"]
 
 # Directories for data and scripts
 FASTQ_DIR = PROJ + "/fastqs"
+FC_TYPE   = CMD_PARAMS["featureCounts"]
+FC_TYPE_S = FC_TYPE + "_SPIKE"
+FC_FILE   = config[FC_TYPE]
+FC_SPIKE  = config[FC_TYPE_S]
 
 os.makedirs(FASTQ_DIR, exist_ok = True)
 
@@ -141,7 +142,10 @@ include: "rules/02c_align_URLS.snake"
 # Run featureCounts
 include: "rules/03_featureCounts.snake"
 # Results
-include: "rules/03_results_UMI.snake"
+include: "rules/03a_featureCounts.snake"
+include: "rules/03a_fragmentSize_PE.snake"
+include: "rules/03b_results_UMI.snake"
+include: "rules/03b_PCAplot.snake"
 # BW with deeptools bamCoverage
 include: "rules/04_bamCoverage_stranded.snake"
 

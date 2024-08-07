@@ -8,19 +8,15 @@
 #        gene_seperation >= upstream and/or downstream
 
 CMD_PARAMS:
-    BL:          ""
     bamCoverageBL:    " --blackListFileName /beevol/home/erickson/ref/hg38/ref/merge_filter_RNAs.bed "
-    region543:   " --regionBodyLength 5000 --binSize 100 --unscaled5prime 0 --unscaled3prime 0 --upstream 1500 --downstream 3500 --missingDataAsZero --skipZeros -q "
-    filter543:   "1000 1000 stranded"
-    reference5:  " --referencePoint TSS --binSize 50 --upstream 1000 --downstream 5000 --missingDataAsZero --skipZeros -q "
-    filter5:     "1000 1000 stranded"
-    reference5a: " --scale -1 --referencePoint TSS --binSize 50 --upstream 5000 --downstream 1000 --missingDataAsZero --skipZeros -q "
-    filter5a:    "1000 1000 stranded"
-    reference3:  " --referencePoint TES --binSize 100 --upstream 1000 --downstream 5000 --missingDataAsZero --skipZeros -q "
-    filter3:     "1000 5000 stranded"
-    EI:          " --regionBodyLength 1000 --binSize 1000 --unscaled5prime 0 --unscaled3prime 0 --upstream 0 --downstream 1000 --missingDataAsZero --skipZeros -q "
-    filterEI:    "0 0 stranded"
-    heatmap:     " --heatmapWidth 10 --whatToShow 'plot, heatmap and colorbar' --regionsLabel '' "
+    region543:        " --regionBodyLength 5000 --binSize 100 --unscaled5prime 0 --unscaled3prime 0 --upstream 1500 --downstream 5000 --missingDataAsZero --skipZeros -q "
+    reference5:       " --referencePoint TSS --binSize 50 --upstream 1000 --downstream 5000 --missingDataAsZero --skipZeros -q "
+    reference3:       " --referencePoint TES --binSize 100 --upstream 1000 --downstream 5000 --missingDataAsZero --skipZeros -q "
+    PI:               " --regionBodyLength 330 --binSize 330 --unscaled5prime 0 --unscaled3prime 0 --upstream 330 --downstream 0 --missingDataAsZero --skipZeros -q "
+    EI:               " --regionBodyLength 1000 --binSize 1000 --unscaled5prime 0 --unscaled3prime 0 --upstream 0 --downstream 1000 --missingDataAsZero --skipZeros -q "
+    heatmap:          " --sortUsing mean --regionsLabel '' --whatToShow 'plot, heatmap and colorbar' --zMin auto --zMax auto "
+    csheatmap:        " --sortUsing mean --hclust 4 --whatToShow 'heatmap and colorbar' --zMin 0  --zMax auto  "
+    caheatmap:        " --sortUsing mean --hclust 4 --whatToShow 'heatmap and colorbar' --zMin auto --zMax 0  "
     
 
 

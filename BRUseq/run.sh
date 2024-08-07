@@ -16,7 +16,7 @@ module load python/3.8.5
 module load samtools/1.9
 module load bbtools/39.01
 module load bowtie2/2.3.2
-module load R/4.2.2
+module load R/4.3.3
 module load fastqc/0.11.9
 module load subread
 
@@ -53,7 +53,7 @@ samples=samples.yaml
 run_snakemake $snake "$samples $genome"
 
 snake=$pipe_dir/Stranded_matrix.snake
-config=$pipe_dir/Stranded_matrix_BRUseq.yaml
+config=$pipe_dir/Stranded_matrix.yaml
 run_snakemake $snake "$samples $config $genome"
 
 # # Run pipeline to make table files of spikeIN

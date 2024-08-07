@@ -13,7 +13,7 @@ rule my_3_sense_matrix:
         sense2  = temp(PROJ   + "/matrix/{newnam}_temp2_3_matrix.gz")
     params:
         job_name = "{newnam}_sense_matrix",
-        args     = CMD_PARAMS["reference3"]  + CMD_PARAMS["BL"],
+        args     = CMD_PARAMS["reference3"]  + CMD_PARAMS["bamCoverageBL"],
         fw_ref   = FW_REF,
         rev_ref  = REV_REF
     resources:
@@ -54,7 +54,7 @@ rule fix_3_sense_matrix:
         temp(PROJ   + "/matrix/{newnam}_temp0_fix_3_matrix.gz")
     params:
         job_name = "{newnam}_3_sense_matrix",
-        args    = CMD_PARAMS["filter3"]
+        args    = CMD_PARAMS["reference3"] + " stranded"
     resources:
         memory   = 4
     log:
@@ -74,11 +74,12 @@ rule my_3_url:
         PROJ   + "/matrix/{newnam}_temp0_fix_3_matrix.gz"
     output:
         temp(PROJ + "/matrix/3.{newnam}_matrix.url.txt"),
-        PROJ + "/matrix/3_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM3 + "_matrix.gz"
+        PROJ + "/matrix/3_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM3[1] + "_matrix.gz"
     params:
         job_name = PROJ + "_3_matrix_url",
         color    = _get_col,
-        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/3_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM3 + "_matrix.gz"
+        groupkey = lambda wildcards: next((k for k, v in GROUP2.items() if wildcards.newnam in v), "self"),
+        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/3_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM3[1] + "_matrix.gz"
     resources:
         memory   = 4
     log:
@@ -92,7 +93,7 @@ rule my_3_url:
         """
         # fix R appended file remote read error
         computeMatrixOperations relabel -m {input} -o {output[1]}
-        echo {params.url_out} self 3.{wildcards.newnam}_{SEQ_DATE} {params.color} >> {output[0]}
+        echo {params.url_out} {params.groupkey} 3.{wildcards.newnam}_{SEQ_DATE} {params.color} >> {output[0]}
         ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
         scp {output[1]} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
         
@@ -106,7 +107,7 @@ rule my_3_url_summary:
             newnam = NAMS_UNIQ
         ))
     output:
-        PROJ + "/URLS/3_" + PROJ + "_" + INDEX_SAMPLE + NORM3 + "_sense_matrix.url.txt"
+        PROJ + "/URLS/3_" + PROJ + "_" + INDEX_SAMPLE + NORM3[1] + "_sense_matrix.url.txt"
     params:
         job_name = PROJ + "_sense_3_matrix_url"
     resources:
