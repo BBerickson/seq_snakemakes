@@ -73,8 +73,8 @@ rule bamCoverage_URL:
         echo "track type=bigWig visibility=full name='{wildcards.newnam}_{SEQ_DATE}{NORMS}_fw' description='{wildcards.newnam}_{SEQ_DATE}{NORMS}_fw' color={params.color} bigDataUrl={params.url_fw}" > {output.stats}
         echo "track type=bigWig visibility=full name='{wildcards.newnam}_{SEQ_DATE}{NORMS}_rev' description='{wildcards.newnam}_{SEQ_DATE}{NORMS}_rev' color={params.color} bigDataUrl={params.url_rev}" >> {output.stats}
         ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
-        scp {output.fw} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
-        scp {output.rev} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
+        scp {input.fw} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
+        scp {input.rev} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
         
         """
 
@@ -177,8 +177,8 @@ rule bamCoverage_spike_URL:
         echo "track type=bigWig visibility=full name='{wildcards.newnam}_{SEQ_DATE}_norm_CPM_fw' description='{wildcards.newnam}_{SEQ_DATE}_norm_CPM_fw' color={params.color} bigDataUrl={params.url_fw}" > {output.stats}
         echo "track type=bigWig visibility=full name='{wildcards.newnam}_{SEQ_DATE}_norm_CPM_rev' description='{wildcards.newnam}_{SEQ_DATE}_norm_CPM_rev' color={params.color} bigDataUrl={params.url_rev}" >> {output.stats}
         ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
-        scp {output.fw} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
-        scp {output.rev} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
+        scp {input.fw} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
+        scp {input.rev} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
         
         """
 

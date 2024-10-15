@@ -102,7 +102,10 @@ BAM_PATH = _get_bampath(NORM)
 rule all:
     input:
         # bamCoverage
-        PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + NORMS + "_bw_URL.txt",
+        expand(
+          PROJ      + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + ".bw,
+          newnam = NAMS_UNIQ
+        ),
         
         # 543 matrix file
         PROJ + "/URLS/" + NORM543[0] + PROJ + "_" + INDEX_SAMPLE + NORM543[1] + "_matrix.url.txt",

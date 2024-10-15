@@ -2,6 +2,7 @@
 ```{r "Packages", include = FALSE, cache = FALSE}
 
 # Load packages
+library(kableExtra)
 library(tidyverse)
 library(yaml)
 library(cowplot)

@@ -44,10 +44,10 @@ run_snakemake() {
 pipe_dir=pipelines
 pipe_dir1=pipelines/ref
 # index and configs
-snake=$pipe_dir/BRUseq_spikeIN.snake
-#snake=$pipe_dir/BRUseq.snake
-genome=$pipe_dir1/hg38_scer3.yaml
-# genome=$pipe_dir1/hg38.yaml
+# snake=$pipe_dir/BRUseq_spikeIN.snake
+snake=$pipe_dir/BRUseq.snake
+# genome=$pipe_dir1/hg38_scer3.yaml
+genome=$pipe_dir1/hg38.yaml
 samples=samples.yaml
 
 run_snakemake $snake "$samples $genome"

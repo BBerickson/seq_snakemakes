@@ -23,17 +23,11 @@ if(!is.null(input)){
   ChIPSpike <- filter(samp,str_detect(name,paste0("^",in_spk,"$"))) %>% dplyr::rename(value4=value) %>% mutate(name="test")
   
   # OR = (InputSpike*ChIP)/(Input*ChIPSpike)
-  out <- full_join(ChIPSpike,ChIP,by="name") %>% 
-    full_join(Input,by="name") %>% 
-    full_join(InputSpike,by="name") %>% 
-    summarise(value=round((value1*value2)/(value3*value4),digits = 5)) %>% 
-    mutate(name= "test", type= "OR")
   out <- full_join(ChIPSpike_en,ChIP_en,by="name") %>% 
     full_join(Input,by="name") %>% 
     full_join(InputSpike,by="name") %>% 
     summarise(value=round((value1*value2_en)/(value3*value4_en),digits = 5)) %>% 
-    mutate(name= "test", type= "OR_enrich") %>% 
-    bind_rows(out,.)
+    mutate(name= "test", type= "OR_enrich") 
   out1 <- out %>% full_join(ChIP,.,by="name") %>% 
     mutate(value=as.integer(value*value2)) %>% 
     dplyr::select(-value2) %>% 

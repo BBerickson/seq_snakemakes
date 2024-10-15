@@ -117,7 +117,8 @@ create_qc_bars <- function(df_in, grp_df, grp_lvls = NULL, sam_lvls = NULL, met_
       legend.position = "top",
       legend.title    = element_blank(),
       strip.text      = element_text(size = 10),
-      axis.title      = element_blank()
+      axis.title      = element_blank(),
+      axis.text.x     = element_text(face ="bold", angle = 45, hjust = 1)
     )
   
   # Split into facets
@@ -134,6 +135,7 @@ create_qc_bars <- function(df_in, grp_df, grp_lvls = NULL, sam_lvls = NULL, met_
         check_overlap = TRUE,
         angle         = 90,
         hjust         = 0,
+        face          ="bold",
         size          = lab_size / .pt
       )
   }

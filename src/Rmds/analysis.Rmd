@@ -1,5 +1,5 @@
 ---
-title: "mNET-seq analysis for `r paste0(proj)`"
+title: "Analysis for `r paste0(proj)`"
 author: "Benjamin Erickson"
 date: "`r format(Sys.Date(), '%B %d, %Y')`"
 output: 
@@ -46,13 +46,26 @@ knitr::knit(here::here(template_dir, "setup.Rmd"), "")
 
 ```
 
-# Quality Control
+```{r load_table, echo=FALSE}
+stats_dir <- here(res_dir, "stats/")
+fq_results     <- str_c(stats_dir, proj, "_results.tsv")
+# Read the TSV file into a data frame
+my_table <- read_tsv(fq_results)
+# Create the table with a smaller font size and wrapped column names
+names(my_table) <- gsub("_", "<br>", names(my_table))
+my_table %>%
+  kbl(escape = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped"), full_width = F, position = "left", font_size = 10) %>%
+  scroll_box(width = "800px", height = "auto")
+```
+
+# Quality Control {.tabset .tabset-pills}
 
 `r knitr::knit_child(here(template_dir, "qc-template.Rmd"))`
 
 # Session info
 
-```{r, echo = FALSE}
+```{r, echo = FALSE,eval=FALSE}
 
 sessionInfo()
 
