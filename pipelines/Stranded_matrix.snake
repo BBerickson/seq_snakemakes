@@ -92,11 +92,19 @@ COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
 
 NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"],ORENTATION)
 
-NORM543 = _get_matrixtype("543_", NORMS,CMD_PARAMS["region543"],GENELIST)
-NORM5 = _get_matrixtype("5_",NORMS,CMD_PARAMS["reference5"],GENELIST)
-NORM3 = _get_matrixtype("3_",NORMS,CMD_PARAMS["reference3"],GENELIST)
-
 BAM_PATH = _get_bampath(NORM)
+
+REGIONS = ["5"] # needs to be the suffix of region in CMD_PARAMS. eg. region: "543", "5", "3", "PI", "EI"
+SENSE_ASENSE = ["sense", "antisense"]
+COVARGS = _get_all_matrixtypes(REGIONS,NORMS,CMD_PARAMS,GENELIST)
+
+# Create the Cartesian product
+product = [(s, i, v, sa) for s in NAMS_UNIQ for i, v in zip(REGIONS, COVARGS) for sa in SENSE_ASENSE]
+
+# Convert to DataFrame
+REGIONS_COVARGS = pd.DataFrame(product, columns=['Newnam', 'Region', 'Value', 'Sense_Asense'])
+
+print(REGIONS_COVARGS)
 
 # Final output files
 rule all:
@@ -111,28 +119,15 @@ rule all:
           newnam = NAMS_UNIQ
         ),
         
-        # 5 sense matrix file
-        PROJ + "/URLS/"+ NORM5[0] + PROJ + "_" + INDEX_SAMPLE + NORM5[1] + "_sense_matrix.url.txt",
-        
-        # 5 antisense matrix file
-        PROJ + "/URLS/"+ NORM5[0] + PROJ + "_" + INDEX_SAMPLE + NORM5[1] + "_antisense_matrix.url.txt"
-        #,
-        
-        # 543 matrix file
-        #PROJ + "/URLS/" + NORM543[0] + PROJ + "_" + INDEX_SAMPLE + NORM543[1] + "_sense_matrix.url.txt",
-        
-        # 3 matrix file
-        #PROJ + "/URLS/"+ NORM3[0] + PROJ + "_" + INDEX_SAMPLE + NORM3[1] + "_sense_matrix.url.txt"
+        # matrix file
+        expand(
+          PROJ + "/URLS/{region}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{covarg}_{sense_asense}_matrix.url.txt",
+           zip, region=REGIONS_COVARGS['Region'], covarg=REGIONS_COVARGS['Value'], sense_asense=REGIONS_COVARGS['Sense_Asense']
+        )
 
 
 # BW with deeptools bamCoverage
 include: "rules/04_bamCoverage_stranded.snake"
 # 5 sense matrix file
-include: "rules/05_5_matrix_sense.snake"
-# 5 antisense matrix file
-include: "rules/05_5_matrix_antisense.snake"
-# 543 matrix file
-include: "rules/05_543_matrix_sense.snake"
-# 3 matrix file
-include: "rules/05_3_matrix_sense.snake"
+include: "rules/05_Stranded_matrix.snake"
 

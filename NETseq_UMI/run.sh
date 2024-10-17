@@ -53,7 +53,7 @@ samples=samples.yaml
 
 run_snakemake $snake "$samples $genome"
 
-snake=$pipe_dir/Stranded_matrix_offset_nogroup.snake
+snake=$pipe_dir/Stranded_matrix.snake
 config=$pipe_dir/Stranded_matrix.yaml
 run_snakemake $snake "$samples $config $genome"
 

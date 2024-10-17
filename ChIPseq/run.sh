@@ -54,8 +54,8 @@ samples=samples.yaml
 run_snakemake $snake "$samples $genome"
 
 # Run pipeline to make table files of sample
-snake=$pipe_dir/ChIPseq_matrix.snake
-config=$pipe_dir/ChIPseq_matrix.yaml
+snake=$pipe_dir/UnStranded_matrix.snake
+config=$pipe_dir/UnStranded_matrix.yaml
 
 run_snakemake $snake "$samples $config $genome"
 
