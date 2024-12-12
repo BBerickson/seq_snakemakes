@@ -15,6 +15,8 @@ MASK:
   "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_snoRNAs.bed"
 GTF:
   "/beevol/home/bentleyd/ref/hg38/ref_bed/Homo_sapiens.GRCh38.111.gtf"
+GTF_SPIKE:
+  ""
 SAF:
   "/beevol/home/bentleyd/ref/hg38/ref_bed/enrich.saf"
 SAF_SPIKE:

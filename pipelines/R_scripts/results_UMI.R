@@ -42,7 +42,7 @@ hh <- full_join(cutad,dedup,by="sample") %>%
   arrange(sample)
 
 # tests if subsample per each genome or per mixed genome
-count_files <- list.files(path = mydirb, pattern = '_filtred_count',recursive = T)
+count_files <- list.files(path = mydirb, pattern = '_mask_count',recursive = T)
 if(!is_empty(count_files)){
   
   paste0(mydirb,"/",count_files) -> count_files

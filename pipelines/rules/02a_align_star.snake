@@ -2,28 +2,31 @@
 
 
 # Align trimmed reads with star
-rule star_first_pass:
+rule star_twopass:
     input:
-        R1  = PROJ + "/{sample}_R1.fastq.gz",
-        R2  = PROJ + "/{sample}_R2.fastq.gz"
+        R1 = PROJ + "/{sample}_R1.fastq.gz",
+        R2 = PROJ + "/{sample}_R2.fastq.gz"
     output:
-        juc = temp(PROJ + "/bams/{sample}_SJ.out.tab"),
-        bam = temp(PROJ + "/bams/{sample}_Aligned.sortedByCoord.out.bam")
+        bam   = temp(PROJ + "/{sample}_" + INDEX_MAP + ".bam"),
+        bai   = temp(PROJ + "/{sample}_" + INDEX_MAP + ".bam.bai"),
+        stats = PROJ + "/bams/{sample}_Log.out"
     params:
-        job_name = "{sample}_star_pass_1",
+        job_name = "{sample}_star_twopass",
+        gtf      = GTF,
+        bam_out  = PROJ + "/bams/{sample}_Aligned.sortedByCoord.out.bam",
+        args     = CMD_PARAMS["star"],
         out      = PROJ + "/bams/{sample}_"
     resources:
-        memory   = lambda wildcards, input: memory_estimator([input.R1, input.R2], 3, 30)
+        memory = lambda wildcards, input: memory_estimator([input.R1, input.R2], 3, 30)
     log:
-        out = PROJ + "/logs/{sample}_star.out",
-        err = PROJ + "/logs/{sample}_star.err"
+        out = PROJ + "/logs/{sample}_star_twopass.out",
+        err = PROJ + "/logs/{sample}_star_twopass.err"
     message:
-        "running first pass star alignments "
+        "Running STAR alignment with two-pass mode"
     threads: 
         16
     shell:
         """
-        
         STAR \
           --genomeDir {INDEX_PATH} \
           --runThreadN {threads} \
@@ -31,55 +34,16 @@ rule star_first_pass:
           --outSAMtype BAM SortedByCoordinate \
           --limitBAMsortRAM {resources.memory}000000000 \
           --readFilesCommand gunzip -c \
-          --outFileNamePrefix {params.out}
+          --outFileNamePrefix {params.out} \
+          --sjdbGTFfile {params.gtf} \
+          {params.args} \
+          --twopassMode Basic
+          
+        mv {params.bam_out} {output.bam}
 
-        """
-
-rule star_second_pass:
-    input:
-        R1        = PROJ + "/{sample}_R1.fastq.gz",
-        R2        = PROJ + "/{sample}_R2.fastq.gz",
-        first_bam = PROJ + "/bams/{sample}_Aligned.sortedByCoord.out.bam",
-        junctions = expand(PROJ + "/bams/{sample}_SJ.out.tab",
-          sample = SAMS_UNIQ)
-    output:
-        bam   = temp(PROJ + "/{sample}_" + INDEX_MAP + ".bam"),
-        bai   = temp(PROJ + "/{sample}_" + INDEX_MAP + ".bam.bai"),
-        stats = PROJ  + "/bams/{sample}_2pass_Log.final.out"
-    params:
-        job_name = "{sample}_star_pass_2",
-        out      = PROJ + "/bams/{sample}_2pass_",
-        bam_out  = PROJ + "/bams/{sample}_2pass_Aligned.sortedByCoord.out.bam",
-        args     = CMD_PARAMS["star2"]
-    resources:
-        memory   = lambda wildcards, input: memory_estimator([input.R1, input.R2, input.first_bam], 2, 30)
-    log:
-        out = PROJ + "/logs/{sample}_2_star.out",
-        err = PROJ + "/logs/{sample}_2_star.err"
-    message:
-        "running second pass star alignments "
-    threads: 
-        16
-    shell:
+        samtools index -@ {threads} {output.bam}
         """
         
-        STAR \
-       --genomeDir {INDEX_PATH} \
-       --runThreadN {threads} \
-       --readFilesIn {input.R1} {input.R2} \
-       --outSAMtype BAM SortedByCoordinate \
-       --readFilesCommand gunzip -c \
-       --outFileNamePrefix {params.out} \
-       --limitBAMsortRAM {resources.memory}000000000 \
-       --sjdbFileChrStartEnd {input.junctions} \
-       {params.args}
-
-       mv {params.bam_out} {output.bam}
-       
-       samtools index -@ {threads} {output.bam}
-       
-        """
-
 
 # ====== Rules for aligning reads summmary =================================
 
@@ -88,7 +52,7 @@ rule star_second_pass:
 rule star_2pass_summmary:
     input:
         expand(
-           PROJ  + "/bams/{sample}_2pass_Log.final.out",
+           PROJ  + "/bams/{sample}_Log.out",
             sample = SAMS_UNIQ
         )
     output:

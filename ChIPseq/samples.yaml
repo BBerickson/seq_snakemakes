@@ -56,13 +56,18 @@ COLORS:
   - "0,225,0"
   - "0,0,225"
 
-# program options  
+# program options 
+# HiSeq 1T     dupedist=40 (BC...XX)
+# HiSeq 2500   dupedist=40 (AM...XX, BC...XX)
+# HiSeq 3k/4k  dupedist=2500 (AC...XX, AN...XX)
+# Novaseq      dupedist=12000
 CMD_PARAMS:
-    clumpify:      " overwrite=t dedupe=t dupedist=12000 optical=f "
+    clumpify:      " overwrite=t dedupe=t dupedist=12000 optical=f " 
     bbduk:         " overwrite=t ftm=5 minlen=50 ktrim=r k=23 hdist=1 mink=11 tpe tbo ecco=t "
+    #bbduk:         " overwrite=t ftm=5 minlen=50 ktrim=r k=23 hdist=1 mink=11 " SE settings
     bowtie2:       " --local --no-mixed --no-discordant "
     samtools:      " -bF4q30 "
-    bamCoverage:   " --binSize 10 --skipNonCoveredRegions --extendReads 300 --centerReads "
+    bamCoverage:   " --binSize 10 --skipNonCoveredRegions --extendReads 75 --centerReads "
     bamCoverageBL: ""
     fragment_size: " --maxFragmentLength 1000 "
     featureCounts: "SAF"

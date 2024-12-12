@@ -125,6 +125,8 @@ rule all:
         #PROJ + "/URLS/" + PROJ + "_" + INDEX_SPIKE + "_bam_URL.txt",
         
         # results
+        PROJ + "/stats/" + PROJ + "_fragment_results.tsv",
+        PROJ + "/stats/" + PROJ + "_spike_fragment_results.tsv",
         PROJ + "/stats/" + PROJ + "_results.tsv",
         
         # report
@@ -143,8 +145,9 @@ include: "rules/01a_clumpify.snake"
 include: "rules/01b_bbduk.snake"
 # Align reads 
 include: "rules/02a_align_bowtie.snake"
-include: "rules/02b_align.snake"
+include: "rules/02b_align_samtools.snake"
 include: "rules/02c_align_URLS.snake"
+include: "rules/02s_align_mask_subsample.snake"
 # Results
 include: "rules/03a_featureCounts.snake"
 include: "rules/03a_fragmentSize_PE.snake"

@@ -44,9 +44,8 @@ run_snakemake() {
 pipe_dir=pipelines
 pipe_dir1=pipelines/ref
 # index and configs
-#snake=$pipe_dir/NETseq_mask_UMI_spikein_sub_samp.snake
-#snake=$pipe_dir/NETseq_mask_UMI_spikein_sub_map.snake
-snake=$pipe_dir/NETseq_mask_UMI.snake
+#snake=$pipe_dir/NETseq_UMI_spikein.snake
+snake=$pipe_dir/NETseq_UMI.snake
 genome=$pipe_dir1/hg38.yaml
 #genome=$pipe_dir1/hg38_HHV8.yaml
 samples=samples.yaml

@@ -15,6 +15,8 @@ MASK:
   ""
 GTF:
   "/beevol/home/bentleyd/ref/scer3/saccharomyces_cerevisiae.gff"
+GTF_SPIKE:
+  ""
 SAF:
   "/beevol/home/bentleyd/ref/scer3/enrich.saf"
 SAF_SPIKE:

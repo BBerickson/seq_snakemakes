@@ -3,12 +3,12 @@
 
 # Summary files
 stats_dir <- here::here(res_dir, "stats/")
+counts_dir <- here::here(res_dir, "counts/")
 
 fq_sum     <- str_c(stats_dir, proj, "_fastqc.tsv")
 trim_sum   <- str_c(stats_dir, proj, "_cutadapt.tsv")
 bwt_sum    <- str_c(stats_dir, proj, "_aligned.tsv")
 dedup_sum  <- str_c(stats_dir, proj, "_", index_map, "_UMI_dedup.tsv")
-counts_sum <- str_c(stats_dir, proj, "_featureCounts.tsv")
 sub_sum    <- str_c(stats_dir, proj, "_results.tsv")
 
 
@@ -193,47 +193,48 @@ dup_sum %>%
 
 ```{r "featurecounts", fig.width = 16, fig.height = 10}
 
+#list files
+counts_sums <- list.files(path = counts_dir, pattern = '_featureCounts.tsv$',recursive = T)
+
 # RNAs to summarize
 rnas <- c(
   "protein_coding", "miRNA",
   "unassigned",     "rRNA",
   "snoRNA",         "snRNA"
 )
-
-# Calculate unassigned counts
-un_counts <- str_c(counts_sum, ".summary") %>%
-  read_tsv(.,show_col_types = FALSE) %>%
-  pivot_longer(cols = ends_with(".bam"), names_to = "sample") %>%
-  trim_path(paste0("_",index_map,"\\.bam$")) %>%
+counts_sum <- list()
+un_counts <- list()
+for(i in seq_along(counts_sums)){
+  # Calculate unassigned counts
+  un_counts[[i]] <- str_c(counts_dir, counts_sums[i], ".summary") %>%
+    read_tsv(.,show_col_types = FALSE) %>%
+    pivot_longer(cols = last(names(.)), names_to = "sample") %>% 
+    trim_path(paste0("_",index_map,".*\\.bam$")) %>%
+    dplyr::filter(grepl("^Unassigned_", Status)) %>%
+    dplyr::mutate(metric = "unassigned") %>%
+    group_by(sample, metric) %>%
+    summarize(value = sum(value), .groups = "drop")
+  # featureCounts stats
+  counts_sum[[i]] <- str_c(counts_dir, counts_sums[i]) %>%
+    read_tsv(skip = 1,show_col_types = FALSE) %>%
+    pivot_longer(cols = last(names(.)), names_to = "sample") %>% 
+    trim_path(paste0("_",index_map,".*\\.bam$")) %>%
+    dplyr::mutate(name = str_c(Geneid, gene_name, sep = "|")) %>%
+    dplyr::select(
+      name, Length, sample,
+      metric = gene_biotype,
+      value
+    ) %>%
+    dplyr::mutate(
+      metric = str_replace(metric, "Mt_rRNA", "rRNA"),
+      metric = ifelse(!metric %in% rnas, "other", metric)
+    ) %>%
+    group_by(sample, metric) %>%
+    summarize(value = sum(value), .groups = "drop") 
   
-  dplyr::filter(grepl("^Unassigned_", Status)) %>%
-  dplyr::mutate(metric = "unassigned") %>%
-  
-  group_by(sample, metric) %>%
-  summarize(value = sum(value), .groups = "drop")
-
-# featureCounts stats
-
-counts_sum <- counts_sum %>%
-  read_tsv(skip = 1,show_col_types = FALSE) %>%
-  pivot_longer(cols = ends_with(".bam"), names_to = "sample") %>%
-  trim_path(paste0("_",index_map,"\\.bam$")) %>%
-  mutate(name = str_c(Geneid, gene_name, sep = "|")) %>%
-  dplyr::select(
-    name, Length, sample,
-    metric = gene_biotype,
-    value
-  ) %>%
-  
-  bind_rows(un_counts) %>%  # add unassigned reads
-  
-  mutate(
-    metric = str_replace(metric, "Mt_rRNA", "rRNA"),
-    metric = ifelse(!metric %in% rnas, "other", metric)
-  ) %>%
-  
-  group_by(sample, metric) %>%
-  summarize(value = sum(value), .groups = "drop") 
+}
+# bring it all together and pivot to fit format
+counts_sum <- bind_rows(counts_sum,un_counts) 
 
 
 # Create bar graphs
@@ -263,18 +264,21 @@ Unique reads were filtered of reads aligned to snoRNA genes. Libraries were then
 mets <- c("Sampled reads", "Reads removed")
 
 sub_sum <- sub_sum %>% read_tsv(.,show_col_types = FALSE) %>% 
-  select(sample,starts_with("aligned",ignore.case = F),starts_with("sub")) 
+  select(sample,starts_with("aligned",ignore.case = T),starts_with("sub")) 
 
 if(any(names(sub_sum) %in% "sub_group")){
   sub_sum <- sub_sum %>%
     dplyr::rename(grp = sub_group,
-                  `Filtered reads` = starts_with("aligned",ignore.case = F), 
+                  `Filtered reads` = starts_with("aligned",ignore.case = T), 
                   `Sampled reads` = starts_with("subsampled_")) %>% 
     separate(.,`Sampled reads`,c("Sampled reads","temp"),"\\(",extra="drop",fill="right",convert=T) %>% 
+    separate(.,`Filtered reads`,c("Filtered reads","temp"),"\\(",extra="drop",fill="right",convert=T) %>%
     dplyr::select(-temp) 
 } else {
   sub_sum <- sub_sum %>% 
-    dplyr::rename(`Filtered reads` = starts_with("aligned",ignore.case = F)) %>% 
+    dplyr::rename(`Filtered reads` = starts_with("aligned",ignore.case = T)) %>% 
+    separate(.,`Filtered reads`,c("Filtered reads","temp"),"\\(",extra="drop",fill="right",convert=T) %>% 
+    dplyr::select(-temp) %>% 
     dplyr::mutate(`Sampled reads` = `Filtered reads`) %>%
   full_join(grp_key, by = c("sample"))
 }

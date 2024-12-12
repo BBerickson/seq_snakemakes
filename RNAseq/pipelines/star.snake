@@ -27,6 +27,8 @@ FA_SAMPLE       = config["FA_SAMPLE"]
 FA_SPIKE        = config["FA_SPIKE"]
 MASK            = config["MASK"]
 MY_REF          = config["MY_REF"]
+GTF             = config["GTF"]
+GTF_SPIKE       = config["GTF_SPIKE"]
 CMD_PARAMS      = config["CMD_PARAMS"]
 COLORS          = config["COLORS"]
 NORM            = config["NORM"]
@@ -124,6 +126,7 @@ rule all:
         #PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + "_bam_URL.txt",
         
         # results
+        PROJ + "/stats/" + PROJ + "_fragment_results.tsv",
         PROJ + "/stats/" + PROJ + "_results.tsv",
         
         # bamCoverage
@@ -138,8 +141,9 @@ include: "rules/01a_clumpify.snake"
 include: "rules/01b_bbduk.snake"
 # Align reads 
 include: "rules/02a_align_star.snake"
-include: "rules/02b_align.snake"
+include: "rules/02b_align_samtools.snake"
 include: "rules/02c_align_URLS.snake"
+include: "rules/02s_align_subsample.snake"
 # Results
 include: "rules/03a_featureCounts.snake"
 include: "rules/03a_fragmentSize_PE.snake"

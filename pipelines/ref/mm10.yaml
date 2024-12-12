@@ -15,6 +15,8 @@ MASK:
   "/beevol/home/bentleyd/ref/mm10/ref_bed/snoRNAs.bed"
 GTF:
   "/beevol/home/bentleyd/ref/mm10/ref_bed/Mus_musculus.GRCm38.102.gff3"
+GTF_SPIKE:
+  ""
 SAF:
   "/beevol/home/bentleyd/ref/mm10/ref_bed/enrich.saf"
 SAF_SPIKE:

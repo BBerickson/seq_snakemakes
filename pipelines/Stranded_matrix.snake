@@ -95,7 +95,7 @@ NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"]
 BAM_PATH = _get_bampath(NORM)
 
 REGIONS = ["5"] # needs to be the suffix of region in CMD_PARAMS. eg. region: "543", "5", "3", "PI", "EI"
-SENSE_ASENSE = ["sense", "antisense"]
+SENSE_ASENSE = ["sense", "anti"] # valid options = "sense", "anti"
 COVARGS = _get_all_matrixtypes(REGIONS,NORMS,CMD_PARAMS,GENELIST)
 
 # Create the Cartesian product

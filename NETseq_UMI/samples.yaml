@@ -55,8 +55,9 @@ CMD_PARAMS:
     umi_pattern:   "NNNNNNNNNNNN"
     umi_tools:     " --method unique --read-length "
     bowtie2:       " --end-to-end "
-    samtools:      " -bF4q5 "
+    samtools:      " -bF4q10 "
     featureCounts: "GTF"
+    fragment_size: " --maxFragmentLength 1000 "
     bamCoverage:   " --binSize 1 --skipNonCoveredRegions --Offset -1 " # --Offset -1 = last bp --Offset 1 = first bp
     bamCoverageBL: " --blackListFileName /beevol/home/erickson/ref/hg38/ref/merge_filter_RNAs.bed "
     

@@ -52,6 +52,10 @@ NORM:
 USER:
   "User7"
 
+# HiSeq 1T     dupedist=40 (BC...XX)
+# HiSeq 2500   dupedist=40 (AM...XX, BC...XX)
+# HiSeq 3k/4k  dupedist=2500 (AC...XX, AN...XX)
+# Novaseq      dupedist=12000
 CMD_PARAMS:
     clumpify:      " lowcomplexity=t overwrite=t dedupe=t dupedist=12000 optical=f subs=0 "
     bbduk:         " overwrite=t ftm=5 minlen=50 ktrim=r k=23 hdist=1 mink=11 tpe tbo ecco=t "
