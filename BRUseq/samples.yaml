@@ -18,15 +18,25 @@ RAW_DATA:
 # directories listed under RAW_DATA. If the sample name
 # matches multiple fastqs, an error will be thrown.
 # If samples have a input pair with a spikeIN list together
-# or if doing subsampling ... needs work
+# subsampling works on samples within a group
+# nicknames will be used for bw and matrix/plots names
 #
-# group-name-1:
-#     - "sample_1_file_prefix"
-#     - "input_1_file_prefix"
-#
-# group-name-2:
-#     - "sample_2_file_prefix"
-#     - "input_2_file_prefix"
+# SAMPLES:
+#     SECTION-1:
+#         SAMPLING-GROUP-1: # subsample norm example
+#             sample_nickname-1: "fastq_1_prefix"
+#             sample_nickname-2: "fastq_2_prefix"
+# 
+#         SAMPLING-GROUP-2: # with input for OR norm example
+#             sample_nickname-3:
+#                  - "fastq_sample_3_prefix"
+#                  - "fastq_input_3_prefix"
+#             sample_nickname-4:
+#                  - "fastq_sample_4_prefix"
+#                  - "fastq_input_4_prefix"
+# 
+#     SECTION-2:
+#         ...
 #
 
 SAMPLES:
@@ -79,6 +89,17 @@ BARCODES:
     "pipelines/ref/truseq_i5i7.fa"     
 ORENTATION:
     "R2R1" # R1R2
+    
+# which matrix type(s) to make
+# deeptools options set in Stranded_matrix.yaml
+# can only to be "543", "5", "3", "PI", or "EI" 
+REGIONS:
+  - "5"
+# valid options = "sense", "anti"
+SENSE_ASENSE:
+  - "sense"
+  - "anti"
+
 # set colors for bw urls and table files, if missing 0,0,0 is default
 COLORS:
   - "0,0,0"

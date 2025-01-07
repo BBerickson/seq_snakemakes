@@ -4,17 +4,17 @@ rule create_5_mixed_sense_antisense_matrix:
     input:
         lambda wildcards: expand(
           PROJ + "/matrix/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM5S + "_matrix.gz",
-          newnam = GROUP2[wildcards.group]
+          newnam = GROUPS[wildcards.group]
         ),
         lambda wildcards: expand(
           PROJ + "/matrix/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM5S + "_anti_matrix.gz",
-          newnam = GROUP2[wildcards.group]
+          newnam = GROUPS[wildcards.group]
         )
     output:
         PROJ + "/matrix2/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM5S + "_sense_antisense.matrix.gz"
     params:
         job_name  = PROJ + "{group}_5prim_mixed_sense_antisense_matrix",
-        samplab   = GROUP2,
+        samplab   = GROUPS,
         groulab   = "{group}"
     resources:
         memory   = 4
@@ -32,13 +32,13 @@ rule create_5_mixed_sense_matrix:
     input:
         lambda wildcards: expand(
           PROJ + "/matrix/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM5S + "_matrix.gz",
-          newnam = GROUP2[wildcards.group]
+          newnam = GROUPS[wildcards.group]
         )
     output:
         PROJ + "/matrix2/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM5S + "_sense.matrix.gz"
     params:
         job_name  = PROJ + "{group}_5prim_mixed_sense_matrix",
-        samplab   = GROUP2,
+        samplab   = GROUPS,
         groulab   = "{group}"
     resources:
         memory   = 4
@@ -56,13 +56,13 @@ rule create_5_mixed_antisense_matrix:
     input:
         lambda wildcards: expand(
           PROJ + "/matrix/5_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM5A + "_anti_matrix.gz",
-          newnam = GROUP2[wildcards.group]
+          newnam = GROUPS[wildcards.group]
         )
     output:
         PROJ + "/matrix2/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM5A + "_antisense.matrix.gz"
     params:
         job_name  = PROJ + "{group}_5prim_mixed_antisense_matrix",
-        samplab   = GROUP2,
+        samplab   = GROUPS,
         groulab   = "{group}"
     resources:
         memory   = 4
@@ -80,13 +80,13 @@ rule create_3_mixed_sense_matrix:
     input:
         lambda wildcards: expand(
           PROJ + "/matrix/3_{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM3 + "_matrix.gz",
-          newnam = GROUP2[wildcards.group]
+          newnam = GROUPS[wildcards.group]
         )
     output:
         PROJ + "/matrix2/3_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM3 + "_sense.matrix.gz"
     params:
         job_name  = PROJ + "{group}_3prim_mixed_sense_matrix",
-        samplab   = GROUP2,
+        samplab   = GROUPS,
         groulab   = "{group}"
     resources:
         memory   = 4

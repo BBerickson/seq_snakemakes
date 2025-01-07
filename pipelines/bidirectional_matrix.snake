@@ -27,53 +27,53 @@ NORM            = config["NORM"]
 ORENTATION      = config["ORENTATION"]
 USER            = config["USER"]
 GENELIST        = config["GENELIST"]
+REGIONS         = config["REGIONS"]
 
 # Simplify ALL_SAMPLES dictionary
-# subsampling groups can be listed in multiple sections
+# ALL_SAMPLES = {'SECTION-1':{'SAMPLING-GROUP-1':{newname1:[fastq1],newname2:[fastq2]}}} or {'SECTION-1':{'SAMPLING-GROUP-1':{newname1:[fastq1,input1],newname2:[fastq2,input2]}}}
 # collapse sections and combine subsampling groups
-SAMPLES = {} # SAMPLES {newname1:[fastq1],newname2:[fastq2]}
-GROUPS = {} # GROUPS {group:[fastq1,fastq2]} 
-GROUP2 = {} GROUP2={group1:[newname1,newname2],group2:[newname3,newname4]} 
-for _, d in ALL_SAMPLES.items():
-    for key, value in d.items():
+def process_samples(all_samples):
+    SAMPLES = {}  # SAMPLES {newname1:[fastq1],newname2:[fastq2]}
+    SAMPIN = {}   # SAMPIN {newname1:[fastq1,input1],newname2:[fastq2,input2]}
+    GROUPS = {}   # GROUPS {SAMPLING-GROUP-1:[fastq1], SAMPLING-GROUP-2:[fastq2]}
 
-        if not isinstance(value, dict):
-            value = {key: value}  # make it a dictionary for uniformity
+    for section, pairs in all_samples.items():
+        for pair_name, samples in pairs.items():
+            for sample_name, values in samples.items():
+                fastq = values[0]
+                input_file = values[1] if len(values) > 1 else None
 
-        for sub_keys, sub_value in value.items():
-            if key in GROUPS:
-                if sub_value not in GROUPS[key]:
-                    GROUPS[key].append(sub_value)
-            else:
-                GROUPS[key] = [sub_value]
-                
-            if key in GROUP2:
-                if sub_keys not in GROUP2[key]:
-                    GROUP2[key].append(sub_keys)
-            else:
-                GROUP2[key] = [sub_keys]
-                
-            if sub_keys in SAMPLES:
-                if sub_value not in SAMPLES[sub_keys]:
-                    SAMPLES[sub_keys].append(sub_value)
+                # Populate SAMPLES
+                SAMPLES.setdefault(sample_name, []).append(fastq)
 
-            else:
-                SAMPLES[sub_keys] = [sub_value]
+                # Populate SAMPIN
+                if input_file:
+                    SAMPIN[sample_name] = [fastq, input_file]
+                else:
+                    SAMPIN[sample_name] = [fastq]
+
+                # Populate GROUPS
+                GROUPS.setdefault(pair_name, []).append(fastq)
+
+    return SAMPLES, SAMPIN, GROUPS
+
+SAMPLES, SAMPIN, GROUPS = process_samples(ALL_SAMPLES)
+
 
 # unpack samples and groups
 SAMS = [[y, x] for y in SAMPLES for x in SAMPLES[y]]
-NAMS = [x[0] for x in SAMS]
+NAMS = [x[0] for x in SAMS] # newnames
+SAMS = [x[1] for x in SAMS] # samples
 GRPS = [[y, x] for y in GROUPS for x in GROUPS[y]]
-SAMS = [x[1] for x in GRPS]
-GRPS = [x[0] for x in GRPS]
+GRPS = [x[0] for x in GRPS] # groups
 NAMS_UNIQ = list(dict.fromkeys(NAMS))
 GRPS_UNIQ = list(dict.fromkeys(GRPS))
 SAMS_UNIQ = list(dict.fromkeys(SAMS))
 
+# Print summary of samples and groups
 print("SAMPLES (%s): %s\n" % (len(SAMPLES), SAMPLES))
 print("GROUPS (%s): %s\n" % (len(GROUPS), GROUPS))
-print("GROUP2 (%s): %s\n" % (len(GROUP2), GROUP2))
-# Print summary of samples and groups
+print("SAMPIN (%s): %s\n" % (len(SAMPIN), SAMPIN))
 print("SAMS (%s): %s\n" % (len(SAMS), SAMS))
 print("NAMS (%s): %s\n" % (len(NAMS), NAMS))
 print("GRPS (%s): %s\n" % (len(GRPS), GRPS))
@@ -82,12 +82,11 @@ print("NAMS_UNIQ (%s): %s\n" % (len(NAMS_UNIQ), NAMS_UNIQ))
 print("GRPS_UNIQ (%s): %s\n" % (len(GRPS_UNIQ), GRPS_UNIQ))
 
 # Wildcard constraints
-GRP_REGEX = "[a-zA-Z0-9_\-]+"
+WILDCARD_REGEX = "[a-zA-Z0-9_\-]+" # Matches alphanumeric characters, underscores, and hyphens
 
 wildcard_constraints:
-    sample  = "[a-zA-Z0-9_\-]+",
-    group   = GRP_REGEX,
-    sam_grp = "[a-zA-Z0-9_\-]+-[a-zA-Z0-9_\-]+"
+    newnam = WILDCARD_REGEX,
+    region = "543|5|3|PI|EI"
 
 
 COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
@@ -95,8 +94,6 @@ COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
 NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"],ORENTATION)
 
 BAM_PATH = _get_bampath(NORM)
-
-REGIONS = ["5"] # needs to be the suffix of region in CMD_PARAMS. eg. region: "543", "5", "3", "PI", "EI" 
 
 COVARGS = _get_all_matrixtypes(REGIONS,NORMS,CMD_PARAMS,GENELIST)
 

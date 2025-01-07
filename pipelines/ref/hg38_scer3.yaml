@@ -26,11 +26,11 @@ FA_SAMPLE:
 FA_SPIKE:
   "/beevol/home/bentleyd/ref/scer3/scer3.fa"
 MY_REF:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_gene.bed"
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38.bed"
 FW_REF:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_gene_fw.bed"
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_pos.bed"
 REV_REF:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_gene_rev.bed"
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_neg.bed"
 PI_REF:
   "/beevol/home/bentleyd/ref/hg38/ref_bed/PI.bed"
 EI_FW_REF:
