@@ -41,6 +41,7 @@ if(!is_empty(count_files)){
                      show_col_types = FALSE) %>% 
       dplyr::mutate(sample=count_files_names[i]) %>% 
       dplyr::filter(!str_detect(type,filter_type)) %>%
+      dplyr::mutate(value = if_else(str_detect(value, "spikin_"),1000000/value,value)) %>% 
       bind_rows(gg)
     
   }

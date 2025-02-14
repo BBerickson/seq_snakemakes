@@ -60,6 +60,7 @@ SAMPLES:
 # with "RPKM","CPM","BPM","RPGC" 
 # Or with scaleFactor from count file i.e. "chrM", 
 # if input with spike in is paired up: "OR", "OR_enrich" 
+# if no input spike in scaleFactor within a group is used: "spikin" 
 # Or "subsample" : make bw and matix files from sub-sampled bam files (paired groups)
 NORM:
   "chrM"
