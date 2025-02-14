@@ -24,8 +24,10 @@ RAW_DATA:
 # SAMPLES:
 #     SECTION-1:
 #         SAMPLING-GROUP-1: # subsample norm example
-#             sample_nickname-1: "fastq_1_prefix"
-#             sample_nickname-2: "fastq_2_prefix"
+#             sample_nickname-1:
+#                  - "fastq_sample_1_prefix"
+#             sample_nickname-2:
+#                  - "fastq_sample_2_prefix"
 # 
 #         SAMPLING-GROUP-2: # with input for OR norm example
 #             sample_nickname-3:
@@ -60,10 +62,10 @@ SAMPLES:
                 - "H66K_pdox_input"
            
                   
-# Norm sample bw and matix files, spike-in is always CPM      
-# "RPKM","CPM","BPM","RPGC" 
-# Or with scaleFactor
-# chrM, shRNA, OR | OR_enrich (if input with spike in is paired up)
+# Norm sample bw and matix files, spike-in is CPM      
+# with "RPKM","CPM","BPM","RPGC" 
+# Or with scaleFactor from count file i.e. "chrM", 
+# if input with spike in is paired up: "OR", "OR_enrich" 
 # Or "subsample" : make bw and matix files from sub-sampled bam files (paired groups)
 NORM:
   "OR_enrich"
@@ -84,15 +86,16 @@ COLORS:
 # HiSeq 3k/4k  dupedist=2500 (AC...XX, AN...XX)
 # Novaseq      dupedist=12000
 CMD_PARAMS:
-    clumpify:      " overwrite=t dedupe=t dupedist=12000 optical=f " 
-    bbduk:         " overwrite=t ftm=5 minlen=50 ktrim=r k=23 hdist=1 mink=11 tpe tbo ecco=t "
-    #bbduk:         " overwrite=t ftm=5 minlen=50 ktrim=r k=23 hdist=1 mink=11 " SE settings
+    clumpify:      " overwrite=t dedupe=t dupedist=12000 optical=f " # PE settings
+    # clumpify:      " overwrite=t dedupe=t dupedist=40 optical=f " #  SE settings
+    bbduk:         " overwrite=t ftm=5 minlen=50 ktrim=r k=23 hdist=1 mink=11 tpe tbo ecco=t " # PE settings
+    #bbduk:         " overwrite=t ftm=5 minlen=20 ktrim=r k=23 hdist=1 mink=11 " SE settings
     bowtie2:       " --local --no-mixed --no-discordant "
     samtools:      " -bF4q30 "
-    bamCoverage:   " --binSize 10 --skipNonCoveredRegions --extendReads 75 --centerReads "
+    bamCoverage:   " --binSize 10 --skipNonCoveredRegions --centerReads "
     bamCoverageBL: ""
     fragment_size: " --maxFragmentLength 1000 "
-    featureCounts: "SAF"
+    featureCounts: " --readExtension5 5000 --readExtension3 5000 " #--largestOverlap
     
 # sandbox User #
 USER:
@@ -103,7 +106,7 @@ USER:
 #   CTACTTGT=CAAGCAGAAGACGGCATACGAGATACAAGTAGGTGACTGGAGTTCAGACGTGTGCTCTTCCGA
 BARCODES:
     "pipelines/ref/truseq_i5i7.fa"     
-ORENTATION:
+ORIENTATION:
     "Unstranded" 
     
 # which matrix type(s) to make

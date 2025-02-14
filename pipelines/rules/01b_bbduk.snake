@@ -12,14 +12,14 @@ rule bbduk_paired:
     params:
         job_name = "{sample}_bbduk",
         args     = CMD_PARAMS["bbduk"],
-        bar      = _get_barcodes
+        bar      = lambda wildcards, input: _get_barcodes(BARCODES, input.R1)
     resources:
         memory   = lambda wildcards, input: memory_estimator([input.R1, input.R2], 2, 5)
     log:
         out = PROJ + "/logs/{sample}_bbduk.out",
         err = PROJ + "/logs/{sample}_bbduk.err"
     message:
-        "Removing duplicats for {wildcards.sample}" 
+        "Removing duplicates for {wildcards.sample}" 
     threads:
         12
     run:
@@ -29,10 +29,9 @@ rule bbduk_paired:
                 """
                 cp {input[0]} {output[0]}
                 cp {input[1]} {output[1]}
-                echo "Total Removed:  0 reads (0.0%) 	0 bases (0.0%)" >> {output[2]}
-                
+                echo "Total Removed:  0 reads (0.0%)  0 bases (0.0%)" >> {output[2]}
                 """
-              )
+            )
         else:
             shell(
                 """

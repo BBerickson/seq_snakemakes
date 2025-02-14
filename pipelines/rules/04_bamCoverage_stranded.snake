@@ -8,28 +8,28 @@ rule bamCoverage:
             PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
             sample = SAMPLES[wildcards.newnam]
         ),
-        check_point = PROJ + "/stats/" + PROJ + "_results.tsv"
+        check_point = PROJ + "/report/" + PROJ + "_results.tsv"
     output:
         fw      =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_fw.bw",
         rev     =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_rev.bw"
     params:
         job_name = "{newnam}_bamCoverage",
         args     = CMD_PARAMS["bamCoverage"] + CMD_PARAMS["bamCoverageBL"],
-        argsf    = _get_bamCov_strand("forward",ORENTATION),
-        argsr    = _get_bamCov_strand("reverse",ORENTATION),
-        scale    = _get_norm
+        argsf    = _get_bamCov_strand("forward",ORIENTATION),
+        argsr    = _get_bamCov_strand("reverse",ORIENTATION),
+        scale    = lambda wildcards: _get_norm(wildcards.newnam,SAMPLES,NAMS_UNIQ,NORM,INDEX_SAMPLE)
     resources:
         memory   = lambda wildcards, input: memory_estimator(input.bam, 0.2, 5)
     log:
         out = PROJ + "/logs/{newnam}_bamCoverage.out",
         err = PROJ + "/logs/{newnam}_bamCoverage.err"
     message:
-        "stranded bigwigs with reads in R2-R1 orentation for {wildcards.newnam}"
+        "stranded bigwigs with reads for {wildcards.newnam}"
     threads: 
         12
     shell:
         """
-        # R2-R1 or R1-R2 orentation
+        # R2-R1 or R1-R2 ORIENTATION
         bamCoverage \
           -b {input.bam[0]} \
           -of bigwig \
@@ -58,7 +58,7 @@ rule bamCoverage_URL:
         stats   = temp(PROJ      + "/bw/{newnam}_bamCoverage_stats.txt")
     params:
         job_name = "{newnam}_bamCoverageURL",
-        color    = _get_col,
+        color    = lambda wildcards: _get_col(wildcards.newnam, COLS_DICT),
         url_fw   = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_fw.bw",
         url_rev  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_rev.bw"
     resources:
@@ -113,27 +113,27 @@ rule bamCoverage_spike:
             PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
             sample = SAMPLES[wildcards.newnam]
         ),
-        check_point = PROJ + "/stats/" + PROJ + "_results.tsv"
+        check_point = PROJ + "/report/" + PROJ + "_results.tsv"
     output:
         fw      =   PROJ   + "/bw/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_norm_CPM_fw.bw",
         rev     =   PROJ   + "/bw/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_norm_CPM_rev.bw"
     params:
         job_name = "{newnam}_spike_bamCoverage",
         args     = CMD_PARAMS["bamCoverage"] + CMD_PARAMS["bamCoverageBL"],
-        argsf    = _get_bamCov_strand("forward",ORENTATION),
-        argsr    = _get_bamCov_strand("reverse",ORENTATION)
+        argsf    = _get_bamCov_strand("forward",ORIENTATION),
+        argsr    = _get_bamCov_strand("reverse",ORIENTATION)
     resources:
         memory   = lambda wildcards, input: memory_estimator(input.bam, 0.2, 5)
     log:
         out = PROJ + "/logs/{newnam}_spike_bamCoverage.out",
         err = PROJ + "/logs/{newnam}_spike_bamCoverage.err"
     message:
-        "stranded bigwigs with reads in R2-R1 orentation for {wildcards.newnam}"
+        "stranded bigwigs for {wildcards.newnam}"
     threads: 
         12
     shell:
         """
-        # R2-R1 or R1-R2 orentation
+        # R2-R1 or R1-R2 ORIENTATION
         bamCoverage \
           -b {input.bam[0]} \
           -of bigwig \
@@ -162,7 +162,7 @@ rule bamCoverage_spike_URL:
         stats   = temp(PROJ      + "/bw/{newnam}_spike_bamCoverage_stats.txt")
     params:
         job_name = "{newnam}_spike_bamCoverageURL",
-        color    = _get_col,
+        color    = lambda wildcards: _get_col(wildcards.newnam, COLS_DICT),
         url_fw   = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_norm_CPM_fw.bw",
         url_rev  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_norm_CPM_rev.bw"
     resources:

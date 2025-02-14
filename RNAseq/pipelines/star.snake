@@ -25,6 +25,8 @@ INDEX_SAMPLE    = config["INDEX_SAMPLE"]
 INDEX_SPIKE     = config["INDEX_SPIKE"]
 FA_SAMPLE       = config["FA_SAMPLE"]
 FA_SPIKE        = config["FA_SPIKE"]
+FC_FILE         = config["GTF"]
+FC_SPIKE        = config["GTF_SPIKE"]
 MASK            = config["MASK"]
 MY_REF          = config["MY_REF"]
 GTF             = config["GTF"]
@@ -32,15 +34,11 @@ GTF_SPIKE       = config["GTF_SPIKE"]
 CMD_PARAMS      = config["CMD_PARAMS"]
 COLORS          = config["COLORS"]
 NORM            = config["NORM"]
-ORENTATION      = config["ORENTATION"]
+ORIENTATION      = config["ORIENTATION"]
 USER            = config["USER"]
 
 # Directories for data and scripts
 FASTQ_DIR = PROJ + "/fastqs"
-FC_TYPE   = CMD_PARAMS["featureCounts"]
-FC_TYPE_S = FC_TYPE + "_SPIKE"
-FC_FILE   = config[FC_TYPE]
-FC_SPIKE  = config[FC_TYPE_S]
 
 os.makedirs(FASTQ_DIR, exist_ok = True)
 
@@ -109,7 +107,7 @@ FASTQS = sum(FASTQS, [])
 
 COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
 
-NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"],ORENTATION)
+NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"],ORIENTATION)
 
 BAM_PATH = _get_bampath(NORM)
 
@@ -133,7 +131,7 @@ rule all:
         
         # results
         PROJ + "/stats/" + PROJ + "_fragment_results.tsv",
-        PROJ + "/stats/" + PROJ + "_results.tsv",
+        PROJ + "/report/" + PROJ + "_results.tsv",
         
         # bamCoverage
         PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + NORMS + "_bw_URL.txt"

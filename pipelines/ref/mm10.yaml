@@ -14,12 +14,8 @@ INDEX_SPIKE:
 MASK:
   "/beevol/home/bentleyd/ref/mm10/ref_bed/snoRNAs.bed"
 GTF:
-  "/beevol/home/bentleyd/ref/mm10/ref_bed/Mus_musculus.GRCm38.102.gff3"
+  "/beevol/home/bentleyd/ref/mm10/ref_bed/mm10_chrfix.GRCm38.102.gtf.gz"
 GTF_SPIKE:
-  ""
-SAF:
-  "/beevol/home/bentleyd/ref/mm10/ref_bed/enrich.saf"
-SAF_SPIKE:
   ""
 FA_SAMPLE:
   "/beevol/home/bentleyd/ref/mm10/mm10.fa"

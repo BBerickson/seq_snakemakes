@@ -24,8 +24,10 @@ RAW_DATA:
 # SAMPLES:
 #     SECTION-1:
 #         SAMPLING-GROUP-1: # subsample norm example
-#             sample_nickname-1: "fastq_1_prefix"
-#             sample_nickname-2: "fastq_2_prefix"
+#             sample_nickname-1:
+#                  - "fastq_sample_1_prefix"
+#             sample_nickname-2:
+#                  - "fastq_sample_2_prefix"
 # 
 #         SAMPLING-GROUP-2: # with input for OR norm example
 #             sample_nickname-3:
@@ -42,11 +44,14 @@ RAW_DATA:
 SAMPLES:
     SECTION-1:
         SAMPLING-GROUP-1:
-            8WG16_rep1: "SRR1544602_8WG16_rep1"
+            8WG16_rep1: 
+              - "SRR1544602_8WG16_rep1"
 
         SAMPLING-GROUP-2:
-            CM603_DMSO: "SRR1736059_anti_Ser5-P_CM603_DMSO"
-            8WG16_rep2: "SRR1544602_8WG16_rep2"
+            CM603_DMSO: 
+              - "SRR1736059_anti_Ser5-P_CM603_DMSO"
+            8WG16_rep2: 
+              - "SRR1544602_8WG16_rep2"
             
 # set colors for bw urls and table files, if missing 0,0,0 is default
 # COLORS:
@@ -72,7 +77,6 @@ CMD_PARAMS:
     bamCoverage:   " --binSize 1 --skipNonCoveredRegions --Offset -1 " # --Offset -1 = last bp --Offset 1 = first bp
     bamCoverageBL: "" # " --blackListFileName /beevol/home/erickson/ref/hg38/ref/merge_filter_RNAs.bed "
     fragment_size: " --maxFragmentLength 1000 "
-    featureCounts: "SAF"
     
 # sandbox User #
 USER:
@@ -80,12 +84,12 @@ USER:
 
 # Norm sample bw and matix files, spike-in is CPM      
 # with "RPKM","CPM","BPM","RPGC" 
-# Or with scaleFactor
-# chrM, shRNA, if input with spike in is paired up OR, OR_enrich 
+# Or with scaleFactor from count file i.e. "chrM", 
+# if input with spike in is paired up: "OR", "OR_enrich" 
 # Or "subsample" : make bw and matix files from sub-sampled bam files (paired groups)
 NORM:
   "subsample"     
-ORENTATION:
+ORIENTATION:
     "R1" # R1, R2, 
 
 # barcode = illumina seq file

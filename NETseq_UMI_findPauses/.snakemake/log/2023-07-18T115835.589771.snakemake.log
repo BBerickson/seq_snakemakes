@@ -1,5 +1,0 @@
-SystemExit in line 86 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI_findPauses/pipelines/mNETseq_UMI.snake:
-ERROR: no fastqs found for 293flpin_Xrn2_WT_R2*_R1_001.fastq.gz.
-  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI_findPauses/pipelines/mNETseq_UMI.snake", line 105, in <module>
-  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI_findPauses/pipelines/mNETseq_UMI.snake", line 105, in <listcomp>
-  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI_findPauses/pipelines/mNETseq_UMI.snake", line 86, in _get_fqs

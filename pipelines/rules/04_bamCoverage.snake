@@ -7,13 +7,13 @@ rule bamCoverage:
             PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
             sample = SAMPLES[wildcards.newnam]
         ),
-        check_point = PROJ + "/stats/" + PROJ + "_results.tsv"
+        check_point = PROJ + "/report/" + PROJ + "_results.tsv"
     output:
         bigwig  = PROJ      + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + ".bw"
     params:
         job_name = "{newnam}_bamCoverage",
         args     = CMD_PARAMS["bamCoverage"] + CMD_PARAMS["bamCoverageBL"],
-        scale    = _get_norm
+        scale    = lambda wildcards: _get_norm(wildcards.newnam,SAMPLES,NAMS_UNIQ,NORM,INDEX_SAMPLE)
     resources:
         memory   = lambda wildcards, input: memory_estimator(input.bam, 0.2, 5)
     log:
@@ -42,7 +42,7 @@ rule bamCoverageURL:
         stats   = temp(PROJ + "/bw/{newnam}_bamCoverage_stats.txt")
     params:
         job_name = "{newnam}_bamCoverage_URL",
-        color    = _get_col,
+        color    = lambda wildcards: _get_col(wildcards.newnam, COLS_DICT),
         url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + ".bw"
     resources:
         memory   = 4
@@ -94,7 +94,7 @@ rule bamCoverage_spike:
             PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
             sample = SAMPLES[wildcards.newnam]
         ),
-        check_point = PROJ + "/stats/" + PROJ + "_results.tsv"
+        check_point = PROJ + "/report/" + PROJ + "_results.tsv"
     output:
         bigwig  = PROJ      + "/bw/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_norm_CPM.bw"
     params:
@@ -128,7 +128,7 @@ rule bamCoverage_spike_URL:
         stats   = temp(PROJ      + "/bw/{newnam}_spike_bamCoverage_stats.txt")
     params:
         job_name = "{newnam}_bamCoverage_spikeURL",
-        color    = _get_col,
+        color    = lambda wildcards: _get_col(wildcards.newnam, COLS_DICT),
         url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_norm_CPM.bw"
     resources:
         memory   = 4

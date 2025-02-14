@@ -10,7 +10,7 @@ rule bbduk_paired:
     params:
         job_name = "{sample}_bbduk",
         args     = CMD_PARAMS["bbduk"],
-        bar      = _get_barcodes
+        bar      = lambda wildcards, input: _get_barcodes(BARCODES, input.R1)
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
     log:

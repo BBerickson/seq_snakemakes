@@ -3,7 +3,7 @@
 # Run clumpify for paired-end reads
 rule clumpify_paired:
     input:
-        _get_fq_paths
+        lambda wildcards: _get_fqs(wildcards.sample, RAW_DATA, FASTQ_DIR, full_name=True, paired=True)
     output:
         R1  = temp(PROJ + "/{sample}_R1_clumpify.fastq.gz"),
         R2  = temp(PROJ + "/{sample}_R2_clumpify.fastq.gz"),

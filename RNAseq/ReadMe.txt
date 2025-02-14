@@ -2,4 +2,3 @@
 
 rsync -artuv ~/Ben_pipelines/snakemake_pipelines/RNAseq/* .
 rsync -artuv ~/Ben_pipelines/snakemake_pipelines/pipelines .
-rsync -artuv ~/Ben_pipelines/snakemake_pipelines/src .

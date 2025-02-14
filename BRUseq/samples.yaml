@@ -24,8 +24,10 @@ RAW_DATA:
 # SAMPLES:
 #     SECTION-1:
 #         SAMPLING-GROUP-1: # subsample norm example
-#             sample_nickname-1: "fastq_1_prefix"
-#             sample_nickname-2: "fastq_2_prefix"
+#             sample_nickname-1:
+#                  - "fastq_sample_1_prefix"
+#             sample_nickname-2:
+#                  - "fastq_sample_2_prefix"
 # 
 #         SAMPLING-GROUP-2: # with input for OR norm example
 #             sample_nickname-3:
@@ -42,18 +44,22 @@ RAW_DATA:
 SAMPLES:
     SECTION-1:
         SAMPLING-GROUP-1:
-            RTF1_WT_pDox_DRB_0: "293flpIN_RTF1_WT_DRB_t0"
-            RTF1_WT_pDox_DRB_15: "293flpIN_RTF1_WT_DRB_t15"
+            RTF1_WT_pDox_DRB_0: 
+              - "293flpIN_RTF1_WT_DRB_t0"
+            RTF1_WT_pDox_DRB_15: 
+              - "293flpIN_RTF1_WT_DRB_t15"
 
         SAMPLING-GROUP-2:
-            RTF1_MT_pDox_DRB_0: "293flpIN_RTF1_MT_DRB_t0"
-            RTF1_WT_pDox_DRB_15: "293flpIN_RTF1_WT_DRB_t15"
+            RTF1_MT_pDox_DRB_0: 
+              - "293flpIN_RTF1_MT_DRB_t0"
+            RTF1_WT_pDox_DRB_15: 
+              - "293flpIN_RTF1_WT_DRB_t15"
       
 
-# Norm sample bw and matix files, spike-in is always CPM      
-# "RPKM","CPM","BPM","RPGC" 
-# Or with scaleFactor
-# chrM, shRNA, OR | OR_enrich (if input with spike in is paired up)
+# Norm sample bw and matix files, spike-in is CPM      
+# with "RPKM","CPM","BPM","RPGC" 
+# Or with scaleFactor from count file i.e. "chrM", 
+# if input with spike in is paired up: "OR", "OR_enrich" 
 # Or "subsample" : make bw and matix files from sub-sampled bam files (paired groups)
 NORM:
   "chrM"
@@ -67,14 +73,15 @@ USER:
 # HiSeq 3k/4k  dupedist=2500 (AC...XX, AN...XX)
 # Novaseq      dupedist=12000
 CMD_PARAMS:
-    clumpify:      " lowcomplexity=t overwrite=t dedupe=t dupedist=12000 optical=f subs=0 "
-    bbduk:         " overwrite=t ftm=5 minlen=50 ktrim=r k=23 hdist=1 mink=11 tpe tbo ecco=t "
+    clumpify:      " lowcomplexity=t overwrite=t dedupe=t dupedist=12000 optical=f subs=0 " # PE settings
+    # clumpify:      " lowcomplexity=t overwrite=t dedupe=t dupedist=40 optical=f subs=0 " #  SE settings
+    bbduk:         " overwrite=t ftm=5 minlen=50 ktrim=r k=23 hdist=1 mink=11 tpe tbo ecco=t " # PE settings
+    #bbduk:         " overwrite=t ftm=5 minlen=20 ktrim=r k=23 hdist=1 mink=11 " SE settings
     bowtie2:       " --end-to-end --no-mixed --no-discordant "
     samtools:      " -bF4q30 "
     bamCoverage:   " --binSize 10 --skipNonCoveredRegions "
     bamCoverageBL: "" #  " --blackListFileName /beevol/home/erickson/ref/hg38/ref/merge_filter_RNAs.bed "
     fragment_size: " --maxFragmentLength 1000 "
-    featureCounts: "SAF"
     
 # barcode = illumina seq file
 #   CCATTGTT=AATGATACGGCGACCACCGAGATCTACACAACAATGGACACTCTTTCCCTACACGACGCTCTTCCGA
@@ -87,7 +94,7 @@ CMD_PARAMS:
     
 BARCODES:
     "pipelines/ref/truseq_i5i7.fa"     
-ORENTATION:
+ORIENTATION:
     "R2R1" # R1R2
     
 # which matrix type(s) to make

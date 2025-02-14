@@ -3,7 +3,7 @@
 #BSUB -J snake
 #BSUB -o logs/snake_%J.out
 #BSUB -e logs/snake_%J.err
-#BSUB -q rna
+
 
 set -o nounset -o pipefail -o errexit -x
 
@@ -30,8 +30,7 @@ run_snakemake() {
         -eo {log.err} 
         -J {params.job_name}
         -R "rusage[mem={resources.memory}] span[hosts=1]"
-        -n {threads}
-        -q rna '
+        -n {threads} '
 
     snakemake \
         --snakefile $snake_file \
@@ -47,7 +46,7 @@ pipe_dir1=pipelines/ref
 snake=$pipe_dir/ChIPseq_PE_spikeIN.snake
 #snake=$pipe_dir/ChIPseq_PE.snake
 #snake=$pipe_dir/ChIPseq_SE.snake
-genome=$pipe_dir1/hg38_mm10.yaml
+genome=$pipe_dir1/hg38_mm39.yaml
 #genome=$pipe_dir1/hg38_scer3.yaml
 #genome=$pipe_dir1/hg38.yaml
 samples=samples.yaml

@@ -14,12 +14,8 @@ INDEX_SPIKE:
 MASK:
   "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_snoRNAs.bed"
 GTF:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/Homo_sapiens.GRCh38.111.gtf"
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_chrfix_GRCh38.113.gtf.gz"
 GTF_SPIKE:
-  ""
-SAF:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/enrich.saf"
-SAF_SPIKE:
   ""
 FA_SAMPLE:
   "/beevol/home/bentleyd/ref/hg38/genome/Homo_sapiens.GRCh38.dna.primary_assembly.fa"
@@ -34,7 +30,7 @@ REV_REF:
 PI_REF:
   "/beevol/home/bentleyd/ref/hg38/ref_bed/PI.bed"
 EI_FW_REF:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/EI_anti_fw.bed"
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/EI_anti_pos.bed"
 EI_REV_REF:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/EI_anti_rev.bed"
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/EI_anti_neg.bed"
 

@@ -1,3 +1,0 @@
-SyntaxError in line 277 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI_findPauses/pipelines/rules/04_FP_dedup_subsample_gene.snake:
-EOF in multi-line statement (04_FP_dedup_subsample_gene.snake, line 277)
-  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/NETseq_UMI_findPauses/pipelines/mNETseq_pauses.snake", line 162, in <module>

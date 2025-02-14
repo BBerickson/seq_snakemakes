@@ -6,7 +6,7 @@
 # this read 2 is provided with -I and read 1 is provided with --read2-in.
 rule extract_umi:
     input:
-        _get_fq_paths
+        lambda wildcards: _get_fqs(wildcards.sample, RAW_DATA, FASTQ_DIR, full_name=True, paired=True)
     output:
         R1  = temp(PROJ + "/{sample}_R1_umi.fastq.gz"),
         R2  = temp(PROJ + "/{sample}_R2_umi.fastq.gz"),

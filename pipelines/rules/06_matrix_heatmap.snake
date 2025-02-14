@@ -118,8 +118,8 @@ rule create_5_sense_antisense_heatmap_plots:
         args     = CMD_PARAMS["heatmap"],
         args2    = CMD_PARAMS["csheatmap"],
         args3    = CMD_PARAMS["caheatmap"],
-        setcol   = _rgb2hexplus,
-        setcol2  = _rgb2hexplus2
+        setcol   = lambda wildcards: _rgb2hexplus(SAMPLES,wildcards.group,COLS_DICT),
+        setcol2  = lambda wildcards: _rgb2hexplus2(SAMPLES,wildcards.group,COLS_DICT)
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
     log:
@@ -171,7 +171,7 @@ rule create_3_sense_heatmap_plots:
         title    = "{group}",
         args     = CMD_PARAMS["heatmap"],
         args2    = CMD_PARAMS["csheatmap"],
-        setcol   = _rgb2hexplus
+        setcol   = lambda wildcards: _rgb2hexplus(SAMPLES,wildcards.group,COLS_DICT)
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
     log:
@@ -210,7 +210,7 @@ rule create_5_sense_antisense_profile_plots:
         PROJ + "/heatmap/5_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM5S + "_profile.png"
     params:
         job_name = PROJ + "_{group}_5prim_profile_plots",
-        setcol   = _rgb2hex
+        setcol   = lambda wildcards: _rgb2hex(SAMPLES,wildcards.group,COLS_DICT)
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
     log:
@@ -238,7 +238,7 @@ rule create_3_sense_profile_plots:
         PROJ + "/heatmap/3_{group}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORM3 + "_profile.png"
     params:
         job_name = PROJ + "_{group}_5prim_profile_plots",
-        setcol   = _rgb2hex
+        setcol   = lambda wildcards: _rgb2hex(SAMPLES,wildcards.group,COLS_DICT)
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
     log:
