@@ -62,8 +62,8 @@ SAMPLES:
                 - "H66K_pdox_input"
            
                   
-# Norm sample bw and matix files, spike-in is CPM      
-# with "RPKM","CPM","BPM","RPGC" 
+# Norm sample bw and matix files,
+# with "RPKM","CPM","BPM","RPGC" (spike-in will be CPM)
 # Or with scaleFactor from count file i.e. "chrM", 
 # if input with spike in is paired up: "OR", "OR_enrich" 
 # if no input spike in scaleFactor within a group is used: "spikin" 
@@ -96,7 +96,7 @@ CMD_PARAMS:
     bamCoverage:   " --binSize 10 --skipNonCoveredRegions --centerReads "
     bamCoverageBL: ""
     fragment_size: " --maxFragmentLength 1000 "
-    featureCounts: " --readExtension5 5000 --readExtension3 5000 " #--largestOverlap
+    featureCounts: " --readExtension5 2000 --readExtension3 2000 " #--largestOverlap
     
 # sandbox User #
 USER:
