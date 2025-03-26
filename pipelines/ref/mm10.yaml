@@ -14,7 +14,7 @@ INDEX_SPIKE:
 MASK:
   "/beevol/home/bentleyd/ref/mm10/ref_bed/snoRNAs.bed"
 GTF:
-  "/beevol/home/bentleyd/ref/mm10/ref_bed/mm10_chrfix.GRCm38.102.gtf.gz"
+  "/beevol/home/bentleyd/ref/mm10/ref_bed/mm10_chrfix.GRCm38.102.gtf"
 GTF_SPIKE:
   ""
 FA_SAMPLE:

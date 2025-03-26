@@ -128,6 +128,7 @@ rule all:
         
         # results
         PROJ + "/stats/" + PROJ + "_fragment_results.tsv",
+        PROJ + "/report/" + INDEX_SAMPLE + "_PCA.png",
         PROJ + "/report/" + PROJ + "_results.tsv",
         
         # bamCoverage

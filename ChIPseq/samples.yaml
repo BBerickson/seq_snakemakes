@@ -23,13 +23,13 @@ RAW_DATA:
 #
 # SAMPLES:
 #     SECTION-1:
-#         SAMPLING-GROUP-1: # subsample norm example
+#         GROUP-1: # subsample norm example
 #             sample_nickname-1:
 #                  - "fastq_sample_1_prefix"
 #             sample_nickname-2:
 #                  - "fastq_sample_2_prefix"
 # 
-#         SAMPLING-GROUP-2: # with input for OR norm example
+#         GROUP-2: # with input for OR norm example
 #             sample_nickname-3:
 #                  - "fastq_sample_3_prefix"
 #                  - "fastq_input_3_prefix"

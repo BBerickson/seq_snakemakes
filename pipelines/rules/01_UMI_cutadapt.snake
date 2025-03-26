@@ -75,7 +75,7 @@ rule cutadapt:
         else:
             shell(
                 """
-                cutadapt \
+                python3 -m cutadapt \
                   {params.args} \
                   -j {threads} \
                   -o {output.R1} \

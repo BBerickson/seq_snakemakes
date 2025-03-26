@@ -130,6 +130,7 @@ rule all:
         #PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + "_subsample_bam_URL.txt",
         
         # results
+        PROJ + "/report/" + INDEX_SAMPLE + "_PCA.png",
         PROJ + "/report/" + PROJ + "_results.tsv",
         
         # bamCoverage
@@ -149,6 +150,7 @@ include: "rules/02c_align_URLS.snake"
 include: "rules/02s_align_mask_subsample.snake"
 # Results
 include: "rules/03a_featureCounts.snake"
+include: "rules/03a_fragmentSize_SE.snake"
 include: "rules/03b_results.snake"
 include: "rules/03b_PCAplot.snake"
 # BW with deeptools bamCoverage
