@@ -41,19 +41,15 @@ run_snakemake() {
 
 # Run pipeline to process RNAseq reads
 pipe_dir=pipelines
-pipe_dir1=pipelines/ref
 # index and configs
 snake=$pipe_dir/RNAseq.snake
-genome=$pipe_dir1/hg38.yaml
-#snake=$pipe_dir/star.snake
-#genome=$pipe_dir1/hg38_star.yaml
 samples=samples.yaml
 
-run_snakemake $snake "$samples $genome"
+run_snakemake $snake "$samples"
 
 # Run pipeline to make table files of sample
 snake=$pipe_dir/Stranded_matrix.snake
 config=$pipe_dir/Stranded_matrix.yaml
 
-run_snakemake $snake "$samples $config $genome"
+run_snakemake $snake "$samples $config"
 

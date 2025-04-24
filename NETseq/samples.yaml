@@ -14,6 +14,11 @@ SEQ_DATE:
 RAW_DATA:
     - "/beevol/home/erickson/Human/NetSeq/SRR1736063_mNET_CMA603_siLuc/fastqs"
 
+# Genome to use for analysis
+# * The specified genome must have a config file present in pipelines/ref
+GENOME:
+    "hg38"
+ 
 # The sample names must match the beginning of a fastq file in one of the
 # directories listed under RAW_DATA. If the sample name
 # matches multiple fastqs, an error will be thrown.

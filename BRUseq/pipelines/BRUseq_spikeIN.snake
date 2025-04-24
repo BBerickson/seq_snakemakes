@@ -13,6 +13,17 @@ import gzip
 # include my python common functions
 include: "funs.py"
 
+# Add genome specific config
+GENOME = config["GENOME"]
+
+GENOME_CONFIG = "pipelines/ref/" + GENOME + ".yaml"
+
+if not os.path.exists(GENOME_CONFIG):
+    sys.exit("ERROR: " + GENOME + " is not a valid GENOME selection.")
+
+configfile:
+    GENOME_CONFIG
+
 # Parameters from config.yaml
 PROJ            = config["PROJ"]
 RAW_DATA        = config["RAW_DATA"]

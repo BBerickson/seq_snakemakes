@@ -40,17 +40,14 @@ run_snakemake() {
 
 # Run pipeline to process UMI Netseq 
 pipe_dir=pipelines
-pipe_dir1=pipelines/ref
 # index and configs
 #snake=$pipe_dir/NETseq_UMI_spikein.snake
 snake=$pipe_dir/NETseq_UMI.snake
-genome=$pipe_dir1/hg38.yaml
-#genome=$pipe_dir1/hg38_HHV8.yaml
 samples=samples.yaml
 
-run_snakemake $snake "$samples $genome"
+run_snakemake $snake "$samples"
 
 snake=$pipe_dir/Stranded_matrix.snake
 config=$pipe_dir/Stranded_matrix.yaml
-run_snakemake $snake "$samples $config $genome"
+run_snakemake $snake "$samples $config"
 

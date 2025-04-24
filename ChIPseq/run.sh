@@ -41,28 +41,23 @@ run_snakemake() {
 
 # Run pipeline to process ChIPseq reads
 pipe_dir=pipelines
-pipe_dir1=pipelines/ref
 # index and configs
 snake=$pipe_dir/ChIPseq_PE_spikeIN.snake
 #snake=$pipe_dir/ChIPseq_PE.snake
 #snake=$pipe_dir/ChIPseq_SE.snake
-genome=$pipe_dir1/hg38_mm39.yaml
-#genome=$pipe_dir1/hg38_scer3.yaml
-#genome=$pipe_dir1/hg38.yaml
 samples=samples.yaml
 
-run_snakemake $snake "$samples $genome"
+run_snakemake $snake "$samples"
 
 # Run pipeline to make table files of sample
 snake=$pipe_dir/UnStranded_matrix.snake
 config=$pipe_dir/UnStranded_matrix.yaml
 
-run_snakemake $snake "$samples $config $genome"
+run_snakemake $snake "$samples $config"
 
 # Run pipeline to make table files of spikeIN
-# genome=$pipe_dir1/mm10.yaml
 # snake=$pipe_dir/ChIPseq_matrix2.snake
 # config=$pipe_dir/ChIPseq_matrix.yaml
 # 
-# run_snakemake $snake "$samples $config $genome"
+# run_snakemake $snake "$samples $config"
 

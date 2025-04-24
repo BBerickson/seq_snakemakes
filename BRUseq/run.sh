@@ -41,25 +41,21 @@ run_snakemake() {
 
 # Run pipeline to process BrUseq reads
 pipe_dir=pipelines
-pipe_dir1=pipelines/ref
 # index and configs
 # snake=$pipe_dir/BRUseq_spikeIN.snake
 # snake=$pipe_dir/BRUseq_SE.snake
 snake=$pipe_dir/BRUseq.snake
-# genome=$pipe_dir1/hg38_scer3.yaml
-genome=$pipe_dir1/hg38.yaml
 samples=samples.yaml
 
-run_snakemake $snake "$samples $genome"
+run_snakemake $snake "$samples"
 
 snake=$pipe_dir/Stranded_matrix.snake
 config=$pipe_dir/Stranded_matrix.yaml
-run_snakemake $snake "$samples $config $genome"
+run_snakemake $snake "$samples $config"
 
 # # Run pipeline to make table files of spikeIN
-# genome=$pipe_dir1/scer3.yaml
 # snake=$pipe_dir/Stranded_matrix.snake
 # config=$pipe_dir/Stranded_matrix_BRUseq.yaml
 # 
-# run_snakemake $snake "$samples $config $genome"
+# run_snakemake $snake "$samples $config"
 

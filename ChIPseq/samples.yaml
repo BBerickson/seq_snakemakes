@@ -13,7 +13,12 @@ SEQ_DATE:
 # to the begining of the fastq name.
 RAW_DATA:
     - "/beevol/home/erickson/fastqs/241122_Novogene"
-    
+
+# Genome to use for analysis
+# * The specified genome must have a config file present in pipelines/ref
+GENOME:
+    "hg38_mm39"
+     
 # The sample names must match the beginning of a fastq file in one of the
 # directories listed under RAW_DATA. If the sample name
 # matches multiple fastqs, an error will be thrown.

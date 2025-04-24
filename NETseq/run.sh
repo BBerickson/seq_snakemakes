@@ -41,15 +41,13 @@ run_snakemake() {
 
 # Run pipeline to process ChIPseq reads
 pipe_dir=pipelines
-pipe_dir1=pipelines/ref
 # index and configs
 snake=$pipe_dir/NETseq.snake
-genome=$pipe_dir1/hg38.yaml
 samples=samples.yaml
 
-run_snakemake $snake "$samples $genome"
+run_snakemake $snake "$samples"
 
 snake=$pipe_dir/Stranded_matrix.snake
 config=$pipe_dir/Stranded_matrix.yaml
-run_snakemake $snake "$samples $config $genome"
+run_snakemake $snake "$samples $config"
 

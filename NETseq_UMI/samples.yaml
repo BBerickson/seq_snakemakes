@@ -3,17 +3,22 @@
 
 # Project name to use for naming summary files
 PROJ:
-    "Nick"
+    "PNUTS_H66K_CTD_Ser5"
     
 SEQ_DATE:
-  "230316"
+  "231222"
 
 # Directories containing fastq files, this can be a relative path.
 # Multiple directories can be provided. The sample names must correspond
 # to the begining of the fastq name.
 RAW_DATA:
-    - "/beevol/home/erickson/fastqs/230316_VH01071_118_AACL7LNM5"
+    - "/beevol/home/erickson/fastqs/231222_Novogene"
 
+# Genome to use for analysis
+# * The specified genome must have a config file present in pipelines/ref
+GENOME:
+    "hg38"
+ 
 # The sample names must match the beginning of a fastq file in one of the
 # directories listed under RAW_DATA. If the sample name
 # matches multiple fastqs, an error will be thrown.
@@ -43,11 +48,26 @@ RAW_DATA:
 
 SAMPLES:
     SECTION-1:
-        SAMPLING-GROUP-1:
-            Control: 
-              - "siControl_S1"
-            PNUTS: 
-              - "siPNUTS_1_S2"
+        PNUTS-ctd:
+            PP1H66KmD_CTD1: 
+              - "PP1H66KmD_CTD1"
+            PP1H66KpD_CTD1: 
+              - "PP1H66KpD_CTD1"
+        PNUTS-ctd_2:
+            PP1H66KmD_CTD2: 
+              - "PP1H66KmD_CTD2"
+            PP1H66KpD_CTD2: 
+             - "PP1H66KpD_CTD2"
+        PNUTS-Ser5_1:
+            PP1H66KmD_Ser5_1: 
+              - "PP1H66KmD_Ser5_1"
+            PP1H66KpD_Ser5_1: 
+              - "PP1H66KpD_Ser5_1"
+        PNUTS-Ser5_2:
+            PP1H66KmD_Ser5_2:
+              - "PP1H66KmD_Ser5_2"
+            PP1H66KpD_Ser5_2:
+              - "PP1H66KpD_Ser5_2"
 
 # set colors for bw urls and table files, if missing 0,0,0 is default
 # COLORS:
@@ -55,6 +75,10 @@ SAMPLES:
 #  - "0,225,0"
 #  - "0,0,225"
 COLORS:
+  - "0,0,0"
+  - "225,0,0"
+  - "0,225,0"
+  - "0,0,225"
   - "0,0,0"
   - "225,0,0"
   - "0,225,0"
@@ -81,7 +105,7 @@ USER:
 
 # "subsample" or "" ... make bw and matix files from sub-sampled or normal bam files
 NORM:
-  "subsample"     
+  "RPKM"     
 ORIENTATION:
     "R1" # R2
 
@@ -160,4 +184,3 @@ SENSE_ASENSE:
 #                         The minimum fragment length needed for read/pair inclusion. (Default: 0)
 #   --maxFragmentLength INT
 #                         The maximum fragment length needed for read/pair inclusion. (Default: 0)
-    
