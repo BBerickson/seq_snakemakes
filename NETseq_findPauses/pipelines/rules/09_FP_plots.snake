@@ -1,0 +1,62 @@
+#===== Rule to generate final plots ============================
+
+
+rule motifs_plots:
+    input:
+        # NET-seq counts for region around pauses 
+        pauses = expand(
+            PROJ + "/beds/pauses/{sam_grp}_{win}{stren_grp}pauses_meta_N.bed.gz",
+            sam_grp = GENE_SUB_GRPS, win = WIN_SIZE, stren_grp = ALL_STREN_GRPS
+        ),
+        beds = expand(
+            PROJ + "/beds/pauses/{sam_grp}_gene_{win}_strong_pauses.bed.gz",
+            sam_grp = SAM_GRPS, win = WIN_SIZE
+        ),
+        plot_yam = "pipelines/plots.yaml",
+        sample_df = PROJ  + "/objects/sample_df.tsv",
+        gene_coords = PROJ  + "/objects/metaplot_genes.tsv.gz"
+    output:
+        overlap_table = PROJ  + "/find_pauses/overlap_table.txt",
+        overlap_bars  = PROJ  + "/find_pauses/overlap_bars.pdf"
+    params:
+        job_name = PROJ + "_motifs_plots",
+        genome_params = GENOME_CONFIG,
+        myfuns   = "pipelines/R_scripts/funs.R",
+        setup    = "pipelines/R_scripts/setup.R",
+        res_dir  = PROJ
+    resources:
+        memory   = 4
+    log:
+        out = PROJ + "/logs/" + PROJ + "_motifs_plots.out",
+        err = PROJ + "/logs/" + PROJ + "_motifs_plots.err"
+    threads:
+        1
+    script:
+        '../R_scripts/motifs_pause_overlap.R'
+
+
+rule pause_plots:
+    input:
+        pause_stats = PROJ  + "/objects/pause_stats.tsv.gz",
+        plot_yam = "pipelines/plots.yaml",
+        sample_df = PROJ  + "/objects/sample_df.tsv",
+        gene_coords = PROJ  + "/objects/metaplot_genes.tsv.gz"
+    output:
+        fpr = PROJ  + "/find_pauses/fraction_pause_reads.pdf",
+        fprtb = PROJ  + "/find_pauses/TSS_Body_fraction_pause_reads.pdf",
+        frp = PROJ  + "/find_pauses/reads_per_pause.pdf"
+    params:
+        job_name = PROJ + "_pause_plots",
+        genome_params = GENOME_CONFIG,
+        myfuns   = "pipelines/R_scripts/funs.R",
+        setup    = "pipelines/R_scripts/setup.R",
+        res_dir  = PROJ
+    resources:
+        memory   = 4
+    log:
+        out = PROJ + "/logs/" + PROJ + "_pause_plots.out",
+        err = PROJ + "/logs/" + PROJ + "_pause_plots.err"
+    threads:
+        1
+    script:
+        '../R_scripts/pause_plots.R'

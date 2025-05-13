@@ -1,0 +1,64 @@
+#===== Config file containing samples ==========================================
+# This gets appended to config
+
+
+# Genome to use for analysis
+# * The specified genome must have a config file present in pipelines/ref
+GENOME:
+    "hg38"
+ 
+# Sample groups. 
+# The sample names must match the beginning of a fastq file in one of the
+# directories listed under RAW_DATA. If the sample name
+# matches multiple fastqs, an error will be thrown.
+#
+# group-name-1:
+#     - "sample_1_R1_file_prefix"
+#     - "sample_1_R2_file_prefix"
+#
+# group-name-2:
+#     - "sample_2_R1_file_prefix"
+#     - "sample_2_R2_file_prefix"
+#
+SAMPLESr:
+    RTF1_WT:
+        - "293flpIN_RTF1_WT1"
+        - "293flpIN_RTF1_WT2"
+        - "293flpIN_RTF1_WT3"
+
+    RTF1_MTr:
+        - "293flpIN_RTF1_MT_R1"
+        - "293flpIN_RTF1_MT_R2"
+        - "293flpIN_RTF1_MT_R3"
+
+
+# set rMATS groups to compare
+#treatment:control
+GROUPS_COMP:
+   - "RTF1_MT:RTF1_WT"
+
+# program options  
+CMD_PARAMS:
+    rmats:         " -t paired --readLength 150 --libType fr-firststrand "     
+ORIENTATION:
+    "R2R1" # R1R2
+    
+# optional arguments:
+#   --gtf GTF             An annotation of genes and transcripts in GTF format.
+# --b1 B1               BAM configuration file.
+# --b2 B2               BAM configuration file.
+# --od OD               output folder of post step.
+# -t {paired,single}    readtype, single or paired.
+# --libType {fr-unstranded,fr-firststrand,fr-secondstrand}
+# --libType options are based on TopHat --library-type. 
+  # For fr-unstranded, the strand of the alignment is not checked. 
+  # For fr-firststrand and fr-secondstrand, the strand is determined for each read and the strand is checked against the annotated strand for the gene. 
+  # For fr-firststrand and fr-secondstrand, paired reads must be aligned to opposite strands. 
+  # For fr-secondstrand the aligned strand of the first read is used as the original strand. 
+  # For fr-firststrand, the aligned strand of the first read is not used as the original strand and instead the other strand is used as the original. 
+  # According to the salmon library format fr-firststrand is ISR and fr-secondstrand is ISF
+# --readLength READLENGTH
+# The length of each read.
+# --nthread NTHREAD     The number of thread. The optimal number of thread
+# should be equal to the number of CPU core.
+

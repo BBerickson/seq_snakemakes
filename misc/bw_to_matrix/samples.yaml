@@ -1,0 +1,94 @@
+#===== Config file containing samples ==========================================
+# This gets appended to config
+
+# Project name to use for naming summary files
+PROJ:
+  "ARMC5_KO_Xrn2_BrUseq"
+    
+SEQ_DATE:
+  "test"
+
+# Directorie(s) containing bam/bw files.
+# Multiple directories can be provided. The sample names must uniquely correspond
+# to the begining of the file name.
+RAW_DATA:
+    - "/beevol/home/erickson/Human/BruSeq/241218_ARMC5_KO_XRN2/ARMC5_KO_Xrn2_BrUseq/bw"
+
+# Genome to use for analysis
+# * The specified genome must have a config file present in pipelines/ref
+GENOME:
+    "hg38"
+     
+# The sample names must match the beginning of a fastq file in one of the
+# directories listed under RAW_DATA. If the sample name
+# matches multiple fastqs, an error will be thrown.
+# If samples are bw then no processing will be done,
+# only matix files will be made
+#
+# SAMPLES:
+#     SECTION-1:
+#         SAMPLING-GROUP-1: 
+#             sample_1_prefix:
+#                  - "sample_1_prefix"
+#             sample_12_prefix:
+#                  - "sample_2_prefix"
+# 
+#
+
+SAMPLES:
+    SECTION-1:
+        SAMPLING-GROUP-1:
+            ARMC5_OK_Xrn2_WT_R1: 
+              - "ARMC5_OK_Xrn2_WT_R1_hg38_241218_norm_chrM_BL"
+            ARMC5_OK_Xrn2_MT_R1: 
+              - "ARMC5_OK_Xrn2_MT_R1_hg38_241218_norm_chrM_BL"
+
+        SAMPLING-GROUP-2:
+            ARMC5_OK_Xrn2_WT_R2: 
+              - "ARMC5_OK_Xrn2_WT_R2_hg38_241218_norm_chrM_BL"
+            ARMC5_OK_Xrn2_MT_R2: 
+              - "ARMC5_OK_Xrn2_MT_R2_hg38_241218_norm_chrM_BL"
+              
+##### Norm if starting from bam files else just uses to rename bw ###
+# Norm applyed to sample bw and matix files,
+# with "RPKM","CPM","BPM","RPGC" 
+# Or with scaleFactor from count file i.e. "chrM",
+# Or "subsample" : make bw and matix files from sub-sampled bam files (paired groups)
+NORM:
+  "none"
+
+# sandbox User #
+USER:
+  "User7"
+  
+ORIENTATION:
+    "R2R1" # R1R2
+
+# which matrix type(s) to make
+# deeptools options set in Stranded_matrix.yaml
+# can only to be "543", "5", "3", "PI", or "EI" 
+REGIONS:
+  - "5"
+# valid options = "sense", "anti" # only needed if stranded
+SENSE_ASENSE: 
+  - "sense"
+  - "anti" 
+
+CMD_PARAMS:
+    samtools:      " -bF4q30 "
+    bamCoverage:   " --binSize 10 --skipNonCoveredRegions --centerReads "
+    bamCoverageBL: ""
+    fragment_size: " --maxFragmentLength 1000 "
+    featureCounts: " --readExtension5 2000 --readExtension3 2000 " #--largestOverlap
+  
+        
+ # set RGB colors for bw urls and table files, 
+  # list as many colors as samples (not inputs) 
+  # applied in order of samples ignoring inputs
+COLORS:
+  - "0,0,0"
+  - "225,0,0"
+  - "0,225,0"
+  - "0,0,225"
+
+    

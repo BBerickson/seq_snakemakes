@@ -1,0 +1,77 @@
+# ====== Rules for filtering aligned reads with samtools =================================
+
+# filter aligned reads
+rule align_filter_sample:
+    input:
+        bam   = PROJ  + "/{sample}_" + INDEX_MAP + ".bam",
+        bai   = PROJ  + "/{sample}_" + INDEX_MAP + ".bam.bai"
+    output:
+        bam    = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
+        bai    = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai",
+        counts = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_count.txt"
+    params:
+        job_name = "{sample}_align_filter",
+        idx      = INDEX_PATH + INDEX_SAMPLE + ".txt",
+        samp     = "{sample}_" + INDEX_SAMPLE,
+        fa2      = FA_SAMPLE,
+        sortname = PROJ + "/{sample}.temp"
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
+    log:
+        out = PROJ + "/logs/{sample}_align_filter.out",
+        err = PROJ + "/logs/{sample}_align_filter.err"
+    message:
+        "filtering reads {wildcards.sample}"
+    threads: 
+        12
+    shell:
+        """
+        # filter
+        samtools view {input.bam} $(head -n1 {params.idx}) \
+        | samtools view -bT {params.fa2} - \
+        | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+        > {output.bam}
+        
+        samtools index -@ {threads} {output.bam}
+        echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
+        
+        """
+
+# filter aligned spike in reads
+rule align_filter_sample_spikein:
+    input:
+        bam = PROJ + "/{sample}_" + INDEX_MAP + ".bam",
+        bai = PROJ + "/{sample}_" + INDEX_MAP + ".bam.bai"
+    output:
+        bam    = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
+        bai    = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam.bai",
+        counts = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_count.txt"
+    params:
+        job_name = "{sample}_align_filter_spikein",
+        idx      = INDEX_PATH + INDEX_SPIKE + ".txt",
+        samp     = "{sample}_" + INDEX_SPIKE,
+        fa3      = FA_SPIKE,
+        sortname = PROJ + "/{sample}_spikein.temp"
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
+    log:
+        out = PROJ + "/logs/{sample}_align_filter_spikein.out",
+        err = PROJ + "/logs/{sample}_align_filter_spikein.err"
+    message:
+        "filtering spike in reads {wildcards.sample}"
+    threads: 
+        12
+    shell:
+        """
+        # filter
+        samtools view {input.bam} $(head -n1 {params.idx}) \
+        | sed 's/spike_*//g' | samtools view -bT {params.fa3} - \
+        | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+        > {output.bam}
+        
+        samtools index -@ {threads} {output.bam}
+        echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
+        """
+
+
+                    

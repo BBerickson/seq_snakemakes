@@ -1,0 +1,80 @@
+# ===== Rules for intersecting reads with genomic regions ======================
+
+
+# Intersect subsampled reads with gene regions
+rule metaplot_beds:
+    input:
+        PROJ + "/beds/{sam_grp}.bed.gz"
+    output:
+        S    = meta_temp_fn(PROJ + "/metaplot_beds/{sam_grp}_{region}_S.bed.gz"),
+        AS   = meta_temp_fn(PROJ + "/metaplot_beds/{sam_grp}_{region}_AS.bed.gz"),
+        S_N  = meta_temp_fn(PROJ + "/metaplot_beds/{sam_grp}_{region}_S_N.bed.gz"),
+        AS_N = meta_temp_fn(PROJ + "/metaplot_beds/{sam_grp}_{region}_AS_N.bed.gz")
+    params:
+        job_name = "{sam_grp}_{region}_metaplot_beds",
+        bed      = lambda wildcards: META_BEDS[wildcards.region]
+    resources:
+        memory   = 1
+    log:
+        out = PROJ + "/logs/{sam_grp}_{region}_metaplot_beds.out",
+        err = PROJ + "/logs/{sam_grp}_{region}_metaplot_beds.err"
+    threads:
+        6
+    shell:
+        """
+        source '{SRC}/funs.sh'
+
+        intersect_reads \
+            '{input}' \
+            '{params.bed}' \
+            {threads} \
+            '{output.S}' \
+            '{output.S_N}' \
+            '-wa -c -s'
+
+        intersect_reads \
+            '{input}' \
+            '{params.bed}' \
+            {threads} \
+            '{output.AS}' \
+            '{output.AS_N}' \
+            '-wa -c -S'
+        """
+
+
+rule pause_stats:
+    input:
+        # NET-seq counts for pause regions
+        beds = expand(
+            PROJ + "/metaplot_beds/{sam_grp}_{pause_region}_S.bed.gz",
+            sam_grp = GENE_SUB_GRPS, pause_region = PAUSE_REGIONS
+        ),
+        # Pauses and pause reads for pause regions
+        pauses = expand(
+            PROJ + "/beds/pauses/{sam_grp}_{win}{stren_grp}{file_type}_{pause_region}.bed.gz",
+            sam_grp      = GENE_SUB_GRPS,
+            win          = WIN_SIZE,
+            stren_grp    = ALL_STREN_GRPS,
+            file_type    = ["pauses", "pause_reads"],
+            pause_region = PAUSE_REGIONS
+        ),
+        plot_yam = "pipelines/plots.yaml",
+        sample_df = PROJ  + "/objects/sample_df.tsv",
+        gene_coords = PROJ  + "/objects/metaplot_genes.tsv.gz"
+    output:
+        PROJ  + "/objects/pause_stats.tsv.gz"
+    params:
+        job_name = PROJ + "_pause_stats",
+        genome_params = GENOME_CONFIG,
+        myfuns   = "pipelines/R_scripts/funs.R",
+        setup    = "pipelines/R_scripts/setup.R",
+        res_dir  = PROJ
+    resources:
+        memory   = 4
+    log:
+        out = PROJ + "/logs/" + PROJ + "_pause_stats.out",
+        err = PROJ + "/logs/" + PROJ + "_pause_stats.err"
+    threads:
+        1
+    script:
+        '../R_scripts/pause_stats.R'

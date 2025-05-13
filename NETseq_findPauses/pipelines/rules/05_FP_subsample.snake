@@ -1,0 +1,165 @@
+# ====== Rules for subsampling reads ===========================================
+
+
+# Clear persistent dictionary used for subsampling
+# to be safe this will clear any existing dictionary
+rule subsample_dict:
+    output:
+        temp(touch(DICT_DIR + "/subsample_dict.txt"))
+    params:
+        job_name = "subsample_dict"
+    resources:
+        memory   = 1
+    log:
+        out = PROJ + "/logs/subsample_dict.out",
+        err = PROJ + "/logs/subsample_dict.err"
+    threads:
+        1
+    shell:
+        """
+        python3 - << 'EOF'
+import sys
+sys.path.insert(0, "{SRC}")
+
+import funs
+
+funs._clear_dict("SUB_DICT", "{SUB_DICT_DIR}")
+EOF
+        """
+
+
+# Identify number of reads to use for subsampling each group
+# use uuid to ensure unique dictionary name
+rule subsample_1:
+    input:
+        DICT_DIR + "/subsample_dict.txt",
+
+        lambda wildcards: expand(
+            PROJ + "/beds/{sample}_shift.bed.gz",
+            sample = GROUPS[wildcards.group]
+        )
+    output:
+        temp(PROJ + "/stats/{group}_summary.tsv")
+    params:
+        job_name = "{group}_summary"
+    resources:
+        memory   = 1
+    log:
+        out = PROJ + "/logs/{group}_summary.out",
+        err = PROJ + "/logs/{group}_summary.err"
+    benchmark:
+        PROJ + "/benchmarks/{group}_summary.tsv"
+    threads:
+        1
+    shell:
+        """
+        python3 - << 'EOF'
+import sys
+sys.path.insert(0, "{SRC}")
+
+import rules
+
+input = "{input}".split()
+
+del input[0]
+
+rules._subsample_1(
+    input,
+    "{output}",
+    "{wildcards.group}",
+    "{SUB_DICT_DIR}"
+)
+EOF
+        """
+
+
+# Subsample libraries to equalize read counts for downstream analysis
+rule subsample_2:
+    input:
+        bed  = PROJ  + "/beds/{sample}_shift.bed.gz",
+        sum  = PROJ  + "/stats/{group}_summary.tsv",
+        dict = DICT_DIR + "/subsample_dict.txt"
+    output:
+        PROJ + "/beds/{sample}-{group}.bed.gz"
+    params:
+        job_name = "{sample}_{group}"
+    resources:
+        memory   = 1
+    log:
+        out = PROJ + "/logs/{sample}_{group}.out",
+        err = PROJ + "/logs/{sample}_{group}.err"
+    benchmark:
+        PROJ + "/benchmarks/{sample}_{group}.tsv"
+    threads:
+        16
+    shell:
+        """
+        MIN_READS=$(python3 - << 'EOF'
+import sys
+sys.path.insert(0, "{SRC}")
+
+import rules
+
+rules._subsample_2("{wildcards.group}", "{SUB_DICT_DIR}")
+EOF
+        )
+
+        get_seed() {{
+            local seed="$1"
+
+            openssl enc -aes-256-ctr -pass pass:"$seed" -nosalt \
+                </dev/zero 2>/dev/null
+        }}
+
+        zcat '{input.bed}' \
+            | shuf -n "$MIN_READS" --random-source=<(get_seed 42) \
+            | sort -S1G --parallel={threads} -k1,1 -k2,2n \
+            | pigz -p {threads} \
+            > '{output}'
+        """
+
+
+# Create subsampling summary
+# also need to clear persistent dict
+rule sub_summary:
+    input:
+        bed = expand(
+            PROJ + "/beds/{sample}-{group}.bed.gz",
+            zip, sample = SAMS_UNIQ, group = GRPS_UNIQ
+        ),
+        sum = expand(
+            PROJ + "/stats/{group}_summary.tsv",
+            group = GRPS_UNIQ
+        )
+    output:
+        PROJ + "/stats/" + PROJ + "_subsample.tsv"
+    params:
+        job_name = PROJ + "_subsample_summary"
+    resources:
+        memory   = 1
+    log:
+        out = PROJ + "/logs/" + PROJ + "_subsample_summary.out",
+        err = PROJ + "/logs/" + PROJ + "_subsample_summary.err"
+    threads:
+        1
+    shell:
+        """
+        python3 - << 'EOF'
+import sys
+sys.path.insert(0, "{SRC}")
+
+import funs
+
+funs._clear_dict("SUB_DICT", "{SUB_DICT_DIR}")
+EOF
+
+        file_arr=({input.sum})
+ 
+        for file in ${{file_arr[@]}}
+        do
+            cat "$file" \
+                >> '{output}'
+        done
+        """
+
+

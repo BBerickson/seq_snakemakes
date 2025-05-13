@@ -1,0 +1,27 @@
+# ====== Rules for getting bw files =================================
+
+
+# stranded bw files
+rule get_bw:
+    input:
+        lambda wildcards: _get_bws(wildcards.newnam, RAW_DATA, BW_DIR, paired=True)
+    output:
+        fw  = PROJ + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_fw.bw",
+        rev = PROJ + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_rev.bw"
+    params:
+        job_name = "{newnam}_getbw",
+    resources:
+        memory   = 4
+    log:
+        out = PROJ + "/logs/{newnam}_get_bw.out",
+        err = PROJ + "/logs/{newnam}_get_bw.err"
+    threads: 
+        1
+    shell:
+        """
+          cp {input[0]} {output[0]}
+          cp {input[1]} {output[1]}
+        
+        """
+
+        

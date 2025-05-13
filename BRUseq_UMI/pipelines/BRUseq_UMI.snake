@@ -1,0 +1,163 @@
+# ===== Snake file for processing Bowtie ================================
+
+# Configure shell for all rules
+shell.executable("/bin/bash")
+shell.prefix("source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; ")
+
+# python packages
+import os
+import glob
+import re
+import gzip
+
+# include my python common functions
+include: "funs.py"
+
+# Add genome specific config
+GENOME = config["GENOME"]
+
+GENOME_CONFIG = "pipelines/ref/" + GENOME + ".yaml"
+
+if not os.path.exists(GENOME_CONFIG):
+    sys.exit("ERROR: " + GENOME + " is not a valid GENOME selection.")
+
+configfile:
+    GENOME_CONFIG
+
+# Parameters from config.yaml
+PROJ            = config["PROJ"]
+RAW_DATA        = config["RAW_DATA"]
+ALL_SAMPLES     = config["SAMPLES"]
+SEQ_DATE        = config["SEQ_DATE"]
+INDEX_PATH      = config["INDEX_PATH"]
+INDEX_MAP       = config["INDEX_MAP"]
+INDEX_SAMPLE    = config["INDEX_SAMPLE"]
+INDEX_SPIKE     = config["INDEX_SPIKE"]
+FA_SAMPLE       = config["FA_SAMPLE"]
+FA_SPIKE        = config["FA_SPIKE"]
+FC_FILE         = config["GTF"]
+FC_SPIKE        = config["GTF_SPIKE"]
+MASK            = config["MASK"]
+CMD_PARAMS      = config["CMD_PARAMS"]
+COLORS          = config["COLORS"]
+NORM            = config["NORM"]
+ORIENTATION     = config["ORIENTATION"]
+USER            = config["USER"]
+
+# Directories for data and scripts
+FASTQ_DIR = PROJ + "/fastqs"
+
+os.makedirs(FASTQ_DIR, exist_ok = True)
+
+# Simplify ALL_SAMPLES dictionary
+# ALL_SAMPLES = {'SECTION-1':{'SAMPLING-GROUP-1':{newname1:[fastq1],newname2:[fastq2]}}} or {'SECTION-1':{'SAMPLING-GROUP-1':{newname1:[fastq1,input1],newname2:[fastq2,input2]}}}
+# collapse sections and combine subsampling groups
+def process_samples(all_samples):
+    SAMPLES = {}  # SAMPLES {newname1:[fastq1],newname2:[fastq2]}
+    SAMPIN = {}   # SAMPIN {newname1:[fastq1,input1],newname2:[fastq2,input2]}
+    GROUPS = {}   # GROUPS {SAMPLING-GROUP-1:[fastq1], SAMPLING-GROUP-2:[fastq2]}
+
+    for section, pairs in all_samples.items():
+        for pair_name, samples in pairs.items():
+            for sample_name, values in samples.items():
+                fastq = values[0]
+                input_file = values[1] if len(values) > 1 else None
+
+                # Populate SAMPLES
+                SAMPLES.setdefault(sample_name, []).append(fastq)
+
+                # Populate SAMPIN
+                if input_file:
+                    SAMPIN[sample_name] = [fastq, input_file]
+                else:
+                    SAMPIN[sample_name] = [fastq]
+
+                # Populate GROUPS
+                GROUPS.setdefault(pair_name, []).append(fastq)
+
+    return SAMPLES, SAMPIN, GROUPS
+
+SAMPLES, SAMPIN, GROUPS = process_samples(ALL_SAMPLES)
+
+# unpack samples and groups
+SAMS = [[y, x] for y in SAMPIN for x in SAMPIN[y]]
+NAMS = [x[0] for x in SAMS] # newnames
+SAMS = [x[1] for x in SAMS] # samples
+GRPS = [[y, x] for y in GROUPS for x in GROUPS[y]]
+GRPS = [x[0] for x in GRPS] # groups
+NAMS_UNIQ = list(dict.fromkeys(NAMS))
+GRPS_UNIQ = list(dict.fromkeys(GRPS))
+SAMS_UNIQ = list(dict.fromkeys(SAMS))
+
+# Print summary of samples and groups
+print("SAMPLES (%s): %s\n" % (len(SAMPLES), SAMPLES))
+print("GROUPS (%s): %s\n" % (len(GROUPS), GROUPS))
+print("SAMPIN (%s): %s\n" % (len(SAMPIN), SAMPIN))
+print("SAMS (%s): %s\n" % (len(SAMS), SAMS))
+print("NAMS (%s): %s\n" % (len(NAMS), NAMS))
+print("GRPS (%s): %s\n" % (len(GRPS), GRPS))
+print("SAMS_UNIQ (%s): %s\n" % (len(SAMS_UNIQ), SAMS_UNIQ))
+print("NAMS_UNIQ (%s): %s\n" % (len(NAMS_UNIQ), NAMS_UNIQ))
+print("GRPS_UNIQ (%s): %s\n" % (len(GRPS_UNIQ), GRPS_UNIQ))
+
+# Wildcard constraints
+WILDCARD_REGEX = "[a-zA-Z0-9_\-]+" # Matches alphanumeric characters, underscores, and hyphens
+
+wildcard_constraints:
+    sample = WILDCARD_REGEX,
+    newnam = WILDCARD_REGEX,
+    group  = WILDCARD_REGEX   
+
+# Create symlinks for fastqs
+FASTQS = [_get_fqs(x, RAW_DATA, FASTQ_DIR) for x in SAMS_UNIQ]
+FASTQS = sum(FASTQS, [])
+
+COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
+
+NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"],ORIENTATION)
+
+BAM_PATH = _get_bampath(NORM)
+
+# Final output files
+rule all:
+    input:
+        # FastQC
+        PROJ + "/stats/" + PROJ + "_fastqc.tsv",
+        
+        # cutadapt
+        PROJ + "/stats/" + PROJ + "_cutadapt.tsv",
+
+        # Align reads
+        PROJ + "/stats/" + PROJ + "_aligned.tsv",
+        
+        # bam URL
+        #PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + "_bam_URL.txt",
+        
+        # subsample of all reads, and URL's
+        #PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + "_subsample_bam_URL.txt",
+        
+        # results
+        PROJ + "/stats/" + PROJ + "_fragment_results.tsv",
+        #PROJ + "/report/" + INDEX_SAMPLE + "_PCA.png",
+        PROJ + "/report/" + PROJ + "_results.tsv",
+        
+        # bamCoverage
+        PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + NORMS + "_bw_URL.txt"
+
+
+# Run FastQC
+include: "rules/01_fastqc.snake"
+# Run cutadapt
+include: "rules/01_UMI_cutadapt.snake"
+# Align reads 
+include: "rules/02a_align_bowtie.snake"
+include: "rules/02b_align_UMI_samtools.snake"
+include: "rules/02c_align_URLS.snake"
+include: "rules/02s_align_mask_subsample.snake"
+# Results
+include: "rules/03a_featureCounts.snake"
+include: "rules/03a_fragmentSize_PE.snake"
+include: "rules/03b_results_UMI.snake"
+include: "rules/03b_PCAplot.snake"
+# BW with deeptools bamCoverage
+include: "rules/04_bamCoverage_stranded.snake"

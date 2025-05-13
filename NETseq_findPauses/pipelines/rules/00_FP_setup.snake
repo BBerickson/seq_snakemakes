@@ -1,0 +1,41 @@
+# ===== Rules to set up pipeline =====================
+
+
+rule compile_cpp:
+    input:
+        SRC + "/{script}.cpp"
+    output:
+        SRC + "/{script}"
+    params:
+        job_name = "{script}_compile"
+    resources:
+        memory   = 1
+    log:
+        out = PROJ + "/logs/{script}_compile.out",
+        err = PROJ + "/logs/{script}_compile.err"
+    threads:
+        1
+    shell:
+        """
+        g++ -std=c++11 {input} -o {output}
+        """
+
+# Create data.frame with sample info
+rule sample_df:
+    input:
+        sam_yam = "samples.yaml"
+    output:
+        PROJ  + "/objects/sample_df.tsv"
+    params:
+        job_name = PROJ + "_sample_df",
+        myfuns   = "pipelines/R_scripts/funs.R",
+        setup    = "pipelines/R_scripts/setup.R"
+    resources:
+        memory   = 1
+    log:
+        out = PROJ + "/logs/" + PROJ + "_sample_df.out",
+        err = PROJ + "/logs/" + PROJ + "_sample_df.err"
+    threads:
+        1
+    script:
+        '../R_scripts/sample_df.R'

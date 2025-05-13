@@ -1,0 +1,91 @@
+# ====== Rules for making standard 5 matrix files from non-stranded ref =================================
+
+
+# stranded sense matrix files
+rule my_5_bidirectonal_matrix:
+    input:
+        fw  = PROJ + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_fw.bw",
+        rev = PROJ + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_rev.bw"
+    output:
+        fw       = PROJ + "/matrix/{region}/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{region}_{covarg}_pos_matrix.gz",
+        rev      = PROJ + "/matrix/{region}/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{region}_{covarg}_neg_matrix.gz"
+    params:
+        job_name = "{region}_{covarg}_{newnam}_bi_matrix",
+        args     = lambda wildcards: CMD_PARAMS[f"region{wildcards.region}"] + CMD_PARAMS["bamCoverageBL"],
+        fw_ref   = FW_REF,
+        rev_ref  = REV_REF
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
+    log:
+        out = PROJ + "/logs/{newnam}_{region}_{covarg}_bi_matrix.out",
+        err = PROJ + "/logs/{newnam}_{region}_{covarg}_bi_matrix.err"
+    threads: 
+        12
+    shell:
+        """
+        computeMatrix {params.args} -R {params.fw_ref} -S {input.fw} -p {threads} -o {output.fw}
+        computeMatrix {params.args} -R {params.rev_ref} -S {input.rev} -p {threads} -o {output.rev}
+        
+        """
+
+# make url's and scp to sandbox
+rule standared_marix_url:
+    input:
+        fw       = PROJ + "/matrix/{region}/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{region}_{covarg}_pos_matrix.gz",
+        rev      = PROJ + "/matrix/{region}/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{region}_{covarg}_neg_matrix.gz"
+    output:
+        temp(PROJ + "/matrix/{region}/{newnam}_{region}_{covarg}_bi_matrix.url.txt")
+    params:
+        job_name = "{newnam}_{region}_{covarg}_bi_matrix_url",
+        color    = lambda wildcards: _get_col(wildcards.newnam, COLS_DICT),
+        groupkey = lambda wildcards: next((k for k, v in GROUPS.items() if wildcards.newnam in v), "self"),
+        url_fw  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{region}_{covarg}_pos_matrix.gz",
+        url_rev  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{region}_{covarg}_neg_matrix.gz"
+    resources:
+        memory   = 4
+    log:
+        out = PROJ + "/logs/{newnam}_{region}_{covarg}_bi_matrix_url.out",
+        err = PROJ + "/logs/{newnam}_{region}_{covarg}_bi_matrix_url.err"
+    threads:
+        1
+    shell:
+        """
+        echo {params.url_fw} {params.groupkey} {wildcards.newnam}{NORMS}_{SEQ_DATE}_pos {params.color} >> {output[0]}
+        echo {params.url_rev} {params.groupkey} {wildcards.newnam}{NORMS}_{SEQ_DATE}_neg {params.color} >> {output[0]}
+        ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
+        scp {input.fw} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
+        scp {input.rev} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
+        """    
+        
+
+# Combine URLs
+rule matrix_url_summary:
+    input:
+        sorted(expand(
+            PROJ + "/matrix/{region}/{newnam}_{region}_{covarg}_bi_matrix.url.txt",
+            zip, newnam=REGIONS_COVARGS['Newnam'], region=REGIONS_COVARGS['Region'], covarg=REGIONS_COVARGS['Value']
+        ))
+    output:
+        PROJ + "/URLS/{region}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{covarg}_bidirectonal_matrix.url.txt"
+    params:
+        job_name = "{region}_{covarg}_bi_matrix_url_summary"
+    resources:
+        memory = 4
+    log:
+        out = PROJ + "/logs/{region}_{covarg}_bi_matrix_url_summary.out",
+        err = PROJ + "/logs/{region}_{covarg}_bi_matrix_url_summary.err"
+    threads:
+        1
+    shell:
+        """
+        # Filter and concatenate files
+        for file in {input}; do
+            if [[ $file == *"{wildcards.region}"* && $file == *"{wildcards.covarg}"* ]]; then
+                cat $file >> {output}
+            fi
+        done
+        """
+
+
+
+

@@ -1,0 +1,79 @@
+# ====== Rules for making standard matrix files ======
+
+# matrix files
+rule standared_matrix:
+    input:
+        bw  =   PROJ + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + ".bw"
+    output:
+        matrix = PROJ + "/matrix/{region}/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{region}_{covarg}_matrix.gz"
+    params:
+        job_name = "{region}_{newnam}_{covarg}_matrix",
+        args = lambda wildcards: CMD_PARAMS[f"region{wildcards.region}"] + CMD_PARAMS["bamCoverageBL"],
+        my_ref   = MY_REF
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
+    log:
+        out = PROJ + "/logs/{region}_{newnam}_{covarg}_matrix.out",
+        err = PROJ + "/logs/{region}_{newnam}_{covarg}_matrix.err"
+    threads: 
+        12
+    shell:
+        """
+        # deeptools
+        computeMatrix {params.args} -R {params.my_ref} -S {input.bw} -p {threads} -o {output.matrix} 
+        """
+
+# make url's and scp to sandbox
+rule standared_marix_url:
+    input:
+        PROJ + "/matrix/{region}/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{region}_{covarg}_matrix.gz"
+    output:
+        temp(PROJ + "/matrix/{region}/{newnam}_{region}_{covarg}_matrix.url.txt")
+    params:
+        job_name = "{newnam}_{region}_{covarg}_matrix_url",
+        color    = lambda wildcards: _get_col(wildcards.newnam, COLS_DICT),
+        groupkey = lambda wildcards: next((k for k, v in GROUPS.items() if wildcards.newnam in v), "self"),
+        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{region}_{covarg}_matrix.gz"
+    resources:
+        memory   = 4
+    log:
+        out = PROJ + "/logs/{newnam}_{region}_{covarg}_matrix_url.out",
+        err = PROJ + "/logs/{newnam}_{region}_{covarg}_matrix_url.err"
+    threads:
+        1
+    shell:
+        """
+        echo {params.url_out} {params.groupkey} {wildcards.newnam}{NORMS}_{SEQ_DATE} {params.color} >> {output[0]}
+        ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
+        scp {input[0]} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
+        """
+        
+
+# Combine URLs
+rule matrix_url_summary:
+    input:
+        sorted(expand(
+            PROJ + "/matrix/{region}/{newnam}_{region}_{covarg}_matrix.url.txt",
+            zip, newnam=REGIONS_COVARGS['Newnam'], region=REGIONS_COVARGS['Region'], covarg=REGIONS_COVARGS['Value']
+        ))
+    output:
+        PROJ + "/URLS/{region}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{covarg}_matrix.url.txt"
+    params:
+        job_name = "{region}_{covarg}_matrix_url_summary"
+    resources:
+        memory = 4
+    log:
+        out = PROJ + "/logs/{region}_{covarg}_matrix_url_summary.out",
+        err = PROJ + "/logs/{region}_{covarg}_matrix_url_summary.err"
+    threads:
+        1
+    shell:
+        """
+        # Filter and concatenate files
+        for file in {input}; do
+            if [[ $file == *"{wildcards.region}"* && $file == *"{wildcards.covarg}"* ]]; then
+                cat $file >> {output}
+            fi
+        done
+        """
+

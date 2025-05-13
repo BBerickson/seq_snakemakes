@@ -1,0 +1,19 @@
+# ===== Config file for finding pauses from NET-seq data =======================
+
+
+# Window sizes to use for finding pauses
+# provide multiple sizes to generate results for multiple different window sizes
+WIN_SIZE:
+    - 200
+
+
+# File label to use for strong pauses
+STRENGTH_GROUPS:
+    - "_strong_"
+
+
+# Maximum searching round for strong pauses
+PAUSE_ROUND:
+    - 1
+
+

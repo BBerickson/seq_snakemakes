@@ -1,0 +1,48 @@
+# ====== Rules for making PCA plots =================================
+
+# make PCA plot
+rule my_PCA_plot:
+    input:
+        FC = lambda wildcards: expand(
+            PROJ + "/counts/{sample}_" + INDEX_SAMPLE + "_featureCounts.tsv",
+            sample = SAMS_UNIQ
+        )
+    output:
+        PROJ + "/report/" + INDEX_SAMPLE + "_PCA.png"
+    params:
+        job_name = "PCA_plot",
+        groupkey = GROUPS
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 4)
+    log:
+        out = PROJ + "/logs/PCA_plot.out",
+        err = PROJ + "/logs/PCA_plot.err"
+    threads: 
+        1
+    script:
+        '../R_scripts/featurecount_PCA.R'
+
+
+# make PCA plot
+rule my_PCA_spikein_plot:
+    input:
+        FC = lambda wildcards: expand(
+            PROJ + "/counts/{sample}_" + INDEX_SPIKE + "_featureCounts.tsv",
+            sample = SAMS_UNIQ
+        )
+    output:
+        PROJ + "/report/" + INDEX_SPIKE + "_PCA.png"
+    params:
+        job_name = "PCA_plot_spikein",
+        groupkey = GROUPS
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 4)
+    log:
+        out = PROJ + "/logs/PCA_spikein_plot.out",
+        err = PROJ + "/logs/PCA_spikein_plot.err"
+    threads: 
+        1
+    script:
+        '../R_scripts/featurecount_PCA.R'
+
+

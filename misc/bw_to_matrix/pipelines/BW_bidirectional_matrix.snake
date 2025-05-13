@@ -1,0 +1,145 @@
+# ===== Snake file for processing mNET-seq data ================================
+
+import os
+import glob
+import re
+
+# Configure shell for all rules
+shell.executable("/bin/bash")
+shell.prefix("source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; ")
+
+#include my python common functions
+include: "funs.py"
+
+# Add genome specific config
+GENOME = config["GENOME"]
+
+GENOME_CONFIG = "pipelines/ref/" + GENOME + ".yaml"
+
+if not os.path.exists(GENOME_CONFIG):
+    sys.exit("ERROR: " + GENOME + " is not a valid GENOME selection.")
+
+configfile:
+    GENOME_CONFIG
+
+# Parameters from config.yaml
+PROJ            = config["PROJ"]
+RAW_DATA        = config["RAW_DATA"]
+ALL_SAMPLES     = config["SAMPLES"]
+SEQ_DATE        = config["SEQ_DATE"]
+INDEX_PATH      = config["INDEX_PATH"]
+INDEX_SAMPLE    = config["INDEX_SAMPLE"]
+INDEX_SPIKE     = ""
+FW_REF          = config["FW_REF"]
+REV_REF         = config["REV_REF"]
+CMD_PARAMS      = config["CMD_PARAMS"]
+COLORS          = config["COLORS"]
+NORM            = config["NORM"]
+ORIENTATION     = config["ORIENTATION"]
+USER            = config["USER"]
+GENELIST        = config["GENELIST"]
+REGIONS         = config["REGIONS"]
+
+BW_DIR = PROJ + "/raw_bw"
+os.makedirs(BW_DIR, exist_ok = True)
+
+# Simplify ALL_SAMPLES dictionary
+# ALL_SAMPLES = {'SECTION-1':{'SAMPLING-GROUP-1':{newname1:[fastq1],newname2:[fastq2]}}} or {'SECTION-1':{'SAMPLING-GROUP-1':{newname1:[fastq1,input1],newname2:[fastq2,input2]}}}
+# collapse sections and combine subsampling groups
+def process_samples(all_samples):
+    SAMPLES = {}  # SAMPLES {newname1:[fastq1],newname2:[fastq2]}
+    SAMPIN = {}   # SAMPIN {newname1:[fastq1,input1],newname2:[fastq2,input2]}
+    GROUPS = {}   # GROUPS {SAMPLING-GROUP-1:[fastq1], SAMPLING-GROUP-2:[fastq2]}
+
+    for section, pairs in all_samples.items():
+        for pair_name, samples in pairs.items():
+            for sample_name, values in samples.items():
+                fastq = values[0]
+                input_file = values[1] if len(values) > 1 else None
+
+                # Populate SAMPLES
+                SAMPLES.setdefault(sample_name, []).append(fastq)
+
+                # Populate SAMPIN
+                if input_file:
+                    SAMPIN[sample_name] = [fastq, input_file]
+                else:
+                    SAMPIN[sample_name] = [fastq]
+
+                # Populate GROUPS
+                GROUPS.setdefault(pair_name, []).append(fastq)
+
+    return SAMPLES, SAMPIN, GROUPS
+
+SAMPLES, SAMPIN, GROUPS = process_samples(ALL_SAMPLES)
+
+
+# unpack samples and groups
+SAMS = [[y, x] for y in SAMPLES for x in SAMPLES[y]]
+NAMS = [x[0] for x in SAMS] # newnames
+SAMS = [x[1] for x in SAMS] # samples
+GRPS = [[y, x] for y in GROUPS for x in GROUPS[y]]
+GRPS = [x[0] for x in GRPS] # groups
+NAMS_UNIQ = list(dict.fromkeys(SAMS))
+GRPS_UNIQ = list(dict.fromkeys(GRPS))
+SAMS_UNIQ = list(dict.fromkeys(SAMS))
+
+# Print summary of samples and groups
+print("SAMPLES (%s): %s\n" % (len(SAMPLES), SAMPLES))
+print("GROUPS (%s): %s\n" % (len(GROUPS), GROUPS))
+print("SAMPIN (%s): %s\n" % (len(SAMPIN), SAMPIN))
+print("SAMS (%s): %s\n" % (len(SAMS), SAMS))
+print("NAMS (%s): %s\n" % (len(NAMS), NAMS))
+print("GRPS (%s): %s\n" % (len(GRPS), GRPS))
+print("SAMS_UNIQ (%s): %s\n" % (len(SAMS_UNIQ), SAMS_UNIQ))
+print("NAMS_UNIQ (%s): %s\n" % (len(NAMS_UNIQ), NAMS_UNIQ))
+print("GRPS_UNIQ (%s): %s\n" % (len(GRPS_UNIQ), GRPS_UNIQ))
+
+# Wildcard constraints
+WILDCARD_REGEX = "[a-zA-Z0-9_\-]+" # Matches alphanumeric characters, underscores, and hyphens
+
+wildcard_constraints:
+    newnam = WILDCARD_REGEX,
+    region = "543|5|3|PI|EI"
+
+COLS_DICT = _get_colors(SAMS_UNIQ, COLORS)
+
+NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"],ORIENTATION)
+
+BAM_PATH = _get_bampath(NORM)
+
+COVARGS = _get_all_matrixtypes(REGIONS,NORMS,CMD_PARAMS,GENELIST)
+
+# Create the Cartesian product
+product = [(s, i, v) for s in SAMS_UNIQ for i, v in zip(REGIONS, COVARGS)]
+
+# Convert to DataFrame
+REGIONS_COVARGS = pd.DataFrame(product, columns=['Newnam', 'Region', 'Value'])
+
+print(REGIONS_COVARGS)
+
+# Final output files
+rule all:
+    input:
+        # bamCoverage
+        expand(
+          PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_fw.bw",
+          newnam = SAMS_UNIQ
+        ),
+        expand(
+          PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_rev.bw",
+          newnam = SAMS_UNIQ
+        ),
+        
+        # matrix file
+        expand(
+          PROJ + "/URLS/{region}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{covarg}_bidirectonal_matrix.url.txt",
+           zip, region=REGIONS_COVARGS['Region'], covarg=REGIONS_COVARGS['Value']
+        )
+
+# BW with deeptools bamCoverage
+include: "rules/04_get_BW_Stranded.snake"
+# 5 sense matrix file
+include: "rules/05_bidirectional_matrix.snake"
+
+

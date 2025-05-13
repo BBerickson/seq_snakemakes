@@ -1,0 +1,23 @@
+# ===== Config file lotting parameters =========================================
+
+
+overwrite:         true                     # Overwrite saved R objects
+
+template_dir:      "src/Rmds"               # Directory containing Rmd templates
+obj_dir:           "objects"                # Directory to save R objects
+tab_dir:           "tables"                 # Directory to save tables
+
+gene_min_pct:      0.1                      # Fraction of lowest expressing genes to exclude
+pause_strength:    "_strong_"               # Pause strength label to use for loading input files
+pause_win:         200                      # Pause window label to use for loading input files
+subsample_regions: ["gene", "tss", "body"]
+
+pause_lims:        [0, 1]                   # Min pauses for filtering TSS boxplots (1st value) and scatter plots (2nd value)
+tss_lim:           1                        # Min number of raw reads for TSS boxplots
+body_lim:          1                        # Min number of reads/kb for gene body region
+only_shared:       true                     # Only include genes in TSS boxplots that have data for all regions
+
+go_genomes:                                 # Genome specification to use for GO analysis depending on genome in SAMPLES.yaml
+    GRCh38: "hsapiens"
+    GRCm38: "mmusculus"
+

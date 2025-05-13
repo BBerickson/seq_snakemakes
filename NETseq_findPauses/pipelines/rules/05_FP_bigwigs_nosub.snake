@@ -1,0 +1,92 @@
+# ====== Rules for creating bigwigs files from aligned reads ===================
+
+
+# Create bigwigs using single bp read coordinates 
+# Do not reverse strands since read #1 from QIA-seq libraries is the sense
+# direction
+use rule bigwigs as bigwigs_nosub with:
+    input:
+        PROJ + "/beds/{sample}_shift.bed.gz"
+    output:
+        p_bg   = temp_fn(PROJ + "/bedgraphs/{sample}_pos.bedgraph.gz"),
+        p_bg_N = temp_fn(PROJ + "/bedgraphs/{sample}_pos_N.bedgraph.gz"),
+        n_bg   = temp_fn(PROJ + "/bedgraphs/{sample}_neg.bedgraph.gz"),
+        n_bg_N = temp_fn(PROJ + "/bedgraphs/{sample}_neg_N.bedgraph.gz"),
+
+        p_bw   = PROJ + "/bigwigs/{sample}_pos.bw",
+        n_bw   = PROJ + "/bigwigs/{sample}_neg.bw"
+    params:
+        job_name = "{sample}_bigwig",
+        chroms   = CHROMS
+    log:
+        out = PROJ + "/logs/{sample}_bigwig.out",
+        err = PROJ + "/logs/{sample}_bigwig.err"
+    benchmark:
+        PROJ + "/benchmarks/{sample}_bigwig.tsv"
+
+
+# Create IGV browser session
+use rule igv_browser as igv_browser_nosub with:
+    input:
+        expand(
+            PROJ + "/bigwigs/{sample}_{strand}.bw",
+            sample = SAMS_UNIQ, strand = ["pos", "neg"]
+        )
+    output:
+        urls = PROJ + "/urls/" + PROJ + "_nosub_urls.tsv",
+        xml  = PROJ + "/urls/" + PROJ + "_nosub_igv.xml"
+    params:
+        job_name = PROJ + "_nosub_igv",
+        regex    = "",
+        **SSH_PARAMS
+    log:
+        out = PROJ + "/logs/" + PROJ + "_nosub_igv.out",
+        err = PROJ + "/logs/" + PROJ + "_nosub_igv.err"
+    benchmark:
+        PROJ + "/benchmarks/" + PROJ + "_nosub_igv.tsv"
+
+ 
+# Create bigwigs using reads that have not been filtered based on
+# proximity to protein coding genes and have not been subsampled
+use rule bigwigs as bigwigs_nofilt with:
+    input:
+        PROJ + "/beds/{sample}_nofilt.bed.gz"
+    output:
+        p_bg   = temp_fn(PROJ + "/bedgraphs/{sample}_nofilt_pos.bedgraph.gz"),
+        p_bg_N = temp_fn(PROJ + "/bedgraphs/{sample}_nofilt_pos_N.bedgraph.gz"),
+        n_bg   = temp_fn(PROJ + "/bedgraphs/{sample}_nofilt_neg.bedgraph.gz"),
+        n_bg_N = temp_fn(PROJ + "/bedgraphs/{sample}_nofilt_neg_N.bedgraph.gz"),
+
+        p_bw   = PROJ + "/bigwigs/{sample}_nofilt_pos.bw",
+        n_bw   = PROJ + "/bigwigs/{sample}_nofilt_neg.bw"
+    params:
+        job_name = "{sample}_nofilt_bigwig",
+        chroms   = CHROMS
+    log:
+        out = PROJ + "/logs/{sample}_nofilt_bigwig.out",
+        err = PROJ + "/logs/{sample}_nofilt_bigwig.err"
+    benchmark:
+        PROJ + "/benchmarks/{sample}_nofilt_bigwig.tsv"
+
+
+# Create IGV browser session
+use rule igv_browser as igv_browser_nofilt with:
+    input:
+        expand(
+            PROJ + "/bigwigs/{sample}_nofilt_{strand}.bw",
+            sample = SAMS_UNIQ, strand = ["pos", "neg"]
+        )
+    output:
+        urls = PROJ + "/urls/" + PROJ + "_nofilt_urls.tsv",
+        xml  = PROJ + "/urls/" + PROJ + "_nofilt_igv.xml"
+    params:
+        job_name    = PROJ + "_nofilt_igv",
+        regex       = "",
+        **SSH_PARAMS
+    log:
+        out = PROJ + "/logs/" + PROJ + "nofilt_igv.out",
+        err = PROJ + "/logs/" + PROJ + "nofilt_igv.err"
+    benchmark:
+        PROJ + "/benchmarks/" + PROJ + "nofilt_igv.tsv"
+
+

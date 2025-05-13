@@ -1,0 +1,58 @@
+# ====== Rules for creating bigwigs files from aligned reads ===================
+
+
+# Create bigwigs using single bp read coordinates 
+# Do not reverse strands since read #1 from QIA-seq libraries is the sense
+# direction
+rule bigwigs:
+    input:
+        PROJ + "/beds/{sam_grp}.bed.gz"
+    output:
+        p_bg   = temp_fn(PROJ + "/bedgraphs/{sam_grp}_pos.bedgraph.gz"),
+        p_bg_N = temp_fn(PROJ + "/bedgraphs/{sam_grp}_pos_N.bedgraph.gz"),
+        n_bg   = temp_fn(PROJ + "/bedgraphs/{sam_grp}_neg.bedgraph.gz"),
+        n_bg_N = temp_fn(PROJ + "/bedgraphs/{sam_grp}_neg_N.bedgraph.gz"),
+
+        p_bw   = PROJ + "/bigwigs/{sam_grp}_pos.bw",
+        n_bw   = PROJ + "/bigwigs/{sam_grp}_neg.bw"
+    params:
+        job_name = "{sam_grp}_bigwig",
+        chroms   = CHROMS
+    resources:
+        memory   = 1
+    log:
+        out = PROJ + "/logs/{sam_grp}_bigwig.out",
+        err = PROJ + "/logs/{sam_grp}_bigwig.err"
+    benchmark:
+        PROJ + "/benchmarks/{sam_grp}_bigwig.tsv"
+    threads:
+        6
+    shell:
+        """
+        source '{SRC}/funs.sh'
+        
+        # Create bigwigs for each strand
+        # Normalized by the number of reads in the starting bed file (RPM)
+        create_bigwig \
+            '{input}' \
+            '-strand +' \
+            1 \
+            '{output.p_bg}' \
+            '{output.p_bg_N}' \
+            '{output.p_bw}' \
+            '{params.chroms}' \
+            {threads}
+
+        create_bigwig \
+            '{input}' \
+            '-strand -' \
+            -1 \
+            '{output.n_bg}' \
+            '{output.n_bg_N}' \
+            '{output.n_bw}' \
+            '{params.chroms}' \
+            {threads}
+        """
+
+
+ 

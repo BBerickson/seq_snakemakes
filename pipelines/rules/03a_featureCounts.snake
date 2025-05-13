@@ -1,0 +1,85 @@
+# ===== Rules to count reads overlapping genes =================================
+
+
+# Run featureCounts
+rule featureCounts_sample:
+    input:
+        bam = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
+        bai = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai"
+    output:
+        tsv = PROJ + "/counts/{sample}_" + INDEX_SAMPLE + "_featureCounts.tsv"
+    params:
+        job_name = PROJ + "_featureCounts",
+        args     = _get_featCout(ORIENTATION),
+        args2    = lambda wildcards: config["CMD_PARAMS"].get("featureCounts", ""),
+        tsv      = PROJ + "/counts/{sample}_" + INDEX_SAMPLE + "_featureCounts_enrich.tsv",
+        ftfile   = FC_FILE
+    resources:
+        memory = lambda wildcards, input: memory_estimator(input, 0.5, 4)
+    log:
+        out = PROJ + "/logs/{sample}_featureCounts.out",
+        err = PROJ + "/logs/{sample}_featureCounts.err"
+    threads:
+        12
+    shell:
+        """
+        if [ "{params.args2}" != "" ]; then
+            featureCounts \
+              {params.args} \
+              {params.args2} \
+              -a {params.ftfile} \
+              -o {params.tsv} \
+              -T {threads} \
+              {input.bam}
+        fi
+        
+        featureCounts \
+            {params.args} \
+            -a {params.ftfile} \
+            -o {output.tsv} \
+            -T {threads} \
+            {input.bam}
+        """
+
+# get read counts from bams spikein
+rule featureCounts_spikein:
+    input:
+        bam   = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
+        bai   = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam.bai"
+    output:
+        tsv = PROJ + "/counts/{sample}_" + INDEX_SPIKE + "_featureCounts.tsv"
+    params:
+        job_name = PROJ + "_featureCounts_spikein",
+        args     = _get_featCout(ORIENTATION),
+        args2    = lambda wildcards: config["CMD_PARAMS"].get("featureCounts", ""),
+        tsv      = PROJ + "/counts/{sample}_" + INDEX_SPIKE + "_featureCounts_enrich.tsv",
+        ftfile   = FC_SPIKE
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 0.5, 4)
+    log:
+        out = PROJ + "/logs/{sample}_featureCounts_spikin.out",
+        err = PROJ + "/logs/{sample}_featureCounts_spikin.err"
+    message:
+        "featureCounts for spikein {wildcards.sample}"
+    threads:
+        12
+    shell:
+        """
+        if [ "{params.args2}" != "" ]; then
+            featureCounts \
+              {params.args} \
+              {params.args2} \
+              -a {params.ftfile} \
+              -o {params.tsv} \
+              -T {threads} \
+              {input.bam}
+        fi
+        
+        featureCounts \
+            {params.args} \
+            -a {params.ftfile} \
+            -o {output.tsv} \
+            -T {threads} \
+            {input.bam}
+        """
+        

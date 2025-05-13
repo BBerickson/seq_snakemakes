@@ -1,0 +1,36 @@
+#===== Config file for Xrn2_codon_optimized ===================
+
+# Path to bowtie2 index 
+GENELIST:
+    "Xrn2_1_782"
+INDEX_PATH:
+    "/beevol/home/erickson/ref/misc/Xrn2_1_782/"
+INDEX_MAP:
+    "Xrn2_1-782"
+INDEX_SAMPLE:
+    "Xrn2_1-782"
+INDEX_SPIKE:
+    ""
+MASK:
+  ""
+GTF:
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/Homo_sapiens.GRCh38.111.gtf"
+GTF_SPIKE:
+  ""
+FA_SAMPLE:
+  "/beevol/home/erickson/ref/misc/Xrn2_1_782/Xrn2.fa"
+FA_SPIKE:
+  ""
+MY_REF:
+  ""
+FW_REF:
+  ""
+REV_REF:
+  ""
+PI_REF:
+  ""
+EI_FW_REF:
+  ""
+EI_REV_REF:
+  ""
+  

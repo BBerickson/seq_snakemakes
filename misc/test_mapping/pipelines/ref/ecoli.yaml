@@ -1,0 +1,36 @@
+#===== Config file for e_coli ===================
+
+# Path to bowtie2 index 
+GENELIST:
+    "e_coli"
+INDEX_PATH:
+    "/beevol/home/erickson/ref/misc/e_coli/"
+INDEX_MAP:
+    "e_coli"
+INDEX_SAMPLE:
+    "e_coli"
+INDEX_SPIKE:
+    ""
+MASK:
+  ""
+GTF:
+  ""
+GTF_SPIKE:
+  ""
+FA_SAMPLE:
+  "/beevol/home/erickson/ref/misc/e_coli/e_coli_k12.v2.fa"
+FA_SPIKE:
+  ""
+MY_REF:
+  ""
+FW_REF:
+  ""
+REV_REF:
+  ""
+PI_REF:
+  ""
+EI_FW_REF:
+  ""
+EI_REV_REF:
+  ""
+  

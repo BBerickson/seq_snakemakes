@@ -1,0 +1,175 @@
+# ====== Rules for subsampling aligned reads with samtools =================================
+
+# calculating subsample numbers for group
+rule calculating_subsample_group:
+    input:
+        lambda wildcards: expand(
+            PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_count.txt",
+            sample = GROUPS[wildcards.group]
+        )
+    output:
+        PROJ + "/bams/{group}_" + INDEX_SAMPLE + "_subsample_frac.txt"
+    params:
+        job_name = "{group}_subsample",
+        group   = "{group}"
+    resources:
+        memory   = 4
+    log:
+        out = PROJ + "/logs/{group}_subsample.out",
+        err = PROJ + "/logs/{group}_subsample.err"
+    message:
+        "getting subsample norm for {wildcards.group}"
+    threads: 
+        1
+    script:
+        '../R_scripts/count_subsample.R'
+
+
+# Combine bamCoverage summaries
+rule calculating_subsample_summary:
+    input:
+        sorted(expand(
+            PROJ + "/bams/{group}_" + INDEX_SAMPLE + "_subsample_frac.txt",
+            group = GRPS_UNIQ
+        ))
+    output:
+        PROJ + "/stats/" + PROJ + "_" + INDEX_SAMPLE + "_subsample_frac.tsv"
+    params:
+        job_name = PROJ + "_calculating_subsample_summary"
+    resources:
+        memory   = 1
+    log:
+        out = PROJ + "/logs/" + PROJ + "_calculating_subsample_summary.out",
+        err = PROJ + "/logs/" + PROJ + "_calculating_subsample_summary.err"
+    message:
+        "Creating " + PROJ + " subsample summary"
+    threads:
+        1
+    run:
+        with open(output[0], "w") as out:
+            for file in input:
+                for line in open(file, "r"):
+                    out.write(line)
+
+
+
+# output subsampled bamfile
+rule subsample_dedup:
+    input:
+        bam    = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
+        bai    = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai",
+        counts = PROJ + "/stats/" + PROJ + "_" + INDEX_SAMPLE + "_subsample_frac.tsv"
+    output:
+        bam   = PROJ + "/bams_sub/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
+        bai   = PROJ + "/bams_sub/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai",
+        stats = PROJ + "/bams_sub/{sample}_" + INDEX_SAMPLE + "_subsample.txt"
+    params:
+        job_name = "subsample_{sample}",
+        samp     = "{sample}_" + INDEX_SAMPLE,
+        scale    = lambda wildcards, input: _get_norm_fraction(wildcards, INDEX_SAMPLE, input.counts)
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
+    log:
+        out = PROJ + "/logs/subsample_{sample}_" + INDEX_SAMPLE + ".out",
+        err = PROJ + "/logs/subsample_{sample}_" + INDEX_SAMPLE + ".err"
+    message:
+        "Subsampling reads for {wildcards.sample} INDEX_SAMPLE "
+    threads:
+        16
+    shell:
+        """
+          # find the min read count, calcuate the fraction of the reads to keep, samtools subset 
+          samtools view -@ {threads} -s {params.scale} -b {input.bam} > {output.bam}
+          
+          samtools index -@ {threads} {output.bam}
+        
+          echo "{params.samp} Sampled_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" >> {output.stats}
+        """
+
+
+# calculating subsample numbers for group
+rule calculating_subsample_group_spikin:
+    input:
+        lambda wildcards: expand(
+            PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_count.txt",
+            sample = GROUPS[wildcards.group]
+        )
+    output:
+        PROJ + "/bams/{group}_" + INDEX_SPIKE + "_subsample_frac.txt"
+    params:
+        job_name = "{group}_subsample",
+        group   = "{group}"
+    resources:
+        memory   = 4
+    log:
+        out = PROJ + "/logs/{group}_subsample.out",
+        err = PROJ + "/logs/{group}_subsample.err"
+    message:
+        "getting subsample norm for {wildcards.group}"
+    threads: 
+        1
+    script:
+        '../R_scripts/count_subsample.R'
+
+
+# Combine bamCoverage summaries
+rule calculating_subsample_spikin_summary:
+    input:
+        sorted(expand(
+            PROJ + "/bams/{group}_" + INDEX_SPIKE + "_subsample_frac.txt",
+            group = GRPS_UNIQ
+        ))
+    output:
+        PROJ + "/stats/" + PROJ + "_" + INDEX_SPIKE + "_subsample_frac.tsv"
+    params:
+        job_name = PROJ + "_calculating_subsample_summary"
+    resources:
+        memory   = 1
+    log:
+        out = PROJ + "/logs/" + PROJ + "_calculating_subsample_summary.out",
+        err = PROJ + "/logs/" + PROJ + "_calculating_subsample_summary.err"
+    message:
+        "Creating " + PROJ + " subsample summary"
+    threads:
+        1
+    run:
+        with open(output[0], "w") as out:
+            for file in input:
+                for line in open(file, "r"):
+                    out.write(line)
+
+
+
+# output subsampled bamfile
+rule subsample_dedup_spikin:
+    input:
+        bam    = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
+        bai    = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam.bai",
+        counts = PROJ + "/stats/" + PROJ + "_" + INDEX_SPIKE + "_subsample_frac.tsv"
+    output:
+        bam   = PROJ + "/bams_sub/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
+        bai   = PROJ + "/bams_sub/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam.bai",
+        stats = PROJ + "/bams_sub/{sample}_" + INDEX_SPIKE + "_subsample.txt"
+    params:
+        job_name = "subsample_{sample}",
+        samp     = "{sample}_" + INDEX_SPIKE,
+        scale    = lambda wildcards, input: _get_norm_fraction(wildcards, INDEX_SPIKE, input.counts)
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
+    log:
+        out = PROJ + "/logs/subsample_{sample}_" + INDEX_SPIKE + ".out",
+        err = PROJ + "/logs/subsample_{sample}_" + INDEX_SPIKE + ".err"
+    message:
+        "Subsampling reads for {wildcards.sample} INDEX_SPIKE "
+    threads:
+        16
+    shell:
+        """
+          # find the min read count, calcuate the fraction of the reads to keep, samtools subset 
+          samtools view -@ {threads} -s {params.scale} -b {input.bam} > {output.bam}
+          
+          samtools index -@ {threads} {output.bam}
+        
+          echo "{params.samp} Sampled_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" >> {output.stats}
+        """
+                    

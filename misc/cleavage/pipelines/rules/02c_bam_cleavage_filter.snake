@@ -1,0 +1,34 @@
+# ===== Rules to count reads overlapping genes =================================
+
+
+# Run cleavage_filter_bam
+rule cleavage_filter_bam:
+    input:
+        bam   = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
+        bai   = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai"
+    output:
+        bam   = PROJ + "/cleavage/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
+        bai   = PROJ + "/cleavage/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai"
+    params:
+        job_name = PROJ + "{sample}_cleavage",
+        TES      = "/beevol/home/erickson/ref/hg38_p14/alt_ref/hg38_TES_5bp_slop.bed",
+        sortname = "{sample}",
+        counts = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_count.txt"
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 0.5, 4)
+    log:
+        out = PROJ + "/logs/{sample}_cleavage.out",
+        err = PROJ + "/logs/{sample}_cleavage.err"
+    threads:
+        12
+    shell:
+        """
+          bedtools intersect -a {input.bam} -b {params.TES} -v -F 1.0 \
+          | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+          > {output.bam}
+        
+        samtools index -@ {threads} {output.bam}
+        echo "{params.sortname} Clavage_Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" >> {params.counts}
+
+        
+        """

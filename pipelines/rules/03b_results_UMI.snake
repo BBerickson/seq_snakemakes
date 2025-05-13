@@ -1,0 +1,50 @@
+# ====== Rules for getting overall results =================================
+
+# making count file
+rule featurecount_summary:
+    input:
+        PROJ + "/counts/{sample}_" + INDEX_SAMPLE + "_featureCounts.tsv"
+    output:
+        PROJ  + "/counts/{sample}_count.txt"
+    params:
+        job_name = "{sample}_count_summary",
+        index = [INDEX_SAMPLE]
+    resources:
+        memory   = 4
+    log:
+        out = PROJ + "/logs/{sample}_count_summary.out",
+        err = PROJ + "/logs/{sample}_count_summary.err"
+    threads: 
+        1
+    script:
+        '../R_scripts/featurecount_summary.R'
+        
+# gathering results
+rule gathering_results:
+    input:
+        PROJ + "/stats/" + PROJ + "_cutadapt.tsv",
+        PROJ + "/stats/" + PROJ + "_aligned.tsv",
+        PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_UMI_dedup.tsv",
+        expand( PROJ + "/counts/{sample}_count.txt",
+            sample = SAMS_UNIQ
+        ),
+        #PROJ + "/report/" + PROJ + "_fragmentSize.pdf"
+    output:
+        PROJ + "/report/" + PROJ + "_results.tsv"
+    params:
+        job_name  = "results",
+        index_map = INDEX_MAP,
+        project   = PROJ
+    resources:
+        memory   = 4
+    log:
+        out = PROJ + "/logs/results.out",
+        err = PROJ + "/logs/results.err"
+    message:
+        "getting final results"
+    threads: 
+        1
+    script:
+        '../R_scripts/results_UMI.R'
+  
+

@@ -1,0 +1,267 @@
+# ===== Snake file for processing Bowtie ================================
+
+# Configure shell for all rules
+shell.executable("/bin/bash")
+shell.prefix("source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; ")
+
+# python packages
+import os
+import glob
+import re
+
+# include my python common functions
+include: "funs.py"
+
+# Add genome specific config
+GENOME = config["GENOME"]
+
+GENOME_CONFIG = "pipelines/ref/" + GENOME + "_FP.yaml"
+
+if not os.path.exists(GENOME_CONFIG):
+    sys.exit("ERROR: " + GENOME + " is not a valid GENOME selection.")
+
+configfile:
+    GENOME_CONFIG
+
+# Parameters from config.yaml
+PROJ           = config["PROJ"]
+ALL_SAMPLES    = config["SAMPLES"]
+SEQ_DATE       = config["SEQ_DATE"]
+INDEX_SAMPLE   = config["INDEX_SAMPLE"]
+INDEX          = config["INDEX_PATH"]
+CHROMS         = config["CHROMS"]
+GTF            = config["GTF"]
+GENES          = config["GENES"]
+MASK           = config["MASK"]
+CMD_PARAMS     = config["CMD_PARAMS"]
+COLORS         = config["COLORS"]
+ORIENTATION    = config["ORIENTATION"]
+TEST_GENES     = config["TEST_GENES"]
+USER           = config["USER"]
+
+PAUSE_GENES     = config["PAUSE_GENES"]
+PAUSE_MASK      = config["PAUSE_MASK"]
+PAUSE_MASK      = ",".join(PAUSE_MASK)
+WIN_SIZE        = config["WIN_SIZE"]
+STRENGTH_GROUPS = config["STRENGTH_GROUPS"]
+PAUSE_ROUND     = config["PAUSE_ROUND"]
+
+GENE_SUB_BEDS   = config["GENE_SUBSAMPLE_BEDS"]
+PAUSE_META_BEDS = config["PAUSE_META_BEDS"]
+
+GENE_SUB_BEDS      = config["GENE_SUBSAMPLE_BEDS"]
+META_BEDS          = config["META_BEDS"]
+
+
+# Directories for data and scripts
+DICT_DIR     = PROJ + "/dicts"
+SUB_DICT_DIR = DICT_DIR + "/SUB_DICT"
+SRC       = "pipelines/src"
+
+# Files for metaplots
+GENE_SUB_REGS = list(GENE_SUB_BEDS.keys())
+
+if GENE_SUB_REGS & META_BEDS.keys():
+    sys.exit("ERROR: META_BEDS and GENE_SUBSAMPLE_BEDS must have different labels. Files provided by GENE_SUBSAMPLE_BEDS will get added to META_BEDS.")
+
+META_BEDS.update(dict(GENE_SUB_BEDS))
+REGIONS = list(META_BEDS.keys())
+
+# Files for metaplots
+# need gene subsampling parameters so these results are included in pipeline
+if list(GENE_SUB_BEDS.keys()) & PAUSE_META_BEDS.keys():
+    sys.exit("ERROR: PAUSE_META_BEDS and GENE_SUBSAMPLE_BEDS must have different labels. Files provided by GENE_SUBSAMPLE_BEDS will get added to PAUSE_META_BEDS.")
+
+PAUSE_META_BEDS.update(dict(GENE_SUB_BEDS))
+
+PAUSE_REGIONS = list(PAUSE_META_BEDS.keys())
+
+
+# Scripts to compile
+SCRIPTS = glob.glob(SRC + "/*.cpp")
+SCRIPTS = [os.path.splitext(os.path.basename(script))[0] for script in SCRIPTS]
+
+# Include intermediate files
+do_nothing = lambda x: x
+
+if config["KEEP_INTERMEDIATE_FILES"]:
+    temp_fn = do_nothing
+else:
+    temp_fn = temp
+
+if config["KEEP_META_FILES"]:
+    meta_temp_fn = do_nothing
+else:
+    meta_temp_fn = temp
+
+# Simplify ALL_SAMPLES dictionary
+# ALL_SAMPLES = {'SECTION-1':{'SAMPLING-GROUP-1':{newname1:[fastq1],newname2:[fastq2]}}} or {'SECTION-1':{'SAMPLING-GROUP-1':{newname1:[fastq1,input1],newname2:[fastq2,input2]}}}
+# collapse sections and combine subsampling groups
+def process_samples(all_samples):
+    SAMPLES = {}  # SAMPLES {newname1:[fastq1],newname2:[fastq2]}
+    SAMPIN = {}   # SAMPIN {newname1:[fastq1,input1],newname2:[fastq2,input2]}
+    GROUPS = {}   # GROUPS {SAMPLING-GROUP-1:[fastq1], SAMPLING-GROUP-2:[fastq2]}
+
+    for section, pairs in all_samples.items():
+        for pair_name, samples in pairs.items():
+            for sample_name, values in samples.items():
+                fastq = values[0]
+                input_file = values[1] if len(values) > 1 else None
+
+                # Populate SAMPLES
+                SAMPLES.setdefault(sample_name, []).append(fastq)
+
+                # Populate SAMPIN
+                if input_file:
+                    SAMPIN[sample_name] = [fastq, input_file]
+                else:
+                    SAMPIN[sample_name] = [fastq]
+
+                # Populate GROUPS
+                GROUPS.setdefault(pair_name, []).append(fastq)
+
+    return SAMPLES, SAMPIN, GROUPS
+
+SAMPLES, SAMPIN, GROUPS = process_samples(ALL_SAMPLES)
+
+# unpack samples and groups
+SAMS = [[y, x] for y in SAMPIN for x in SAMPIN[y]]
+NAMS = [x[0] for x in SAMS] # newnames
+SAMS = [x[1] for x in SAMS] # samples
+GRPS = [[y, x] for y in GROUPS for x in GROUPS[y]]
+GRPS = [x[0] for x in GRPS] # groups
+NAMS_UNIQ = list(dict.fromkeys(NAMS))
+GRPS_UNIQ = list(dict.fromkeys(GRPS))
+SAMS_UNIQ = list(dict.fromkeys(SAMS))
+
+# Gene subsampling groups
+SAM_GRPS      = [x + "-" + y for y in GROUPS for x in GROUPS[y]]
+GENE_SUB_GRPS = [x + "_" + y for x in SAM_GRPS for y in GENE_SUB_REGS]
+GENE_SUB_GRPS = SAM_GRPS + GENE_SUB_GRPS
+
+# Pausing strength parameters
+def _create_dict(keys, values):
+    if (len(keys) != len(values)) & (len(values) != 1):
+        sys.exit("ERROR: For pause strength parameters must provide a single value or a value for each group.")
+
+    if len(values) == 1:
+        values = [values] * len(keys)
+
+    d = dict(zip(keys, values))
+
+    return(d)
+
+PAUSE_ROUND = _create_dict(STRENGTH_GROUPS, PAUSE_ROUND)
+
+
+# Add label for unfiltered pauses ("_")
+ALL_STREN_GRPS = STRENGTH_GROUPS.copy()
+ALL_STREN_GRPS.append("_")
+
+# Print summary of samples and groups
+print("SAMPLES (%s): %s\n" % (len(SAMPLES), SAMPLES))
+print("GROUPS (%s): %s\n" % (len(GROUPS), GROUPS))
+print("SAMPIN (%s): %s\n" % (len(SAMPIN), SAMPIN))
+print("SAM_GRPS (%s): %s\n" % (len(SAM_GRPS), SAM_GRPS))
+print("GENE_SUB_GRPS (%s): %s\n" % (len(GENE_SUB_GRPS), GENE_SUB_GRPS))
+print("GRPS (%s): %s\n" % (len(GRPS), GRPS))
+print("SAMS_UNIQ (%s): %s\n" % (len(SAMS_UNIQ), SAMS_UNIQ))
+print("NAMS_UNIQ (%s): %s\n" % (len(NAMS_UNIQ), NAMS_UNIQ))
+print("GRPS_UNIQ (%s): %s\n" % (len(GRPS_UNIQ), GRPS_UNIQ))
+
+# Wildcard constraints
+GRP_REGEX = "[a-zA-Z0-9\-]+"
+
+wildcard_constraints:
+    region  = "[a-zA-Z0-9\-]+",
+    reads   = "[a-zA-Z]+",
+    length  = "[a-zA-Z]+",
+    sample  = "[a-zA-Z0-9_]+",
+    newnam  = "[a-zA-Z0-9_]+",
+    group   = GRP_REGEX,
+    sam_grp = "[a-zA-Z0-9_\-]+-[a-zA-Z0-9_\-]+",
+
+    win          = "[0-9]+",
+    stren        = "(_(?!sep).*_)",
+    stren_grp    = "(_(?!sep).*_|_)",
+    pause_region = "[a-zA-Z0-9\-]+"
+
+
+COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
+
+
+
+# Final output files
+rule all:
+    input:
+        # Compile scripts
+        expand(
+            SRC + "/{script}",
+            script = SCRIPTS
+        ),
+        
+        # base bed files
+        PROJ + "/stats/"+ PROJ + "_filt.tsv",
+        
+        # Sample subsampling
+        PROJ + "/stats/" + PROJ + "_subsample.tsv",
+        
+        # Gene subsampling
+        expand(
+            PROJ + "/stats/{group}_{sub_region}_summary.tsv",
+            group = GRPS_UNIQ, sub_region = GENE_SUB_REGS
+        ),
+
+        expand(
+            DICT_DIR + "/{group}_{sub_region}_cleanup.txt",
+            group = GRPS_UNIQ, sub_region = GENE_SUB_REGS
+        ),
+
+        # Subsampling tests
+        PROJ + "/stats/" + PROJ + "_subsample_test.tsv",
+
+        PROJ + "/stats/" + PROJ + "_gene_subsample_test.tsv",
+
+        # Pauses
+        expand(
+            PROJ + "/beds/pauses/{sam_grp}_{win}_pauses.bed.gz",
+            sam_grp = GENE_SUB_GRPS, win = WIN_SIZE
+        ),
+
+        expand(
+            PROJ + "/stats/" + PROJ + "_{win}{stren_grp}pausing.tsv",
+            sam_grp = GENE_SUB_GRPS, win = WIN_SIZE, stren_grp = ALL_STREN_GRPS
+        ),
+        
+        # plot files
+        PROJ  + "/find_pauses/overlap_bars.pdf",
+        PROJ  + "/find_pauses/reads_per_pause.pdf"
+
+
+# Setup code for pipeline
+include: "rules/00_FP_setup.snake"
+
+# make Bed files
+include: "rules/04_FP_bed.snake"
+
+# Sample subsampling
+include: "rules/05_FP_subsample.snake"
+
+# Create bed files for metaplots
+include: "rules/07_FP_metaplots.snake"
+include: "rules/05_FP_metaplots_nosub.snake"
+
+# Create bedgraphs and bigwigs 
+include: "rules/07_FP_bigwigs.snake"
+
+# Gene subsampling
+include: "rules/06_FP_gene_subsample.snake"
+
+# Identify pause sites
+include: "rules/08_FP_find_pauses.snake"
+
+# Test output files
+include: "rules/08_FP_test.snake"
+
+# plot output files
+include: "rules/09_FP_plots.snake"

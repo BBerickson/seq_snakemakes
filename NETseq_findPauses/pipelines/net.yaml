@@ -1,0 +1,13 @@
+#===== Config file for filtering and aligning mNET-seq reads ===================
+
+
+# Should intermediate file be kept
+KEEP_INTERMEDIATE_FILES:
+    False
+
+
+# Should metaplot files be kept:
+KEEP_META_FILES:
+    False
+
+
