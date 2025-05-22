@@ -11,26 +11,3 @@ INDEX_SAMPLE:
     "hg38"
 INDEX_SPIKE:
     "mm39"
-MASK:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_snoRNA.bed"
-GTF:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_chrfix_GRCh38.113.gtf"
-GTF_SPIKE:
-  "/beevol/home/bentleyd/ref/mm39/ref_bed/mm39_chrfix_GRCm39.113.gtf"
-FA_SAMPLE:
-  "/beevol/home/bentleyd/ref/hg38/genome/Homo_sapiens.GRCh38.dna.primary_assembly.fa"
-FA_SPIKE:
-  "/beevol/home/bentleyd/ref/mm39/genome/Mus_musculus.GRCm39.dna.primary_assembly.fa"
-MY_REF:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38.bed"
-FW_REF:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_pos.bed"
-REV_REF:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_neg.bed"
-PI_REF:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/PI.bed"
-EI_FW_REF:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/EI_anti_pos.bed"
-EI_REV_REF:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/EI_anti_neg.bed"
-  

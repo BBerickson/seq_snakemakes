@@ -17,7 +17,7 @@ rule star_twopass:
         args     = CMD_PARAMS["star"],
         out      = PROJ + "/bams/{sample}_"
     resources:
-        memory = lambda wildcards, input: memory_estimator([input.R1, input.R2], 3, 30)
+        memory = lambda wildcards, input: memory_estimator([input.R1, input.R2], 3, 30, 300) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/{sample}_star_twopass.out",
         err = PROJ + "/logs/{sample}_star_twopass.err"
@@ -59,7 +59,7 @@ rule star_2pass_summary:
     params:
         job_name = "star_2pass_summary"
     resources:
-        memory=1
+        memory = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out=PROJ + "/logs/star_summary.out",
         err=PROJ + "/logs/star_summary.err"

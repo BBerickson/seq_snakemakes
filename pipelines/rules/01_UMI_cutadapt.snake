@@ -99,7 +99,7 @@ rule cutadapt_summary:
     params:
         job_name = PROJ + "_cutadapt_summary"
     resources:
-        memory   = 1
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/" + PROJ + "_cutadapt_summary.out",
         err = PROJ + "/logs/" + PROJ + "_cutadapt_summary.err"

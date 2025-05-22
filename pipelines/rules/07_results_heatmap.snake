@@ -23,7 +23,7 @@ rule create_report:
     params:
         job_name   = PROJ + "_heatmap_plots"
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 4) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/" + PROJ + "_heatmap_plots.out",
         err = PROJ + "/logs/" + PROJ + "_heatmap_plots.err"

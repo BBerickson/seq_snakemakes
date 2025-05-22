@@ -51,7 +51,7 @@ rule fastqc_summary:
     params:
         job_name = PROJ + "_fastqc_summary"
     resources:
-        memory   = 1
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/" + PROJ + "_fastqc_summary.out",
         err = PROJ + "/logs/" + PROJ + "_fastqc_summary.err"

@@ -6,45 +6,49 @@ shell.prefix("source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; 
 
 # python packages
 import os
-import glob
 import re
-import gzip
+from pathlib import Path
 
-# include my python common functions
+# Include custom Python functions
 include: "funs.py"
 
-# Add genome specific config
+# ------------------------------------------------------------------------------
+# Load main genome config
+# ------------------------------------------------------------------------------
+
 GENOME = config["GENOME"]
+GENOME_CONFIG = Path("pipelines/ref") / f"{GENOME}.yaml"
 
-GENOME_CONFIG = "pipelines/ref/" + GENOME + ".yaml"
+if not GENOME_CONFIG.exists():
+    sys.exit(f"ERROR: {GENOME} is not a valid GENOME selection.")
 
-if not os.path.exists(GENOME_CONFIG):
-    sys.exit("ERROR: " + GENOME + " is not a valid GENOME selection.")
+# Load the main config file into Snakemake's config dictionary
+configfile: str(GENOME_CONFIG)
 
-configfile:
-    GENOME_CONFIG
+# ------------------------------------------------------------------------------
+# Assign parameters from configs
+# ------------------------------------------------------------------------------
 
-# Parameters from config.yaml
-PROJ            = config["PROJ"]
-RAW_DATA        = config["RAW_DATA"]
-ALL_SAMPLES     = config["SAMPLES"]
-SEQ_DATE        = config["SEQ_DATE"]
-BARCODES        = config["BARCODES"]
-INDEX_PATH      = config["INDEX_PATH"]
-INDEX_MAP       = config["INDEX_MAP"]
-INDEX_SAMPLE    = config["INDEX_SAMPLE"]
-INDEX_SPIKE     = config["INDEX_SPIKE"]
-FA_SAMPLE       = config["FA_SAMPLE"]
-FA_SPIKE        = config["FA_SPIKE"]
-FC_FILE         = config["GTF"]
-FC_SPIKE        = config["GTF_SPIKE"]
-MASK            = config["MASK"]
-CMD_PARAMS      = config["CMD_PARAMS"]
-COLORS          = config["COLORS"]
-NORM            = config["NORM"]
-ORIENTATION     = config["ORIENTATION"]
-USER            = config["USER"]
-GENELIST        = config["GENELIST"]
+PROJ         = config.get("PROJ")
+RAW_DATA     = config.get("RAW_DATA")
+ALL_SAMPLES  = config.get("SAMPLES")
+SEQ_DATE     = config.get("SEQ_DATE")
+BARCODES     = config.get("BARCODES")
+INDEX_PATH   = config.get("INDEX_PATH")
+INDEX_MAP    = config.get("INDEX_MAP")
+INDEX_SAMPLE = config.get("INDEX_SAMPLE")
+INDEX_SPIKE  = ""
+FA_SAMPLE    = config.get("FA_SAMPLE")
+FA_SPIKE     = ""
+FC_FILE      = config.get("GTF")
+FC_SPIKE     = ""
+MASK         = config.get("MASK")
+CMD_PARAMS   = config.get("CMD_PARAMS")
+COLORS       = config.get("COLORS")
+NORM         = config.get("NORM")
+ORIENTATION  = config.get("ORIENTATION")
+USER         = config.get("USER")
+GENELIST     = config.get("GENELIST","test")
 
 PROJ          =  PROJ + "_" + GENELIST
 
@@ -124,14 +128,10 @@ BAM_PATH = _get_bampath(NORM)
 # Final output files
 rule all:
     input:
-        # clumpify
-        PROJ + "/stats/" + PROJ + "_clumpify.tsv",
+        # process summary files
+        expand("{proj}/stats/{proj}_{step}.tsv", proj=PROJ, step=["clumpify", "bbduk", "aligned"]),
         
-        # bbduk
-        PROJ + "/stats/" + PROJ + "_bbduk.tsv",
-
         # Bowtie2
-        PROJ + "/stats/" + PROJ + "_aligned.tsv",
         #PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + "_bam_URL.txt",
         
         # results

@@ -12,7 +12,7 @@ rule my_bowtie_sample_url:
         job_name = PROJ + "_bowtie_sample_url",
         url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam"
     resources:
-        memory   = 1
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/{sample}_" + PROJ + "_bowtie_sample_url.out",
         err = PROJ + "/logs/{sample}_" + PROJ + "_bowtie_sample_url.err"
@@ -40,7 +40,7 @@ rule bowtie_sample_urls:
     params:
         job_name = PROJ + "_bowtie_url"
     resources:
-        memory   = 1
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/" + PROJ + "_bowtie_sample_url.out",
         err = PROJ + "/logs/" + PROJ + "_bowtie_sample_url.err"
@@ -66,7 +66,7 @@ rule my_bowtie_spike_url:
         job_name = PROJ + "_bowtie_sample_url",
         url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam"
     resources:
-        memory   = 1
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/{sample}_" + PROJ + "_bowtie_spike_url.out",
         err = PROJ + "/logs/{sample}_" + PROJ + "_bowtie_spike_url.err"
@@ -93,7 +93,7 @@ rule bowtie_spike_urls:
     params:
         job_name = PROJ + "_bowtie_spike_url"
     resources:
-        memory   = 1
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/" + PROJ + "_bowtie_spike_url.out",
         err = PROJ + "/logs/" + PROJ + "_bowtie_spike_url.err"

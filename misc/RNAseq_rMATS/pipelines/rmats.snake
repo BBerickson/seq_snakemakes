@@ -1,39 +1,45 @@
 # ===== Snake file for processing Bowtie ================================
 
+
 # Configure shell for all rules
 shell.executable("/bin/bash")
 shell.prefix("source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; ")
 
 # python packages
 import os
-import glob
 import re
+from pathlib import Path
 
-# include my python common functions
+# Include custom Python functions
 include: "funs.py"
 
-# Add genome specific config
+# ------------------------------------------------------------------------------
+# Load main genome config
+# ------------------------------------------------------------------------------
+
 GENOME = config["GENOME"]
+GENOME_CONFIG = Path("pipelines/ref") / f"{GENOME}.yaml"
 
-GENOME_CONFIG = "pipelines/ref/" + GENOME + ".yaml"
+if not GENOME_CONFIG.exists():
+    sys.exit(f"ERROR: {GENOME} is not a valid GENOME selection.")
 
-if not os.path.exists(GENOME_CONFIG):
-    sys.exit("ERROR: " + GENOME + " is not a valid GENOME selection.")
+# Load the main config file into Snakemake's config dictionary
+configfile: str(GENOME_CONFIG)
 
-configfile:
-    GENOME_CONFIG
+# ------------------------------------------------------------------------------
+# Assign parameters from configs
+# ------------------------------------------------------------------------------
 
-# Parameters from config.yaml
-PROJ            = config["PROJ"]
-RAW_DATA        = config["RAW_DATA"]
-SAMPLES         = config["SAMPLESr"]
-GROUPS_COMP     = config["GROUPS_COMP"]
-SEQ_DATE        = config["SEQ_DATE"]
-GTF             = config["GTF"]
-CMD_PARAMS      = config["CMD_PARAMS"]
-NORM            = config["NORM"]
-ORIENTATION      = config["ORIENTATION"]
-USER            = config["USER"]
+PROJ         = config.get("PROJ")
+RAW_DATA     = config.get("RAW_DATA")
+ALL_SAMPLES  = config.get("SAMPLESr")
+SEQ_DATE     = config.get("SEQ_DATE")
+GROUPS_COMP  = config.get("GROUPS_COMP")
+GTF          = config.get("GTF")
+CMD_PARAMS   = config.get("CMD_PARAMS")
+NORM         = config.get("NORM")
+ORIENTATION  = config.get("ORIENTATION")
+USER         = config.get("USER")
 
 # Sample and group lists
 SAMS = [[y, x] for y in SAMPLES for x in SAMPLES[y]]

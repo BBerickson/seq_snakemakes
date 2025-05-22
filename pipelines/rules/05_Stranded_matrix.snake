@@ -47,7 +47,7 @@ rule standared_marix_url:
         groupkey = lambda wildcards: next((k for k, v in GROUPS.items() if wildcards.newnam in v), "self"),
         url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{region}_{covarg}_{sense_asense}_matrix.gz"
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/{newnam}_{region}_{covarg}_{sense_asense}_matrix_url.out",
         err = PROJ + "/logs/{newnam}_{region}_{covarg}_{sense_asense}_matrix_url.err"
@@ -73,7 +73,7 @@ rule matrix_url_summary:
     params:
         job_name = "{region}_{covarg}_{sense_asense}_matrix_url_summary"
     resources:
-        memory = 4
+        memory = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/{region}_{covarg}_{sense_asense}_matrix_url_summary.out",
         err = PROJ + "/logs/{region}_{covarg}_{sense_asense}_matrix_url_summary.err"

@@ -45,7 +45,7 @@ rule bamCoverageURL:
         color    = lambda wildcards: _get_col(wildcards.newnam, COLS_DICT),
         url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + ".bw"
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/{newnam}_bamCoverage_URL.out",
         err = PROJ + "/logs/{newnam}_bamCoverage_URL.err"
@@ -72,7 +72,7 @@ rule bamCoverage_summary:
     params:
         job_name = PROJ + "_bamCoverage_summary"
     resources:
-        memory   = 1
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/" + PROJ + "_bamCoverage_summary.out",
         err = PROJ + "/logs/" + PROJ + "_bamCoverage_summary.err"
@@ -131,7 +131,7 @@ rule bamCoverage_spike_URL:
         color    = lambda wildcards: _get_col(wildcards.newnam, COLS_DICT),
         url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_norm_CPM.bw"
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/{newnam}_spike_bamCoverage_URL.out",
         err = PROJ + "/logs/{newnam}_spike_bamCoverage_URL.err"
@@ -159,7 +159,7 @@ rule bamCoverage_spike_summary:
     params:
         job_name = PROJ + "_bamCoverage_spike_summary"
     resources:
-        memory   = 1
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/" + PROJ + "_bamCoverage_spike_summary.out",
         err = PROJ + "/logs/" + PROJ + "_bamCoverage_spike_summary.err"

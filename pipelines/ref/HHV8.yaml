@@ -9,18 +9,12 @@ INDEX_MAP:
     "HHV8"
 INDEX_SAMPLE:
     "HHV8"
-INDEX_SPIKE:
-    ""
 MASK:
   ""
 GTF:
   ""
-GTF_SPIKE:
-  ""
 FA_SAMPLE:
   "/beevol/home/erickson/ref/HHV8/HHV8.fa"
-FA_SPIKE:
-  ""
 MY_REF:
   "/beevol/home/erickson/ref/HHV8/KSHV_genes.bed"
 FW_REF:
@@ -28,9 +22,5 @@ FW_REF:
 REV_REF:
   "/beevol/home/erickson/ref/HHV8/KSHV_genes_rev.bed"
 PI_REF:
-  ""
-EI_FW_REF:
-  ""
-EI_REV_REF:
   ""
   

@@ -17,7 +17,7 @@ rule create_5_mixed_sense_antisense_matrix:
         samplab   = GROUPS,
         groulab   = "{group}"
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/" + PROJ + "_{group}_5prim_mixed_sense_antisense_matrix.out",
         err = PROJ + "/logs/" + PROJ + "_{group}_5prim_mixed_sense_antisense_matrix.err"
@@ -41,7 +41,7 @@ rule create_5_mixed_sense_matrix:
         samplab   = GROUPS,
         groulab   = "{group}"
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/" + PROJ + "_{group}_5prim_mixed_sense_matrix.out",
         err = PROJ + "/logs/" + PROJ + "_{group}_5prim_mixed_sense_matrix.err"
@@ -65,7 +65,7 @@ rule create_5_mixed_antisense_matrix:
         samplab   = GROUPS,
         groulab   = "{group}"
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/" + PROJ + "_{group}_5prim_mixed_antisense_matrix.out",
         err = PROJ + "/logs/" + PROJ + "_{group}_5prim_mixed_antisense_matrix.err"
@@ -89,7 +89,7 @@ rule create_3_mixed_sense_matrix:
         samplab   = GROUPS,
         groulab   = "{group}"
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/" + PROJ + "_{group}_3prim_mixed_sense_matrix.out",
         err = PROJ + "/logs/" + PROJ + "_{group}_3prim_mixed_sense_matrix.err"
@@ -121,7 +121,7 @@ rule create_5_sense_antisense_heatmap_plots:
         setcol   = lambda wildcards: _rgb2hexplus(SAMPLES,wildcards.group,COLS_DICT),
         setcol2  = lambda wildcards: _rgb2hexplus2(SAMPLES,wildcards.group,COLS_DICT)
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 5) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/" + PROJ + "_{group}_5prim_heatmap_plots.out",
         err = PROJ + "/logs/" + PROJ + "_{group}_5prim_heatmap_plots.err"

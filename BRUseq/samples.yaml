@@ -89,17 +89,12 @@ CMD_PARAMS:
     bamCoverageBL: "" #  " --blackListFileName /beevol/home/erickson/ref/hg38/ref/merge_filter_RNAs.bed "
     fragment_size: " --maxFragmentLength 1000 "
     
-# barcode = illumina seq file
-#   CCATTGTT=AATGATACGGCGACCACCGAGATCTACACAACAATGGACACTCTTTCCCTACACGACGCTCTTCCGA
-#   CTACTTGT=CAAGCAGAAGACGGCATACGAGATACAAGTAGGTGACTGGAGTTCAGACGTGTGCTCTTCCGA
-
-# TruSeq_Universal_Adapters 
-#   GATCGGAAGAGCACACGTCT,ACACTCTTTCCCTACACGACGCTCTTCCGATCT
-# BARCODES:
-    # "GATCGGAAGAGCACACGTCT,ACACTCTTTCCCTACACGACGCTCTTCCGATCT"
-    
+# a fasta file with the universal adaptors or literal strings
+# "pipelines/ref/truseq_i5i7.fa"
+# "pipelines/ref/truseq_rna.fa"
+# "GATCGGAAGAGCACACGTCT,ACACTCTTTCCCTACACGACGCTCTTCCGATCT"
 BARCODES:
-    "pipelines/ref/truseq_i5i7.fa"     
+    "pipelines/ref/truseq_rna.fa"     
 ORIENTATION:
     "R2R1" # R1R2
     

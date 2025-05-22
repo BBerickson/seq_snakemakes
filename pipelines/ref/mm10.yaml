@@ -9,18 +9,12 @@ INDEX_MAP:
     "mm10"
 INDEX_SAMPLE:
     "mm10"
-INDEX_SPIKE:
-    ""
 MASK:
   "/beevol/home/bentleyd/ref/mm10/ref_bed/snoRNAs.bed"
 GTF:
   "/beevol/home/bentleyd/ref/mm10/ref_bed/mm10_chrfix.GRCm38.102.gtf"
-GTF_SPIKE:
-  ""
 FA_SAMPLE:
   "/beevol/home/bentleyd/ref/mm10/mm10.fa"
-FA_SPIKE:
-  ""
 MY_REF:
   "/beevol/home/bentleyd/ref/mm10/ref_bed/mm10gene.bed"
 FW_REF:
@@ -29,8 +23,4 @@ REV_REF:
   "/beevol/home/bentleyd/ref/mm10/ref_bed/mm10gene_neg.bed"
 PI_REF:
   "/beevol/home/bentleyd/ref/mm10/ref_bed/PI.bed"
-EI_FW_REF:
-  ""
-EI_REV_REF:
-  ""
   

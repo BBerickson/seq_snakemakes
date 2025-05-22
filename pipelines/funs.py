@@ -9,37 +9,45 @@ import itertools
 import subprocess
 
 # estimates the amount of memory based on file size
-def memory_estimator(input_files, multiplier, minsize=4):
-    total_size_gb = sum(os.path.getsize(f) for f in input_files) / (1024 ** 3)  # Convert bytes to GB
-    return round(max(total_size_gb * multiplier, minsize))  # Ensure at least minsize GB
+def get_file_size_gb(filepath):
+    """Returns the file size in gigabytes (GB)."""
+    return os.path.getsize(filepath) / (1024 ** 3)
 
-# extract barcode from fastq file
-def _get_barcodes(barcodes, filename):
-    patternfile = barcodes
-    
-    if os.path.exists(patternfile):
-        with gzip.open(filename, 'rt') as f:
-            header = f.readline().strip().split()
-            header2 = header[1].split(":")
-            my_indexs = header2[-1].split("+")
-        
-        index_patterns = {}
-        with open(patternfile) as pf:
-            for line in pf:
-                index, pattern = line.strip().split("=")
-                index_patterns[index] = pattern
-        
-        results = []
-        for t in my_indexs:
-            for p in index_patterns:
-                match = re.search(p, t)
-                if match:
-                    results.append(index_patterns[p])
-                    break  # Exit the loop if a match is found
+def memory_estimator(input_files, multiplier, minsize=1, maxsize=250, unit='GB'):
+    """
+    Estimates memory usage based on total file size.
+
+    Parameters:
+        input_files (list): List of file paths.
+        multiplier (float): Scaling factor for estimated memory.
+        minsize (int): Minimum memory in GB.
+        maxsize (int): Maximum memory in GB.
+        unit (str): 'GB' (default) or 'MB' for output unit.
+
+    Returns:
+        int: Estimated memory usage in the specified unit.
+    """
+    total_size_gb = sum(get_file_size_gb(f) for f in input_files)
+    estimated_gb = total_size_gb * multiplier
+    estimated_gb = max(estimated_gb, minsize)
+    estimated_gb = min(estimated_gb, maxsize)
+
+    if unit.upper() == 'MB':
+        return round(estimated_gb * 1024)
+    return round(estimated_gb)
+
+
+# returns literal or ref for bbduk
+def _bbduk_adapter_param(barcodes):
+    if os.path.isfile(barcodes):
+        return "ref={}".format(barcodes)
     else:
-        results = barcodes.strip().split()
-    
-    return ','.join(results)
+        if "," in barcodes:
+            adapters = [a.strip() for a in barcodes.split(",") if a.strip()]
+        else:
+            adapters = [a.strip() for a in barcodes.split() if a.strip()]
+        return "literal={}".format(','.join(adapters))
+
     
 # gets number for norm fraction sample
 def _get_norm_fraction(wildcards, index_type, filename):

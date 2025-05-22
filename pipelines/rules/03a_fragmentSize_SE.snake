@@ -37,7 +37,7 @@ rule read_size_png:
     params:
         job_name = "{sample}_SE_fragment_png"
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/{sample}_SE_read_size_png.out",
         err = PROJ + "/logs/{sample}_SE_read_size.err"
@@ -82,7 +82,7 @@ rule read_size_png_spike:
     params:
         job_name = "{sample}_SE_fragment_png_spike"
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/{sample}_spike_SE_read_size_png.out",
         err = PROJ + "/logs/{sample}_spike_SE_read_size.err"
@@ -104,7 +104,7 @@ rule read_results:
         job_name = "read_results",
         samp     = INDEX_SAMPLE
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/read_results.out",
         err = PROJ + "/logs/read_results.err"
@@ -129,7 +129,7 @@ rule read_results_spike:
         job_name = "read_spike_results",
         samp     = INDEX_SPIKE
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/read_spike_results.out",
         err = PROJ + "/logs/read_spike_results.err"
@@ -153,7 +153,7 @@ rule fragment_png:
         job_name  = "fragment_results_pdf",
         chunkSize = 4
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/fragment_results_pdf.out",
         err = PROJ + "/logs/fragment_results_pdf.err"
@@ -176,7 +176,7 @@ rule fragment_pdf_spike:
         job_name  = "fragment_spike_results_pdf",
         chunkSize = 4
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/fragment_spike_results_pdf.out",
         err = PROJ + "/logs/fragment_spike_results_pdf.err"

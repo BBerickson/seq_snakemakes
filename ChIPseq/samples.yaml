@@ -59,11 +59,11 @@ SAMPLES:
             
         SAMPLE-INPUT-PAIR-2:
             PP1-PNUTS-H66K_mdox_H3k9me2: 
-                - "H66KmdoxH3k9me3"
+                - "H66KmdoxH3k9me2"
                 - "H66K_mdox_input"
                 
             PP1-PNUTS-H66K_pdox_H3k9me2: 
-                - "H66KpdoxH3k9me3"
+                - "H66KpdoxH3k9me2"
                 - "H66K_pdox_input"
            
                   
@@ -107,9 +107,10 @@ CMD_PARAMS:
 USER:
   "User7"
   
-# barcode = illumina seq file or string AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC ATCTCGTATGCCGTCTTCTGCTTG
-#   CCATTGTT=AATGATACGGCGACCACCGAGATCTACACAACAATGGACACTCTTTCCCTACACGACGCTCTTCCGA
-#   CTACTTGT=CAAGCAGAAGACGGCATACGAGATACAAGTAGGTGACTGGAGTTCAGACGTGTGCTCTTCCGA
+# a fasta file with the universal adaptors or literal strings
+# "pipelines/ref/truseq_i5i7.fa"
+# "pipelines/ref/truseq_rna.fa"
+# "GATCGGAAGAGCACACGTCT,ACACTCTTTCCCTACACGACGCTCTTCCGATCT"
 BARCODES:
     "pipelines/ref/truseq_i5i7.fa"     
 ORIENTATION:

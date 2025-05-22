@@ -49,7 +49,7 @@ rule featurecount_spikein_summary:
         job_name = "{sample}_spikein_count_summary",
         index = [INDEX_SAMPLE, INDEX_SPIKE]
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/{sample}_spikein_count_summary.out",
         err = PROJ + "/logs/{sample}_spikein_count_summary.err"
@@ -73,7 +73,7 @@ rule calculating_OR:
         in_sam   = INDEX_SAMPLE,
         in_spk   = INDEX_SPIKE
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/{newnam}_OR.out",
         err = PROJ + "/logs/{newnam}_OR.err"
@@ -96,7 +96,7 @@ rule gathering_OR_results:
     params:
         job_name = "ORresults"
     resources:
-        memory   = 1
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/ORresults.out",
         err = PROJ + "/logs/ORresults.err"
@@ -131,7 +131,7 @@ rule gathering_results:
         job_name = "results",
         project  = PROJ
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/results.out",
         err = PROJ + "/logs/results.err"

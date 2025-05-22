@@ -42,7 +42,7 @@ rule standared_marix_url:
         url_fw  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{region}_{covarg}_pos_matrix.gz",
         url_rev  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{region}_{covarg}_neg_matrix.gz"
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/{newnam}_{region}_{covarg}_bi_matrix_url.out",
         err = PROJ + "/logs/{newnam}_{region}_{covarg}_bi_matrix_url.err"
@@ -70,7 +70,7 @@ rule matrix_url_summary:
     params:
         job_name = "{region}_{covarg}_bi_matrix_url_summary"
     resources:
-        memory = 4
+        memory = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/{region}_{covarg}_bi_matrix_url_summary.out",
         err = PROJ + "/logs/{region}_{covarg}_bi_matrix_url_summary.err"

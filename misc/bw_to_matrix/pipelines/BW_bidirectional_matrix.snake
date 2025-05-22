@@ -1,44 +1,70 @@
 # ===== Snake file for processing mNET-seq data ================================
 
-import os
-import glob
-import re
-
 # Configure shell for all rules
 shell.executable("/bin/bash")
 shell.prefix("source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; ")
 
-#include my python common functions
+# Python packages
+import os
+import sys
+import yaml
+from pathlib import Path
+
+# Include custom Python functions
 include: "funs.py"
 
-# Add genome specific config
+# ------------------------------------------------------------------------------
+# Load main genome config
+# ------------------------------------------------------------------------------
+
 GENOME = config["GENOME"]
+GENOME_CONFIG = Path("pipelines/ref") / f"{GENOME}.yaml"
 
-GENOME_CONFIG = "pipelines/ref/" + GENOME + ".yaml"
+if not GENOME_CONFIG.exists():
+    sys.exit(f"ERROR: {GENOME} is not a valid GENOME selection.")
 
-if not os.path.exists(GENOME_CONFIG):
-    sys.exit("ERROR: " + GENOME + " is not a valid GENOME selection.")
+# Load the main config file into Snakemake's config dictionary
+configfile: str(GENOME_CONFIG)
 
-configfile:
-    GENOME_CONFIG
+# ------------------------------------------------------------------------------
+# Load additional genome-specific configs manually
+# ------------------------------------------------------------------------------
 
-# Parameters from config.yaml
-PROJ            = config["PROJ"]
-RAW_DATA        = config["RAW_DATA"]
-ALL_SAMPLES     = config["SAMPLES"]
-SEQ_DATE        = config["SEQ_DATE"]
-INDEX_PATH      = config["INDEX_PATH"]
-INDEX_SAMPLE    = config["INDEX_SAMPLE"]
-INDEX_SPIKE     = ""
-FW_REF          = config["FW_REF"]
-REV_REF         = config["REV_REF"]
-CMD_PARAMS      = config["CMD_PARAMS"]
-COLORS          = config["COLORS"]
-NORM            = config["NORM"]
-ORIENTATION     = config["ORIENTATION"]
-USER            = config["USER"]
-GENELIST        = config["GENELIST"]
-REGIONS         = config["REGIONS"]
+INDEX_SAMPLE = config['INDEX_SAMPLE']
+INDEX_SPIKE  = ""
+
+# Paths to additional config files
+GENOME_CONFIG1 = Path("pipelines/ref") / f"{INDEX_SAMPLE}.yaml"
+
+# Validate existence
+if not GENOME_CONFIG1.exists():
+    sys.exit(f"ERROR: {INDEX_SAMPLE} is not a valid INDEX_SAMPLE selection.")
+
+# Load additional configs
+with open(GENOME_CONFIG1) as f:
+    config1 = yaml.safe_load(f)
+
+# ------------------------------------------------------------------------------
+# Assign parameters from configs
+# ------------------------------------------------------------------------------
+
+# From main config
+PROJ         = config.get("PROJ")
+RAW_DATA     = config.get("RAW_DATA")
+ALL_SAMPLES  = config.get("SAMPLES")
+SEQ_DATE     = config.get("SEQ_DATE")
+INDEX_PATH   = config.get("INDEX_PATH")
+CMD_PARAMS   = config.get("CMD_PARAMS")
+COLORS       = config.get("COLORS")
+NORM         = config.get("NORM")
+ORIENTATION  = config.get("ORIENTATION")
+REGIONS      = config.get("REGIONS")
+USER         = config.get("USER")
+
+# From additional configs
+FW_REF      = config1.get("FW_REF")
+REV_REF     = config1.get("REV_REF")
+GENELIST    = config1.get("GENELIST")
 
 BW_DIR = PROJ + "/raw_bw"
 os.makedirs(BW_DIR, exist_ok = True)

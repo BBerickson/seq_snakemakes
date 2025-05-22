@@ -49,7 +49,7 @@ rule featurecount_spikein_summary:
         job_name = "{sample}_spikein_count_summary",
         index = [INDEX_SAMPLE, INDEX_SPIKE]
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/{sample}_spikein_count_summary.out",
         err = PROJ + "/logs/{sample}_spikein_count_summary.err"
@@ -82,7 +82,7 @@ rule gathering_results:
         index_map = INDEX_MAP,
         project   = PROJ
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/results.out",
         err = PROJ + "/logs/results.err"

@@ -11,7 +11,7 @@ rule get_bw:
     params:
         job_name = "{newnam}_getbw",
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/{newnam}_get_bw.out",
         err = PROJ + "/logs/{newnam}_get_bw.err"

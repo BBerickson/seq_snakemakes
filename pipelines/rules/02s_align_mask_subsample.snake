@@ -54,7 +54,7 @@ rule calculating_subsample_group:
         job_name = "{group}_subsample",
         group   = "{group}"
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/{group}_subsample.out",
         err = PROJ + "/logs/{group}_subsample.err"
@@ -78,7 +78,7 @@ rule calculating_subsample_summary:
     params:
         job_name = PROJ + "_calculating_subsample_summary"
     resources:
-        memory   = 1
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/" + PROJ + "_calculating_subsample_summary.out",
         err = PROJ + "/logs/" + PROJ + "_calculating_subsample_summary.err"
@@ -138,7 +138,7 @@ rule subsample_summary:
     params:
         job_name = PROJ + "_subsample_whole_summary"
     resources:
-        memory   = 1
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/" + PROJ + "_subsample_sample_summary.out",
         err = PROJ + "/logs/" + PROJ + "_subsample_sample_summary.err"

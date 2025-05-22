@@ -47,7 +47,7 @@ rule dedup_summary:
     params:
         job_name = PROJ + "_dedup_summary",
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/" + PROJ + "_dedup_summary.out",
         err = PROJ + "/logs/" + PROJ + "_dedup_summary.err"

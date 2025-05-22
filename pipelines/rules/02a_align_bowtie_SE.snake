@@ -55,7 +55,7 @@ rule bowtieR1_summmary:
     params:
         job_name = "bowtie_unpaired_summmary"
     resources:
-        memory   = 1
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/bowtie_unpaired_summmary.out",
         err = PROJ + "/logs/bowtie_unparied_summmary.err"

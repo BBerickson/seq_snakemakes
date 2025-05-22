@@ -13,7 +13,7 @@ rule gathering_bams_groups:
         mygroup  = "{compgroups}",
         mysamps  = SAM_GRPS
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/rmats_bams_{compgroups}.out",
         err = PROJ + "/logs/rmats_bams_{compgroups}.err"
@@ -38,7 +38,7 @@ rule fastq_rmats:
         gtf      = GTF,
         args     = CMD_PARAMS["rmats"]
     resources:
-        memory   = 30
+        memory   = lambda wildcards, input: memory_estimator(input, 10, 30) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/{compgroups}_fastq_rmats.out",
         err = PROJ + "/logs/{compgroups}_fastq_rmats.err"

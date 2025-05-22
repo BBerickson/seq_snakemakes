@@ -12,7 +12,7 @@ rule bbduk_paired:
     params:
         job_name = "{sample}_bbduk",
         args     = CMD_PARAMS["bbduk"],
-        bar      = lambda wildcards, input: _get_barcodes(BARCODES, input.R1)
+        bar      = lambda wildcards: _bbduk_adapter_param(BARCODES)
     resources:
         memory   = lambda wildcards, input: memory_estimator([input.R1, input.R2], 2, 5)
     log:
@@ -38,7 +38,7 @@ rule bbduk_paired:
                 bbduk.sh -Xmx{resources.memory}g threads={threads} \
                     in1={input.R1} in2={input.R2} \
                     out1={output.R1} out2={output.R2} \
-                    literal={params.bar} {params.args} 2>> {output.log}
+                    {params.bar} {params.args} 2>> {output.log}
                 """
             )
 
@@ -54,7 +54,7 @@ rule bbduk_summary:
     params:
         job_name = PROJ + "_bbduk_summary"
     resources:
-        memory   = 1
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/" + PROJ + "_bbduk_summary.out",
         err = PROJ + "/logs/" + PROJ + "_bbduk_summary.err"

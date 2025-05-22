@@ -62,7 +62,7 @@ rule bamCoverage_URL:
         url_fw   = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_fw.bw",
         url_rev  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_rev.bw"
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/{newnam}_bamCoverage_URL.out",
         err = PROJ + "/logs/{newnam}_bamCoverage_URL.err"
@@ -91,7 +91,7 @@ rule bamCoverage_summary:
     params:
         job_name = PROJ + "_bamCoverage_summary"
     resources:
-        memory   = 1
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/" + PROJ + "_bamCoverage_summary.out",
         err = PROJ + "/logs/" + PROJ + "_bamCoverage_summary.err"
@@ -166,7 +166,7 @@ rule bamCoverage_spike_URL:
         url_fw   = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_norm_CPM_fw.bw",
         url_rev  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_norm_CPM_rev.bw"
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/{newnam}_spike_bamCoverage_URL.out",
         err = PROJ + "/logs/{newnam}_spike_bamCoverage_URL.err"
@@ -196,7 +196,7 @@ rule bamCoverage_spike_summary:
     params:
         job_name = PROJ + "_bamCoverage_spike_summary"
     resources:
-        memory   = 1
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/" + PROJ + "_bamCoverage_spike_summary.out",
         err = PROJ + "/logs/" + PROJ + "_bamCoverage_spike_summary.err"
