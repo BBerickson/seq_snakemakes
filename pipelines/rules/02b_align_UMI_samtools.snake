@@ -94,6 +94,7 @@ rule align_filter_sample:
         job_name = "{sample}_align_filter",
         idx      = INDEX_PATH + INDEX_SAMPLE + ".txt",
         samp     = "{sample}_" + INDEX_SAMPLE,
+        args     = CMD_PARAMS["samtools"],
         fa2      = FA_SAMPLE,
         sortname = PROJ + "/{sample}.temp"
     resources:
@@ -108,13 +109,17 @@ rule align_filter_sample:
     shell:
         """
         # filter
-        samtools view {input.bam} $(head -n1 {params.idx}) \
-        | samtools view -bT {params.fa2} - \
+        samtools view {params.args} {input.bam} > {output.bamt}
+        samtools index -@ {threads} {output.bamt}
+        
+        samtools view {output.bamt} $(head -n1 {params.idx}) \
+        | sed 's/spike_*//g' | samtools view -bT {params.fa2} - \
         | samtools sort - -T {params.sortname} -@ {threads} -O bam \
         > {output.bam}
         
         samtools index -@ {threads} {output.bam}
         echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
+        
         """
 
 
@@ -126,11 +131,14 @@ rule align_filter_sample_spikein:
     output:
         bam    = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
         bai    = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam.bai",
+        bamt   = temp(PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_temp.bam"),
+        bait   = temp(PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_temp.bam.bai"),
         counts = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_count.txt"
     params:
         job_name = "{sample}_align_filter_spikein",
         idx      = INDEX_PATH + INDEX_SPIKE + ".txt",
         samp     = "{sample}_" + INDEX_SPIKE,
+        args     = CMD_PARAMS["samtools"],
         fa3      = FA_SPIKE,
         sortname = PROJ + "/{sample}_spikein.temp"
     resources:
@@ -145,7 +153,10 @@ rule align_filter_sample_spikein:
     shell:
         """
         # filter
-        samtools view {input.bam} $(head -n1 {params.idx}) \
+        samtools view {params.args} {input.bam} > {output.bamt}
+        samtools index -@ {threads} {output.bamt}
+        
+        samtools view {output.bamt} $(head -n1 {params.idx}) \
         | sed 's/spike_*//g' | samtools view -bT {params.fa3} - \
         | samtools sort - -T {params.sortname} -@ {threads} -O bam \
         > {output.bam}

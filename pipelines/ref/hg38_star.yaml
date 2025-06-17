@@ -10,7 +10,7 @@ INDEX_MAP:
 INDEX_SAMPLE:
     "hg38"
 MASK:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_snoRNAs.bed"
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_snoRNA.bed"
 GTF:
   "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_chrfix_GRCh38.113.gtf"
 FA_SAMPLE:

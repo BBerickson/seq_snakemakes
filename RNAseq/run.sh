@@ -43,6 +43,7 @@ run_snakemake() {
 pipe_dir=pipelines
 # index and configs
 snake=$pipe_dir/RNAseq.snake
+# snake=$pipe_dir/star.snake
 samples=samples.yaml
 
 run_snakemake $snake "$samples"

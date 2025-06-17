@@ -1,10 +1,62 @@
 # ====== Rules for filtering aligned reads with samtools =================================
 
 # filter aligned reads
-rule align_filter_sample:
+rule align_filter_multimap:
     input:
         bam   = PROJ  + "/{sample}_" + INDEX_MAP + ".bam",
         bai   = PROJ  + "/{sample}_" + INDEX_MAP + ".bam.bai"
+    output:
+        bam    = temp(PROJ + "/{sample}_" + INDEX_MAP + "_multimap.bam"),
+        bai    = temp(PROJ + "/{sample}_" + INDEX_MAP + "_multimap.bam.bai"),
+        bamt   = temp(PROJ + "/{sample}_" + INDEX_MAP + "_multimap_temp.bam"),
+        counts = PROJ + "/bams/{sample}_" + INDEX_MAP + "_count_multimap.txt"
+    params:
+        job_name = "{sample}_multimap_filter",
+        samp     = "{sample}_" + INDEX_MAP,
+        args     = CMD_PARAMS["samtools"],
+        args2    = _extract_k_option(CMD_PARAMS["bowtie2"],ORIENTATION),
+        sortname = PROJ + "/{sample}_multimap.temp"
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
+    log:
+        out = PROJ + "/logs/{sample}_multimap_filter.out",
+        err = PROJ + "/logs/{sample}_multimap_filter.err"
+    threads: 
+        12
+    run:
+        # If no params are passed step is skipped
+        if len(params.args2strip()) == 0:
+            shell(
+                """
+                cp {input[0]} {output[0]}
+                cp {input[1]} {output[1]}
+                echo "{params.samp} Multimap_Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
+                
+                """
+              )
+        else:
+            shell(
+                """
+                samtools view {params.args} -u {input.bam} \
+                  | samtools sort -n -T {params.sortname} -@ {threads} \
+                  | samtools view -h - \
+                  | python2 pipelines/multimappers.py {params.args2} \
+                  | samtools fixmate -r - {output.bamt}
+        
+               samtools view -F 1804 -f 2 -u {output.bamt} \
+                  | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+                  > {output.bam}
+                samtools index -@ {threads} {output.bam}
+                echo "{params.samp} Multimap_Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
+                """
+            )
+    
+        
+# filter aligned reads
+rule align_filter_sample:
+    input:
+        bam   = PROJ  + "/{sample}_" + INDEX_MAP + "_multimap.bam",
+        bai   = PROJ  + "/{sample}_" + INDEX_MAP + "_multimap.bam.bai"
     output:
         bam    = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
         bai    = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai",
@@ -13,6 +65,7 @@ rule align_filter_sample:
         job_name = "{sample}_align_filter",
         idx      = INDEX_PATH + INDEX_SAMPLE + ".txt",
         samp     = "{sample}_" + INDEX_SAMPLE,
+        args     = CMD_PARAMS["samtools"],
         fa2      = FA_SAMPLE,
         sortname = PROJ + "/{sample}.temp"
     resources:
@@ -28,7 +81,7 @@ rule align_filter_sample:
         """
         # filter
         samtools view {input.bam} $(head -n1 {params.idx}) \
-        | samtools view -bT {params.fa2} - \
+        | sed 's/spike_*//g' | samtools view -bT {params.fa2} - \
         | samtools sort - -T {params.sortname} -@ {threads} -O bam \
         > {output.bam}
         
@@ -36,12 +89,12 @@ rule align_filter_sample:
         echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
         
         """
-
+        
 # filter aligned spike in reads
 rule align_filter_sample_spikein:
     input:
-        bam = PROJ + "/{sample}_" + INDEX_MAP + ".bam",
-        bai = PROJ + "/{sample}_" + INDEX_MAP + ".bam.bai"
+        bam = PROJ + "/{sample}_" + INDEX_MAP + "_multimap.bam",
+        bai = PROJ + "/{sample}_" + INDEX_MAP + "_multimap.bam.bai"
     output:
         bam    = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
         bai    = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam.bai",
@@ -50,6 +103,7 @@ rule align_filter_sample_spikein:
         job_name = "{sample}_align_filter_spikein",
         idx      = INDEX_PATH + INDEX_SPIKE + ".txt",
         samp     = "{sample}_" + INDEX_SPIKE,
+        args     = CMD_PARAMS["samtools"],
         fa3      = FA_SPIKE,
         sortname = PROJ + "/{sample}_spikein.temp"
     resources:

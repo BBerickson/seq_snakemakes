@@ -3,14 +3,17 @@
 # gathering results
 rule gathering_bams_groups:
     input:
-        PROJ + "/stats/" + PROJ + "_results.tsv"
+        PROJ + "/report/" + PROJ + "_results.tsv"
     output:
         PROJ + "/rmats/{compgroups}_S1.txt",
-        PROJ + "/rmats/{compgroups}_S2.txt"
+        PROJ + "/rmats/{compgroups}_S2.txt",
+        PROJ + "/rmats/{compgroups}_bams.tsv",
+        PROJ + "/rmats/{compgroups}_palette.txt"
     params:
         job_name = "{compgroups}_rmats_bams_groups",
         project  = PROJ + "/" + BAM_PATH,
         mygroup  = "{compgroups}",
+        mycols   = COLS_DICT,
         mysamps  = SAM_GRPS
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB

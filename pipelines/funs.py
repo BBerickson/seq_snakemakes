@@ -284,6 +284,25 @@ def _get_norm_scale(samples, sample_key, norm_type, index_sample):
                 res[key] = "NA"
     return res
 
+# grab bowtie options for multimap cleaning 
+def _extract_k_option(bowtie2, orientation): 
+    # Extract the -k value using regex
+    match = re.search(r'-k\s*(\d+)', bowtie2)
+    if not match:
+        return ""  # Return empty string if -k is not found
+
+    # Normalize the output to "-k <value>"
+    k_value = match.group(1)
+    result = f"-k {k_value}"
+
+    # Add --paired-end if orientation doesn't match R1 or R2
+    if orientation not in {"R1", "R2"}:
+        result += " --paired-end"
+    
+    return result
+
+
+
 # grab normalization options for bamCoverage for each sample 
 def _get_norm(newnam, samples, sample_key, norm_type, index_sample): 
     NORMS_DICT = _get_norm_scale(samples, sample_key, norm_type, index_sample)
@@ -295,7 +314,7 @@ def _get_norm(newnam, samples, sample_key, norm_type, index_sample):
       value = (NORMS_DICT[newnam])
       results = results + " --scaleFactor " + str(value)
     return results
-  
+    
 # file nameing based on normalization and filter options    
 def _get_normtype(normUsing, norm_type, blacklist, orientation):
     word = "_norm_" + norm_type

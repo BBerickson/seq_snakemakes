@@ -13,7 +13,6 @@ rule bowtieR1:
         job_name = "{sample}_bowtie_unpaired",
         idx      = INDEX_PATH + INDEX_MAP,
         args     = CMD_PARAMS["bowtie2"],
-        args2    = CMD_PARAMS["samtools"],
         sortname = PROJ + "/{sample}.temp"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 3, 16)
@@ -32,7 +31,6 @@ rule bowtieR1:
             -U {input.R1} \
             {params.args} \
             2> {output.stats} \
-            | samtools view {params.args2} - \
             | samtools sort - -T {params.sortname} -@ {threads} -O bam \
             > {output.bam}
         

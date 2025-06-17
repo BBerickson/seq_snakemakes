@@ -37,17 +37,18 @@ SEQ_DATE     = config.get("SEQ_DATE")
 GROUPS_COMP  = config.get("GROUPS_COMP")
 GTF          = config.get("GTF")
 CMD_PARAMS   = config.get("CMD_PARAMS")
+COLORS       = config.get("COLORS")
 NORM         = config.get("NORM")
 ORIENTATION  = config.get("ORIENTATION")
 USER         = config.get("USER")
 
 # Sample and group lists
-SAMS = [[y, x] for y in SAMPLES for x in SAMPLES[y]]
+SAMS = [[y, x] for y in ALL_SAMPLES for x in ALL_SAMPLES[y]]
 SAMS = [x[1] for x in SAMS]
 GRPS = [x for x in GROUPS_COMP]
 
 # Gene subsampling groups
-SAM_GRPS      = [x + "-" + y for y in SAMPLES for x in SAMPLES[y]]
+SAM_GRPS      = [x + "-" + y for y in ALL_SAMPLES for x in ALL_SAMPLES[y]]
 
 GRPS_UNIQ = list(dict.fromkeys(GRPS))
 SAMS_UNIQ = list(dict.fromkeys(SAMS))
@@ -67,6 +68,8 @@ wildcard_constraints:
     group   = GRP_REGEX,
 
 BAM_PATH = _get_bampath(NORM)
+COLS_DICT = _get_colors(SAMS_UNIQ, COLORS)
+print("COLS_DICT (%s): %s\n" % (len(COLS_DICT), COLS_DICT))
 
 # Final output files
 rule all:

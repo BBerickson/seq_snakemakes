@@ -14,7 +14,7 @@ INDEX_SPIKE:
 MASK:
   ""
 GTF:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/Homo_sapiens.GRCh38.111.gtf"
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_chrfix_GRCh38.113.gtf"
 GTF_SPIKE:
   ""
 FA_SAMPLE:
