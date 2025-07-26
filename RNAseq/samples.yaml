@@ -85,14 +85,24 @@ COLORS:
 # HiSeq 3k/4k  dupedist=2500 (AC...XX, AN...XX)
 # Novaseq      dupedist=12000
 CMD_PARAMS:
-    clumpify:      " lowcomplexity=t overwrite=t dedupe=t dupedist=12000 optical=f subs=0 "
-    bbduk:         " overwrite=t ftm=5 minlen=50 ktrim=r k=23 hdist=1 mink=11 tpe tbo ecco=t "
-    hisat2:        " --add-chrname --no-softclip --no-mixed --no-discordant "
-    star:         " --limitSjdbInsertNsj 2000000 --outSAMattributes NH HI AS nM MD --alignSJoverhangMin 10 --outMultimapperOrder Random "
+    clumpify:      
+      paired: " lowcomplexity=t overwrite=t dedupe=t dupedist=12000 optical=f subs=0 " # PE settings
+      single: " lowcomplexity=t overwrite=t dedupe=t dupedist=40 optical=f subs=0 " #  SE settings
+    bbduk:      
+      paired: " overwrite=t ftm=5 minlen=50 ktrim=r k=23 hdist=1 mink=11 tpe tbo ecco=t " # PE settings
+      single: " overwrite=t ftm=5 minlen=20 ktrim=r k=23 hdist=1 mink=11 " # SE settings
+    hisat2:      
+      paired: " --add-chrname --no-softclip --no-mixed --no-discordant "
+      single: " --add-chrname --no-softclip "
+    star:      
+      paired:  " --limitSjdbInsertNsj 2000000 --outSAMattributes NH HI AS nM MD --alignSJoverhangMin 10 --outMultimapperOrder Random "
+      single:  " --limitSjdbInsertNsj 2000000 --outSAMattributes NH HI AS nM MD --alignSJoverhangMin 10 --outMultimapperOrder Random "
     samtools:      " -bF4q1 "
     bamCoverage:   " --binSize 10 --skipNonCoveredRegions "
-    bamCoverageBL: "" # " --blackListFileName /beevol/home/erickson/ref/hg38/ref/merge_filter_RNAs.bed "
-    fragment_size: " --maxFragmentLength 1000 "
+    fragment_size: 
+      paired:  " --maxFragmentLength 1000 "
+      single:  " bin=10 max=1010 "
+    featureCounts: " --readExtension5 2000 --readExtension3 2000 " #--largestOverlap
     
 # sandbox User #
 USER:

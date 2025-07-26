@@ -13,7 +13,7 @@ rule hisatPE:
     params:
         job_name = "{sample}_hisatPE",
         idx      = INDEX_PATH + INDEX_MAP,
-        args     = CMD_PARAMS["hisat2"],
+        args     = lambda wildcards: CMD_PARAMS["hisat2"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
         sortname = PROJ + "/{sample}.temp"
     resources:
         memory   = lambda wildcards, input: memory_estimator([input.R1, input.R2], 3, 18)
@@ -24,20 +24,39 @@ rule hisatPE:
         "Aligning reads with hisat2 for {wildcards.sample}"
     threads: 
         12
-    shell:
-        """
-        hisat2 \
-            -p {threads} \
-            -x {params.idx} \
-            -1 {input.R1} \
-            -2 {input.R2} \
-            {params.args} \
-            2> {output.stats} \
-            | samtools sort - -T {params.sortname} -@ {threads} -O bam \
-            > {output.bam}
-        
-        samtools index -@ {threads} {output.bam}
-        """
+    run:
+        if PAIREDMAP[wildcards.sample]:
+            shell(
+                """
+                hisat2 \
+                    -p {threads} \
+                    -x {params.idx} \
+                    -1 {input.R1} \
+                    -2 {input.R2} \
+                    {params.args} \
+                    2> {output.stats} \
+                    | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+                    > {output.bam}
+                
+                samtools index -@ {threads} {output.bam}
+                """
+            )
+        else:
+            shell(
+                """
+                hisat2 \
+                    -p {threads} \
+                    -x {params.idx} \
+                    -U {input.R1} \
+                    {params.args} \
+                    2> {output.stats} \
+                    | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+                    > {output.bam}
+
+                samtools index -@ {threads} {output.bam}
+                """
+            )
+    
 
 # ====== Rules for aligning reads summmary =================================
 

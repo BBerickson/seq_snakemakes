@@ -1,50 +1,66 @@
 # ====== Rules for aligning reads =================================
 
 
-# Align trimmed reads with bowtie2 PE
-rule bowtiePE:
+# Align trimmed reads with bowtie2 R1 or R2
+rule bowtie:
     input:
-        R1  = PROJ + "/{sample}_R1.fastq.gz",
-        R2  = PROJ + "/{sample}_R2.fastq.gz"
+        R1 = PROJ + "/{sample}_R1.fastq.gz",
+        R2 = PROJ + "/{sample}_R2.fastq.gz"
     output:
         bam   = temp(PROJ + "/{sample}_" + INDEX_MAP + ".bam"),
         bai   = temp(PROJ + "/{sample}_" + INDEX_MAP + ".bam.bai"),
         stats = PROJ + "/bams/{sample}_" + INDEX_MAP + "_bowtie_stats.txt"
     params:
-        job_name = "{sample}_bowtiePE",
+        job_name = "{sample}_bowtie",
         idx      = INDEX_PATH + INDEX_MAP,
-        args     = CMD_PARAMS["bowtie2"],
+        args     = lambda wildcards: CMD_PARAMS["bowtie2"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
         sortname = PROJ + "/{sample}.temp"
     resources:
-        memory   = lambda wildcards, input: memory_estimator([input.R1, input.R2], 3, 18)
+        memory = lambda wildcards, input: memory_estimator(input, 3, 18)
     log:
         out = PROJ + "/logs/{sample}_bowtie.out",
         err = PROJ + "/logs/{sample}_bowtie.err"
-    message:
-        "Aligning reads with Bowtie2 for {wildcards.sample}"
     threads: 
         12
-    shell:
-        """
-        bowtie2 \
-            -p {threads} \
-            -x {params.idx} \
-            -1 {input.R1} \
-            -2 {input.R2} \
-            {params.args} \
-            2> {output.stats} \
-            | samtools sort - -T {params.sortname} -@ {threads} -O bam \
-            > {output.bam}
-        
-        samtools index -@ {threads} {output.bam}
-        
-        """
+    run:
+        if PAIREDMAP[wildcards.sample]:
+            shell(
+                """
+                bowtie2 \
+                    -p {threads} \
+                    -x {params.idx} \
+                    -1 {input.R1} -2 {input.R2} \
+                    {params.args} \
+                    2> {output.stats} \
+                    | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+                    > {output.bam}
+
+                samtools index -@ {threads} {output.bam}
+                """
+            )
+        else:
+            shell(
+                """
+                bowtie2 \
+                    -p {threads} \
+                    -x {params.idx} \
+                    -U {input.R1} \
+                    {params.args} \
+                    2> {output.stats} \
+                    | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+                    > {output.bam}
+
+                samtools index -@ {threads} {output.bam}
+                """
+            )
+
+
 
 # ====== Rules for aligning reads summmary =================================
 
 
-# Align trimmed reads with bowtie2 PE summmary 
-rule bowtiePE_summmary:
+# Align trimmed reads with bowtie2 summmary
+rule bowtie_summmary:
     input:
         expand(
             PROJ + "/bams/{sample}_" + INDEX_MAP + "_bowtie_stats.txt",
@@ -90,5 +106,6 @@ rule bowtiePE_summmary:
 
                         out.write("%s\t%s\t%s\n" % (name, met, num))
                         
+                        
+                        
 
-                    

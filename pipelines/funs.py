@@ -6,6 +6,7 @@ import gzip
 import glob
 import pandas as pd
 import itertools
+from itertools import cycle
 import subprocess
 
 # estimates the amount of memory based on file size
@@ -169,6 +170,66 @@ def _get_fqs(sample, dirs, link_dir, full_name = False, paired=True):
     
     return fastqs
 
+# Simplify ALL_SAMPLES dictionary
+# ALL_SAMPLES = {'SECTION-1':{'SAMPLING-GROUP-1':{newname1:[fastq1],newname2:[fastq2]}}} or {'SECTION-1':{'SAMPLING-GROUP-1':{newname1:[fastq1,input1],newname2:[fastq2,input2]}}}
+# collapse sections and combine subsampling groups
+def process_samples(all_samples, index_list, norm, orientations):
+    SAMPLES = {}    # {sample_name: [fastq]}
+    SAMPIN = {}     # {sample_name: [fastq, input_file]}
+    GROUPS = {}     # {pair_name: [fastq]}
+    NORMMAP = {}    # {sample_name: [(index1, norm), (index2, 'cpm'), ...]}
+    PAIREDMAP = {}  # {sample_name: True/False}
+
+    # Flatten all sample names
+    all_sample_names = [
+        sample_name
+        for section in all_samples.values()
+        for pairs in section.values()
+        for sample_name in pairs
+    ]
+
+    # Normalize orientations
+    if isinstance(orientations, str):
+        orientation_cycle = cycle([orientations])
+    elif isinstance(orientations, list):
+        orientation_cycle = cycle(orientations)
+    else:
+        raise ValueError("orientations must be a string or a list of strings")
+
+    sample_to_orientation = {
+        sample_name: next(orientation_cycle)
+        for sample_name in all_sample_names
+    }
+
+    for section, pairs in all_samples.items():
+        for pair_name, samples in pairs.items():
+            for sample_name, values in samples.items():
+                fastq = values[0]
+                input_file = values[1] if len(values) > 1 else None
+
+                # Populate SAMPLES
+                SAMPLES.setdefault(sample_name, []).append(fastq)
+
+                # Populate SAMPIN
+                SAMPIN[sample_name] = [fastq, input_file] if input_file else [fastq]
+
+                # Populate GROUPS
+                GROUPS.setdefault(pair_name, []).append(fastq)
+
+                # Populate NORMMAP
+                norm_values = [norm] + ["CPM"] * (len(index_list) - 1)
+                NORMMAP[sample_name] = list(zip(index_list, norm_values))
+
+                # Determine orientation and pairing
+                orientation = sample_to_orientation[sample_name]
+                is_paired = orientation not in ["R1", "R2"]
+                PAIREDMAP[fastq] = is_paired
+                PAIREDMAP[input_file] = is_paired
+
+    return SAMPLES, SAMPIN, GROUPS, NORMMAP, PAIREDMAP
+
+
+  
 # Find all bigwigs matching sample name in provided directories
 def _find_bws(sample, dirs):
     bw_pat   = ".*" + sample + r".+\.bw$"
@@ -257,32 +318,26 @@ def _get_col(sample, cols_dict):
     return cols_dict.get(sample, "0,0,0")
         
 # build bamCoverage scaleFactor sample dictonary
-def _get_norm_scale(samples, sample_key, norm_type, index_sample):
-    res = {}
-    for key in sample_key:
-        if norm_type.lower() in ["subsample", "none", "rpkm", "cpm", "bpm", "rpgc", "c"] or norm_type.isspace():
-            res[key] = 1
-        else:
-            norm_type_with_index = norm_type + "_" + index_sample
-            path = PROJ + "/counts/"
-            sample = samples[key][0]
-            filename = glob.glob(path + sample + "*_count.txt")
-            if filename:
-                filename = filename[0]
-                with open(filename, "r") as f:
-                    for line in f:
-                        if norm_type_with_index in line:
-                            num = line.strip().split()
-                            if float(num[1]) != 0:
-                                res[key] = 1000000 / float(num[1])
-                            else:
-                                res[key] = 1
-                            break
-                    else:
-                        res[key] = "NA"
-            else:
-                res[key] = "NA"
-    return res
+def _get_norm_scale(sample, norm_type, index_sample):
+    if norm_type.lower() in ["subsample", "none", "rpkm", "cpm", "bpm", "rpgc", "c"] or norm_type.isspace():
+        return 1
+
+    norm_type_with_index = norm_type + "_" + index_sample
+    path = PROJ + "/stats/"
+    filename = glob.glob(path + sample + "*_summary_featureCounts.tsv")
+
+    filename = filename[0]
+    with open(filename, "r") as f:
+        for line in f:
+           if norm_type_with_index in line:
+                num = line.strip().split()
+                try:
+                    value = float(num[1])
+                    return 1000000 / value if value != 0 else 1
+                except (IndexError, ValueError):
+                    return 1
+
+    raise ValueError(f"Normalization type '{norm_type_with_index}' not found in file '{filename}'.")
 
 # grab bowtie options for multimap cleaning 
 def _extract_k_option(bowtie2, orientation): 
@@ -304,20 +359,35 @@ def _extract_k_option(bowtie2, orientation):
 
 
 # grab normalization options for bamCoverage for each sample 
-def _get_norm(newnam, samples, sample_key, norm_type, index_sample): 
-    NORMS_DICT = _get_norm_scale(samples, sample_key, norm_type, index_sample)
-    if norm_type in ["RPKM","CPM","BPM","RPGC"]:
-      results = "--normalizeUsing " + norm_type
+def _get_norm(df, newnam, suffix, index):
+    row = df[
+        (df['Newnam'] == newnam) &
+        (df['Index'] == index) &
+        (df['Suffix'] == suffix)
+    ]
+    
+    if row.empty:
+        raise ValueError(f"No matching normalization found for {newnam}, {index}, {suffix}")
+    
+    sample = row.iloc[0]['Sample']
+    index  = row.iloc[0]['Index']
+    norm   = row.iloc[0]['Norm']
+
+    norm_value = _get_norm_scale(sample, norm, index)
+    norm = norm.upper()
+
+    if norm in ["RPKM","CPM","BPM","RPGC"]:
+      results = "--normalizeUsing " + norm
     else:
       results = "--normalizeUsing None"
-    if newnam in NORMS_DICT:
-      value = (NORMS_DICT[newnam])
-      results = results + " --scaleFactor " + str(value)
+    results = results + " --scaleFactor " + str(norm_value)
+    
     return results
+  
     
 # file nameing based on normalization and filter options    
 def _get_normtype(normUsing, norm_type, blacklist, orientation):
-    word = "_norm_" + norm_type
+    word = norm_type
     
     match = re.search(r"--Offset\s+(-?\d+)", normUsing)
     if match:
@@ -331,10 +401,10 @@ def _get_normtype(normUsing, norm_type, blacklist, orientation):
       elif num == 1:
         offset = "_5end"
       else:
-        offset = "_offset_" + str(num)
+        offset = "_Offset" + str(num)
       word = word + offset
     if re.search(r"\S", blacklist):
-      word = word + "_BL"
+      word = word + "_FilterBL"
     return " ".join(word.split())
   
 # set orientation for deeptools bamCovrage stranded data
@@ -347,23 +417,79 @@ def _get_bamCov_strand(mytype, orientation):
       return "forward"
     
 # set featureCounts options based on orientation and .gtf/.saf ref file
-def _get_featCout(orientation):
-  # set options for read orientation
+import gzip
+import os
+
+def _validate_gtf_feature_type(gtf_file, feature_type):
+    if not gtf_file or not os.path.exists(gtf_file):
+        return False
+    try:
+        # Handle compressed files
+        open_func = gzip.open if gtf_file.endswith('.gz') else open
+        
+        with open_func(gtf_file, 'rt') as f:
+            for line_num, line in enumerate(f, 1):
+                # Skip comments and empty lines
+                if line.startswith('#') or not line.strip():
+                    continue
+                
+                # Parse GTF line (tab-separated)
+                fields = line.strip().split('\t')
+                if len(fields) >= 3:
+                    current_feature_type = fields[2]
+                    if current_feature_type == feature_type:
+                        return True
+                
+                # Only check first 1000 lines for efficiency
+                if line_num > 1000:
+                    break
+                    
+    except Exception as e:
+        print(f"Warning: Could not validate GTF file {gtf_file}: {e}")
+        return False
+    
+    return False
+
+def _get_featCount(orientation, gtf_file=None):
+    # set options for read orientation
     if orientation == "R2R1" or orientation == "R2":
-      results = "-s 2 "
+        results = "-s 2"
     elif orientation == "R1R2" or orientation == "R1":
-      results = "-s 1 "
+        results = "-s 1"
     else:
-      results = "-s 0 "
-  # set paired end options
+        results = "-s 0"
+    
+    # set paired end options
     if orientation != "R2" and orientation != "R1":
-      results = results + "-p -C --countReadPairs "
-  # Options for GTF file
-    results = results + "-F GTF --extraAttributes 'gene_name,gene_biotype' -t gene -O "
+        results += " -p -C --countReadPairs"
+    
+    # set format flag based on file extension
+    format_flag = ""
+    feature_type = "gene"  # default
+    
+    if gtf_file:
+        if gtf_file.endswith(('.gtf', '.gtf.gz')):
+            format_flag = " -F GTF"
+            
+            # Validate if 'gene' feature type exists, fallback to 'transcript'
+            if not _validate_gtf_feature_type(gtf_file, "gene"):
+                if _validate_gtf_feature_type(gtf_file, "transcript"):
+                    feature_type = "transcript"
+                    print(f"Warning: 'gene' feature type not found in {gtf_file}, using 'transcript' instead")
+                else:
+                    print(f"Warning: Neither 'gene' nor 'transcript' feature types found in {gtf_file}, using 'gene' as default")
+                    
+        elif gtf_file.endswith(('.saf', '.saf.gz')):
+            format_flag = " -F SAF"
+            # SAF format doesn't use -t parameter, so keep gene as default
+       
+    # Options for GTF file
+    results += f"{format_flag} --extraAttributes 'gene_name,gene_biotype' -t {feature_type} -O"
     return results
 
+
 # file nameing based on normalization, Matrix options, and genelist   
-def _get_matrixtype(normUsing, computeMatrix,genelist):
+def _get_matrixtype(computeMatrix,genelist):
     if genelist != "":
       genelist = "_" + genelist
     matchu = re.search(r"--upstream (\w+)", computeMatrix)
@@ -394,12 +520,12 @@ def _get_matrixtype(normUsing, computeMatrix,genelist):
       result = result + value + "bin"
     else:
       result = result + "0bin"
-    message = result + normUsing + genelist
+    message = result + genelist
     return message
 
 
 # builds list of matrixtypes
-def _get_all_matrixtypes(regions, normUsing, matrix_args, genelist):
+def _get_all_matrixtypes(regions, matrix_args, genelist):
   results = []
   for region in regions:
         if region == "PI" or region == "EI":
@@ -407,7 +533,7 @@ def _get_all_matrixtypes(regions, normUsing, matrix_args, genelist):
         else:
           computeMatrix = matrix_args[f"region{region}"]  # Retrieve the specific CMD_PARAM
           
-        result = _get_matrixtype(normUsing, computeMatrix, genelist)
+        result = _get_matrixtype(computeMatrix, genelist)
         results.append(result)
     
   return results  # Return all results

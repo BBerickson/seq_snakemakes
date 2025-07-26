@@ -2,39 +2,43 @@
 
 
 # filter aligned reads
-rule align_mask_sample:
+rule align_mask:
     input:
-        bam    = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
-        bai    = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai"
+        bam    = PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
+        bai    = PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam.bai"
     output:
-        bam    = PROJ      + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_mask.bam",
-        bai    = PROJ      + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_mask.bam.bai",
-        counts = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_mask_count.txt",
-        bamt   = temp(PROJ + "/bams/{sample}_temp.bam"),
-        bait   = temp(PROJ + "/bams/{sample}_temp2.bam")
+        bam    = PROJ + "/bams_mask/{sample}_aligned_{index}_" + SEQ_DATE + "_mask.bam",
+        bai    = PROJ + "/bams_mask/{sample}_aligned_{index}_" + SEQ_DATE + "_mask.bam.bai",
+        counts = PROJ + "/bams_mask/{sample}_aligned_{index}_" + SEQ_DATE + "_mask_count.txt",
+        bamt   = temp(PROJ + "/bams_mask/{sample}_aligned_{index}_temp_mask.bam"),
+        bait   = temp(PROJ + "/bams_mask/{sample}_aligned_{index}_temp2_mask.bam")
     params:
-        job_name = "{sample}_align_filter_mask",
-        idx      = INDEX_PATH + INDEX_SAMPLE + ".txt",
-        samp     = "{sample}_" + INDEX_SAMPLE,
-        fa2      = FA_SAMPLE,
-        mask     = MASK,
-        sortname = PROJ + "/{sample}.temp"
+        job_name = "{sample}_aligned_{index}_align_filter_mask",
+        idx      = lambda wildcards: INDEX_PATH + wildcards.index + ".txt",
+        samp     = "{sample}_{index}",
+        fa2      = lambda wildcards: config_indexes[wildcards.index].get("FA_SAMPLE"),
+        mask     = lambda wildcards: config_indexes[wildcards.index].get("MASK"),
+        sortname = PROJ + "/{sample}_aligned_{index}.temp"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
     log:
-        out = PROJ + "/logs/{sample}_align_filter.out",
-        err = PROJ + "/logs/{sample}_align_filter.err"
-    message:
-        "filtering reads {wildcards.sample}"
+        out = PROJ + "/logs/{sample}_aligned_{index}_align_filter_mask.out",
+        err = PROJ + "/logs/{sample}_aligned_{index}_align_filter_mask.err"
     threads: 
         12
     shell:
         """
-        # filter
-        samtools view -L {params.mask} -b {input.bam} -U {output.bamt} > {output.bait}
-        
-        samtools sort {output.bamt} -T {params.sortname} -@ {threads} -O bam \
-        > {output.bam}
+        # Conditional masking
+        if [ -n "{params.mask}" ] && [ "{params.mask}" != "None" ]; then
+            samtools view -L {params.mask} {input.bam} -U {output.bamt} > {output.bait}
+        else
+            # No mask: copy all reads to bamt, empty file to bait
+            cp {input.bam} {output.bamt}
+            touch {output.bait}  # Create empty file
+
+        fi
+        # sort
+        samtools sort {output.bamt} -T {params.sortname} -@ {threads} -O bam > {output.bam}
         
         samtools index -@ {threads} {output.bam}
         echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
@@ -45,21 +49,20 @@ rule align_mask_sample:
 rule calculating_subsample_group:
     input:
         lambda wildcards: expand(
-            PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_mask_count.txt",
-            sample = GROUPS[wildcards.group]
+            PROJ + "/bams_mask/{sample}_aligned_{index}_" + SEQ_DATE + "_mask_count.txt",
+            sample = GROUPS[wildcards.group],
+            index = [wildcards.index]
         )
     output:
-        PROJ + "/bams/{group}_" + INDEX_SAMPLE + "_subsample_frac.txt"
+        PROJ + "/bams_mask/{group}_aligned_{index}_subsample_frac.txt"
     params:
-        job_name = "{group}_subsample",
+        job_name = "{group}_aligned_{index}_subsample",
         group   = "{group}"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
-        out = PROJ + "/logs/{group}_subsample.out",
-        err = PROJ + "/logs/{group}_subsample.err"
-    message:
-        "getting subsample norm for {wildcards.group}"
+        out = PROJ + "/logs/{group}_aligned_{index}_subsample.out",
+        err = PROJ + "/logs/{group}_aligned_{index}_subsample.err"
     threads: 
         1
     script:
@@ -69,21 +72,20 @@ rule calculating_subsample_group:
 # Combine bamCoverage summaries
 rule calculating_subsample_summary:
     input:
-        sorted(expand(
-            PROJ + "/bams/{group}_" + INDEX_SAMPLE + "_subsample_frac.txt",
-            group = GRPS_UNIQ
+        lambda wildcards: sorted(expand(
+            PROJ + "/bams_mask/{group}_aligned_{index}_subsample_frac.txt",
+            group = GRPS_UNIQ,
+            index = [wildcards.index]
         ))
     output:
-        PROJ + "/stats/" + PROJ + "_" + INDEX_SAMPLE + "_subsample_frac.tsv"
+        PROJ + "/stats/" + PROJ + "_{index}_subsample_frac.tsv"
     params:
-        job_name = PROJ + "_calculating_subsample_summary"
+        job_name = PROJ + "_calculating_{index}_subsample_summary"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
-        out = PROJ + "/logs/" + PROJ + "_calculating_subsample_summary.out",
-        err = PROJ + "/logs/" + PROJ + "_calculating_subsample_summary.err"
-    message:
-        "Creating " + PROJ + " subsample summary"
+        out = PROJ + "/logs/" + PROJ + "_calculating_{index}_subsample_summary.out",
+        err = PROJ + "/logs/" + PROJ + "_calculating_{index}_subsample_summary.err"
     threads:
         1
     run:
@@ -97,24 +99,22 @@ rule calculating_subsample_summary:
 # output temp subsampled bamfile from dedup UMI
 rule subsample_dedup:
     input:
-        bam    = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_mask.bam",
-        bai    = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_mask.bam.bai",
-        counts = PROJ + "/stats/" + PROJ + "_" + INDEX_SAMPLE + "_subsample_frac.tsv"
+        bam    = PROJ + "/bams_mask/{sample}_aligned_{index}_" + SEQ_DATE + "_mask.bam",
+        bai    = PROJ + "/bams_mask/{sample}_aligned_{index}_" + SEQ_DATE + "_mask.bam.bai",
+        counts = PROJ + "/stats/" + PROJ + "_{index}_subsample_frac.tsv"
     output:
-        bam   = PROJ + "/bams_sub/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
-        bai   = PROJ + "/bams_sub/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai",
-        stats = PROJ + "/bams_sub/{sample}_" + INDEX_SAMPLE + "_subsample.txt"
+        bam   = PROJ + "/bams_sub/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
+        bai   = PROJ + "/bams_sub/{sample}_aligned_{index}_" + SEQ_DATE + ".bam.bai",
+        stats = PROJ + "/bams_sub/{sample}_aligned_{index}_subsample.txt"
     params:
-        job_name = "subsample_dedup_{sample}",
-        samp     = "{sample}_" + INDEX_SAMPLE,
-        scale    = lambda wildcards, input: _get_norm_fraction(wildcards, INDEX_SAMPLE, input.counts)
+        job_name = "subsample_dedup_{sample}_aligned_{index}",
+        samp     = "{sample}_{index}",
+        scale    = lambda wildcards, input: _get_norm_fraction(wildcards, wildcards.index, input.counts)
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
     log:
-        out = PROJ + "/logs/subsample_dedup_{sample}_" + INDEX_SAMPLE + ".out",
-        err = PROJ + "/logs/subsample_dedup_{sample}_" + INDEX_SAMPLE + ".err"
-    message:
-        "Subsampling UMI_dedup reads for {wildcards.sample} INDEX_SAMPLE "
+        out = PROJ + "/logs/subsample_dedup_{sample}_aligned_{index}.out",
+        err = PROJ + "/logs/subsample_dedup_{sample}_aligned_{index}.err"
     threads:
         16
     shell:
@@ -130,20 +130,19 @@ rule subsample_dedup:
 # Create subsample_whole summary
 rule subsample_summary:
     input:
-        expand(
-            PROJ + "/bams_sub/{sample}_" + INDEX_SAMPLE + "_subsample.txt",
-            sample =SAMS_UNIQ)
+        lambda wildcards: expand(
+            PROJ + "/bams_sub/{sample}_aligned_{index}_subsample.txt",
+            sample =SAMS_UNIQ,
+            index = [wildcards.index])
     output:
-        PROJ + "/stats/" + PROJ + "_" + INDEX_SAMPLE + "_subsample.tsv"
+        PROJ + "/stats/" + PROJ + "_{index}_subsample.tsv"
     params:
-        job_name = PROJ + "_subsample_whole_summary"
+        job_name = PROJ + "_{index}_subsample_whole_summary"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
-        out = PROJ + "/logs/" + PROJ + "_subsample_sample_summary.out",
-        err = PROJ + "/logs/" + PROJ + "_subsample_sample_summary.err"
-    message:
-        "Creating " + PROJ + " subsample_whole summary"
+        out = PROJ + "/logs/" + PROJ + "_{index}_subsample_sample_summary.out",
+        err = PROJ + "/logs/" + PROJ + "_{index}_subsample_sample_summary.err"
     threads:
         1
     run:

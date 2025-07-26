@@ -1,18 +1,25 @@
 #!/usr/bin/env Rscript
 
+args = commandArgs(trailingOnly=TRUE)
+
 library("tidyverse")
 
-type <- snakemake@params[["type"]]
-samp <- read_delim(snakemake@input[[1]],col_names = c("name","value"),delim = " ",show_col_types = FALSE) 
-if(length(snakemake@input)>1){
-  input <- read_delim(snakemake@input[[2]],col_names = c("name","value"),delim = " ",show_col_types = FALSE)
+samp_file <- strsplit(args[1], " ")[[1]]
+type <- args[2]
+indexs <- strsplit(args[3], " ")[[1]]
+outfile <- args[4]
+
+
+samp <- read_delim(samp_file[[1]],col_names = c("name","value"),delim = " ",show_col_types = FALSE) 
+if(length(samp_file)>1){
+  input <- read_delim(samp_file[[2]],col_names = c("name","value"),delim = " ",show_col_types = FALSE)
 } else {
   input <- NULL
 }
 
-if(!is.null(input)){
-  in_sam <- snakemake@params[["in_sam"]]
-  in_spk <- snakemake@params[["in_spk"]]
+if(!is.null(input) & length(indexs) > 1){
+  in_sam <- indexs[[1]]
+  in_spk <- indexs[[2]]
   sam_en <- paste0("enrich_",in_sam)
   spk_en <- paste0("enrich_",in_spk)
   InputSpike <- filter(input,str_detect(name,paste0("^",in_spk,"$"))) %>% dplyr::rename(value1=value) %>% mutate(name="test")
@@ -38,19 +45,19 @@ if(!is.null(input)){
     dplyr::mutate(type=paste0(type,"_",in_spk)) %>%
     bind_rows(out,out1,.)
   out <- out %>% 
-    dplyr::mutate(mysamp=snakemake@input[[1]]) %>% 
+    dplyr::mutate(mysamp=samp_file[[1]]) %>% 
     separate(.,mysamp,c("temp","mysamp"),"/.*/") %>% 
-    mutate(mysamp=str_remove(mysamp,"_spikin_count.txt")) %>%  
+    mutate(mysamp=str_remove(mysamp,"_summary_featureCounts.tsv")) %>%  
     select(mysamp,type,value)
   
-  write_delim(out %>% select(-mysamp), snakemake@input[[1]],col_names = F,delim = " ", append = TRUE)
-  write_delim(out, snakemake@output[[1]],col_names = F,delim = " ")
+  write_delim(out %>% select(-mysamp), samp_file[[1]],col_names = F,delim = " ", append = TRUE)
+  write_delim(out, outfile,col_names = F,delim = " ")
 } else {
-  out <- tibble(mysamp=snakemake@input[[1]], type="OR", value = NA) %>% 
+  out <- tibble(mysamp=samp_file[[1]], type="OR", value = NA) %>% 
     separate(.,mysamp,c("temp","mysamp"),"/.*/") %>% 
-    mutate(mysamp=str_remove(mysamp,"_spikin_count.txt")) %>%  
+    mutate(mysamp=str_remove(mysamp,"_summary_featureCounts.tsv")) %>%  
     select(mysamp,type,value)
-  write_delim(out, snakemake@output[[1]],col_names = F,delim = " ")
+  write_delim(out, outfile,col_names = F,delim = " ")
 }
 
 

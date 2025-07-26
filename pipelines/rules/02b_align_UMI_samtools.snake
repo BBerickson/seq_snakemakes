@@ -19,8 +19,6 @@ rule dedup_UMI:
     log:
         out = PROJ + "/logs/{sample}_dedup.out",
         err = PROJ + "/logs/{sample}_dedup.err"
-    message:
-        "Removing duplicates for {wildcards.sample}"
     threads:
         4
     shell:
@@ -51,8 +49,6 @@ rule dedup_summary:
     log:
         out = PROJ + "/logs/" + PROJ + "_dedup_summary.out",
         err = PROJ + "/logs/" + PROJ + "_dedup_summary.err"
-    message:
-        "Creating " + PROJ + " dedup summary"
     threads:
         1
     run:
@@ -82,28 +78,28 @@ rule dedup_summary:
 
 
 # filter aligned reads
-rule align_filter_sample:
+rule align_filter:
     input:
         bam    = PROJ + "/bams/{sample}_" + INDEX_MAP + "_" + SEQ_DATE + "_temp.bam",
         bai    = PROJ + "/bams/{sample}_" + INDEX_MAP + "_" + SEQ_DATE + "_temp.bam.bai"
     output:
-        bam    = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
-        bai    = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai",
-        counts = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_count.txt"
+        bam    = PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
+        bai    = PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam.bai",
+        counts = PROJ + "/bams/{sample}_aligned_{index}_count.txt",
+        bamt   = temp(PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + "_temp2.bam"),
+        bamit  = temp(PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + "_temp2.bam.bai")
     params:
-        job_name = "{sample}_align_filter",
-        idx      = INDEX_PATH + INDEX_SAMPLE + ".txt",
-        samp     = "{sample}_" + INDEX_SAMPLE,
+        job_name = "{sample}_aligned_{index}_align_filter",
+        idx      = lambda wildcards: INDEX_PATH + wildcards.index + ".txt",
+        samp     = "{sample}_{index}",
         args     = CMD_PARAMS["samtools"],
-        fa2      = FA_SAMPLE,
-        sortname = PROJ + "/{sample}.temp"
+        fa2      = lambda wildcards: config_indexes[wildcards.index].get("FA_SAMPLE"),
+        sortname = PROJ + "/{sample}_aligned_{index}.temp"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
     log:
-        out = PROJ + "/logs/{sample}_align_filter.out",
-        err = PROJ + "/logs/{sample}_align_filter.err"
-    message:
-        "filtering reads {wildcards.sample}"
+        out = PROJ + "/logs/{sample}_aligned_{index}_align_filter.out",
+        err = PROJ + "/logs/{sample}_aligned_{index}_align_filter.err"
     threads: 
         12
     shell:
@@ -120,49 +116,6 @@ rule align_filter_sample:
         samtools index -@ {threads} {output.bam}
         echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
         
-        """
-
-
-# filter aligned spike in reads
-rule align_filter_sample_spikein:
-    input:
-        bam    = PROJ + "/bams/{sample}_" + INDEX_MAP + "_" + SEQ_DATE + "_temp.bam",
-        bai    = PROJ + "/bams/{sample}_" + INDEX_MAP + "_" + SEQ_DATE + "_temp.bam.bai"
-    output:
-        bam    = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
-        bai    = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam.bai",
-        bamt   = temp(PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_temp.bam"),
-        bait   = temp(PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_temp.bam.bai"),
-        counts = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_count.txt"
-    params:
-        job_name = "{sample}_align_filter_spikein",
-        idx      = INDEX_PATH + INDEX_SPIKE + ".txt",
-        samp     = "{sample}_" + INDEX_SPIKE,
-        args     = CMD_PARAMS["samtools"],
-        fa3      = FA_SPIKE,
-        sortname = PROJ + "/{sample}_spikein.temp"
-    resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
-    log:
-        out = PROJ + "/logs/{sample}_align_filter_spikein.out",
-        err = PROJ + "/logs/{sample}_align_filter_spikein.err"
-    message:
-        "filtering spike in reads {wildcards.sample}"
-    threads: 
-        12
-    shell:
-        """
-        # filter
-        samtools view {params.args} {input.bam} > {output.bamt}
-        samtools index -@ {threads} {output.bamt}
-        
-        samtools view {output.bamt} $(head -n1 {params.idx}) \
-        | sed 's/spike_*//g' | samtools view -bT {params.fa3} - \
-        | samtools sort - -T {params.sortname} -@ {threads} -O bam \
-        > {output.bam}
-        
-        samtools index -@ {threads} {output.bam}
-        echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
         """
 
 

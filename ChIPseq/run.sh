@@ -42,9 +42,7 @@ run_snakemake() {
 # Run pipeline to process ChIPseq reads
 pipe_dir=pipelines
 # index and configs
-snake=$pipe_dir/ChIPseq_PE_spikeIN.snake
-#snake=$pipe_dir/ChIPseq_PE.snake
-#snake=$pipe_dir/ChIPseq_SE.snake
+snake=$pipe_dir/ChIPseq.snake
 samples=samples.yaml
 
 run_snakemake $snake "$samples"
@@ -55,9 +53,4 @@ config=$pipe_dir/UnStranded_matrix.yaml
 
 run_snakemake $snake "$samples $config"
 
-# Run pipeline to make table files of spikeIN
-# snake=$pipe_dir/ChIPseq_matrix2.snake
-# config=$pipe_dir/ChIPseq_matrix.yaml
-# 
-# run_snakemake $snake "$samples $config"
 

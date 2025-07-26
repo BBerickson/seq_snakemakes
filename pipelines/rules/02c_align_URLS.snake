@@ -2,22 +2,20 @@
 
 
 # make URLS and copy files to sandbox
-rule my_bowtie_sample_url:
+rule my_bowtie_url:
     input:
-        bam   = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
-        bai   = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai",
+        bam = PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
+        bai = PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam.bai",
     output:
-        temp(PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_url.txt")
+        temp(PROJ + "/bams/{sample}_aligned_{index}_url.txt")
     params:
-        job_name = PROJ + "_bowtie_sample_url",
-        url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam"
+        job_name = "{sample}_aligned_{index}_bowtie_url",
+        url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{sample}_aligned_{index}_" + SEQ_DATE + ".bam"
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
+        memory = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
-        out = PROJ + "/logs/{sample}_" + PROJ + "_bowtie_sample_url.out",
-        err = PROJ + "/logs/{sample}_" + PROJ + "_bowtie_sample_url.err"
-    message:
-        "Creating " + PROJ + " bowtie_sample url"
+        out = PROJ + "/logs/{sample}_aligned_{index}" + PROJ + "_bowtie_url.out",
+        err = PROJ + "/logs/{sample}_aligned_{index}" + PROJ + "_bowtie_url.err"
     threads:
         1
     shell:
@@ -28,84 +26,26 @@ rule my_bowtie_sample_url:
           
         """
         
-# Combine bowtie2 urls
-rule bowtie_sample_urls:
+rule bowtie_urls:
     input:
-        expand(
-            PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_url.txt",
-            sample = SAMS_UNIQ
+        lambda wildcards: expand(
+            PROJ + "/bams/{sample}_aligned_" + wildcards.index + "_url.txt",
+            sample=SAMS_UNIQ
         )
     output:
-        PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + "_bam_URL.txt"
+        PROJ + "/URLS/" + PROJ + "_{index}_bam_URL.txt"
     params:
-        job_name = PROJ + "_bowtie_url"
+        job_name = lambda wildcards: PROJ + "_" + wildcards.index + "_bowtie_urls"
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
+        memory = lambda wildcards, input: memory_estimator(input, 1, 1)
     log:
-        out = PROJ + "/logs/" + PROJ + "_bowtie_sample_url.out",
-        err = PROJ + "/logs/" + PROJ + "_bowtie_sample_url.err"
-    message:
-        "Creating " + PROJ + " bowtie2 url"
-    threads:
-        1
+        out = PROJ + "/logs/" + PROJ + "_{index}_bowtie_urls.out",
+        err = PROJ + "/logs/" + PROJ + "_{index}_bowtie_urls.err"
     run:
         with open(output[0], "w") as out:
             for file in input:
-                for line in open(file, "r"):
-                    out.write(line)
-                    
- 
- # make URLS and copy files to sandbox
-rule my_bowtie_spike_url:
-    input:
-        bam   = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
-        bai   = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam.bai",
-    output:
-        temp(PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_url.txt")
-    params:
-        job_name = PROJ + "_bowtie_sample_url",
-        url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam"
-    resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/{sample}_" + PROJ + "_bowtie_spike_url.out",
-        err = PROJ + "/logs/{sample}_" + PROJ + "_bowtie_spike_url.err"
-    message:
-        "Creating " + PROJ + " bowtie_spike url"
-    threads:
-        1
-    shell:
-        """
-          echo "{params.url}" >> {output}
-          ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
-          scp {input.bam}* amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
-          
-        """
-# Combine bowtie2 urls
-rule bowtie_spike_urls:
-    input:
-        expand(
-            PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_url.txt",
-            sample = SAMS_UNIQ
-        )
-    output:
-        PROJ + "/URLS/" + PROJ + "_" + INDEX_SPIKE + "_bam_URL.txt"
-    params:
-        job_name = PROJ + "_bowtie_spike_url"
-    resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/" + PROJ + "_bowtie_spike_url.out",
-        err = PROJ + "/logs/" + PROJ + "_bowtie_spike_url.err"
-    message:
-        "Creating " + PROJ + " bowtie2 spike url"
-    threads:
-        1
-    run:
-        with open(output[0], "w") as out:
-            for file in input:
-                for line in open(file, "r"):
-                    out.write(line)
+                with open(file) as f:
+                    out.writelines(f.readlines())
                                        
                                        
 

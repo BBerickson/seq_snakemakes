@@ -7,16 +7,12 @@ INDEX_PATH:
     "/beevol/home/erickson/ref/misc/pp1_PNUTS/"
 INDEX_MAP:
     "prom_pp1_PNUTS_dWRD82"
-INDEX_SAMPLE:
+INDEXES:
     "prom_pp1_PNUTS_dWRD82"
-INDEX_SPIKE:
-    ""
 MASK:
   ""
 GTF:
   "/beevol/home/bentleyd/ref/hg38/ref_bed/Homo_sapiens.GRCh38.111.gtf"
-GTF_SPIKE:
-  ""
 FA_SAMPLE:
   "/beevol/home/erickson/ref/misc/pp1_PNUTS/pp1_PNUTS_dWRD82_w_promoter.ref"
 FA_SPIKE:
@@ -28,9 +24,5 @@ FW_REF:
 REV_REF:
   ""
 PI_REF:
-  ""
-EI_FW_REF:
-  ""
-EI_REV_REF:
   ""
   

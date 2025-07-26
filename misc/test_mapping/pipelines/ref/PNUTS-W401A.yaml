@@ -7,20 +7,14 @@ INDEX_PATH:
     "/beevol/home/erickson/ref/misc/PNUTS-W401A/"
 INDEX_MAP:
     "PNUTS-W401A"
-INDEX_SAMPLE:
+INDEXES:
     "PNUTS-W401A"
-INDEX_SPIKE:
-    ""
 MASK:
   ""
 GTF:
   "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_chrfix_GRCh38.113.gtf"
-GTF_SPIKE:
-  ""
 FA_SAMPLE:
   "/beevol/home/erickson/ref/misc/PNUTS-W401A/PNUTS-W401A.fa"
-FA_SPIKE:
-  ""
 MY_REF:
   ""
 FW_REF:
@@ -28,9 +22,5 @@ FW_REF:
 REV_REF:
   ""
 PI_REF:
-  ""
-EI_FW_REF:
-  ""
-EI_REV_REF:
   ""
   

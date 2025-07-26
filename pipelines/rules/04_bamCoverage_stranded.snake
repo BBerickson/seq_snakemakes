@@ -5,73 +5,73 @@
 rule bamCoverage:
     input:
         bam = lambda wildcards: expand(
-            PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
-            sample = SAMPLES[wildcards.newnam]
+            PROJ + "/" + BAM_PATH + "/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
+            sample = SAMPLES[wildcards.newnam],
+            index = [wildcards.index]
         ),
         check_point = PROJ + "/report/" + PROJ + "_results.tsv"
     output:
-        fw      =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_fw.bw",
-        rev     =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_rev.bw"
+        fw      =   PROJ   + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_fw.bw",
+        rev     =   PROJ   + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_rev.bw"
     params:
-        job_name = "{newnam}_bamCoverage",
-        args     = CMD_PARAMS["bamCoverage"] + CMD_PARAMS["bamCoverageBL"],
+        job_name = "{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage",
+        args     = CMD_PARAMS["bamCoverage"] + CMD_PARAMS.get("bamCoverageBL", ""),
         argsf    = _get_bamCov_strand("forward",ORIENTATION),
-        argsr    = _get_bamCov_strand("reverse",ORIENTATION),
-        scale    = lambda wildcards: _get_norm(wildcards.newnam,SAMPLES,NAMS_UNIQ,NORM,INDEX_SAMPLE)
+        argsr    = _get_bamCov_strand("reverse",ORIENTATION)
     resources:
         memory   = lambda wildcards, input: memory_estimator(input.bam, 0.2, 5)
     log:
-        out = PROJ + "/logs/{newnam}_bamCoverage.out",
-        err = PROJ + "/logs/{newnam}_bamCoverage.err"
-    message:
-        "stranded bigwigs with reads for {wildcards.newnam}"
+        out = PROJ + "/logs/{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage.out",
+        err = PROJ + "/logs/{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage.err"
     threads: 
         12
-    shell:
-        """
+    run:
+        scale = _get_norm(DF_SAM_NORM, wildcards.newnam, wildcards.suffix, wildcards.index)
         # R2-R1 or R1-R2 ORIENTATION
-        bamCoverage \
-          -b {input.bam[0]} \
-          -of bigwig \
-          -o {output.fw} \
-          {params.args} \
-          {params.scale} \
-          -p 12 --filterRNAstrand {params.argsf}
-
-        bamCoverage \
-          -b {input.bam[0]} \
-          -of bigwig \
-          -o {output.rev} \
-          {params.args} \
-          {params.scale} \
-          -p 12 --filterRNAstrand {params.argsr}
-        
-        
-        """
+        shell(f"""
+            bamCoverage \
+              -b {input.bam[0]} \
+              -of bigwig \
+              -o {output.fw} \
+              {params.args} \
+              {scale} \
+              -p {threads} \
+              --filterRNAstrand {params.argsf}
+              
+          bamCoverage \
+              -b {input.bam[0]} \
+              -of bigwig \
+              -o {output.rev} \
+              {params.args} \
+              {scale} \
+              -p {threads} \
+              --filterRNAstrand {params.argsr}
+        """)
+  
 
 # Align trimmed reads with bamCoverage
 rule bamCoverage_URL:
     input:
-        fw      =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_fw.bw",
-        rev     =   PROJ   + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_rev.bw"
+        fw      =   PROJ   + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_fw.bw",
+        rev     =   PROJ   + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_rev.bw"
     output:
-        stats   = temp(PROJ      + "/bw/{newnam}_bamCoverage_stats.txt")
+        stats   = temp(PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_bamCoverage_stats.txt")
     params:
-        job_name = "{newnam}_bamCoverageURL",
+        job_name = "{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_bamCoverageURL",
         color    = lambda wildcards: _get_col(wildcards.newnam, COLS_DICT),
-        url_fw   = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_fw.bw",
-        url_rev  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_rev.bw"
+        url_fw   = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_fw.bw",
+        url_rev  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_rev.bw"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
-        out = PROJ + "/logs/{newnam}_bamCoverage_URL.out",
-        err = PROJ + "/logs/{newnam}_bamCoverage_URL.err"
+        out = PROJ + "/logs/{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage_URL.out",
+        err = PROJ + "/logs/{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage_URL.err"
     threads: 
         1
     shell:
         """
-        echo "track type=bigWig visibility=full name='{wildcards.newnam}_{SEQ_DATE}{NORMS}_fw' description='{wildcards.newnam}_{SEQ_DATE}{NORMS}_fw' color={params.color} bigDataUrl={params.url_fw}" > {output.stats}
-        echo "track type=bigWig visibility=full name='{wildcards.newnam}_{SEQ_DATE}{NORMS}_rev' description='{wildcards.newnam}_{SEQ_DATE}{NORMS}_rev' color={params.color} bigDataUrl={params.url_rev}" >> {output.stats}
+        echo "track type=bigWig visibility=full name='{wildcards.newnam}_{SEQ_DATE}_{wildcards.suffix}_fw' description='{wildcards.newnam}_{SEQ_DATE}_{wildcards.suffix}_fw' color={params.color} bigDataUrl={params.url_fw}" > {output.stats}
+        echo "track type=bigWig visibility=full name='{wildcards.newnam}_{SEQ_DATE}_{wildcards.suffix}_rev' description='{wildcards.newnam}_{SEQ_DATE}_{wildcards.suffix}_rev' color={params.color} bigDataUrl={params.url_rev}" >> {output.stats}
         ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
         scp {input.fw} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
         scp {input.rev} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
@@ -82,126 +82,20 @@ rule bamCoverage_URL:
 # Combine bamCoverage summaries
 rule bamCoverage_summary:
     input:
-        sorted(expand(
-            PROJ + "/bw/{newnam}_bamCoverage_stats.txt",
-            newnam = NAMS_UNIQ
-        ))
+        lambda wildcards: sorted([
+            PROJ + f"/bw/{newnam}_aligned_{index}_{SEQ_DATE}_norm_{suffix}_bamCoverage_stats.txt"
+            for newnam, index, suffix in zip(DF_SAM_NORM['Newnam'], DF_SAM_NORM['Index'], DF_SAM_NORM['Suffix'])
+            if index == wildcards.index
+        ])
     output:
-        PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + NORMS + "_bw_URL.txt"
+        PROJ + "/URLS/" + PROJ + "_{index}_" + SEQ_DATE + "_norm_{suffix}_bw_URL.txt"
     params:
-        job_name = PROJ + "_bamCoverage_summary"
+        job_name = PROJ + "_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage_summary"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
-        out = PROJ + "/logs/" + PROJ + "_bamCoverage_summary.out",
-        err = PROJ + "/logs/" + PROJ + "_bamCoverage_summary.err"
-    message:
-        "Creating " + PROJ + " bamCoverage summary"
-    threads:
-        1
-    run:
-        with open(output[0], "w") as out:
-            for file in input:
-                for line in open(file, "r"):
-                    out.write(line)
-
-
-# Align trimmed reads with bamCoverage
-rule bamCoverage_spike:
-    input:
-        bam = lambda wildcards: expand(
-            PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
-            sample = SAMPLES[wildcards.newnam]
-        ),
-        check_point = PROJ + "/report/" + PROJ + "_results.tsv"
-    output:
-        fw      =   PROJ   + "/bw/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_norm_CPM_fw.bw",
-        rev     =   PROJ   + "/bw/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_norm_CPM_rev.bw"
-    params:
-        job_name = "{newnam}_spike_bamCoverage",
-        args     = CMD_PARAMS["bamCoverage"] + CMD_PARAMS["bamCoverageBL"],
-        argsf    = _get_bamCov_strand("forward",ORIENTATION),
-        argsr    = _get_bamCov_strand("reverse",ORIENTATION)
-    resources:
-        memory   = lambda wildcards, input: memory_estimator(input.bam, 0.2, 5)
-    log:
-        out = PROJ + "/logs/{newnam}_spike_bamCoverage.out",
-        err = PROJ + "/logs/{newnam}_spike_bamCoverage.err"
-    message:
-        "stranded bigwigs for {wildcards.newnam}"
-    threads: 
-        12
-    shell:
-        """
-        # R2-R1 or R1-R2 ORIENTATION
-        bamCoverage \
-          -b {input.bam[0]} \
-          -of bigwig \
-          -o {output.fw} \
-          {params.args} \
-          --normalizeUsing CPM \
-          -p 12 --filterRNAstrand {params.argsf}
-
-        bamCoverage \
-          -b {input.bam[0]} \
-          -of bigwig \
-          -o {output.rev} \
-          {params.args} \
-          --normalizeUsing CPM \
-          -p 12 --filterRNAstrand {params.argsr}
-        
-        
-        """
-
-# Align trimmed reads with bamCoverage
-rule bamCoverage_spike_URL:
-    input:
-        fw      =   PROJ   + "/bw/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_norm_CPM_fw.bw",
-        rev     =   PROJ   + "/bw/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_norm_CPM_rev.bw"
-    output:
-        stats   = temp(PROJ      + "/bw/{newnam}_spike_bamCoverage_stats.txt")
-    params:
-        job_name = "{newnam}_spike_bamCoverageURL",
-        color    = lambda wildcards: _get_col(wildcards.newnam, COLS_DICT),
-        url_fw   = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_norm_CPM_fw.bw",
-        url_rev  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SPIKE + "_" + SEQ_DATE + "_norm_CPM_rev.bw"
-    resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/{newnam}_spike_bamCoverage_URL.out",
-        err = PROJ + "/logs/{newnam}_spike_bamCoverage_URL.err"
-    threads: 
-        1
-    shell:
-        """
-        echo "track type=bigWig visibility=full name='{wildcards.newnam}_{SEQ_DATE}_norm_CPM_fw' description='{wildcards.newnam}_{SEQ_DATE}_norm_CPM_fw' color={params.color} bigDataUrl={params.url_fw}" > {output.stats}
-        echo "track type=bigWig visibility=full name='{wildcards.newnam}_{SEQ_DATE}_norm_CPM_rev' description='{wildcards.newnam}_{SEQ_DATE}_norm_CPM_rev' color={params.color} bigDataUrl={params.url_rev}" >> {output.stats}
-        ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
-        scp {input.fw} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
-        scp {input.rev} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
-        
-        """
-
-
-
-# Combine bamCoverage summaries
-rule bamCoverage_spike_summary:
-    input:
-        sorted(expand(
-            PROJ + "/bw/{newnam}_spike_bamCoverage_stats.txt",
-            newnam = NAMS_UNIQ
-        ))
-    output:
-        PROJ + "/URLS/" + PROJ + "_" + INDEX_SPIKE + "_norm_CPM_bw_URL.txt"
-    params:
-        job_name = PROJ + "_bamCoverage_spike_summary"
-    resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/" + PROJ + "_bamCoverage_spike_summary.out",
-        err = PROJ + "/logs/" + PROJ + "_bamCoverage_spike_summary.err"
-    message:
-        "Creating " + PROJ + " bamCoverage_spike summary"
+        out = PROJ + "/logs/" + PROJ + "_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage_summary.out",
+        err = PROJ + "/logs/" + PROJ + "_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage_summary.err"
     threads:
         1
     run:

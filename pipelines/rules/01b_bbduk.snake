@@ -1,47 +1,58 @@
 # ===== Snakefile for trimming reads with bbduk =====================
 
 # Run bbduk
-rule bbduk_paired:
+rule bbduk:
     input:
         R1  = PROJ + "/{sample}_R1_clumpify.fastq.gz",
         R2  = PROJ + "/{sample}_R2_clumpify.fastq.gz"
     output:
-        R1   = temp(PROJ + "/{sample}_R1.fastq.gz"),
-        R2   = temp(PROJ + "/{sample}_R2.fastq.gz"),
-        log  = PROJ + "/bbduk/{sample}_bbduk.log"
+        R1 = temp(PROJ + "/{sample}_R1.fastq.gz"),
+        R2 = temp(PROJ + "/{sample}_R2.fastq.gz"),
+        log = PROJ + "/bbduk/{sample}_bbduk.log"
     params:
         job_name = "{sample}_bbduk",
-        args     = CMD_PARAMS["bbduk"],
-        bar      = lambda wildcards: _bbduk_adapter_param(BARCODES)
+        args = lambda wildcards: CMD_PARAMS["bbduk"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
+        bar = lambda wildcards: _bbduk_adapter_param(BARCODES)
     resources:
-        memory   = lambda wildcards, input: memory_estimator([input.R1, input.R2], 2, 5)
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
     log:
         out = PROJ + "/logs/{sample}_bbduk.out",
         err = PROJ + "/logs/{sample}_bbduk.err"
-    message:
-        "Removing duplicates for {wildcards.sample}" 
     threads:
         12
     run:
-        # If no params are passed, make a symlink to original fastq
         if len(params.args) == 0:
             shell(
                 """
-                cp {input[0]} {output[0]}
-                cp {input[1]} {output[1]}
-                echo "Total Removed:  0 reads (0.0%)  0 bases (0.0%)" >> {output[2]}
+                cp {input.R1} {output.R1}
+                cp {input.R2} {output.R2}
+                echo "Total Removed:  0 reads (0.0%)  0 bases (0.0%)" >> {output.log}
                 """
             )
         else:
-            shell(
-                """
-                bbduk.sh -Xmx{resources.memory}g threads={threads} \
-                    in1={input.R1} in2={input.R2} \
-                    out1={output.R1} out2={output.R2} \
-                    {params.bar} {params.args} 2>> {output.log}
-                """
-            )
+            if PAIREDMAP[wildcards.sample]:
+                shell(
+                    """
+                    bbduk.sh -Xmx{resources.memory}g threads={threads} \
+                        in1={input.R1} in2={input.R2} \
+                        out1={output.R1} out2={output.R2} \
+                        {params.bar} {params.args} 2>> {output.log}
+                    """
+                )
+            else:
+                shell(
+                    """
+                    bbduk.sh -Xmx{resources.memory}g threads={threads} \
+                        in={input.R1} \
+                        out={output.R1} \
+                        {params.bar} {params.args} 2>> {output.log}
+                    # Create empty R2 to satisfy output declaration
+                    touch {output.R2}
+                    """
+                )
 
+        
+  
 # Create bbduk summary
 rule bbduk_summary:
     input:
@@ -79,8 +90,6 @@ rule bbduk_summary:
                         met = re.sub(":", "", met)
                         met = met.strip()
                         met = re.sub(" ", "_", met)
-                        
-
                         out.write("%s\t%s\t%s\n" % (name, met, num))
 
 

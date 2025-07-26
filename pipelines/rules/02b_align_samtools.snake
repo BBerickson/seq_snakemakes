@@ -3,37 +3,36 @@
 # filter aligned reads
 rule align_filter_multimap:
     input:
-        bam   = PROJ  + "/{sample}_" + INDEX_MAP + ".bam",
-        bai   = PROJ  + "/{sample}_" + INDEX_MAP + ".bam.bai"
+        bam = PROJ + "/{sample}_" + INDEX_MAP + ".bam",
+        bai = PROJ + "/{sample}_" + INDEX_MAP + ".bam.bai"
     output:
-        bam    = temp(PROJ + "/{sample}_" + INDEX_MAP + "_multimap.bam"),
-        bai    = temp(PROJ + "/{sample}_" + INDEX_MAP + "_multimap.bam.bai"),
-        bamt   = temp(PROJ + "/{sample}_" + INDEX_MAP + "_multimap_temp.bam"),
+        bam = temp(PROJ + "/{sample}_" + INDEX_MAP + "_multimap.bam"),
+        bai = temp(PROJ + "/{sample}_" + INDEX_MAP + "_multimap.bam.bai"),
+        bamt = temp(PROJ + "/{sample}_" + INDEX_MAP + "_multimap_temp.bam"),
         counts = PROJ + "/bams/{sample}_" + INDEX_MAP + "_count_multimap.txt"
     params:
         job_name = "{sample}_multimap_filter",
-        samp     = "{sample}_" + INDEX_MAP,
-        args     = CMD_PARAMS["samtools"],
-        args2    = _extract_k_option(CMD_PARAMS["bowtie2"],ORIENTATION),
+        samp = "{sample}_" + INDEX_MAP,
+        args = CMD_PARAMS["samtools"],
+        args2 = lambda wildcards: _extract_k_option(CMD_PARAMS[ALIGNER]["paired" if PAIREDMAP[wildcards.sample] else "single"], ORIENTATION),
         sortname = PROJ + "/{sample}_multimap.temp"
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
+        memory = lambda wildcards, input: memory_estimator(input, 0.5, 2)
     log:
         out = PROJ + "/logs/{sample}_multimap_filter.out",
         err = PROJ + "/logs/{sample}_multimap_filter.err"
     threads: 
         12
     run:
-        # If no params are passed step is skipped
-        if len(params.args2strip()) == 0:
+        if len(params.args2.strip()) == 0:
             shell(
                 """
-                cp {input[0]} {output[0]}
-                cp {input[1]} {output[1]}
+                touch {output.bamt}
+                cp {input.bam} {output.bam}
+                cp {input.bai} {output.bai}
                 echo "{params.samp} Multimap_Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
-                
                 """
-              )
+            )
         else:
             shell(
                 """
@@ -42,87 +41,64 @@ rule align_filter_multimap:
                   | samtools view -h - \
                   | python2 pipelines/multimappers.py {params.args2} \
                   | samtools fixmate -r - {output.bamt}
-        
-               samtools view -F 1804 -f 2 -u {output.bamt} \
-                  | samtools sort - -T {params.sortname} -@ {threads} -O bam \
-                  > {output.bam}
+                """
+            )
+
+            if PAIREDMAP[wildcards.sample]:
+                shell(
+                    """
+                    samtools view -F 1804 -f 2 -u {output.bamt} \
+                      | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+                      > {output.bam}
+                    """
+                )
+            else:
+                shell(
+                    """
+                    samtools view -F 1804 -u {output.bamt} \
+                      | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+                      > {output.bam}
+                    """
+                )
+
+            shell(
+                """
                 samtools index -@ {threads} {output.bam}
                 echo "{params.samp} Multimap_Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
                 """
             )
+
     
         
 # filter aligned reads
-rule align_filter_sample:
-    input:
-        bam   = PROJ  + "/{sample}_" + INDEX_MAP + "_multimap.bam",
-        bai   = PROJ  + "/{sample}_" + INDEX_MAP + "_multimap.bam.bai"
-    output:
-        bam    = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
-        bai    = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai",
-        counts = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_count.txt"
-    params:
-        job_name = "{sample}_align_filter",
-        idx      = INDEX_PATH + INDEX_SAMPLE + ".txt",
-        samp     = "{sample}_" + INDEX_SAMPLE,
-        args     = CMD_PARAMS["samtools"],
-        fa2      = FA_SAMPLE,
-        sortname = PROJ + "/{sample}.temp"
-    resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
-    log:
-        out = PROJ + "/logs/{sample}_align_filter.out",
-        err = PROJ + "/logs/{sample}_align_filter.err"
-    message:
-        "filtering reads {wildcards.sample}"
-    threads: 
-        12
-    shell:
-        """
-        # filter
-        samtools view {input.bam} $(head -n1 {params.idx}) \
-        | sed 's/spike_*//g' | samtools view -bT {params.fa2} - \
-        | samtools sort - -T {params.sortname} -@ {threads} -O bam \
-        > {output.bam}
-        
-        samtools index -@ {threads} {output.bam}
-        echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
-        
-        """
-        
-# filter aligned spike in reads
-rule align_filter_sample_spikein:
+rule align_filter_indexed:
     input:
         bam = PROJ + "/{sample}_" + INDEX_MAP + "_multimap.bam",
         bai = PROJ + "/{sample}_" + INDEX_MAP + "_multimap.bam.bai"
     output:
-        bam    = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
-        bai    = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam.bai",
-        counts = PROJ + "/bams/{sample}_" + INDEX_SPIKE + "_count.txt"
+        bam    = PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
+        bai    = PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam.bai",
+        counts = PROJ + "/bams/{sample}_aligned_{index}_count.txt"
     params:
-        job_name = "{sample}_align_filter_spikein",
-        idx      = INDEX_PATH + INDEX_SPIKE + ".txt",
-        samp     = "{sample}_" + INDEX_SPIKE,
+        job_name = "{sample}_align_filter_{index}",
+        idx      = lambda wildcards: INDEX_PATH + wildcards.index + ".txt",
+        samp     = "{sample}_{index}",
         args     = CMD_PARAMS["samtools"],
-        fa3      = FA_SPIKE,
-        sortname = PROJ + "/{sample}_spikein.temp"
+        fa       = lambda wildcards: config_indexes[wildcards.index].get("FA_SAMPLE"),
+        sortname = PROJ + "/{sample}_aligned_{index}.temp"
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
+        memory = lambda wildcards, input: memory_estimator(input, 0.5, 2)
     log:
-        out = PROJ + "/logs/{sample}_align_filter_spikein.out",
-        err = PROJ + "/logs/{sample}_align_filter_spikein.err"
-    message:
-        "filtering spike in reads {wildcards.sample}"
-    threads: 
-        12
+        out = PROJ + "/logs/{sample}_align_filter_{index}.out",
+        err = PROJ + "/logs/{sample}_align_filter_{index}.err"
+    threads: 12
     shell:
         """
-        # filter
         samtools view {input.bam} $(head -n1 {params.idx}) \
-        | sed 's/spike_*//g' | samtools view -bT {params.fa3} - \
+        | sed 's/spike_*//g' \
+        | samtools view -bT {params.fa} - \
         | samtools sort - -T {params.sortname} -@ {threads} -O bam \
         > {output.bam}
-        
         samtools index -@ {threads} {output.bam}
         echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
         """

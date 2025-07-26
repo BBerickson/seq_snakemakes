@@ -3,18 +3,18 @@
 # matrix files
 rule standared_matrix:
     input:
-        bw  =   PROJ + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + ".bw"
+        bw  =  PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}.bw"
     output:
-        matrix = PROJ + "/matrix/{region}/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{region}_{covarg}_matrix.gz"
+        matrix = PROJ + "/matrix/{region}/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_matrix.gz"
     params:
-        job_name = "{region}_{newnam}_{covarg}_matrix",
+        job_name = "{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_matrix",
         args = lambda wildcards: CMD_PARAMS[f"region{wildcards.region}"] + CMD_PARAMS["bamCoverageBL"],
-        my_ref   = MY_REF
+        my_ref = lambda wildcards: PI_REF if wildcards.region == "PI" else MY_REF
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
     log:
-        out = PROJ + "/logs/{region}_{newnam}_{covarg}_matrix.out",
-        err = PROJ + "/logs/{region}_{newnam}_{covarg}_matrix.err"
+        out = PROJ + "/logs/{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_matrix.out",
+        err = PROJ + "/logs/{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_matrix.err"
     threads: 
         12
     shell:
@@ -26,24 +26,24 @@ rule standared_matrix:
 # make url's and scp to sandbox
 rule standared_marix_url:
     input:
-        PROJ + "/matrix/{region}/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{region}_{covarg}_matrix.gz"
+        PROJ + "/matrix/{region}/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_matrix.gz"
     output:
-        temp(PROJ + "/matrix/{region}/{newnam}_{region}_{covarg}_matrix.url.txt")
+        temp(PROJ + "/matrix/{region}/{newnam}_aligned_{index}_{region}_{covarg}_norm_{suffix}_matrix.url.txt")
     params:
-        job_name = "{newnam}_{region}_{covarg}_matrix_url",
+        job_name = "{newnam}_aligned_{index}_{region}_{covarg}_norm_{suffix}_matrix_url",
         color    = lambda wildcards: _get_col(wildcards.newnam, COLS_DICT),
         groupkey = lambda wildcards: next((k for k, v in GROUPS.items() if wildcards.newnam in v), "self"),
-        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{region}_{covarg}_matrix.gz"
+        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_matrix.gz"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
-        out = PROJ + "/logs/{newnam}_{region}_{covarg}_matrix_url.out",
-        err = PROJ + "/logs/{newnam}_{region}_{covarg}_matrix_url.err"
+        out = PROJ + "/logs/{newnam}_aligned_{index}_{region}_{covarg}_norm_{suffix}_matrix_url.out",
+        err = PROJ + "/logs/{newnam}_aligned_{index}_{region}_{covarg}_norm_{suffix}_matrix_url.err"
     threads:
         1
     shell:
         """
-        echo {params.url_out} {params.groupkey} {wildcards.newnam}{NORMS}_{SEQ_DATE} {params.color} >> {output[0]}
+        echo {params.url_out} {params.groupkey} {wildcards.newnam}_norm_{wildcards.suffix}_{SEQ_DATE} {params.color} >> {output[0]}
         ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
         scp {input[0]} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
         """
@@ -53,25 +53,26 @@ rule standared_marix_url:
 rule matrix_url_summary:
     input:
         sorted(expand(
-            PROJ + "/matrix/{region}/{newnam}_{region}_{covarg}_matrix.url.txt",
-            zip, newnam=REGIONS_COVARGS['Newnam'], region=REGIONS_COVARGS['Region'], covarg=REGIONS_COVARGS['Value']
+            PROJ + "/matrix/{region}/{newnam}_aligned_{index}_{region}_{covarg}_norm_{suffix}_matrix.url.txt",
+            zip, newnam=DF_SAM_NORM['Newnam'], index=DF_SAM_NORM['Index'], region=DF_SAM_NORM['Region'], 
+            covarg=DF_SAM_NORM['Value'], suffix=DF_SAM_NORM['Suffix']
         ))
     output:
-        PROJ + "/URLS/{region}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{covarg}_matrix.url.txt"
+        PROJ + "/URLS/{region}_aligned_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_matrix.url.txt"
     params:
-        job_name = "{region}_{covarg}_matrix_url_summary"
+        job_name = "{region}_{index}__{covarg}_norm_{suffix}_matrix_url_summary"
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
-        out = PROJ + "/logs/{region}_{covarg}_matrix_url_summary.out",
-        err = PROJ + "/logs/{region}_{covarg}_matrix_url_summary.err"
+        out = PROJ + "/logs/{region}_{index}__{covarg}_norm_{suffix}_matrix_url_summary.out",
+        err = PROJ + "/logs/{region}_{index}__{covarg}_norm_{suffix}_matrix_url_summary.err"
     threads:
         1
     shell:
         """
         # Filter and concatenate files
         for file in {input}; do
-            if [[ $file == *"{wildcards.region}"* && $file == *"{wildcards.covarg}"* ]]; then
+            if [[ $file == *"{wildcards.region}"* && $file == *"{wildcards.covarg}"* && $file == *"{wildcards.suffix}"* ]]; then
                 cat $file >> {output}
             fi
         done

@@ -1,6 +1,6 @@
 # ===== Snakefile for trimming and filtering NET-seq reads =====================
 
-# Extract UMI sequence
+# Extract UMI sequence R1R2
 # The UMI is the first 12 bases of read 2. By default umi_tools assumes
 # the given UMI pattern starts at the 5' end of the read. To account for
 # this read 2 is provided with -I and read 1 is provided with --read2-in.
@@ -30,19 +30,34 @@ rule extract_umi:
             os.symlink(input[1], output.R2)
             shell("touch {output.log}")
         else:
-            shell(
-                """
-                umi_tools extract \
-                  -I {input[1]} \
-                  --extract-method=string \
-                  --bc-pattern={params.umi_pat} \
-                  --read2-in={input[0]} \
-                  --read2-out={output.R1} \
-                  -L {output.log} \
-                  | gzip \
-                  > {output.R2}
-                """
-            )
+            if ORIENTATION == "R1":
+                shell(
+                    """
+                    umi_tools extract \
+                      -I {input[1]} \
+                      --extract-method=string \
+                      --bc-pattern={params.umi_pat} \
+                      --read2-in={input[0]} \
+                      --read2-out={output.R1} \
+                      -L {output.log} \
+                      | gzip \
+                      > {output.R2}
+                    """
+                )
+            else:
+                shell(
+                    """
+                    umi_tools extract \
+                      -I {input[0]} \
+                      --extract-method=string \
+                      --bc-pattern={params.umi_pat} \
+                      --read2-in={input[1]} \
+                      --read2-out={output.R2} \
+                      -L {output.log} \
+                      | gzip \
+                      > {output.R1}
+                    """
+                )
 
 
 # Trim reads with cutadapt

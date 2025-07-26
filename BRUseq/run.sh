@@ -42,8 +42,6 @@ run_snakemake() {
 # Run pipeline to process BrUseq reads
 pipe_dir=pipelines
 # index and configs
-# snake=$pipe_dir/BRUseq_spikeIN.snake
-# snake=$pipe_dir/BRUseq_SE.snake
 snake=$pipe_dir/BRUseq.snake
 samples=samples.yaml
 

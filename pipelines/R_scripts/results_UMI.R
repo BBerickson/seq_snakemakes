@@ -10,18 +10,26 @@ aligner <- read_tsv(snakemake@input[[2]],col_names = c("sample","type","alignmen
   dplyr::select(sample,alignment_rate)
 
 mydir <- snakemake@params[["project"]]
-mydirc <- paste0(mydir,"/counts")
+mydirc <- paste0(mydir,"/stats")
 mydirf <- paste0(mydir,"/stats")
 mydirs <- paste0(mydir,"/bams_sub")
 mydirb <- paste0(mydir,"/bams")
 index_map <- snakemake@params[["index_map"]]
+sam_new <- snakemake@params[["sam_new"]]
+
+sn <- tibble(
+  new_name = names(sam_new),
+  sample = unlist(sam_new)
+)
 
 cutad <- cutad %>% 
   dplyr::mutate(type=str_replace_all(type," ","_")) %>% 
   spread(type,value) %>% 
   dplyr::mutate(Total_reads = as.double(Total_read_pairs_processed)) %>%
   dplyr::rename("passing_filters_Cutadapt"="Pairs_written_(passing_filters)") %>%
-  dplyr::select(sample,Total_reads,passing_filters_Cutadapt)
+  dplyr::select(sample,Total_reads,passing_filters_Cutadapt) %>% 
+  full_join(sn,.,by="sample") %>% 
+  arrange(new_name)
 
 dedup_files <- list.files(path = mydirf, pattern = '_dedup.tsv',recursive = T)
 dedup <- read_tsv(paste0(mydirf,"/",dedup_files),
@@ -38,8 +46,7 @@ dedup <- dedup %>% dplyr::filter(type == "Input_Reads" | type == "Number_of_read
   dplyr::select(-Number_of_reads_out,-alignment_rate,-Input_Reads) %>% 
   pivot_wider(names_from = "index",values_from = c("Aligned_reads","Unique_UMI"))
 
-hh <- full_join(cutad,dedup,by="sample") %>% 
-  arrange(sample)
+hh <- full_join(cutad,dedup,by="sample") 
 
 # tests if subsample per each genome or per mixed genome
 count_files <- list.files(path = mydirb, pattern = '_mask_count',recursive = T)
@@ -85,7 +92,7 @@ if(!is_empty(count_files)){
         tidyr::separate(.,sample,c("sample","index"),"_(?=[^_]+$)") %>% 
         dplyr::mutate(index = paste0("subsampled_", index)) %>%
         pivot_wider(names_from = "index",values_from = c("read_fraction"))
-      hh <- full_join(hh,subsample,by="sample") %>% arrange(sub_group,sample)
+      hh <- full_join(hh,subsample,by="sample") %>% arrange(sub_group,new_name)
     }
   }
   subsample_files <- list.files(path = mydirf, pattern = '_subsample.tsv',recursive = T)
@@ -131,33 +138,37 @@ if(!is_empty(count_files)){
         dplyr::mutate(sample=str_remove(sample, paste0("_",index_map))) %>%
         dplyr::rename(!!paste0("subsampled_", index_map) := read_fraction) %>% 
         dplyr::select(-value) 
-      hh <- full_join(hh,subsample,by="sample") %>% arrange(sub_group,sample)
+      hh <- full_join(hh,subsample,by="sample") %>% arrange(sub_group,new_name)
     }
   }
   
-  count_files <- list.files(path = mydirc, pattern = '_count',recursive = T)
+  count_files <- list.files(path = mydirc, pattern = '_summary_featureCounts.tsv',recursive = T)
   if(!is_empty(count_files)){
     count_files_names <- tibble(samp=count_files) %>% 
-      dplyr::mutate(samp=str_remove(samp,"_count.txt")) %>%
-      dplyr::mutate(samp=str_remove(samp,"_spikin")) %>% 
+      dplyr::mutate(samp=str_remove(samp,"_summary_featureCounts.tsv")) %>%
       unlist()
     
     paste0(mydirc,"/",count_files) -> count_files
+    filter_type <- c("enrich_|chrM_")
     
     gg <- NULL
     for(i in seq_along(count_files)){
       gg <- read_delim(count_files[i],delim = " ",
                        col_names = c("type","value"),
                        show_col_types = FALSE) %>% 
-        dplyr::filter(!str_detect(type,"enrich_|chrM_")) %>% 
         dplyr::mutate(sample=count_files_names[i]) %>% 
+        dplyr::filter(!str_detect(type,filter_type)) %>%
+        dplyr::mutate(value = if_else(str_detect(value, "spikin_"),1000000/value,value)) %>% 
         bind_rows(gg)
+      
     }
+    
     
     hh <- gg %>% distinct(type,sample,.keep_all =T) %>% spread(type,value) %>% 
       dplyr::select(sample, distinct(gg,type)$type) %>% 
       full_join(hh,.,by="sample")
   }
+
 }
 
 frag_files <- list.files(path = mydirf, pattern = '_fragment_results.tsv',recursive = T)

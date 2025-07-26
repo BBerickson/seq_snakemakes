@@ -83,15 +83,19 @@ CMD_PARAMS:
     cutadapt:      " --minimum-length 15 -O 10 -a 'AACTGTAGGCACCATCAAT' -A 'AGATCGGAAGAGCGTCGTGTAG' " 
     umi_pattern:   "NNNNNNNNNNNN"
     umi_tools:     " --method unique --read-length "
-    bowtie2:       " --local --no-mixed --no-discordant "
+    bowtie2:      
+      paired:  " --end-to-end --very-sensitive --no-mixed --no-discordant " # -k2 all but 1 multi-mapper from -k will be filtered out.
+      single:  " --end-to-end --very-sensitive " # -k2 all but 1 multi-mapper from -k will be filtered out.
     samtools:      " -bF4q10 "
     bamCoverage:   " --binSize 10 --skipNonCoveredRegions "
-    bamCoverageBL: "" #  " --blackListFileName /beevol/home/erickson/ref/hg38/ref/merge_filter_RNAs.bed "
-    fragment_size: " --maxFragmentLength 1000 "
+    fragment_size: 
+      paired:  " --maxFragmentLength 1000 "
+      single:  " bin=10 max=1010 "
+    featureCounts: " --readExtension5 2000 --readExtension3 2000 " #--largestOverlap
     
 
 ORIENTATION:
-    "R1R2" # R1R2
+    "R1R2" # R2R1
     
 # which matrix type(s) to make
 # deeptools options set in Stranded_matrix.yaml

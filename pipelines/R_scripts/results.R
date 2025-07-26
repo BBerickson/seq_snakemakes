@@ -7,8 +7,14 @@ bbduk <- read_tsv(snakemake@input[[2]],col_names = c("sample","type","value"),sh
 aligner <- read_tsv(snakemake@input[[3]],col_names = c("sample","type","alignment_rate"),show_col_types = FALSE)
 
 mydir <- snakemake@params[["project"]]
-mydirc <- paste0(mydir,"/counts")
+mydirc <- paste0(mydir,"/stats")
 mydirf <- paste0(mydir,"/stats")
+sam_new <- snakemake@params[["sam_new"]]
+
+sn <- tibble(
+  new_name = names(sam_new),
+  sample = unlist(sam_new)
+)
 
 cc <- clump %>% 
   spread(type,value) %>% 
@@ -24,11 +30,10 @@ hh <- aligner %>%
   dplyr::filter(type == "overall_alignment_rate") %>% 
   dplyr::select(sample,alignment_rate)
 
-count_files <- list.files(path = mydirc, pattern = '_count',recursive = T)
+count_files <- list.files(path = mydirc, pattern = '_summary_featureCounts.tsv',recursive = T)
 if(!is_empty(count_files)){
   count_files_names <- tibble(samp=count_files) %>% 
-    dplyr::mutate(samp=str_remove(samp,"_count.txt")) %>%
-    dplyr::mutate(samp=str_remove(samp,"_spikin")) %>% 
+    dplyr::mutate(samp=str_remove(samp,"_summary_featureCounts.tsv")) %>%
     unlist()
   
   paste0(mydirc,"/",count_files) -> count_files
@@ -70,8 +75,9 @@ if(!is_empty(frag_files)){
 }
 
 
-full_join(cc,bb,by="sample") %>% 
+full_join(sn,cc,by="sample") %>% 
+  full_join(.,bb,by="sample") %>% 
   full_join(.,hh,by="sample") %>% 
-  arrange(sample) %>% 
+  arrange(new_name) %>% 
   write_tsv(., snakemake@output[[1]])
 

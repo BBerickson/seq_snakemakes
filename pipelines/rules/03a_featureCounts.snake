@@ -4,21 +4,21 @@
 # Run featureCounts
 rule featureCounts_sample:
     input:
-        bam = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
-        bai = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai"
+        bam = PROJ + "/" + BAM_PATH + "/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
+        bai = PROJ + "/" + BAM_PATH + "/{sample}_aligned_{index}_" + SEQ_DATE + ".bam.bai"
     output:
-        tsv = PROJ + "/counts/{sample}_" + INDEX_SAMPLE + "_featureCounts.tsv"
+        tsv = PROJ + "/counts/{sample}_aligned_{index}_featureCounts.tsv"
     params:
-        job_name = PROJ + "_featureCounts",
-        args     = _get_featCout(ORIENTATION),
-        args2    = lambda wildcards: config["CMD_PARAMS"].get("featureCounts", ""),
-        tsv      = PROJ + "/counts/{sample}_" + INDEX_SAMPLE + "_featureCounts_enrich.tsv",
-        ftfile   = FC_FILE
+        job_name = "{sample}_aligned_{index}_featureCounts",
+        args     = lambda wildcards: _get_featCount(ORIENTATION, config_indexes[wildcards.index].get("GTF")),
+        args2    = config["CMD_PARAMS"].get("featureCounts", ""),
+        tsv      = PROJ + "/counts/{sample}_aligned_{index}_featureCounts_enrich.tsv",
+        ftfile   = lambda wildcards: config_indexes[wildcards.index].get("GTF")
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 0.5, 4)
     log:
-        out = PROJ + "/logs/{sample}_featureCounts.out",
-        err = PROJ + "/logs/{sample}_featureCounts.err"
+        out = PROJ + "/logs/{sample}_featureCounts_{index}.out",
+        err = PROJ + "/logs/{sample}_featureCounts_{index}.err"
     threads:
         12
     shell:
@@ -41,45 +41,29 @@ rule featureCounts_sample:
             {input.bam}
         """
 
-# get read counts from bams spikein
-rule featureCounts_spikein:
+# making count file with spikein
+rule featurecount_summary:
     input:
-        bam   = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam",
-        bai   = PROJ + "/" + BAM_PATH + "/{sample}_" + INDEX_SPIKE + "_" + SEQ_DATE + ".bam.bai"
+        lambda wildcards: expand(
+            PROJ + "/counts/{sample}_aligned_{index}_featureCounts.tsv",
+            sample=wildcards.sample,
+            index=INDEXES
+        )
     output:
-        tsv = PROJ + "/counts/{sample}_" + INDEX_SPIKE + "_featureCounts.tsv"
+        summary = PROJ + "/stats/{sample}_summary_featureCounts.tsv"
     params:
-        job_name = PROJ + "_featureCounts_spikein",
-        args     = _get_featCout(ORIENTATION),
-        args2    = lambda wildcards: config["CMD_PARAMS"].get("featureCounts", ""),
-        tsv      = PROJ + "/counts/{sample}_" + INDEX_SPIKE + "_featureCounts_enrich.tsv",
-        ftfile   = FC_SPIKE
+        job_name = "{sample}_summary_featureCounts",
+        index = INDEXES,
+        script = "pipelines/R_scripts/featurecount_summary.R"
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 0.5, 4)
+        memory = lambda wildcards, input: memory_estimator(input, 1, 1)
     log:
-        out = PROJ + "/logs/{sample}_featureCounts_spikin.out",
-        err = PROJ + "/logs/{sample}_featureCounts_spikin.err"
-    message:
-        "featureCounts for spikein {wildcards.sample}"
-    threads:
-        12
+        out = PROJ + "/logs/{sample}_summary_featureCounts.out",
+        err = PROJ + "/logs/{sample}_summary_featureCounts.err"
+    threads: 1
     shell:
         """
-        if [ "{params.args2}" != "" ]; then
-            featureCounts \
-              {params.args} \
-              {params.args2} \
-              -a {params.ftfile} \
-              -o {params.tsv} \
-              -T {threads} \
-              {input.bam}
-        fi
-        
-        featureCounts \
-            {params.args} \
-            -a {params.ftfile} \
-            -o {output.tsv} \
-            -T {threads} \
-            {input.bam}
+        Rscript {params.script} "{input}" "{params.index}" "{output.summary}"
         """
+
         

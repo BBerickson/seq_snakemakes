@@ -42,15 +42,14 @@ run_snakemake() {
 # Run pipeline to process BrUseq reads
 pipe_dir=pipelines
 # index and configs
-# snake=$pipe_dir/BRUseq_spikeIN_UMI.snake
 snake=$pipe_dir/BRUseq_UMI.snake
 samples=samples.yaml
 
-run_snakemake $snake "$samples 
+run_snakemake $snake "$samples" 
 
 snake=$pipe_dir/Stranded_matrix.snake
 config=$pipe_dir/Stranded_matrix.yaml
-run_snakemake $snake "$samples $config 
+run_snakemake $snake "$samples $config" 
 
 # # Run pipeline to make table files of spikeIN
 

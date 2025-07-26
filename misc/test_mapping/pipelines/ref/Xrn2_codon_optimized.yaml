@@ -7,20 +7,14 @@ INDEX_PATH:
     "/beevol/home/erickson/ref/misc/Xrn2_Int11_codon_optimized/"
 INDEX_MAP:
     "Xrn2_codon_optimized"
-INDEX_SAMPLE:
+INDEXES:
     "Xrn2_codon_optimized"
-INDEX_SPIKE:
-    ""
 MASK:
   ""
 GTF:
   "/beevol/home/bentleyd/ref/hg38/ref_bed/Homo_sapiens.GRCh38.111.gtf"
-GTF_SPIKE:
-  ""
 FA_SAMPLE:
   "/beevol/home/erickson/ref/misc/Xrn2_Int11_codon_optimized/Xrn2_codon_optimized.fa"
-FA_SPIKE:
-  ""
 MY_REF:
   ""
 FW_REF:
@@ -28,9 +22,5 @@ FW_REF:
 REV_REF:
   ""
 PI_REF:
-  ""
-EI_FW_REF:
-  ""
-EI_REV_REF:
   ""
   

@@ -6,17 +6,13 @@ GENELIST:
 INDEX_PATH:
     "/beevol/home/erickson/ref/misc/e_coli/"
 INDEX_MAP:
-    "e_coli"
-INDEX_SAMPLE:
-    "e_coli"
-INDEX_SPIKE:
-    ""
+    "ecoli"
+INDEXES:
+    "ecoli"
 MASK:
   ""
 GTF:
-  ""
-GTF_SPIKE:
-  ""
+  "/beevol/home/erickson/ref/misc/e_coli/GCF_000005845.2_ASM584v2_genomic.gtf"
 FA_SAMPLE:
   "/beevol/home/erickson/ref/misc/e_coli/e_coli_k12.v2.fa"
 FA_SPIKE:
@@ -28,9 +24,5 @@ FW_REF:
 REV_REF:
   ""
 PI_REF:
-  ""
-EI_FW_REF:
-  ""
-EI_REV_REF:
   ""
   

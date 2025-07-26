@@ -1,14 +1,15 @@
 #===== Config file for standared mm39 ===================
 
-# Path to mixed bowtie2 index and chrom name txt file
-GENELIST:
-    ""
+# Path to mixed bowtie2 index and chrom name txt files
 INDEX_PATH:
     "/beevol/home/bentleyd/ref/mm39/genome/"
+# bowtie2 index prefix
 INDEX_MAP:
-    "mm39"
-INDEX_SAMPLE:
-    "mm39"
+  "mm39"
+# index.yaml prefix
+INDEXES:
+  "mm39"
+# ref file locations
 MASK:
   "/beevol/home/bentleyd/ref/mm39/ref_bed/mm39_snoRNA.bed"
 GTF:

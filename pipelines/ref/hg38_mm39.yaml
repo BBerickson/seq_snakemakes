@@ -1,13 +1,12 @@
 #===== Config file for standared hg38 with mm10 spikeIN  ===================
 
-# Path to mixed bowtie2 index and chrom name txt file
-GENELIST:
-    ""
+# Path to mixed bowtie2 index and chrom name txt files
 INDEX_PATH:
     "/beevol/home/bentleyd/ref/hg38_mm39/"
+# bowtie2 index prefix
 INDEX_MAP:
     "hg38_mm39"
-INDEX_SAMPLE:
-    "hg38"
-INDEX_SPIKE:
-    "mm39"
+# index.yaml prefix(s)
+INDEXES:
+  - "hg38"
+  - "mm39"

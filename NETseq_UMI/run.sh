@@ -41,7 +41,6 @@ run_snakemake() {
 # Run pipeline to process UMI Netseq 
 pipe_dir=pipelines
 # index and configs
-#snake=$pipe_dir/NETseq_UMI_spikein.snake
 snake=$pipe_dir/NETseq_UMI.snake
 samples=samples.yaml
 

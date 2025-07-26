@@ -1,48 +1,58 @@
 # ===== Snakefile for removing duplicates with clumpify =====================
 
-# Run clumpify for paired-end reads
-rule clumpify_paired:
+# Run clumpify for single-end reads
+rule clumpify:
     input:
-        lambda wildcards: _get_fqs(wildcards.sample, RAW_DATA, FASTQ_DIR, full_name=True, paired=True)
+        lambda wildcards: _get_fqs(wildcards.sample, RAW_DATA, FASTQ_DIR, full_name=True, paired=PAIREDMAP[wildcards.sample])
     output:
-        R1  = temp(PROJ + "/{sample}_R1_clumpify.fastq.gz"),
-        R2  = temp(PROJ + "/{sample}_R2_clumpify.fastq.gz"),
+        R1 = temp(PROJ + "/{sample}_R1_clumpify.fastq.gz"),
+        R2 = temp(PROJ + "/{sample}_R2_clumpify.fastq.gz"),
         log = PROJ + "/clumpify/{sample}_clumpify.log"
     params:
         job_name = "{sample}_clumpify",
-        args     = CMD_PARAMS["clumpify"]
+        args = lambda wildcards: CMD_PARAMS["clumpify"]["paired" if PAIREDMAP[wildcards.sample] else "single"]
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 10, 15)
+        memory = lambda wildcards, input: memory_estimator(input, 10, 15)
     log:
         out = PROJ + "/logs/{sample}_clumpify.out",
         err = PROJ + "/logs/{sample}_clumpify.err"
-    message:
-        "Removing duplicats for {wildcards.sample}" 
     threads:
         1
     run:
-        # If no params are passed step is skipped
+        reduced_mem = int(resources.memory * 0.9)
         if len(params.args) == 0:
             shell(
                 """
-                cp {input[0]} {output[0]}
-                cp {input[1]} {output[1]}
-                echo "Reads In:  0,0" >> {output[2]}
-                echo "Duplicates Found:  0,0" >> {output[2]}
-                
-                """
-              )
-        else:
-            shell(
-                """
-                reduced_mem=$(awk "BEGIN {{print int({resources.memory} * 0.9)}}")
-                clumpify.sh -Xmx${{reduced_mem}}g \
-                    groups=${{reduced_mem}} \
-                    in1={input[0]} in2={input[1]} \
-                    out1={output[0]} out2={output[1]} \
-                    {params.args} 2>> {output[2]}
+                cp {input[0]} {output.R1}
+                cp {input[1]} {output.R2}
+                echo "Reads In:  0,0" >> {output.log}
+                echo "Duplicates Found:  0,0" >> {output.log}
                 """
             )
+        else:
+            if PAIREDMAP[wildcards.sample]:
+                shell(
+                    """
+                    clumpify.sh -Xmx{reduced_mem}g \
+                        groups={reduced_mem} \
+                        in1={input[0]} in2={input[1]} \
+                        out1={output.R1} out2={output.R2} \
+                        {params.args} 2>> {output.log}
+                    """
+                )
+            else:
+                shell(
+                    """
+                    clumpify.sh -Xmx{reduced_mem}g \
+                        groups={reduced_mem} \
+                        in={input[0]} \
+                        out={output.R1} \
+                        {params.args} 2>> {output.log}
+                    # Create empty R2 to satisfy output declaration
+                    touch {output.R2}
+                    """
+                )
+
 
 
 # Create clumpify summary
@@ -61,28 +71,22 @@ rule clumpify_summary:
     log:
         out = PROJ + "/logs/" + PROJ + "_clumpify_summary.out",
         err = PROJ + "/logs/" + PROJ + "_clumpify_summary.err"
-    message:
-        "Creating " + PROJ + " clumpify summary"
     threads:
         1
     run:
         with open(output[0], "w") as out:
-            for file in input:
-                name = os.path.basename(file)
-                name = re.sub("_clumpify.log", "", name)
-
-                for line in open(file, "r"):
-                    match = re.search("Reads In: |Duplicates Found:", line)
-
-                    if match:
-                        num = re.search("[0-9,]{2,}", line)
-                        num = int(re.sub(",", "", num.group(0)))  # Convert to int and remove comma
-                        num_divided = num // 2  # Divide num by 2 using integer division (floor division)
-                        met = re.search("[\w\(\) ]+:", line).group(0)
-                        met = re.sub(":", "", met)
-                        met = met.strip()
-                        met = re.sub(" ", "_", met)
-
-                        out.write("%s\t%s\t%s\n" % (name, met, num_divided))
+          for file in input:
+            name = os.path.basename(file)
+            name = re.sub("_clumpify.log", "", name)
+        
+            for line in open(file, "r"):
+                match = re.search("Reads In: |Duplicates Found:", line)
+                if match:
+                    num = re.search("[0-9,]{2,}", line)
+                    num = int(re.sub(",", "", num.group(0)))
+                    num_final = num // 2 if PAIREDMAP[name] else num
+                    met = re.search("[\w\(\) ]+:", line).group(0)
+                    met = re.sub(":", "", met).strip().replace(" ", "_")
+                    out.write(f"{name}\t{met}\t{num_final}\n")
 
 

@@ -6,14 +6,14 @@ rule get_bw:
     input:
         lambda wildcards: _get_bws(wildcards.newnam, RAW_DATA, BW_DIR, paired=False)
     output:
-        bw = PROJ + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + ".bw",
+        bw = PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE +"_norm_{suffix}.bw"
     params:
-        job_name = "{newnam}_getbw",
+        job_name = "{newnam}_aligned_{index}_norm_{suffix}_getbw",
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
-        out = PROJ + "/logs/{newnam}_get_bw.out",
-        err = PROJ + "/logs/{newnam}_get_bw.err"
+        out = PROJ + "/logs/{newnam}_{index}_norm_{suffix}_get_bw.out",
+        err = PROJ + "/logs/{newnam}_{index}_norm_{suffix}_get_bw.err"
     threads: 
         1
     shell:

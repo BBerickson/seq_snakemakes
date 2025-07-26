@@ -5,10 +5,13 @@ GENELIST:
     "HHV8"
 INDEX_PATH:
     "/beevol/home/erickson/ref/HHV8/"
+# bowtie2 index prefix
 INDEX_MAP:
-    "HHV8"
-INDEX_SAMPLE:
-    "HHV8"
+  "HHV8"
+# index.yaml prefix
+INDEXES:
+  "HHV8"
+# ref file locations
 MASK:
   ""
 GTF:

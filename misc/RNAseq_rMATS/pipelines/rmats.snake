@@ -1,13 +1,13 @@
 # ===== Snake file for processing Bowtie ================================
 
-
 # Configure shell for all rules
 shell.executable("/bin/bash")
 shell.prefix("source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; ")
 
 # python packages
 import os
-import re
+import sys
+import yaml
 from pathlib import Path
 
 # Include custom Python functions
@@ -27,20 +27,41 @@ if not GENOME_CONFIG.exists():
 configfile: str(GENOME_CONFIG)
 
 # ------------------------------------------------------------------------------
+# Load additional genome-specific configs manually
+# ------------------------------------------------------------------------------
+
+raw_indexes = config['INDEXES']
+INDEXES = [raw_indexes] if isinstance(raw_indexes, str) else [raw_indexes[0]]
+
+
+# Paths to additional config files
+GENOME_CONFIG1 = Path("pipelines/ref") / f"{INDEXES[0]}.yaml"
+
+# Validate existence
+if not GENOME_CONFIG1.exists():
+    sys.exit(f"ERROR: Config file not found for index '{INDEXES[0]}'. Expected at: {GENOME_CONFIG1}")
+
+# Load additional configs
+with open(GENOME_CONFIG1) as f:
+    config1 = yaml.safe_load(f)
+    
+# ------------------------------------------------------------------------------
 # Assign parameters from configs
 # ------------------------------------------------------------------------------
 
 PROJ         = config.get("PROJ")
 RAW_DATA     = config.get("RAW_DATA")
-ALL_SAMPLES  = config.get("SAMPLESr")
+ALL_SAMPLES  = config.get("SAMPLESrmat")
 SEQ_DATE     = config.get("SEQ_DATE")
 GROUPS_COMP  = config.get("GROUPS_COMP")
-GTF          = config.get("GTF")
 CMD_PARAMS   = config.get("CMD_PARAMS")
 COLORS       = config.get("COLORS")
 NORM         = config.get("NORM")
 ORIENTATION  = config.get("ORIENTATION")
 USER         = config.get("USER")
+
+# From additional configs
+GTF          = config1.get("GTF")
 
 # Sample and group lists
 SAMS = [[y, x] for y in ALL_SAMPLES for x in ALL_SAMPLES[y]]

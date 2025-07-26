@@ -2,25 +2,19 @@
 # This gets appended to config
 
 
-# Genome to use for analysis
-# * The specified genome must have a config file present in pipelines/ref
-GENOME:
-    "hg38"
- 
 # Sample groups. 
-# The sample names must match the beginning of a fastq file in one of the
-# directories listed under RAW_DATA. If the sample name
-# matches multiple fastqs, an error will be thrown.
+# The sample names must match the fastq sample names in samples.yaml, not the newname
+# Group replicats 
 #
 # group-name-1:
-#     - "sample_1_R1_file_prefix"
-#     - "sample_1_R2_file_prefix"
+#     - "sample_1_rep1_file_prefix"
+#     - "sample_1_rep2_file_prefix"
 #
 # group-name-2:
-#     - "sample_2_R1_file_prefix"
-#     - "sample_2_R2_file_prefix"
+#     - "sample_2_rep1_file_prefix"
+#     - "sample_2_rep2_file_prefix"
 #
-SAMPLESr:
+SAMPLESrmat:
     RTF1_WT:
         - "293flpIN_RTF1_WT1"
         - "293flpIN_RTF1_WT2"
@@ -37,17 +31,15 @@ SAMPLESr:
 GROUPS_COMP:
    - "RTF1_MT:RTF1_WT"
 
-# program options  
+# program options
+# R2R1 use --libType fr-firststrand
+# R1R2 use --libType fr-secondstrand
 CMD_PARAMS:
     rmats:         " -t paired --readLength 150 --libType fr-firststrand "     
 ORIENTATION:
-    "R2R1" # R1R2
+    "R2R1" # R1R2 
     
 # optional arguments:
-#   --gtf GTF             An annotation of genes and transcripts in GTF format.
-# --b1 B1               BAM configuration file.
-# --b2 B2               BAM configuration file.
-# --od OD               output folder of post step.
 # -t {paired,single}    readtype, single or paired.
 # --libType {fr-unstranded,fr-firststrand,fr-secondstrand}
 # --libType options are based on TopHat --library-type. 
@@ -58,7 +50,6 @@ ORIENTATION:
   # For fr-firststrand, the aligned strand of the first read is not used as the original strand and instead the other strand is used as the original. 
   # According to the salmon library format fr-firststrand is ISR and fr-secondstrand is ISF
 # --readLength READLENGTH
-# The length of each read.
-# --nthread NTHREAD     The number of thread. The optimal number of thread
-# should be equal to the number of CPU core.
+  # The length of each read.
+
 

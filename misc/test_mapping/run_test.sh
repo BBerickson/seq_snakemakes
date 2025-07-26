@@ -42,7 +42,7 @@ run_snakemake() {
 # Run pipeline to process ChIPseq reads
 pipe_dir=pipelines
 # index and configs
-snake=$pipe_dir/bowtie_test_PE.snake
+snake=$pipe_dir/bowtie_test.snake
 samples=samples.yaml
 
 run_snakemake $snake "$samples"

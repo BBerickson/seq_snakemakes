@@ -1,38 +1,118 @@
 # ====== Rules for getting overall results =================================
 
-# making count file
-rule featurecount_summary:
+# multiBamSummary spikein reads
+rule multiBamSummary:
     input:
-        PROJ + "/counts/{sample}_" + INDEX_SAMPLE + "_featureCounts.tsv"
+        bam = lambda wildcards: expand(
+            PROJ + "/" + BAM_PATH + "/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
+            sample = GROUPS[wildcards.group],
+            index = [wildcards.index]
+        ),
+        counts = lambda wildcards: expand(
+          PROJ + "/stats/{sample}_summary_featureCounts.tsv",
+            sample = GROUPS[wildcards.group]
+        )
     output:
-        PROJ  + "/counts/{sample}_count.txt"
+        npz  = PROJ + "/" + BAM_PATH + "/{group}_aligned_{index}_" + SEQ_DATE + ".npz",
+        gsf  = PROJ + "/" + BAM_PATH + "/{group}_aligned_{index}_" + SEQ_DATE + "_scalefactor.txt"
     params:
-        job_name = "{sample}_count_summary",
-        index = [INDEX_SAMPLE]
+        job_name = "{group}_aligned_{index}_multiBamSummary",
+        index_sample = INDEXES,
+        labs = lambda wildcards: " ".join(GROUPS[wildcards.group])
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input.bam, 0.2, 5)
+    log:
+        out = PROJ + "/logs/{group}_aligned_{index}_multiBamSummary.out",
+        err = PROJ + "/logs/{group}_aligned_{index}_multiBamSummary.err"
+    threads: 
+        12
+    shell:
+        """
+          multiBamSummary bins \
+            --binSize 100 \
+            --bamfiles {input.bam} \
+            --labels {params.labs} \
+            -p {threads} \
+            --scalingFactors {output.gsf} \
+            -o {output.npz}
+        
+          Rscript pipelines/R_scripts/multiBamSummary.R {output.gsf} "{input.counts}" "{params.index_sample}"
+        
+        """
+
+# calculating OR
+rule calculating_OR:
+    input:
+        lambda wildcards: expand(
+            PROJ  + "/stats/{sample}_summary_featureCounts.tsv",
+            sample = SAMPIN[wildcards.newnam]
+        )
+    output:
+        temp(PROJ + "/counts/{newnam}_OR_count.txt")
+    params:
+        job_name = "{newnam}_OR",
+        type     = NORM,
+        indexs   = INDEXES,
+        script   = "pipelines/R_scripts/count_OR.R"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
-        out = PROJ + "/logs/{sample}_count_summary.out",
-        err = PROJ + "/logs/{sample}_count_summary.err"
+        out = PROJ + "/logs/{newnam}_OR.out",
+        err = PROJ + "/logs/{newnam}_OR.err"
+    message:
+        "getting OR norm for {wildcards.newnam}"
     threads: 
         1
-    script:
-        '../R_scripts/featurecount_summary.R'
-        
+    shell:
+        """
+        Rscript {params.script} "{input}" "{params.type}" "{params.indexs}" "{output}"
+
+        """
+  
+# gathering results
+rule gathering_OR_results:
+    input:
+        expand(
+        PROJ      + "/counts/{newnam}_OR_count.txt",
+            newnam = NAMS_UNIQ
+        )
+    output:
+        PROJ + "/counts/" + PROJ + "_OR_summery.tsv"
+    params:
+        job_name = "ORresults"
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
+    log:
+        out = PROJ + "/logs/ORresults.out",
+        err = PROJ + "/logs/ORresults.err"
+    message:
+        "getting final results"
+    threads: 
+        1
+    run:
+        with open(output[0], "w") as out:
+            for file in input:
+                for line in open(file, "r"):
+                    out.write(line)
+                    
+                    
+                    
 # gathering results
 rule gathering_results:
     input:
         PROJ + "/stats/" + PROJ + "_clumpify.tsv",
         PROJ + "/stats/" + PROJ + "_bbduk.tsv",
         PROJ + "/stats/" + PROJ + "_aligned.tsv",
-        expand( PROJ + "/counts/{sample}_count.txt",
+        expand( PROJ + "/stats/{sample}_summary_featureCounts.tsv",
             sample = SAMS_UNIQ
         ),
-        PROJ + "/report/" + PROJ + "_fragmentSize.pdf"
+        expand(PROJ + "/stats/" + PROJ + "_{index}_fragment_results.tsv", index=INDEXES),
+        PROJ + "/counts/" + PROJ + "_OR_summery.tsv"
     output:
         PROJ + "/report/" + PROJ + "_results.tsv"
     params:
         job_name = "results",
+        sam_new  = SAMPLES,
         project  = PROJ
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
@@ -46,6 +126,4 @@ rule gathering_results:
     script:
         '../R_scripts/results.R'
   
-
   
-      

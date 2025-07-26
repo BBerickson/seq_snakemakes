@@ -4,21 +4,21 @@
 # Run cleavage_filter_bam
 rule cleavage_filter_bam:
     input:
-        bam   = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
-        bai   = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai"
+        bam   = PROJ + "/bams/{sample}_{index}_" + SEQ_DATE + ".bam",
+        bai   = PROJ + "/bams/{sample}_{index}_" + SEQ_DATE + ".bam.bai"
     output:
-        bam   = PROJ + "/cleavage/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam",
-        bai   = PROJ + "/cleavage/{sample}_" + INDEX_SAMPLE + "_" + SEQ_DATE + ".bam.bai"
+        bam   = PROJ + "/cleavage/{sample}_{index}_" + SEQ_DATE + ".bam",
+        bai   = PROJ + "/cleavage/{sample}_{index}_" + SEQ_DATE + ".bam.bai"
     params:
-        job_name = PROJ + "{sample}_cleavage",
+        job_name = PROJ + "{sample}_{index}_cleavage",
         TES      = "/beevol/home/erickson/ref/hg38_p14/alt_ref/hg38_TES_5bp_slop.bed",
         sortname = "{sample}",
-        counts = PROJ + "/bams/{sample}_" + INDEX_SAMPLE + "_count.txt"
+        counts = PROJ + "/bams/{sample}_{index}_count.txt"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 0.5, 4)
     log:
-        out = PROJ + "/logs/{sample}_cleavage.out",
-        err = PROJ + "/logs/{sample}_cleavage.err"
+        out = PROJ + "/logs/{sample}_{index}_cleavage.out",
+        err = PROJ + "/logs/{sample}_{index}_cleavage.err"
     threads:
         12
     shell:

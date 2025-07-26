@@ -1,14 +1,15 @@
 #===== Config file for hg38 and ensembl v113 genome  ===================
 
 # Path to bowtie2 index ref files
-GENELIST:
-    ""
 INDEX_PATH:
-    "/beevol/home/bentleyd/ref/hg38/genome/"
+  "/beevol/home/bentleyd/ref/hg38/genome/"
+# bowtie2 index prefix
 INDEX_MAP:
-    "hg38"
-INDEX_SAMPLE:
-    "hg38"
+  "hg38"
+# index.yaml prefix
+INDEXES:
+  "hg38"
+# ref file locations
 MASK:
   "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_snoRNA.bed"
 GTF:

@@ -6,7 +6,8 @@ shell.prefix("source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; 
 
 # python packages
 import os
-import re
+import sys
+import yaml
 from pathlib import Path
 
 # Include custom Python functions
@@ -26,27 +27,41 @@ if not GENOME_CONFIG.exists():
 configfile: str(GENOME_CONFIG)
 
 # ------------------------------------------------------------------------------
+# Load additional genome-specific configs manually
+# ------------------------------------------------------------------------------
+
+INDEXES = config['INDEXES']
+if isinstance(INDEXES, str):
+    INDEXES = [INDEXES]
+
+# Load genome-specific config files into a dictionary
+config_indexes = {}
+for idx in INDEXES:
+    path = Path("pipelines/ref") / f"{idx}.yaml"
+    if not path.exists():
+        sys.exit(f"ERROR: {idx} is not a valid genome index.")
+    with open(path) as f:
+        config_indexes[idx] = yaml.safe_load(f)
+
+
+# ------------------------------------------------------------------------------
 # Assign parameters from configs
 # ------------------------------------------------------------------------------
 
+# From main config
 PROJ         = config.get("PROJ")
 RAW_DATA     = config.get("RAW_DATA")
 ALL_SAMPLES  = config.get("SAMPLES")
 SEQ_DATE     = config.get("SEQ_DATE")
+BARCODES     = config.get("BARCODES")
 INDEX_PATH   = config.get("INDEX_PATH")
 INDEX_MAP    = config.get("INDEX_MAP")
-INDEX_SAMPLE = config.get("INDEX_SAMPLE")
-INDEX_SPIKE  = ""
-FA_SAMPLE    = config.get("FA_SAMPLE")
-FA_SPIKE     = ""
-FC_FILE      = config.get("GTF")
-FC_SPIKE     = ""
-MASK         = config.get("MASK")
 CMD_PARAMS   = config.get("CMD_PARAMS")
+NORM         = config.get('NORM')
 COLORS       = config.get("COLORS")
-NORM         = config.get("NORM")
 ORIENTATION  = config.get("ORIENTATION")
 USER         = config.get("USER")
+
 
 # Directories for data and scripts
 FASTQ_DIR = PROJ + "/fastqs"
@@ -54,34 +69,32 @@ FASTQ_DIR = PROJ + "/fastqs"
 os.makedirs(FASTQ_DIR, exist_ok = True)
 
 # Simplify ALL_SAMPLES dictionary
-# ALL_SAMPLES = {'SECTION-1':{'SAMPLING-GROUP-1':{newname1:[fastq1],newname2:[fastq2]}}} or {'SECTION-1':{'SAMPLING-GROUP-1':{newname1:[fastq1,input1],newname2:[fastq2,input2]}}}
-# collapse sections and combine subsampling groups
-def process_samples(all_samples):
-    SAMPLES = {}  # SAMPLES {newname1:[fastq1],newname2:[fastq2]}
-    SAMPIN = {}   # SAMPIN {newname1:[fastq1,input1],newname2:[fastq2,input2]}
-    GROUPS = {}   # GROUPS {SAMPLING-GROUP-1:[fastq1], SAMPLING-GROUP-2:[fastq2]}
+SAMPLES, SAMPIN, GROUPS, NORMMAP, PAIREDMAP = process_samples(
+    ALL_SAMPLES, INDEXES, NORM, ORIENTATION
+)
 
-    for section, pairs in all_samples.items():
-        for pair_name, samples in pairs.items():
-            for sample_name, values in samples.items():
-                fastq = values[0]
-                input_file = values[1] if len(values) > 1 else None
+# make file suffix from bamCoverage settings and NORM 
+for sample, norm_list in NORMMAP.items():
+    updated_list = [
+        (index, norm_value, _get_normtype(
+            CMD_PARAMS["bamCoverage"],
+            norm_value,
+            CMD_PARAMS.get("bamCoverageBL", ""),
+            ORIENTATION
+        ))
+        for index, norm_value in norm_list
+    ]
+    NORMMAP[sample] = updated_list
+    
+# Combine into a list of records with expanded NormMap
+SAM_NORM = []
+for key in SAMPIN:
+    sam_value = SAMPIN[key][0]
+    for index, norm, suffix in NORMMAP[key]:
+        SAM_NORM.append([sam_value, key, index, norm, suffix])
 
-                # Populate SAMPLES
-                SAMPLES.setdefault(sample_name, []).append(fastq)
-
-                # Populate SAMPIN
-                if input_file:
-                    SAMPIN[sample_name] = [fastq, input_file]
-                else:
-                    SAMPIN[sample_name] = [fastq]
-
-                # Populate GROUPS
-                GROUPS.setdefault(pair_name, []).append(fastq)
-
-    return SAMPLES, SAMPIN, GROUPS
-
-SAMPLES, SAMPIN, GROUPS = process_samples(ALL_SAMPLES)
+# Create DataFrame
+DF_SAM_NORM = pd.DataFrame(SAM_NORM, columns=['Sample', 'Newnam', 'Index', 'Norm', 'Suffix'])
 
 # unpack samples and groups
 SAMS = [[y, x] for y in SAMPIN for x in SAMPIN[y]]
@@ -97,12 +110,12 @@ SAMS_UNIQ = list(dict.fromkeys(SAMS))
 print("SAMPLES (%s): %s\n" % (len(SAMPLES), SAMPLES))
 print("GROUPS (%s): %s\n" % (len(GROUPS), GROUPS))
 print("SAMPIN (%s): %s\n" % (len(SAMPIN), SAMPIN))
-print("SAMS (%s): %s\n" % (len(SAMS), SAMS))
-print("NAMS (%s): %s\n" % (len(NAMS), NAMS))
-print("GRPS (%s): %s\n" % (len(GRPS), GRPS))
 print("SAMS_UNIQ (%s): %s\n" % (len(SAMS_UNIQ), SAMS_UNIQ))
 print("NAMS_UNIQ (%s): %s\n" % (len(NAMS_UNIQ), NAMS_UNIQ))
 print("GRPS_UNIQ (%s): %s\n" % (len(GRPS_UNIQ), GRPS_UNIQ))
+print("NORMMAP (%s): %s\n" % (len(NORMMAP), NORMMAP))
+print("PAIREDMAP (%s): %s\n" % (len(PAIREDMAP), PAIREDMAP))
+print(DF_SAM_NORM.to_string(index=False))
 
 # Wildcard constraints
 WILDCARD_REGEX = "[a-zA-Z0-9_\-]+" # Matches alphanumeric characters, underscores, and hyphens
@@ -110,17 +123,20 @@ WILDCARD_REGEX = "[a-zA-Z0-9_\-]+" # Matches alphanumeric characters, underscore
 wildcard_constraints:
     sample = WILDCARD_REGEX,
     newnam = WILDCARD_REGEX,
-    group  = WILDCARD_REGEX   
+    group  = WILDCARD_REGEX,
+    index  = WILDCARD_REGEX,
+    suffix = WILDCARD_REGEX   
 
 # Create symlinks for fastqs
-FASTQS = [_get_fqs(x, RAW_DATA, FASTQ_DIR) for x in SAMS_UNIQ]
+FASTQS = [_get_fqs(x, RAW_DATA, FASTQ_DIR, paired=PAIREDMAP[x]) for x in SAMS_UNIQ]
 FASTQS = sum(FASTQS, [])
 
 COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
 
-NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"],ORIENTATION)
+NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS.get("bamCoverageBL", ""),ORIENTATION)
 
 BAM_PATH = _get_bampath(NORM)
+ALIGNER = "bowtie2"
 
 # Final output files
 rule all:
@@ -129,18 +145,23 @@ rule all:
         expand("{proj}/stats/{proj}_{step}.tsv", proj=PROJ, step=["fastqc", "cutadapt", "aligned"]),
         
         # bam URL
-        #PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + "_bam_URL.txt",
+        #expand(PROJ + "/URLS/" + PROJ + "_{index}_bam_URL.txt", index=INDEXES),
         
         # subsample of all reads, and URL's
-        #PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + "_subsample_bam_URL.txt",
+        #expand(PROJ + "/URLS/" + PROJ + "_{index}_subsample_bam_URL.txt", index=INDEXES),
         
         # results
-        PROJ + "/stats/" + PROJ + "_fragment_results.tsv",
-        #PROJ + "/report/" + INDEX_SAMPLE + "_PCA.png",
+        expand(
+          PROJ + "/report/" + PROJ + "_{index}_fragmentSize.pdf", 
+          index=INDEXES
+        ),
         PROJ + "/report/" + PROJ + "_results.tsv",
         
-        # bamCoverage
-        PROJ + "/URLS/" + PROJ + "_" + INDEX_SAMPLE + NORMS + "_bw_URL.txt"
+        # bamCoverage URL
+        expand(
+          PROJ + "/URLS/" + PROJ + "_{index}_" + SEQ_DATE + "_norm_{suffix}_bw_URL.txt",
+           zip, index=DF_SAM_NORM['Index'], suffix=DF_SAM_NORM['Suffix']
+        )
 
 
 # Run FastQC
@@ -154,7 +175,7 @@ include: "rules/02c_align_URLS.snake"
 include: "rules/02s_align_mask_subsample.snake"
 # Results
 include: "rules/03a_featureCounts.snake"
-include: "rules/03a_fragmentSize_PE.snake"
+include: "rules/03a_fragmentSize.snake"
 include: "rules/03b_results_UMI.snake"
 include: "rules/03b_PCAplot.snake"
 # BW with deeptools bamCoverage

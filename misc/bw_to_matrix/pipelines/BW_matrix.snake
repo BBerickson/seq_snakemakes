@@ -30,15 +30,16 @@ configfile: str(GENOME_CONFIG)
 # Load additional genome-specific configs manually
 # ------------------------------------------------------------------------------
 
-INDEX_SAMPLE = config['INDEX_SAMPLE']
-INDEX_SPIKE  = ""
+raw_indexes = config['INDEXES']
+INDEXES = [raw_indexes] if isinstance(raw_indexes, str) else [raw_indexes[0]]
+
 
 # Paths to additional config files
-GENOME_CONFIG1 = Path("pipelines/ref") / f"{INDEX_SAMPLE}.yaml"
+GENOME_CONFIG1 = Path("pipelines/ref") / f"{INDEXES[0]}.yaml"
 
 # Validate existence
 if not GENOME_CONFIG1.exists():
-    sys.exit(f"ERROR: {INDEX_SAMPLE} is not a valid INDEX_SAMPLE selection.")
+    sys.exit(f"ERROR: Config file not found for index '{INDEXES[0]}'. Expected at: {GENOME_CONFIG1}")
 
 # Load additional configs
 with open(GENOME_CONFIG1) as f:
@@ -54,9 +55,9 @@ RAW_DATA     = config.get("RAW_DATA")
 ALL_SAMPLES  = config.get("SAMPLES")
 SEQ_DATE     = config.get("SEQ_DATE")
 INDEX_PATH   = config.get("INDEX_PATH")
+NORM         = config.get("NORM")
 CMD_PARAMS   = config.get("CMD_PARAMS")
 COLORS       = config.get("COLORS")
-NORM         = config.get("NORM")
 ORIENTATION  = config.get("ORIENTATION")
 REGIONS      = config.get("REGIONS")
 USER         = config.get("USER")
@@ -64,40 +65,38 @@ USER         = config.get("USER")
 # From additional configs
 MY_REF      = config1.get("MY_REF")
 PI_REF      = config1.get("PI_REF")
-GENELIST    = config1.get("GENELIST")
+GENELIST = config1.get("GENELIST") or ""
 
 BW_DIR = PROJ + "/raw_bw"
 os.makedirs(BW_DIR, exist_ok = True)
 
 # Simplify ALL_SAMPLES dictionary
-# ALL_SAMPLES = {'SECTION-1':{'SAMPLING-GROUP-1':{newname1:[fastq1],newname2:[fastq2]}}} or {'SECTION-1':{'SAMPLING-GROUP-1':{newname1:[fastq1,input1],newname2:[fastq2,input2]}}}
-# collapse sections and combine subsampling groups
-def process_samples(all_samples):
-    SAMPLES = {}  # SAMPLES {newname1:[fastq1],newname2:[fastq2]}
-    SAMPIN = {}   # SAMPIN {newname1:[fastq1,input1],newname2:[fastq2,input2]}
-    GROUPS = {}   # GROUPS {SAMPLING-GROUP-1:[fastq1], SAMPLING-GROUP-2:[fastq2]}
+SAMPLES, SAMPIN, GROUPS, NORMMAP, PAIREDMAP = process_samples(
+    ALL_SAMPLES, INDEXES, NORM, ORIENTATION
+)
 
-    for section, pairs in all_samples.items():
-        for pair_name, samples in pairs.items():
-            for sample_name, values in samples.items():
-                fastq = values[0]
-                input_file = values[1] if len(values) > 1 else None
+# make file suffix from bamCoverage settings and NORM 
+for sample, norm_list in NORMMAP.items():
+    updated_list = [
+        (index, norm_value, _get_normtype(
+            CMD_PARAMS["bamCoverage"],
+            norm_value,
+            CMD_PARAMS.get("bamCoverageBL", ""),
+            ORIENTATION
+        ))
+        for index, norm_value in norm_list
+    ]
+    NORMMAP[sample] = updated_list
+    
+# Combine into a list of records with expanded NormMap
+SAM_NORM = []
+for key in SAMPIN:
+    sam_value = SAMPIN[key][0]
+    for index, norm, suffix in NORMMAP[key]:
+        SAM_NORM.append([sam_value, key, index, norm, suffix])
 
-                # Populate SAMPLES
-                SAMPLES.setdefault(sample_name, []).append(fastq)
-
-                # Populate SAMPIN
-                if input_file:
-                    SAMPIN[sample_name] = [fastq, input_file]
-                else:
-                    SAMPIN[sample_name] = [fastq]
-
-                # Populate GROUPS
-                GROUPS.setdefault(pair_name, []).append(fastq)
-
-    return SAMPLES, SAMPIN, GROUPS
-
-SAMPLES, SAMPIN, GROUPS = process_samples(ALL_SAMPLES)
+# Create DataFrame
+DF_SAM_NORM = pd.DataFrame(SAM_NORM, columns=['Sample', 'Newnam', 'Index', 'Norm', 'Suffix'])
 
 
 # unpack samples and groups
@@ -114,23 +113,28 @@ SAMS_UNIQ = list(dict.fromkeys(SAMS))
 print("SAMPLES (%s): %s\n" % (len(SAMPLES), SAMPLES))
 print("GROUPS (%s): %s\n" % (len(GROUPS), GROUPS))
 print("SAMPIN (%s): %s\n" % (len(SAMPIN), SAMPIN))
-print("SAMS (%s): %s\n" % (len(SAMS), SAMS))
-print("NAMS (%s): %s\n" % (len(NAMS), NAMS))
-print("GRPS (%s): %s\n" % (len(GRPS), GRPS))
 print("SAMS_UNIQ (%s): %s\n" % (len(SAMS_UNIQ), SAMS_UNIQ))
 print("NAMS_UNIQ (%s): %s\n" % (len(NAMS_UNIQ), NAMS_UNIQ))
 print("GRPS_UNIQ (%s): %s\n" % (len(GRPS_UNIQ), GRPS_UNIQ))
+print("NORMMAP (%s): %s\n" % (len(NORMMAP), NORMMAP))
+print("PAIREDMAP (%s): %s\n" % (len(PAIREDMAP), PAIREDMAP))
+print(DF_SAM_NORM.to_string(index=False))
 
 # Wildcard constraints
 WILDCARD_REGEX = "[a-zA-Z0-9_\-]+" # Matches alphanumeric characters, underscores, and hyphens
 
 wildcard_constraints:
+    sample = WILDCARD_REGEX,
     newnam = WILDCARD_REGEX,
+    group  = WILDCARD_REGEX,
+    index  = WILDCARD_REGEX,
+    suffix = WILDCARD_REGEX,
+    covarg = "[a-zA-Z0-9_.\\-]+",
     region = "543|5|3|PI|EI"
 
 COLS_DICT = _get_colors(SAMS_UNIQ, COLORS)
 
-NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS["bamCoverageBL"],ORIENTATION)
+NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS.get("bamCoverageBL", ""),ORIENTATION)
 
 BAM_PATH = _get_bampath(NORM)
 
@@ -149,14 +153,17 @@ rule all:
     input:
         # bamCoverage
         expand(
-          PROJ + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + ".bw",
-          newnam = SAMS_UNIQ
+            PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}.bw",
+            zip,
+            newnam=DF_SAM_NORM['Newnam'],
+            index=DF_SAM_NORM['Index'],
+            suffix=DF_SAM_NORM['Suffix']
         ),
         
         # matrix file
         expand(
-          PROJ + "/URLS/{region}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{covarg}_matrix.url.txt",
-           zip, region=REGIONS_COVARGS['Region'], covarg=REGIONS_COVARGS['Value']
+          PROJ + "/URLS/{region}_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_matrix.url.txt",
+           zip, region=DF_SAM_NORM['Region'], index=DF_SAM_NORM['Index'], covarg=DF_SAM_NORM['Value'], suffix=DF_SAM_NORM['Suffix']
         )
 
 # BW with deeptools bamCoverage

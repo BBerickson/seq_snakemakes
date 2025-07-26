@@ -16,7 +16,7 @@ rule star_twopass:
         job_name = "{sample}_star_twopass",
         gtf      = FC_FILE,
         bam_out  = PROJ + "/bams/{sample}_Aligned.sortedByCoord.out.bam",
-        args     = CMD_PARAMS["star"],
+        args     = lambda wildcards: CMD_PARAMS["star"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
         out      = PROJ + "/bams/{sample}_"
     resources:
         memory = lambda wildcards, input: memory_estimator([input.R1, input.R2], 5, 30, 250) # multiplier, min, max, unit=GB

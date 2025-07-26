@@ -1,18 +1,19 @@
 #===== Config file for standared scer3 genome  ===================
 
 # Path to bowtie2 index ref files
-GENELIST:
-    ""
 INDEX_PATH:
     "/beevol/home/bentleyd/ref/scer3/"
+# bowtie2 index prefix
 INDEX_MAP:
-    "scer3"
-INDEX_SAMPLE:
-    "scer3"
+  "scer3"
+# index.yaml prefix
+INDEXES:
+  "scer3"
+# ref file locations
 MASK:
   ""
 GTF:
-  "/beevol/home/bentleyd/ref/scer3/saccharomyces_cerevisiae.gff"
+  "/beevol/home/erickson/ref/scer3/sacCer3.ensGene.gtf"
 FA_SAMPLE:
   "/beevol/home/bentleyd/ref/scer3/scer3.fa"
 MY_REF:

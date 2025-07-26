@@ -4,26 +4,25 @@
 # stranded sense matrix files
 rule create_strand_matrix:
     input:
-        fw  = PROJ + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_fw.bw",
-        rev = PROJ + "/bw/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + NORMS + "_rev.bw"
+        fw = PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_fw.bw",
+        rev = PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_rev.bw"
     output:
-        matrix   = PROJ + "/matrix/{region}/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{region}_{covarg}_{sense_asense}_matrix.gz",
-        fw       = temp(PROJ + "/matrix/{newnam}_{sense_asense}_temp1_{region}_{covarg}_{sense_asense}_matrix.gz"),
-        rev      = temp(PROJ + "/matrix/{newnam}_{sense_asense}_temp2_{region}_{covarg}_{sense_asense}_matrix.gz")
+        matrix = PROJ + "/matrix/{region}/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_{sense_asense}_matrix.gz",
+        fw     = temp(PROJ + "/matrix/{newnam}_aligned_{index}_temp1_{region}_{covarg}_norm_{suffix}_{sense_asense}_matrix.gz"),
+        rev    = temp(PROJ + "/matrix/{newnam}_aligned_{index}_temp2_{region}_{covarg}_norm_{suffix}_{sense_asense}_matrix.gz")
     params:
-        job_name = "{region}_{covarg}_{newnam}_{sense_asense}_matrix",
+        job_name = "{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_{sense_asense}_matrix",
         args = lambda wildcards: (
             CMD_PARAMS[f"region{wildcards.region}"] + CMD_PARAMS["bamCoverageBL"] +
             (" --scale -1 " if wildcards.sense_asense == "anti" else "")
         ),
-        args2    = "stranded",
         fw_ref   = lambda wildcards: FW_REF if wildcards.sense_asense == "sense" else REV_REF,
         rev_ref  = lambda wildcards: REV_REF if wildcards.sense_asense == "sense" else FW_REF
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
     log:
-        out = PROJ + "/logs/{newnam}_{region}_{covarg}_{sense_asense}_matrix.out",
-        err = PROJ + "/logs/{newnam}_{region}_{covarg}_{sense_asense}_matrix.err"
+        out = PROJ + "/logs/{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_{sense_asense}_matrix.out",
+        err = PROJ + "/logs/{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_{sense_asense}_matrix.err"
     threads: 
         12
     shell:
@@ -34,28 +33,27 @@ rule create_strand_matrix:
         
         """
 
-        
 # make url's and scp to sandbox
 rule standared_marix_url:
     input:
-        PROJ + "/matrix/{region}/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{region}_{covarg}_{sense_asense}_matrix.gz"
+        PROJ + "/matrix/{region}/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_{sense_asense}_matrix.gz"
     output:
-        temp(PROJ + "/matrix/{region}/{newnam}_{region}_{covarg}_{sense_asense}_matrix.url.txt")
+        temp(PROJ + "/URLS/{region}_{newnam}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_matrix.url.txt")
     params:
-        job_name = "{newnam}_{region}_{covarg}_{sense_asense}_matrix_url",
+        job_name = "{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_{sense_asense}_matrix_url",
         color    = lambda wildcards: _get_col(wildcards.newnam, COLS_DICT),
         groupkey = lambda wildcards: next((k for k, v in GROUPS.items() if wildcards.newnam in v), "self"),
-        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{region}_{covarg}_{sense_asense}_matrix.gz"
+        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_{suffix}_{sense_asense}_matrix.gz"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
-        out = PROJ + "/logs/{newnam}_{region}_{covarg}_{sense_asense}_matrix_url.out",
-        err = PROJ + "/logs/{newnam}_{region}_{covarg}_{sense_asense}_matrix_url.err"
+        out = PROJ + "/logs/{region}_{newnam}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_matrix_url.out",
+        err = PROJ + "/logs/{region}_{newnam}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_matrix_url.err"
     threads:
         1
     shell:
         """
-        echo {params.url_out} {params.groupkey} {wildcards.newnam}{NORMS}_{SEQ_DATE}_{wildcards.sense_asense} {params.color} >> {output[0]}
+        echo {params.url_out} {params.groupkey} {wildcards.newnam}_norm_{wildcards.suffix}_{SEQ_DATE}_{wildcards.sense_asense} {params.color} >> {output[0]}
         ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
         scp {input[0]} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
         """
@@ -64,26 +62,26 @@ rule standared_marix_url:
 rule matrix_url_summary:
     input:
         sorted(expand(
-            PROJ + "/matrix/{region}/{newnam}_{region}_{covarg}_{sense_asense}_matrix.url.txt",
-            zip, newnam=REGIONS_COVARGS['Newnam'], region=REGIONS_COVARGS['Region'], 
-            covarg=REGIONS_COVARGS['Value'], sense_asense=REGIONS_COVARGS['Sense_Asense']
+            PROJ + "/URLS/{region}_{newnam}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_matrix.url.txt",
+            zip, region=DF_SAM_NORM['Region'], newnam=DF_SAM_NORM['Newnam'], index=DF_SAM_NORM['Index'], 
+            covarg=DF_SAM_NORM['Value'], suffix=DF_SAM_NORM['Suffix'], sense_asense=DF_SAM_NORM['Sense_Asense']
         ))
     output:
-        PROJ + "/URLS/{region}_" + INDEX_SAMPLE + "_" + SEQ_DATE + "_{covarg}_{sense_asense}_matrix.url.txt"
+        PROJ + "/URLS/{region}_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_{sense_asense}_matrix.url.txt"
     params:
-        job_name = "{region}_{covarg}_{sense_asense}_matrix_url_summary"
+        job_name = "{region}_{index}__{covarg}_norm_{suffix}_{sense_asense}_matrix_url_summary"
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
-        out = PROJ + "/logs/{region}_{covarg}_{sense_asense}_matrix_url_summary.out",
-        err = PROJ + "/logs/{region}_{covarg}_{sense_asense}_matrix_url_summary.err"
+        out = PROJ + "/logs/{region}_{index}__{covarg}_norm_{suffix}_{sense_asense}_matrix_url_summary.out",
+        err = PROJ + "/logs/{region}_{index}__{covarg}_norm_{suffix}_{sense_asense}_matrix_url_summary.err"
     threads:
         1
     shell:
         """
         # Filter and concatenate files
         for file in {input}; do
-            if [[ $file == *"{wildcards.region}"* && $file == *"{wildcards.covarg}"* && $file == *"{wildcards.sense_asense}"* ]]; then
+            if [[ $file == *"{wildcards.region}"* && $file == *"{wildcards.covarg}"* && $file == *"{wildcards.sense_asense}"* && $file == *"{wildcards.suffix}"*]]; then
                 cat $file >> {output}
             fi
         done

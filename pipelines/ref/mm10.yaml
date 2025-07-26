@@ -1,14 +1,15 @@
 #===== Config file for mm10 ===================
 
 # Path to bowtie2 index ref files
-GENELIST:
-    ""
 INDEX_PATH:
     "/beevol/home/bentleyd/ref/mm10/"
+# bowtie2 index prefix
 INDEX_MAP:
-    "mm10"
-INDEX_SAMPLE:
-    "mm10"
+  "mm10"
+# index.yaml prefix
+INDEXES:
+  "mm10"
+# ref file locations
 MASK:
   "/beevol/home/bentleyd/ref/mm10/ref_bed/snoRNAs.bed"
 GTF:
