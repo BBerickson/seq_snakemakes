@@ -171,7 +171,7 @@ rule all:
         
         # matrix file
         expand(
-          PROJ + "/URLS/{region}_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_matrix.url.txt",
+          PROJ + "/URLS/{region}_aligned_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_matrix.url.txt",
            zip, region=DF_SAM_NORM['Region'], index=DF_SAM_NORM['Index'], covarg=DF_SAM_NORM['Value'], suffix=DF_SAM_NORM['Suffix']
         )
 

@@ -66,14 +66,14 @@ rule matrix_url_summary:
             covarg=DF_SAM_NORM['Value'], suffix=DF_SAM_NORM['Suffix']
         ))
     output:
-        PROJ + "/URLS/{region}_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_bidirectonal_matrix.url.txt"
+        PROJ + "/URLS/{region}_aligned_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_bidirectonal_matrix.url.txt"
     params:
-        job_name = "{region}_{index}__{covarg}_norm_{suffix}_bi_matrix_url_summary"
+        job_name = "{region}_aligned_{index}__{covarg}_norm_{suffix}_bi_matrix_url_summary"
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
-        out = PROJ + "/logs/{region}_{index}__{covarg}_norm_{suffix}_bi_matrix_url_summary.out",
-        err = PROJ + "/logs/{region}_{index}__{covarg}_norm_{suffix}_bi_matrix_url_summary.err"
+        out = PROJ + "/logs/{region}_aligned_{index}__{covarg}_norm_{suffix}_bi_matrix_url_summary.out",
+        err = PROJ + "/logs/{region}_aligned_{index}__{covarg}_norm_{suffix}_bi_matrix_url_summary.err"
     threads:
         1
     shell:
