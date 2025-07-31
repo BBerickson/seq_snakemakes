@@ -1,0 +1,38 @@
+# ===== Snakefile for concatenating fastq files =====================
+
+# rule for R1
+rule concatenate_r1:
+    input:
+        lambda wildcards: FASTQ_GROUPS[wildcards.newnam]["R1"]
+    output:
+        "fastqs/{newnam}_R1_001.fastq.gz"
+    params:
+        job_name = "{newnam}_R1.fastq"
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 0.1, 1)
+    log:
+        out = PROJ + "/logs/{newnam}_R1.fastq.out",
+        err = PROJ + "/logs/{newnam}_R1.fastq.err"
+    threads:
+        1
+    shell:
+        "cat {input} > {output}"
+
+# rule for R2
+rule concatenate_r2:
+    input:
+        lambda wildcards: FASTQ_GROUPS[wildcards.newnam]["R2"]
+    output:
+        "fastqs/{newnam}_R2_001.fastq.gz"
+    params:
+        job_name = "{newnam}_R2.fastq"
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 0.1, 1)
+    log:
+        out = PROJ + "/logs/{newnam}_R2.fastq.out",
+        err = PROJ + "/logs/{newnam}_R2.fastq.err"
+    threads:
+        1
+    shell:
+        "cat {input} > {output}"
+

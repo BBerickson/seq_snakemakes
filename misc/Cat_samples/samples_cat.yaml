@@ -1,0 +1,56 @@
+#===== Config file containing samples ==========================================
+# This gets appended to config
+
+# Project name to use for naming summary files
+PROJ:
+    "ARMC5KO_PNUTS-WT"
+    
+SEQ_DATE:
+    "250728"
+
+# Directories containing fastq files, this can be a relative path.
+# Multiple directories can be provided. The sample names must correspond
+# to the begining of the fastq name.
+RAW_DATA:
+    - "/beevol/home/erickson/fastqs/250728_Novogene"
+
+# set piared or single end fastqs, True/False
+PAIRED:
+    "True"
+# The sample names must match the beginning of a fastq file in one of the
+# directories listed under RAW_DATA. If the sample name
+# matches multiple fastqs, an error will be thrown.
+# Samples to cat list together under new name and saved in fastqs dir
+# 
+#
+# SAMPLES:
+#     SECTION-1:
+#         GROUP-1: # cat sample example
+#             sample_newname-1:
+#                  - "fastq_sample1_rep1_prefix"
+#                  - "fastq_sample1_rep2_prefix"
+#             sample_newname-2:
+#                  - "fastq_sample2_rep1_prefix"
+#                  - "fastq_sample2_rep2_prefix"
+#
+
+SAMPLES:
+    SECTION-1:
+        SAMPLE-INPUT-PAIR-1:
+            AR5KOPNTSWTmDsr5: 
+                - "AR5KOPNTSWTmDsr5_CKDL250020454-1A_22YC2TLT4_L2"
+                - "AR5KOPNTSWTmDsr5_CKDL250020454-1A_22V5YVLT4_L3"
+                
+            AR5KOPNTSWTpDsr5: 
+                - "AR5KOPNTSWTpDsr5_CKDL250020454-1A_22YC2TLT4_L2"
+                - "AR5KOPNTSWTpDsr5_CKDL250020454-1A_22V5YVLT4_L3"
+                
+            AR5KOPNUTSWTmDIn: 
+                - "AR5KOPNUTSWTmDIn_CKDL250020454-1A_22YC2TLT4_L2"
+                - "AR5KOPNUTSWTmDIn_CKDL250020454-1A_22V5YVLT4_L3"
+                
+            AR5KOPNUTSWTpDIn: 
+                - "AR5KOPNUTSWTpDIn_CKDL250020454-1A_22YC2TLT4_L2"
+                - "AR5KOPNUTSWTpDIn_CKDL250020454-1A_22V5YVLT4_L3"
+           
+                  
