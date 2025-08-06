@@ -150,10 +150,7 @@ rule all:
         #expand(PROJ + "/URLS/" + PROJ + "_{index}_bam_URL.txt", index=INDEXES),
         
         # results
-        expand(
-          PROJ + "/report/" + PROJ + "_{index}_fragmentSize.pdf", 
-          index=INDEXES
-        ),
+        #expand(PROJ + "/report/" + PROJ + "_{index}_fragmentSize.pdf", index=INDEXES),
         PROJ + "/report/" + PROJ + "_results.tsv"
 
 

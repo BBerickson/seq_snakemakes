@@ -123,10 +123,11 @@ ORIENTATION:
     
 # which matrix type(s) to make
 # deeptools options set in Stranded_matrix.yaml
-# can only to be "543", "5", "3", "PI", or "EI" 
+# can only to be "543", "5", "5L", "3", "PI", or "EI" 
 REGIONS:
   - "543"
   - "5"
+  - "5L"
   - "3"
   - "PI"
 

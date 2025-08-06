@@ -43,6 +43,7 @@ run_snakemake() {
 pipe_dir=pipelines
 # index and configs
 snake=$pipe_dir/bowtie_test.snake
+#snake=$pipe_dir/NETseq_UMI_test.snake
 samples=samples.yaml
 
 run_snakemake $snake "$samples"

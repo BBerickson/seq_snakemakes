@@ -2,19 +2,19 @@
 
 # Path to bowtie2 index 
 GENELIST:
-    "Xrn2_codon_opti"
+    "pp1_PNUTS"
 INDEX_PATH:
-    "/beevol/home/erickson/ref/misc/Xrn2_Int11_codon_optimized/"
+    "/beevol/home/erickson/ref/misc/pp1_PNUTS/"
 INDEX_MAP:
-    "Xrn2_codon_optimized"
+    "pp1PNUTS"
 INDEXES:
-    "Xrn2_codon_optimized"
+    "pp1PNUTS"
 MASK:
   ""
 GTF:
   "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_chrfix_GRCh38.113.gtf"
 FA_SAMPLE:
-  "/beevol/home/erickson/ref/misc/Xrn2_Int11_codon_optimized/Xrn2_codon_optimized.fa"
+  "/beevol/home/erickson/ref/misc/pp1_PNUTS/pp1_PNUTS2.ref"
 MY_REF:
   ""
 FW_REF:

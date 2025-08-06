@@ -61,6 +61,11 @@ NORM         = config.get('NORM')
 COLORS       = config.get("COLORS")
 ORIENTATION  = config.get("ORIENTATION")
 USER         = config.get("USER")
+GENELIST     = config.get("GENELIST","test")
+
+PROJ          =  PROJ + "_" + GENELIST
+
+CMD_PARAMS["featureCounts"] = ""
 
 # Directories for data and scripts
 FASTQ_DIR = PROJ + "/fastqs"
@@ -132,52 +137,34 @@ FASTQS = sum(FASTQS, [])
 
 COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
 
-NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS.get("bamCoverageBL", ""),ORIENTATION)
-
 BAM_PATH = _get_bampath(NORM)
-ALIGNER = "hisat2"
+ALIGNER = "bowtie2"
 
 # Final output files
 rule all:
     input:
         # process summary files
-        expand("{proj}/stats/{proj}_{step}.tsv", proj=PROJ, step=["fastqc", "clumpify", "bbduk", "aligned"]),
+        expand("{proj}/stats/{proj}_{step}.tsv", proj=PROJ, step=["cutadapt", "aligned"]),
         
         # bam URL
         #expand(PROJ + "/URLS/" + PROJ + "_{index}_bam_URL.txt", index=INDEXES),
         
-        # subsample of all reads, and URL's
-        #expand(PROJ + "/URLS/" + PROJ + "_{index}_subsample_bam_URL.txt", index=INDEXES),
-        
         # results
-        expand(PROJ + "/stats/" + PROJ + "_{index}_fragment_results.tsv", index=INDEXES),
-        expand(PROJ + "/report/" + PROJ + "_{index}_fragmentSize.pdf", index=INDEXES),
-        #expand(PROJ + "/report/{index}_PCA.png", index=INDEXES),
-        PROJ + "/report/" + PROJ + "_results.tsv",
-        
-        # bamCoverage URL
-        expand(
-          PROJ + "/URLS/" + PROJ + "_{index}_" + SEQ_DATE + "_norm_{suffix}_bw_URL.txt",
-           zip, index=DF_SAM_NORM['Index'], suffix=DF_SAM_NORM['Suffix']
-        )
+        #expand(PROJ + "/report/" + PROJ + "_{index}_fragmentSize.pdf", index=INDEXES),
+        PROJ + "/report/" + PROJ + "_results.tsv"
 
 
 # Run FastQC
 include: "rules/01_fastqc.snake"
-# Run clumpify
-include: "rules/01a_clumpify.snake"
-# Run bbmerge
-include: "rules/01b_bbduk.snake"
+# Run cutadapt
+include: "rules/01_UMI_cutadapt.snake"
 # Align reads 
-include: "rules/02a_align_hisat.snake"
-include: "rules/02b_align_samtools.snake"
+include: "rules/02a_align_bowtie.snake"
+include: "rules/02b_align_UMI_samtools.snake"
 include: "rules/02c_align_URLS.snake"
-include: "rules/02s_align_subsample.snake"
+include: "rules/02s_align_mask_subsample.snake"
 # Results
 include: "rules/03a_featureCounts.snake"
 include: "rules/03a_fragmentSize.snake"
-include: "rules/03b_results.snake"
-include: "rules/03b_PCAplot.snake"
-# BW with deeptools bamCoverage
-include: "rules/04_bamCoverage_stranded.snake"
+include: "rules/03b_results_UMI.snake"
 

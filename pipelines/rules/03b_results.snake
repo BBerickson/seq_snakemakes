@@ -106,7 +106,6 @@ rule gathering_results:
         expand( PROJ + "/stats/{sample}_summary_featureCounts.tsv",
             sample = SAMS_UNIQ
         ),
-        expand(PROJ + "/stats/" + PROJ + "_{index}_fragment_results.tsv", index=INDEXES),
         PROJ + "/counts/" + PROJ + "_OR_summery.tsv"
     output:
         PROJ + "/report/" + PROJ + "_results.tsv"

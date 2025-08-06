@@ -8,8 +8,7 @@ rule gathering_results:
         PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_UMI_dedup.tsv",
         expand( PROJ + "/stats/{sample}_summary_featureCounts.tsv",
             sample = SAMS_UNIQ
-        ),
-        expand(PROJ + "/stats/" + PROJ + "_{index}_fragment_results.tsv", index=INDEXES)
+        )
     output:
         PROJ + "/report/" + PROJ + "_results.tsv"
     params:
