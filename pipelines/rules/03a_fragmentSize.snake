@@ -7,8 +7,8 @@ rule fragment_size:
         bam  = PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
         bai  = PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam.bai"
     output:
-        log  = PROJ + "/stats/{sample}_aligned_{index}_fragment.txt",
-        pic  = PROJ + "/stats/{sample}_aligned_{index}_fragmentSize.png"
+        log  = temp(PROJ + "/stats/{sample}_aligned_{index}_fragment.txt"),
+        pic  = temp(PROJ + "/stats/{sample}_aligned_{index}_fragmentSize.png")
     params:
         job_name = "{sample}_PE_fragment_size_{index}",
         labels   = lambda wildcards: wildcards.sample if "spike" not in wildcards.index else f"{wildcards.sample}_spike",

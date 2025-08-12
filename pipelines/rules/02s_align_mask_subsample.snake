@@ -54,7 +54,7 @@ rule calculating_subsample_group:
             index = [wildcards.index]
         )
     output:
-        PROJ + "/bams_mask/{group}_aligned_{index}_subsample_frac.txt"
+        temp(PROJ + "/bams_mask/{group}_aligned_{index}_subsample_frac.txt")
     params:
         job_name = "{group}_aligned_{index}_subsample",
         group   = "{group}"

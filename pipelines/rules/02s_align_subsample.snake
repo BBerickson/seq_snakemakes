@@ -9,7 +9,7 @@ rule calculating_subsample_group:
             index = [wildcards.index]
         )
     output:
-        PROJ + "/bams/{group}_aligned_{index}_subsample_frac.txt"
+        temp(PROJ + "/bams/{group}_aligned_{index}_subsample_frac.txt")
     params:
         job_name = "{group}_aligned_{index}_subsample",
         group   = "{group}"
@@ -64,7 +64,7 @@ rule subsample_dedup:
     params:
         job_name = "subsample_{sample}_aligned_{index}",
         samp     = "{sample}_{index}",
-        scale    = lambda wildcards, input: _get_norm_fraction(wildcards, INDEX_SAMPLE, input.counts)
+        scale    = lambda wildcards, input: _get_norm_fraction(wildcards, wildcards.index, input.counts)
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
     log:

@@ -3,19 +3,21 @@
 # gathering results
 rule gathering_results:
     input:
-        PROJ + "/stats/" + PROJ + "_cutadapt.tsv",
-        PROJ + "/stats/" + PROJ + "_aligned.tsv",
-        PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_UMI_dedup.tsv",
-        expand( PROJ + "/stats/{sample}_summary_featureCounts.tsv",
+        cutadapt = PROJ + "/stats/" + PROJ + "_cutadapt.tsv",
+        aligned  = PROJ + "/stats/" + PROJ + "_aligned.tsv",
+        dedup    = PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_UMI_dedup.tsv",
+        fc_file  = expand( PROJ + "/stats/{sample}_summary_featureCounts.tsv",
             sample = SAMS_UNIQ
         )
     output:
         PROJ + "/report/" + PROJ + "_results.tsv"
     params:
-        job_name  = "results",
-        index_map = INDEX_MAP,
-        sam_new   = SAMPLES,
-        project   = PROJ
+        job_name = "results",
+        indexmap = INDEX_MAP,
+        sam_new  = SAMPLES,
+        project  = PROJ,
+        filterty = CMD_PARAMS["filter_results"],
+        script = "pipelines/R_scripts/results.R"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
@@ -25,7 +27,10 @@ rule gathering_results:
         "getting final results"
     threads: 
         1
-    script:
-        '../R_scripts/results_UMI.R'
+    shell:
+        """
+        Rscript {params.script} "{input.dedup}" "{input.cutadapt}" "{input.aligned}" "{input.fc_file}" "{params.indexmap}" "{params.sam_new}" "{params.project}" "{params.filterty}" "{output}"
+
+        """
   
 

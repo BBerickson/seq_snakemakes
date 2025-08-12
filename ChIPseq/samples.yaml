@@ -81,10 +81,22 @@ NORM:
   # list as many colors as samples (not inputs) 
   # applied in order of samples ignoring inputs
 COLORS:
-  - "0,0,0"
-  - "225,0,0"
-  - "0,225,0"
-  - "0,0,225"
+  - "0,0,0"       # - Black
+  - "225,0,0"     # - Bright red
+  - "0,225,0"     # - Bright green
+  - "0,0,225"     # - Bright blue
+  - "255,127,0"   # - Orange
+  - "177,89,40"   # - Brown
+  - "106,61,154"  # - Purple
+  - "255,55,153"  # - Hot pink/magenta
+  - "166,206,22"  # - Lime green/yellow-green
+  - "31,120,180"  # - Steel blue
+  - "251,154,153" # - Light pink/salmon pink
+  - "178,223,138" # - Light green/pale green
+  - "51,160,44"   # - Forest green 
+  - "227,26,28"   # - Red
+  - "253,191,111" # - Light orange/peach
+  - "202,178,214" # - Light purple/lavender
 
 # program options 
 # HiSeq 1T     dupedist=40 (BC...XX)
@@ -107,6 +119,7 @@ CMD_PARAMS:
       paired:  " --maxFragmentLength 1000 "
       single:  " bin=10 max=1010 "
     featureCounts: " --readExtension5 2000 --readExtension3 2000 " #--largestOverlap
+    filter_results: "chrM|snRNA|snoRNA|rRNA|protein_coding"
     
 # sandbox User #
 USER:
@@ -117,9 +130,10 @@ USER:
 # "pipelines/ref/truseq_rna.fa"
 # "GATCGGAAGAGCACACGTCT,ACACTCTTTCCCTACACGACGCTCTTCCGATCT"
 BARCODES:
-    "pipelines/ref/truseq_i5i7.fa"     
+    "pipelines/ref/truseq_i5i7.fa"
+# set strand orentation of fastq files, can list one for each file         
 ORIENTATION:
-    "Unstranded" 
+    "Unstranded" # if single end R1
     
 # which matrix type(s) to make
 # deeptools options set in Stranded_matrix.yaml

@@ -35,9 +35,8 @@ GROUPS_COMP:
 # R2R1 use --libType fr-firststrand
 # R1R2 use --libType fr-secondstrand
 CMD_PARAMS:
-    rmats:         " -t paired --readLength 150 --libType fr-firststrand "     
-ORIENTATION:
-    "R2R1" # R1R2 
+    rmats:         " -t paired --readLength 150 --libType fr-firststrand "
+
     
 # optional arguments:
 # -t {paired,single}    readtype, single or paired.

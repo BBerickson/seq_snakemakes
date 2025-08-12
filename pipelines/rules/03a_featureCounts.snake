@@ -1,11 +1,11 @@
 # ===== Rules to count reads overlapping genes =================================
 
 
-# Run featureCounts
 rule featureCounts_sample:
     input:
         bam = PROJ + "/" + BAM_PATH + "/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
-        bai = PROJ + "/" + BAM_PATH + "/{sample}_aligned_{index}_" + SEQ_DATE + ".bam.bai"
+        bai = PROJ + "/" + BAM_PATH + "/{sample}_aligned_{index}_" + SEQ_DATE + ".bam.bai",
+        counts = PROJ + "/bams/{sample}_aligned_{index}_count.txt"
     output:
         tsv = PROJ + "/counts/{sample}_aligned_{index}_featureCounts.tsv"
     params:
@@ -23,22 +23,53 @@ rule featureCounts_sample:
         12
     shell:
         """
-        if [ "{params.args2}" != "" ]; then
-            featureCounts \
-              {params.args} \
-              {params.args2} \
-              -a {params.ftfile} \
-              -o {params.tsv} \
-              -T {threads} \
-              {input.bam}
-        fi
+        # Extract read count from the counts file
+        read_count=$(awk '{{print $3}}' {input.counts})
         
-        featureCounts \
-            {params.args} \
-            -a {params.ftfile} \
-            -o {output.tsv} \
-            -T {threads} \
-            {input.bam}
+        # Check if BAM file is empty (0 reads)
+        if [ "$read_count" -eq 0 ]; then
+            echo "BAM file is empty (0 reads), creating empty featureCounts output"
+            # Create empty featureCounts output file
+            echo -e "# Program:featureCounts v2.0.1; Command line arguments: (empty BAM file)" > {output.tsv}
+            echo -e "ID\tChr\tStart\tEnd\tStrand\tLength\tgene_name\tGeneid\t{input.bam}" >> {output.tsv}
+            echo -e "0\tchr0\t1\t2\t+\t1\tgene_name\tGeneid\t0" >> {output.tsv}
+            
+            # Create dummy .summary file
+            echo -e "Status\t{input.bam}" > {output.tsv}.summary
+            echo -e "Assigned\t0" >> {output.tsv}.summary
+            echo -e "Unassigned_Unmapped\t0" >> {output.tsv}.summary
+            echo -e "Unassigned_MappingQuality\t0" >> {output.tsv}.summary
+            echo -e "Unassigned_Chimera\t0" >> {output.tsv}.summary
+            echo -e "Unassigned_FragmentLength\t0" >> {output.tsv}.summary
+            echo -e "Unassigned_Duplicate\t0" >> {output.tsv}.summary
+            echo -e "Unassigned_MultiMapping\t0" >> {output.tsv}.summary
+            echo -e "Unassigned_Secondary\t0" >> {output.tsv}.summary
+            echo -e "Unassigned_NonSplit\t0" >> {output.tsv}.summary
+            echo -e "Unassigned_NoFeatures\t0" >> {output.tsv}.summary
+            echo -e "Unassigned_Overlapping_Length\t0" >> {output.tsv}.summary
+            echo -e "Unassigned_Ambiguity\t0" >> {output.tsv}.summary
+        else
+            echo "BAM file contains $read_count reads, running featureCounts"
+            
+            # Run featureCounts with additional parameters if specified
+            if [ "{params.args2}" != "" ]; then
+                featureCounts \
+                  {params.args} \
+                  {params.args2} \
+                  -a {params.ftfile} \
+                  -o {params.tsv} \
+                  -T {threads} \
+                  {input.bam}
+            fi
+            
+            # Run main featureCounts
+            featureCounts \
+                {params.args} \
+                -a {params.ftfile} \
+                -o {output.tsv} \
+                -T {threads} \
+                {input.bam}
+        fi
         """
 
 # making count file with spikein

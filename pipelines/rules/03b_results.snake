@@ -18,7 +18,8 @@ rule multiBamSummary:
     params:
         job_name = "{group}_aligned_{index}_multiBamSummary",
         index_sample = INDEXES,
-        labs = lambda wildcards: " ".join(GROUPS[wildcards.group])
+        labs = lambda wildcards: " ".join(GROUPS[wildcards.group]),
+        script = "pipelines/R_scripts/multiBamSummary.R"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input.bam, 0.2, 5)
     log:
@@ -36,7 +37,7 @@ rule multiBamSummary:
             --scalingFactors {output.gsf} \
             -o {output.npz}
         
-          Rscript pipelines/R_scripts/multiBamSummary.R {output.gsf} "{input.counts}" "{params.index_sample}"
+          Rscript {params.script} {output.gsf} "{input.counts}" "{params.index_sample}"
         
         """
 
@@ -100,19 +101,22 @@ rule gathering_OR_results:
 # gathering results
 rule gathering_results:
     input:
-        PROJ + "/stats/" + PROJ + "_clumpify.tsv",
-        PROJ + "/stats/" + PROJ + "_bbduk.tsv",
-        PROJ + "/stats/" + PROJ + "_aligned.tsv",
-        expand( PROJ + "/stats/{sample}_summary_featureCounts.tsv",
+        clump   = PROJ + "/stats/" + PROJ + "_clumpify.tsv",
+        bbduk   = PROJ + "/stats/" + PROJ + "_bbduk.tsv",
+        aligned = PROJ + "/stats/" + PROJ + "_aligned.tsv",
+        fc_file = expand( PROJ + "/stats/{sample}_summary_featureCounts.tsv",
             sample = SAMS_UNIQ
         ),
-        PROJ + "/counts/" + PROJ + "_OR_summery.tsv"
+        OR      = PROJ + "/counts/" + PROJ + "_OR_summery.tsv"
     output:
         PROJ + "/report/" + PROJ + "_results.tsv"
     params:
         job_name = "results",
+        indexmap = INDEX_MAP,
         sam_new  = SAMPLES,
-        project  = PROJ
+        project  = PROJ,
+        filterty = CMD_PARAMS["filter_results"],
+        script = "pipelines/R_scripts/results.R"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
@@ -122,7 +126,10 @@ rule gathering_results:
         "getting final results"
     threads: 
         1
-    script:
-        '../R_scripts/results.R'
+    shell:
+        """
+        Rscript {params.script} "{input.clump}" "{input.bbduk}" "{input.aligned}" "{input.fc_file}" "{params.indexmap}" "{params.sam_new}" "{params.project}" "{params.filterty}" "{output}"
+
+        """
   
   

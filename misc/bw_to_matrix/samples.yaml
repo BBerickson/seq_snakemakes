@@ -60,9 +60,9 @@ NORM:
 # sandbox User #
 USER:
   "User7"
-  
+# set orentation of fastq files, can list one for each file       
 ORIENTATION:
-    "R2R1" # R1R2
+    "R2R1" # R1R2, R1
 
 # which matrix type(s) to make
 # deeptools options set in Stranded_matrix.yaml
@@ -87,9 +87,20 @@ CMD_PARAMS:
   # list as many colors as samples (not inputs) 
   # applied in order of samples ignoring inputs
 COLORS:
-  - "0,0,0"
-  - "225,0,0"
-  - "0,225,0"
-  - "0,0,225"
-
+  - "0,0,0"       # - Black
+  - "225,0,0"     # - Bright red
+  - "0,225,0"     # - Bright green
+  - "0,0,225"     # - Bright blue
+  - "255,127,0"   # - Orange
+  - "177,89,40"   # - Brown
+  - "106,61,154"  # - Purple
+  - "255,55,153"  # - Hot pink/magenta
+  - "166,206,22"  # - Lime green/yellow-green
+  - "31,120,180"  # - Steel blue
+  - "251,154,153" # - Light pink/salmon pink
+  - "178,223,138" # - Light green/pale green
+  - "51,160,44"   # - Forest green 
+  - "227,26,28"   # - Red
+  - "253,191,111" # - Light orange/peach
+  - "202,178,214" # - Light purple/lavender
     
