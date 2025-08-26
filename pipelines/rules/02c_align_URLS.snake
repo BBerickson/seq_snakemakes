@@ -18,6 +18,7 @@ rule my_bowtie_url:
         err = PROJ + "/logs/{sample}_aligned_{index}" + PROJ + "_bowtie_url.err"
     threads:
         1
+    container: None
     shell:
         """
           echo "{params.url}" >> {output}
@@ -41,11 +42,10 @@ rule bowtie_urls:
     log:
         out = PROJ + "/logs/" + PROJ + "_{index}_bowtie_urls.out",
         err = PROJ + "/logs/" + PROJ + "_{index}_bowtie_urls.err"
-    run:
-        with open(output[0], "w") as out:
-            for file in input:
-                with open(file) as f:
-                    out.writelines(f.readlines())
+    shell:
+        """
+        cat {input} > {output}
+        """
                                        
                                        
 

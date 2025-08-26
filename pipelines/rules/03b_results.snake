@@ -90,11 +90,10 @@ rule gathering_OR_results:
         "getting final results"
     threads: 
         1
-    run:
-        with open(output[0], "w") as out:
-            for file in input:
-                for line in open(file, "r"):
-                    out.write(line)
+    shell:
+        """
+        cat {input} > {output}
+        """
                     
                     
                     

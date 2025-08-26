@@ -2,7 +2,7 @@
 
 # Configure shell for all rules
 shell.executable("/bin/bash")
-shell.prefix("source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; ")
+shell.prefix("[ -f ~/.bash_profile ] && source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; ")
 
 # python packages
 import os
@@ -30,6 +30,10 @@ configfile: str(GENOME_CONFIG)
 # Load additional genome-specific configs manually
 # ------------------------------------------------------------------------------
 
+# Docker container
+singularity:
+    config["CONTAINER"] 
+    
 raw_indexes = config['INDEXES']
 INDEXES = [raw_indexes] if isinstance(raw_indexes, str) else [raw_indexes[0]]
 

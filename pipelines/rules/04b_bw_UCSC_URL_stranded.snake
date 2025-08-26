@@ -1,55 +1,7 @@
-# ====== Rules for aligning reads with bamCoverage and OR norm to spike in =================================
+# ====== Rules for saving files on amc-sandbox and creating URLS for UCSC genome browser===============================
 
 
-# Align trimmed reads with bamCoverage
-rule bamCoverage:
-    input:
-        bam = lambda wildcards: expand(
-            PROJ + "/" + BAM_PATH + "/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
-            sample = SAMPLES[wildcards.newnam],
-            index = [wildcards.index]
-        ),
-        check_point = PROJ + "/report/" + PROJ + "_results.tsv"
-    output:
-        fw      =   PROJ   + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_fw.bw",
-        rev     =   PROJ   + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_rev.bw"
-    params:
-        job_name = "{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage",
-        args     = CMD_PARAMS["bamCoverage"] + CMD_PARAMS.get("bamCoverageBL", ""),
-        argsf    = _get_bamCov_strand("forward",ORIENTATION),
-        argsr    = _get_bamCov_strand("reverse",ORIENTATION)
-    resources:
-        memory   = lambda wildcards, input: memory_estimator(input.bam, 0.2, 5)
-    log:
-        out = PROJ + "/logs/{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage.out",
-        err = PROJ + "/logs/{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage.err"
-    threads: 
-        12
-    run:
-        scale = _get_norm(DF_SAM_NORM, wildcards.newnam, wildcards.suffix, wildcards.index)
-        # R2-R1 or R1-R2 ORIENTATION
-        shell(f"""
-            bamCoverage \
-              -b {input.bam[0]} \
-              -of bigwig \
-              -o {output.fw} \
-              {params.args} \
-              {scale} \
-              -p {threads} \
-              --filterRNAstrand {params.argsf}
-              
-          bamCoverage \
-              -b {input.bam[0]} \
-              -of bigwig \
-              -o {output.rev} \
-              {params.args} \
-              {scale} \
-              -p {threads} \
-              --filterRNAstrand {params.argsr}
-        """)
-  
-
-# Align trimmed reads with bamCoverage
+# copy to amc-sandbox and make URL
 rule bamCoverage_URL:
     input:
         fw      =   PROJ   + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_fw.bw",
@@ -57,7 +9,7 @@ rule bamCoverage_URL:
     output:
         stats   = temp(PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_bamCoverage_stats.txt")
     params:
-        job_name = "{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_bamCoverageURL",
+        job_name = "{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_UCSC_URL",
         color    = lambda wildcards: _get_col(wildcards.newnam, COLS_DICT),
         url_fw   = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_fw.bw",
         url_rev  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_rev.bw"
@@ -68,6 +20,7 @@ rule bamCoverage_URL:
         err = PROJ + "/logs/{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage_URL.err"
     threads: 
         1
+    container: None
     shell:
         """
         echo "track type=bigWig visibility=full name='{wildcards.newnam}_{SEQ_DATE}_{wildcards.suffix}_fw' description='{wildcards.newnam}_{SEQ_DATE}_{wildcards.suffix}_fw' color={params.color} bigDataUrl={params.url_fw}" > {output.stats}
@@ -79,7 +32,7 @@ rule bamCoverage_URL:
         """
 
 
-# Combine bamCoverage summaries
+# Combine URLS into one file
 rule bamCoverage_summary:
     input:
         lambda wildcards: sorted([
@@ -90,7 +43,7 @@ rule bamCoverage_summary:
     output:
         PROJ + "/URLS/" + PROJ + "_{index}_" + SEQ_DATE + "_norm_{suffix}_bw_URL.txt"
     params:
-        job_name = PROJ + "_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage_summary"
+        job_name = PROJ + "_{index}_" + SEQ_DATE + "_{suffix}_cat_URL"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
@@ -98,9 +51,8 @@ rule bamCoverage_summary:
         err = PROJ + "/logs/" + PROJ + "_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage_summary.err"
     threads:
         1
-    run:
-        with open(output[0], "w") as out:
-            for file in input:
-                for line in open(file, "r"):
-                    out.write(line)
+    shell:
+        """
+        cat {input} > {output}
+        """
 

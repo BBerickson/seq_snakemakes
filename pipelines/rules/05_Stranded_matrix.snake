@@ -38,7 +38,7 @@ rule standared_marix_url:
     input:
         PROJ + "/matrix/{region}/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_{sense_asense}_matrix.gz"
     output:
-        temp(PROJ + "/URLS/{region}_{newnam}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_matrix.url.txt")
+        temp(PROJ + "/matrix/{region}/{newnam}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_matrix.url.txt")
     params:
         job_name = "{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_{sense_asense}_matrix_url",
         color    = lambda wildcards: _get_col(wildcards.newnam, COLS_DICT),
@@ -47,10 +47,11 @@ rule standared_marix_url:
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
-        out = PROJ + "/logs/{region}_{newnam}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_matrix_url.out",
-        err = PROJ + "/logs/{region}_{newnam}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_matrix_url.err"
+        out = PROJ + "/logs/{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_{sense_asense}_matrix_url.out",
+        err = PROJ + "/logs/{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_{sense_asense}_matrix_url.err"
     threads:
         1
+    container: None
     shell:
         """
         echo {params.url_out} {params.groupkey} {wildcards.newnam}_norm_{wildcards.suffix}_{SEQ_DATE}_{wildcards.sense_asense} {params.color} >> {output[0]}
@@ -61,11 +62,15 @@ rule standared_marix_url:
 # Combine URLs
 rule matrix_url_summary:
     input:
-        sorted(expand(
-            PROJ + "/URLS/{region}_{newnam}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_matrix.url.txt",
-            zip, region=DF_SAM_NORM['Region'], newnam=DF_SAM_NORM['Newnam'], index=DF_SAM_NORM['Index'], 
-            covarg=DF_SAM_NORM['Value'], suffix=DF_SAM_NORM['Suffix'], sense_asense=DF_SAM_NORM['Sense_Asense']
-        ))
+        lambda wildcards: sorted([
+            PROJ + f"/matrix/{row['Region']}/{row['Newnam']}_aligned_{row['Index']}_temp_{row['Value']}_norm_{row['Suffix']}_{row['Sense_Asense']}_matrix.url.txt"
+            for _, row in DF_SAM_NORM.iterrows()
+            if (str(row['Region']) == wildcards.region and 
+                str(row['Index']) == wildcards.index and
+                str(row['Value']) == wildcards.covarg and 
+                str(row['Suffix']) == wildcards.suffix and 
+                str(row['Sense_Asense']) == wildcards.sense_asense)
+        ])
     output:
         PROJ + "/URLS/{region}_aligned_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_{sense_asense}_matrix.url.txt"
     params:
@@ -79,12 +84,8 @@ rule matrix_url_summary:
         1
     shell:
         """
-        # Filter and concatenate files
-        for file in {input}; do
-            if [[ $file == *"{wildcards.region}"* && $file == *"{wildcards.covarg}"* && $file == *"{wildcards.sense_asense}"* && $file == *"{wildcards.suffix}"*]]; then
-                cat $file >> {output}
-            fi
-        done
+        # concatenate files
+        cat {input} > {output}
         """
 
 

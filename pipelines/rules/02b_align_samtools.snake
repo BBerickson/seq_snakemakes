@@ -15,7 +15,8 @@ rule align_filter_multimap:
         samp = "{sample}_" + INDEX_MAP,
         args = CMD_PARAMS["samtools"],
         args2 = lambda wildcards: _extract_k_option(CMD_PARAMS[ALIGNER]["paired" if PAIREDMAP[wildcards.sample] else "single"], ORIENTATION),
-        sortname = PROJ + "/{sample}_multimap.temp"
+        sortname = PROJ + "/{sample}_multimap.temp",
+        is_paired = lambda wildcards: PAIREDMAP[wildcards.sample]
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 0.5, 2)
     log:
@@ -23,51 +24,42 @@ rule align_filter_multimap:
         err = PROJ + "/logs/{sample}_multimap_filter.err"
     threads: 
         12
-    run:
-        if len(params.args2.strip()) == 0:
-            shell(
-                """
-                touch {output.bamt}
-                cp {input.bam} {output.bam}
-                cp {input.bai} {output.bai}
-                echo "{params.samp} Multimap_Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
-                """
-            )
-        else:
-            shell(
-                """
-                samtools view {params.args} -u {input.bam} \
-                  | samtools sort -n -T {params.sortname} -@ {threads} \
-                  | samtools view -h - \
-                  | python2 pipelines/multimappers.py {params.args2} \
-                  | samtools fixmate -r - {output.bamt}
-                """
-            )
-
-            if PAIREDMAP[wildcards.sample]:
-                shell(
-                    """
-                    samtools view -F 1804 -f 2 -u {output.bamt} \
-                      | samtools sort - -T {params.sortname} -@ {threads} -O bam \
-                      > {output.bam}
-                    """
-                )
-            else:
-                shell(
-                    """
-                    samtools view -F 1804 -u {output.bamt} \
-                      | samtools sort - -T {params.sortname} -@ {threads} -O bam \
-                      > {output.bam}
-                    """
-                )
-
-            shell(
-                """
-                samtools index -@ {threads} {output.bam}
-                echo "{params.samp} Multimap_Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
-                """
-            )
-
+    shell:
+        """
+        # Check if args2 is empty (after stripping whitespace)
+        args2_trimmed=$(echo "{params.args2}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+        
+        if [ -z "$args2_trimmed" ]; then
+            # No multimap filtering needed
+            touch {output.bamt}
+            cp {input.bam} {output.bam}
+            cp {input.bai} {output.bai}
+            echo "{params.samp} Multimap_Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
+        else
+            # Apply multimap filtering
+            samtools view {params.args} -u {input.bam} \
+              | samtools sort -n -T {params.sortname} -@ {threads} \
+              | samtools view -h - \
+              | python pipelines/multimappers.py {params.args2} \
+              | samtools fixmate -r - {output.bamt}
+            
+            if [ "{params.is_paired}" = "True" ]; then
+                # Paired-end filtering
+                samtools view -F 1804 -f 2 -u {output.bamt} \
+                  | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+                  > {output.bam}
+            else
+                # Single-end filtering
+                samtools view -F 1804 -u {output.bamt} \
+                  | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+                  > {output.bam}
+            fi
+            
+            # Index and count reads
+            samtools index -@ {threads} {output.bam}
+            echo "{params.samp} Multimap_Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
+        fi
+        """
     
         
 # filter aligned reads

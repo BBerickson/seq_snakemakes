@@ -14,48 +14,44 @@ rule hisatPE:
         job_name = "{sample}_hisatPE",
         idx      = INDEX_PATH + INDEX_MAP,
         args     = lambda wildcards: CMD_PARAMS["hisat2"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
-        sortname = PROJ + "/{sample}.temp"
+        sortname = PROJ + "/{sample}.temp",
+        is_paired = lambda wildcards: PAIREDMAP[wildcards.sample]
     resources:
-        memory   = lambda wildcards, input: memory_estimator([input.R1, input.R2], 3, 18)
+        memory   = lambda wildcards, input: memory_estimator(input, 3, 18)
     log:
         out = PROJ + "/logs/{sample}_hisat.out",
         err = PROJ + "/logs/{sample}_hisat.err"
-    message:
-        "Aligning reads with hisat2 for {wildcards.sample}"
     threads: 
         12
-    run:
-        if PAIREDMAP[wildcards.sample]:
-            shell(
-                """
-                hisat2 \
-                    -p {threads} \
-                    -x {params.idx} \
-                    -1 {input.R1} \
-                    -2 {input.R2} \
-                    {params.args} \
-                    2> {output.stats} \
-                    | samtools sort - -T {params.sortname} -@ {threads} -O bam \
-                    > {output.bam}
+    shell:
+        """
+        if [ "{params.is_paired}" = "True" ]; then
+            # Paired-end alignment
+            hisat2 \
+                -p {threads} \
+                -x {params.idx} \
+                -1 {input.R1} \
+                -2 {input.R2} \
+                {params.args} \
+                2> {output.stats} \
+                | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+                > {output.bam}
                 
-                samtools index -@ {threads} {output.bam}
-                """
-            )
-        else:
-            shell(
-                """
-                hisat2 \
-                    -p {threads} \
-                    -x {params.idx} \
-                    -U {input.R1} \
-                    {params.args} \
-                    2> {output.stats} \
-                    | samtools sort - -T {params.sortname} -@ {threads} -O bam \
-                    > {output.bam}
+        else
+            # Single-end alignment
+            hisat2 \
+                -p {threads} \
+                -x {params.idx} \
+                -U {input.R1} \
+                {params.args} \
+                2> {output.stats} \
+                | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+                > {output.bam}
+        fi
 
-                samtools index -@ {threads} {output.bam}
-                """
-            )
+        samtools index -@ {threads} {output.bam}
+        """
+
     
 
 # ====== Rules for aligning reads summmary =================================
@@ -71,7 +67,8 @@ rule hisatPE_summmary:
     output:
         PROJ + "/stats/" + PROJ + "_aligned.tsv"
     params:
-        job_name = "hisatPE_summmary"
+        job_name = "hisatPE_summmary",
+        index = INDEX_MAP
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
@@ -81,34 +78,16 @@ rule hisatPE_summmary:
         "summmary hisat2 "
     threads:
         1
-    run:
-        with open(output[0], "w") as out:
-            for file in input:
-                name = os.path.basename(file)
-                name = re.sub("_" + INDEX_MAP + "_hisat_stats.txt", "", name)
+    shell:
+        """
+        python - << 'EOF'
+import sys
+sys.path.insert(0, "pipelines/")
 
-                for line in open(file, "r"):
-                    match = re.search("overall alignment rate", line)
+import rules
 
-                    if match:
-                        num = re.search("[0-9.%]+", line)
-                        num = num.group(0).strip()
-                        met = re.search("[a-z\s]+", line).group(0)
-                        met = met.strip()
-                        met = re.sub(" ", "_", met)
-
-                        out.write("%s\t%s\t%s\n" % (name, met, num))
-                    else:
-                        line  = re.sub("; of these:", "", line.strip())
-                        line  = re.sub(" \([0-9\.%]+\)", "", line)
-                        words = line.split(" ")
-                        num   = words[0]
-                        met   = words[1:]
-                        met   = " ".join(met)
-
-                        out.write("%s\t%s\t%s\n" % (name, met, num))
-                        
-                        
-
+rules._hisatPE_summmary("{input}".split(), "{output[0]}", "{params.index}")
+EOF
+        """
 
                     

@@ -12,7 +12,8 @@ rule bbduk:
     params:
         job_name = "{sample}_bbduk",
         args = lambda wildcards: CMD_PARAMS["bbduk"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
-        bar = lambda wildcards: _bbduk_adapter_param(BARCODES)
+        bar = lambda wildcards: _bbduk_adapter_param(BARCODES),
+        is_paired = lambda wildcards: PAIREDMAP[wildcards.sample]
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
     log:
@@ -20,36 +21,33 @@ rule bbduk:
         err = PROJ + "/logs/{sample}_bbduk.err"
     threads:
         12
-    run:
-        if len(params.args) == 0:
-            shell(
-                """
-                cp {input.R1} {output.R1}
+    shell:
+        """
+        if [ -z "{params.args}" ]; then
+            # No bbduk args, just copy files
+            cp {input.R1} {output.R1}
+            if [ "{params.is_paired}" = "True" ]; then
                 cp {input.R2} {output.R2}
-                echo "Total Removed:  0 reads (0.0%)  0 bases (0.0%)" >> {output.log}
-                """
-            )
-        else:
-            if PAIREDMAP[wildcards.sample]:
-                shell(
-                    """
-                    bbduk.sh -Xmx{resources.memory}g threads={threads} \
-                        in1={input.R1} in2={input.R2} \
-                        out1={output.R1} out2={output.R2} \
-                        {params.bar} {params.args} 2>> {output.log}
-                    """
-                )
-            else:
-                shell(
-                    """
-                    bbduk.sh -Xmx{resources.memory}g threads={threads} \
-                        in={input.R1} \
-                        out={output.R1} \
-                        {params.bar} {params.args} 2>> {output.log}
-                    # Create empty R2 to satisfy output declaration
-                    touch {output.R2}
-                    """
-                )
+            else
+                touch {output.R2}
+            fi
+            echo "Total Removed:  0 reads (0.0%)  0 bases (0.0%)" >> {output.log}
+        elif [ "{params.is_paired}" = "True" ]; then
+            # Paired-end processing
+            bbduk.sh -Xmx{resources.memory}g threads={threads} \
+                in1={input.R1} in2={input.R2} \
+                out1={output.R1} out2={output.R2} \
+                {params.bar} {params.args} 2>> {output.log}
+        else
+            # Single-end processing
+            bbduk.sh -Xmx{resources.memory}g threads={threads} \
+                in={input.R1} \
+                out={output.R1} \
+                {params.bar} {params.args} 2>> {output.log}
+            # Create empty R2 to satisfy output declaration
+            touch {output.R2}
+        fi
+        """
 
         
   
@@ -73,23 +71,16 @@ rule bbduk_summary:
         "Creating " + PROJ + " bbduk summary"
     threads:
         1
-    run:
-        with open(output[0], "w") as out:
-            for file in input:
-                name = os.path.basename(file)
-                name = re.sub("_bbduk.log", "", name)
+    shell:
+        """
+        python - << 'EOF'
+import sys
+sys.path.insert(0, "pipelines/")
 
-                for line in open(file, "r"):
-                    match = re.search("Total Removed:", line)
+import rules
 
-                    if match:
-                        mett = line.strip().split("\t")
-                        num = mett[1].strip()
-                        num = re.sub(" reads ", "", num)
-                        met = re.search("[\w\(\) ]+:", line).group(0)
-                        met = re.sub(":", "", met)
-                        met = met.strip()
-                        met = re.sub(" ", "_", met)
-                        out.write("%s\t%s\t%s\n" % (name, met, num))
+rules._bbduk_summary("{input}".split(), "{output[0]}")
+EOF
+        """
 
 

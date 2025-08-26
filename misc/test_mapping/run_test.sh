@@ -9,16 +9,8 @@ set -o nounset -o pipefail -o errexit -x
 
 mkdir -p logs
 
-# Load modules
-. /usr/share/Modules/init/bash
-module load modules modules-init modules-python
-module load python/3.8.5
-module load samtools/1.9
-module load bbtools/39.01
-module load bowtie2/2.3.2
-module load R/4.3.3
-module load fastqc/0.11.9
-module load subread
+bind_dir='/beevol/home'
+ssh_key_dir='$HOME/.ssh'
 
 # Function to run snakemake
 run_snakemake() {
@@ -33,17 +25,19 @@ run_snakemake() {
         -n {threads} '
 
     snakemake \
+        --use-singularity \
+        --singularity-args "--bind $bind_dir" \
         --snakefile $snake_file \
         --drmaa "$args" \
         --jobs 100 \
+        --config SSH_KEY_DIR="$ssh_key_dir" \
         --configfile $config_file
 }
 
-# Run pipeline to process ChIPseq reads
-pipe_dir=pipelines
+# Run pipeline to process reads
 # index and configs
-snake=$pipe_dir/bowtie_test.snake
-#snake=$pipe_dir/NETseq_UMI_test.snake
+snake=pipelines/bowtie_test.snake
+#snake=pipelines/NETseq_UMI_test.snake
 samples=samples.yaml
 
 run_snakemake $snake "$samples"

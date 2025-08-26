@@ -106,7 +106,7 @@ CMD_PARAMS:
     fragment_size: 
       paired:  " --maxFragmentLength 1000 "
       single:  " bin=10 max=1010 "
-    featureCounts: " --readExtension5 2000 --readExtension3 2000 " #--largestOverlap
+    featureCounts: "" #--largestOverlap
     filter_results: "protein_coding"
     
 # sandbox User #
@@ -115,7 +115,7 @@ USER:
 
 # "subsample" or "" ... make bw and matix files from sub-sampled or normal bam files
 NORM:
-  "RPKM"
+  "CPM"
 # set orentation of fastq files, can list one for each file   
 ORIENTATION:
     "R1R2" # R2R1
@@ -129,6 +129,9 @@ REGIONS:
 SENSE_ASENSE:
   - "sense"
 
+CONTAINER:
+    "docker://bberickson/bodhi-snakemake:v1.1.0"
+    
 ## Additional common parameters for various processing steps
 #### Cutadapt ####
 # --pair-filter=first - read filtering decisions are made based solely on R1

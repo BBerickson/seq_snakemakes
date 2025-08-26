@@ -10,7 +10,9 @@ rule clumpify:
         log = PROJ + "/clumpify/{sample}_clumpify.log"
     params:
         job_name = "{sample}_clumpify",
-        args = lambda wildcards: CMD_PARAMS["clumpify"]["paired" if PAIREDMAP[wildcards.sample] else "single"]
+        args = lambda wildcards: CMD_PARAMS["clumpify"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
+        is_paired = lambda wildcards: PAIREDMAP[wildcards.sample],
+        reduced_mem = lambda wildcards, resources: int(resources.memory * 0.9)
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 10, 15)
     log:
@@ -18,40 +20,36 @@ rule clumpify:
         err = PROJ + "/logs/{sample}_clumpify.err"
     threads:
         1
-    run:
-        reduced_mem = int(resources.memory * 0.9)
-        if len(params.args) == 0:
-            shell(
-                """
-                cp {input[0]} {output.R1}
+    shell:
+        """
+        if [ -z "{params.args}" ]; then
+            # No clumpify args, just copy files
+            cp {input[0]} {output.R1}
+            if [ "{params.is_paired}" = "True" ]; then
                 cp {input[1]} {output.R2}
-                echo "Reads In:  0,0" >> {output.log}
-                echo "Duplicates Found:  0,0" >> {output.log}
-                """
-            )
-        else:
-            if PAIREDMAP[wildcards.sample]:
-                shell(
-                    """
-                    clumpify.sh -Xmx{reduced_mem}g \
-                        groups={reduced_mem} \
-                        in1={input[0]} in2={input[1]} \
-                        out1={output.R1} out2={output.R2} \
-                        {params.args} 2>> {output.log}
-                    """
-                )
-            else:
-                shell(
-                    """
-                    clumpify.sh -Xmx{reduced_mem}g \
-                        groups={reduced_mem} \
-                        in={input[0]} \
-                        out={output.R1} \
-                        {params.args} 2>> {output.log}
-                    # Create empty R2 to satisfy output declaration
-                    touch {output.R2}
-                    """
-                )
+            else
+                touch {output.R2}
+            fi
+            echo "Reads In:  0,0" >> {output.log}
+            echo "Duplicates Found:  0,0" >> {output.log}
+        elif [ "{params.is_paired}" = "True" ]; then
+            # Paired-end processing
+            clumpify.sh -Xmx{params.reduced_mem}g \
+                groups={params.reduced_mem} \
+                in1={input[0]} in2={input[1]} \
+                out1={output.R1} out2={output.R2} \
+                {params.args} 2>> {output.log}
+        else
+            # Single-end processing
+            clumpify.sh -Xmx{params.reduced_mem}g \
+                groups={params.reduced_mem} \
+                in={input[0]} \
+                out={output.R1} \
+                {params.args} 2>> {output.log}
+            # Create empty R2 to satisfy output declaration
+            touch {output.R2}
+        fi
+        """
 
 
 
@@ -65,7 +63,8 @@ rule clumpify_summary:
     output:
         PROJ + "/stats/" + PROJ + "_clumpify.tsv"
     params:
-        job_name = PROJ + "_clumpify_summary"
+        job_name = PROJ + "_clumpify_summary",
+        pairedmap = PAIREDMAP
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
@@ -73,20 +72,16 @@ rule clumpify_summary:
         err = PROJ + "/logs/" + PROJ + "_clumpify_summary.err"
     threads:
         1
-    run:
-        with open(output[0], "w") as out:
-          for file in input:
-            name = os.path.basename(file)
-            name = re.sub("_clumpify.log", "", name)
-        
-            for line in open(file, "r"):
-                match = re.search("Reads In: |Duplicates Found:", line)
-                if match:
-                    num = re.search("[0-9,]{2,}", line)
-                    num = int(re.sub(",", "", num.group(0)))
-                    num_final = num // 2 if PAIREDMAP[name] else num
-                    met = re.search("[\w\(\) ]+:", line).group(0)
-                    met = re.sub(":", "", met).strip().replace(" ", "_")
-                    out.write(f"{name}\t{met}\t{num_final}\n")
+    shell:
+        """
+        python - << 'EOF'
+import sys
+sys.path.insert(0, "pipelines/")
+
+import rules
+
+rules._clumpify_summary("{input}".split(), "{output[0]}", "{params.pairedmap}")
+EOF
+        """
 
 

@@ -21,7 +21,7 @@ rule create_report:
     output:
         PROJ + "/" + PROJ + "_{index}_heatmap_analysis.html"
     params:
-        job_name   = PROJ + "_{index}_heatmap_plots"
+        job_name   = PROJ + "_{index}_heatMapPlots"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 4) # multiplier, min, max, unit=GB
     log:

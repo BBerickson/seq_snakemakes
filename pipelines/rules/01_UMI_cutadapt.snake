@@ -13,7 +13,8 @@ rule extract_umi:
         log = PROJ + "/logs/{sample}_extract_umi.out"
     params:
         job_name = "{sample}_umi_extract",
-        umi_pat  = CMD_PARAMS["umi_pattern"]
+        umi_pat  = CMD_PARAMS["umi_pattern"],
+        orientation = ORIENTATION
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 5)
     log:
@@ -23,41 +24,37 @@ rule extract_umi:
         "Extracting UMIs for {wildcards.sample}"
     threads:
         1
-    run:
-        # If no params are passed, make a symlink to original fastq
-        if len(params.umi_pat) == 0:
-            os.symlink(input[0], output.R1)
-            os.symlink(input[1], output.R2)
-            shell("touch {output.log}")
-        else:
-            if ORIENTATION == "R1":
-                shell(
-                    """
-                    umi_tools extract \
-                      -I {input[1]} \
-                      --extract-method=string \
-                      --bc-pattern={params.umi_pat} \
-                      --read2-in={input[0]} \
-                      --read2-out={output.R1} \
-                      -L {output.log} \
-                      | gzip \
-                      > {output.R2}
-                    """
-                )
-            else:
-                shell(
-                    """
-                    umi_tools extract \
-                      -I {input[0]} \
-                      --extract-method=string \
-                      --bc-pattern={params.umi_pat} \
-                      --read2-in={input[1]} \
-                      --read2-out={output.R2} \
-                      -L {output.log} \
-                      | gzip \
-                      > {output.R1}
-                    """
-                )
+    shell:
+        """
+        if [ -z "{params.umi_pat}" ]; then
+            # If no UMI pattern, create symlinks
+            ln -sf {input[0]} {output.R1}
+            ln -sf {input[1]} {output.R2}
+            touch {output.log}
+        elif [ "{params.orientation}" = "R1" ]; then
+            # Extract UMIs from R1
+            umi_tools extract \
+              -I {input[1]} \
+              --extract-method=string \
+              --bc-pattern={params.umi_pat} \
+              --read2-in={input[0]} \
+              --read2-out={output.R1} \
+              -L {output.log} \
+              | gzip \
+              > {output.R2}
+        else
+            # Extract UMIs from R2
+            umi_tools extract \
+              -I {input[0]} \
+              --extract-method=string \
+              --bc-pattern={params.umi_pat} \
+              --read2-in={input[1]} \
+              --read2-out={output.R2} \
+              -L {output.log} \
+              | gzip \
+              > {output.R1}
+        fi
+        """
 
 
 # Trim reads with cutadapt
@@ -81,25 +78,25 @@ rule cutadapt:
         "Running cutadapt on {wildcards.sample}"
     threads:
         6
-    run:
-        # If no params are passed, make a symlink to original fastq
-        if len(params.args) == 0:
-            os.symlink(input[0], output.R1)
-            os.symlink(input[1], output.R2)
-            shell("touch {output.stats}")
-        else:
-            shell(
-                """
-                python3 -m cutadapt \
-                  {params.args} \
-                  -j {threads} \
-                  -o {output.R1} \
-                  -p {output.R2} \
-                  {input.R1} \
-                  {input.R2} \
-                  > {output.stats}
-                """
-            )
+    shell:
+        """
+        if [ -z "{params.args}" ]; then
+            # No cutadapt args, create symlinks to original files
+            ln -sf {input.R1} {output.R1}
+            ln -sf {input.R2} {output.R2}
+            touch {output.stats}
+        else
+            # Run cutadapt with provided arguments
+            python3 -m cutadapt \
+              {params.args} \
+              -j {threads} \
+              -o {output.R1} \
+              -p {output.R2} \
+              {input.R1} \
+              {input.R2} \
+              > {output.stats}
+        fi
+        """
 
 
 # Create cutadapt summary
@@ -122,25 +119,16 @@ rule cutadapt_summary:
         "Creating " + PROJ + " cutadapt summary"
     threads:
         1
-    run:
-        with open(output[0], "w") as out:
-            for file in input:
-                name = os.path.basename(file)
-                name = re.sub("_cutadapt_stats.txt", "", name)
+    shell:
+        """
+        python - << 'EOF'
+import sys
+sys.path.insert(0, "pipelines/")
 
-                for line in open(file, "r"):
-                    match = re.search("Pairs | pairs |with adapter", line)
+import rules
 
-                    if match:
-                      line = line.strip()
-                      mett = re.split(r'\s{2,}', line)
-                      num = mett[1].strip()
-                      num = re.sub("\,", "", num)
-                      num = re.sub(" ", "", num)
-                      met = re.search("[\w\(\) ]+:", line).group(0)
-                      met = re.sub(":", "", met)
-                      met = re.sub(" ", "_", met)
-
-                      out.write("%s\t%s\t%s\n" % (name, met, num))
+rules._cutadapt_summary("{input}".split(), "{output[0]}")
+EOF
+        """
 
 

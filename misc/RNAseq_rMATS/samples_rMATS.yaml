@@ -20,7 +20,7 @@ SAMPLESrmat:
         - "293flpIN_RTF1_WT2"
         - "293flpIN_RTF1_WT3"
 
-    RTF1_MTr:
+    RTF1_MT:
         - "293flpIN_RTF1_MT_R1"
         - "293flpIN_RTF1_MT_R2"
         - "293flpIN_RTF1_MT_R3"

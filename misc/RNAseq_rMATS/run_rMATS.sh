@@ -1,21 +1,16 @@
 #!/usr/bin/env bash
 
-#BSUB -J snake
-#BSUB -o logs/snake_%J.out
-#BSUB -e logs/snake_%J.err
+#BSUB -J rmats
+#BSUB -o logs/rmats_%J.out
+#BSUB -e logs/rmats_%J.err
 
 
 set -o nounset -o pipefail -o errexit -x
 
 mkdir -p logs
 
-# Load modules
-. /usr/share/Modules/init/bash
-module load modules modules-init modules-python
-module load python/3.8.5
-module load samtools/1.9
-module load rMATS/4.0.2
-module load R/4.2.2
+bind_dir='/beevol/home'
+ssh_key_dir='$HOME/.ssh'
 
 # Function to run snakemake
 run_snakemake() {
@@ -30,16 +25,18 @@ run_snakemake() {
         -n {threads} '
 
     snakemake \
+        --use-singularity \
+        --singularity-args "--bind $bind_dir" \
         --snakefile $snake_file \
         --drmaa "$args" \
         --jobs 100 \
+        --config SSH_KEY_DIR="$ssh_key_dir" \
         --configfile $config_file
 }
 
 # Run pipeline to process RNAseq reads
-pipe_dir=pipelines
 # index and configs
-snake=$pipe_dir/rmats.snake
+snake=pipelines/rmats.snake
 samples=samples.yaml
 samples2=samples_rMATS.yaml
 

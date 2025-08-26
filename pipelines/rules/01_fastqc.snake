@@ -12,12 +12,10 @@ rule fastqc:
         job_name = "{fastq}_fastqc",
         out      = PROJ + "/fastqc"
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 0.1, 1)
+        memory   = lambda wildcards, input: memory_estimator(input, 0.1, 2)
     log:
         out = PROJ + "/logs/{fastq}_fastqc.out",
         err = PROJ + "/logs/{fastq}_fastqc.err"
-    message:
-        "Running FastQC on {wildcards.fastq}"
     threads:
         6
     shell:
@@ -55,8 +53,6 @@ rule fastqc_summary:
     log:
         out = PROJ + "/logs/" + PROJ + "_fastqc_summary.out",
         err = PROJ + "/logs/" + PROJ + "_fastqc_summary.err"
-    message:
-        "Creating " + PROJ + " FastQC summary"
     threads:
         1
     shell:

@@ -33,7 +33,7 @@ rule standared_marix_url:
         fw       = PROJ + "/matrix/{region}/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_pos_matrix.gz",
         rev      = PROJ + "/matrix/{region}/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_neg_matrix.gz"
     output:
-        temp(PROJ + "/matrix/{region}/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_bi_matrix.url.txt")
+        temp(PROJ + "/matrix/{region}/{newnam}_aligned_{index}_temp_{covarg}_norm_{suffix}_bi_matrix.url.txt")
     params:
         job_name = "{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_bi_matrix_url",
         color    = lambda wildcards: _get_col(wildcards.newnam, COLS_DICT),
@@ -47,6 +47,7 @@ rule standared_marix_url:
         err = PROJ + "/logs/{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_bi_matrix_url.err"
     threads:
         1
+    container: None
     shell:
         """
         echo {params.url_fw} {params.groupkey} {wildcards.newnam}_{wildcards.suffix}_{SEQ_DATE}_pos {params.color} >> {output[0]}
@@ -60,11 +61,14 @@ rule standared_marix_url:
 # Combine URLs
 rule matrix_url_summary:
     input:
-        sorted(expand(
-            PROJ + "/matrix/{region}/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_bi_matrix.url.txt",
-            zip, newnam=DF_SAM_NORM['Newnam'], index=DF_SAM_NORM['Index'], region=DF_SAM_NORM['Region'], 
-            covarg=DF_SAM_NORM['Value'], suffix=DF_SAM_NORM['Suffix']
-        ))
+        lambda wildcards: sorted([
+            PROJ + f"/matrix/{row['Region']}/{row['Newnam']}_aligned_{row['Index']}_temp_{row['Value']}_norm_{row['Suffix']}_bi_matrix.url.txt"
+            for _, row in DF_SAM_NORM.iterrows()
+            if (str(row['Region']) == wildcards.region and 
+                str(row['Index']) == wildcards.index and
+                str(row['Value']) == wildcards.covarg and 
+                str(row['Suffix']) == wildcards.suffix)
+        ])
     output:
         PROJ + "/URLS/{region}_aligned_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_bidirectonal_matrix.url.txt"
     params:
@@ -78,12 +82,8 @@ rule matrix_url_summary:
         1
     shell:
         """
-        # Filter and concatenate files
-        for file in {input}; do
-            if [[ $file == *"{wildcards.region}"* && $file == *"{wildcards.covarg}"* && $file == *"{wildcards.suffix}"*]]; then
-                cat $file >> {output}
-            fi
-        done
+        # concatenate files
+        cat {input} > {output}
         """
 
 

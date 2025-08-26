@@ -51,14 +51,20 @@ SAMPLES:
         SAMPLING-GROUP-1:
             RTF1_WT1: 
               - "293flpIN_RTF1_WT1"
+            RTF1_MT1: 
+              - "293flpIN_RTF1_MT_R1"
 
         SAMPLING-GROUP-2:
             RTF1_WT2: 
               - "293flpIN_RTF1_WT2"
+            RTF1_MT2: 
+              - "293flpIN_RTF1_MT_R2"
 
         SAMPLING-GROUP-3:
             RTF1_WT3: 
               - "293flpIN_RTF1_WT3"
+            RTF1_MT3: 
+              - "293flpIN_RTF1_MT_R3"
       
 # Norm sample bw and matix files, spike-in is CPM      
 # with "RPKM","CPM","BPM","RPGC" 
@@ -67,7 +73,7 @@ SAMPLES:
 # if no input spike in scaleFactor within a group is used: "spikin" 
 # Or "subsample" : make bw and matix files from sub-sampled bam files (paired groups)
 NORM:
-  "RPKM"
+  "CPM"
 
   
  # set RGB colors for bw urls and table files, 
@@ -142,6 +148,9 @@ SENSE_ASENSE:
   - "sense"
   - "anti"
 
+CONTAINER:
+    "docker://bberickson/bodhi-snakemake:v1.1.0"
+    
 ## Additional common parameters for various processing steps
 ### Clumpify.py ##
 # overwrite=f         (ow) Set to false to force the program to abort rather 

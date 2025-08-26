@@ -36,26 +36,30 @@ rule fastq_rmats:
     output:
         SE = PROJ + "/rmats/{compgroups}/SE.MATS.JC.txt"
     params:
-        job_name = "{compgroups}_fastq_rmats",
-        outdir   = PROJ + "/rmats/{compgroups}",
-        gtf      = GTF,
-        args     = CMD_PARAMS["rmats"]
+        job_name  = "{compgroups}_fastq_rmats",
+        outdir    = PROJ + "/rmats/{compgroups}",
+        outdirtmp = PROJ + "/rmats/{compgroups}/tmp",
+        gtf       = GTF,
+        args      = CMD_PARAMS["rmats"]
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 10, 30) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/{compgroups}_fastq_rmats.out",
         err = PROJ + "/logs/{compgroups}_fastq_rmats.err"
-    message:
-        "Aligning reads with fastq_rmats for {wildcards.compgroups}"
     threads: 
         12
     shell:
         """
+        mkdir -p {params.outdirtmp}
+        
         rmats.py --b1 {input.S1} --b2 {input.S2} \
         --gtf {params.gtf} \
         --od {params.outdir} \
+        --tmp {params.outdirtmp} \
         --nthread {threads} \
         {params.args}
+        
+        rm -rf {params.outdirtmp}
         """
                     
                     

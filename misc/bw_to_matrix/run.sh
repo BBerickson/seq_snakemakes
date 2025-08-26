@@ -8,12 +8,8 @@ set -o nounset -o pipefail -o errexit -x
 
 mkdir -p logs
 
-# Load modules
-. /usr/share/Modules/init/bash
-module load modules modules-init modules-python
-module load python/3.8.5
-module load samtools/1.9
-module load R/4.3.3
+bind_dir='/beevol/home'
+ssh_key_dir='$HOME/.ssh'
 
 # Function to run snakemake
 run_snakemake() {
@@ -25,27 +21,29 @@ run_snakemake() {
         -eo {log.err} 
         -J {params.job_name}
         -R "rusage[mem={resources.memory}] span[hosts=1]"
-        -n {threads}  '
+        -n {threads} '
 
     snakemake \
+        --use-singularity \
+        --singularity-args "--bind $bind_dir" \
         --snakefile $snake_file \
         --drmaa "$args" \
         --jobs 100 \
+        --config SSH_KEY_DIR="$ssh_key_dir" \
         --configfile $config_file
 }
 
 # Run pipeline to process bigwig files to matrix files
-pipe_dir=pipelines
 # index and configs
 samples=samples.yaml
 
 # Run pipeline to make table files of sample
-# snake=$pipe_dir/BW_matrix.snake
-# config=$pipe_dir/UnStranded_matrix.yaml
-# snake=$pipe_dir/BW_bidirectional_matrix.snake
-# config=$pipe_dir/bidirectional_matrix.yaml
-snake=$pipe_dir/BW_Stranded_matrix.snake
-config=$pipe_dir/Stranded_matrix.yaml
+# snake=pipelines/BW_matrix.snake
+# config=pipelines/UnStranded_matrix.yaml
+# snake=pipelines/BW_bidirectional_matrix.snake
+# config=pipelines/bidirectional_matrix.yaml
+snake=pipelines/BW_Stranded_matrix.snake
+config=pipelines/Stranded_matrix.yaml
 
 run_snakemake $snake "$samples $config"
 

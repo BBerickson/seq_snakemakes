@@ -10,42 +10,39 @@ rule fragment_size:
         log  = temp(PROJ + "/stats/{sample}_aligned_{index}_fragment.txt"),
         pic  = temp(PROJ + "/stats/{sample}_aligned_{index}_fragmentSize.png")
     params:
-        job_name = "{sample}_PE_fragment_size_{index}",
+        job_name = "{sample}_fragment_size_{index}",
         labels   = lambda wildcards: wildcards.sample if "spike" not in wildcards.index else f"{wildcards.sample}_spike",
         script   = "pipelines/R_scripts/read_size_png.R",
-        args     = lambda wildcards: CMD_PARAMS["fragment_size"]["paired" if PAIREDMAP[wildcards.sample] else "single"]
+        args     = lambda wildcards: CMD_PARAMS["fragment_size"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
+        is_paired = lambda wildcards: PAIREDMAP[wildcards.sample]
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 0.2, 5)
     log:
-        out = PROJ + "/logs/{sample}_PE_fragment_{index}_size.out",
-        err = PROJ + "/logs/{sample}_PE_fragment_{index}_size.err"
+        out = PROJ + "/logs/{sample}_fragment_{index}_size.out",
+        err = PROJ + "/logs/{sample}_fragment_{index}_size.err"
     threads: 
         12
-    run:
-        if PAIREDMAP[wildcards.sample]:
-            shell(
-                """
-                bamPEFragmentSize \
-                  -hist {output.pic} \
-                  --numberOfProcessors {threads} \
-                  -T "Fragment size of PE data" \
-                  -b  {input.bam} {params.args} \
-                  --samplesLabel {params.labels} \
-                  --table {output.log} 
-                """
-            )
-        else:
-            shell(
-                """
-                # bbtools
-                readlength.sh \
-                  in={input.bam} \
-                  out={output.log} \
-                  bin=10 max=1010
-                  
-                Rscript {params.script} {output.log} {output.pic}
-                """
-            )
+    shell:
+        """
+        if [ "{params.is_paired}" = "True" ]; then
+            # Paired-end fragment size analysis
+            bamPEFragmentSize \
+              -hist {output.pic} \
+              --numberOfProcessors {threads} \
+              -T "Fragment size of PE data" \
+              -b  {input.bam} {params.args} \
+              --samplesLabel {params.labels} \
+              --table {output.log}
+        else
+            # Single-end read length analysis
+            readlength.sh \
+              in={input.bam} \
+              out={output.log} \
+              bin=10 max=1010
+              
+            Rscript {params.script} {output.log} {output.pic}
+        fi
+        """
   
         
 rule fragment_results:

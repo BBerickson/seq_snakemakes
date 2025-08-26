@@ -2,7 +2,7 @@
 
 # Configure shell for all rules
 shell.executable("/bin/bash")
-shell.prefix("source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; ")
+shell.prefix("[ -f ~/.bash_profile ] && source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; ")
 
 # python packages
 import os
@@ -48,6 +48,10 @@ for idx in INDEXES:
 # Assign parameters from configs
 # ------------------------------------------------------------------------------
 
+# Docker container
+singularity:
+    config["CONTAINER"] 
+    
 # From main config
 PROJ         = config.get("PROJ")
 RAW_DATA     = config.get("RAW_DATA")
@@ -178,4 +182,5 @@ include: "rules/03a_fragmentSize.snake"
 include: "rules/03b_results.snake"
 include: "rules/03b_PCAplot.snake"
 # BW with deeptools bamCoverage
-include: "rules/04_bamCoverage_stranded.snake"
+include: "rules/04a_bamCoverage_stranded.snake"
+include: "rules/04b_bw_UCSC_URL_stranded.snake"

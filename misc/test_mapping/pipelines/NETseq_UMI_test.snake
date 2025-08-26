@@ -2,7 +2,7 @@
 
 # Configure shell for all rules
 shell.executable("/bin/bash")
-shell.prefix("source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; ")
+shell.prefix("[ -f ~/.bash_profile ] && source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; ")
 
 # python packages
 import os
@@ -48,6 +48,10 @@ for idx in INDEXES:
 # Assign parameters from configs
 # ------------------------------------------------------------------------------
 
+# Docker container
+singularity:
+    config["CONTAINER"] 
+    
 # From main config
 PROJ         = config.get("PROJ")
 RAW_DATA     = config.get("RAW_DATA")

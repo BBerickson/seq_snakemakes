@@ -2,7 +2,7 @@
 
 # Configure shell for all rules
 shell.executable("/bin/bash")
-shell.prefix("source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; ")
+shell.prefix("[ -f ~/.bash_profile ] && source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; ")
 
 # Python packages
 import os
@@ -49,6 +49,10 @@ with open(GENOME_CONFIG1) as f:
 # Assign parameters from configs
 # ------------------------------------------------------------------------------
 
+# Docker container
+singularity:
+    config["CONTAINER"] 
+    
 # From main config
 PROJ         = config.get("PROJ")
 RAW_DATA     = config.get("RAW_DATA")
@@ -181,7 +185,7 @@ rule all:
         
 
 # BW with deeptools bamCoverage
-include: "rules/04_bamCoverage_stranded.snake"
+include: "rules/04a_bamCoverage_stranded.snake"
 # 5 sense matrix file
 include: "rules/05_bidirectional_matrix.snake"
 

@@ -318,26 +318,77 @@ def _get_col(sample, cols_dict):
     return cols_dict.get(sample, "0,0,0")
         
 # build bamCoverage scaleFactor sample dictonary
-def _get_norm_scale(sample, norm_type, index_sample):
+def _get_norm_scale(sample, norm_type, index_sample, norm_files):
     if norm_type.lower() in ["subsample", "none", "rpkm", "cpm", "bpm", "rpgc", "c"] or norm_type.isspace():
         return 1
-
+    
     norm_type_with_index = norm_type + "_" + index_sample
-    path = PROJ + "/stats/"
-    filename = glob.glob(path + sample + "*_summary_featureCounts.tsv")
+    
+    # Find the correct file for this sample from the provided norm_files
+    matching_file = None
+    for filepath in norm_files:
+        if sample in filepath and "_summary_featureCounts.tsv" in filepath:
+            matching_file = filepath
+            break
+    
+    if matching_file is None:
+        print(f"WARNING: No featureCounts file found for sample {sample} in provided files: {norm_files}")
+        return 1
+    
+    try:
+        with open(matching_file, "r") as f:
+            for line in f:
+                if norm_type_with_index in line:
+                    num = line.strip().split()
+                    try:
+                        value = float(num[1])
+                        return 1000000 / value if value != 0 else 1
+                    except (IndexError, ValueError):
+                        print(f"WARNING: Could not parse normalization value from line: {line}")
+                        return 1
+        
+        print(f"WARNING: Normalization type '{norm_type_with_index}' not found in file '{matching_file}'")
+        return 1
+        
+    except FileNotFoundError:
+        print(f"WARNING: Could not open file '{matching_file}'")
+        return 1
+    except Exception as e:
+        print(f"WARNING: Error reading normalization file '{matching_file}': {e}")
+        return 1
 
-    filename = filename[0]
-    with open(filename, "r") as f:
-        for line in f:
-           if norm_type_with_index in line:
-                num = line.strip().split()
-                try:
-                    value = float(num[1])
-                    return 1000000 / value if value != 0 else 1
-                except (IndexError, ValueError):
-                    return 1
 
-    raise ValueError(f"Normalization type '{norm_type_with_index}' not found in file '{filename}'.")
+# grab normalization options for bamCoverage for each sample 
+def _get_norm(df, newnam, suffix, index, norm_files):
+    row = df[
+        (df['Newnam'] == newnam) &
+        (df['Index'] == index) &
+        (df['Suffix'] == suffix)
+    ]
+    
+    if row.empty:
+        print(f"WARNING: No matching normalization found for {newnam}, {index}, {suffix}")
+        print(f"Available combinations in dataframe:")
+        if not df.empty:
+            print(df[['Newnam', 'Index', 'Suffix']].drop_duplicates().to_string())
+        return "--normalizeUsing None --scaleFactor 1.0"
+    
+    sample = row.iloc[0]['Sample']
+    index_val = row.iloc[0]['Index']
+    norm = row.iloc[0]['Norm']
+    
+    # Pass the norm_files to the scale function
+    norm_value = _get_norm_scale(sample, norm, index_val, norm_files)
+    norm_upper = norm.upper()
+    
+    if norm_upper in ["RPKM", "CPM", "BPM", "RPGC"]:
+        results = "--normalizeUsing " + norm_upper
+    else:
+        results = "--normalizeUsing None"
+    
+    results = results + " --scaleFactor " + str(norm_value)
+    return results
+
 
 # grab bowtie options for multimap cleaning 
 def _extract_k_option(bowtie2, orientation): 
@@ -356,33 +407,6 @@ def _extract_k_option(bowtie2, orientation):
     
     return result
 
-
-
-# grab normalization options for bamCoverage for each sample 
-def _get_norm(df, newnam, suffix, index):
-    row = df[
-        (df['Newnam'] == newnam) &
-        (df['Index'] == index) &
-        (df['Suffix'] == suffix)
-    ]
-    
-    if row.empty:
-        raise ValueError(f"No matching normalization found for {newnam}, {index}, {suffix}")
-    
-    sample = row.iloc[0]['Sample']
-    index  = row.iloc[0]['Index']
-    norm   = row.iloc[0]['Norm']
-
-    norm_value = _get_norm_scale(sample, norm, index)
-    norm = norm.upper()
-
-    if norm in ["RPKM","CPM","BPM","RPGC"]:
-      results = "--normalizeUsing " + norm
-    else:
-      results = "--normalizeUsing None"
-    results = results + " --scaleFactor " + str(norm_value)
-    
-    return results
   
     
 # file nameing based on normalization and filter options    

@@ -2,7 +2,7 @@
 
 # rMATS results
 
-PROJ="180629_SY351" # same as PROJ: in samples.yaml
+PROJ="RTF1_RNAseq" # same as PROJ: in samples.yaml
 tc <- "treatment:control" # same as GROUPS_COMP: in samples_rAMTS.yaml
 setwd() 
 

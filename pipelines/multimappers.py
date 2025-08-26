@@ -1,13 +1,10 @@
-#!/usr/bin/env python2
-
+#!/usr/bin/env python3
 # from Anshul Kundaje's lab
 # piped script to take multimappers and randomly assign
 # requires a qname sorted file!!
-
 import sys
 import random
 import argparse
-
 
 def parse_args():
     '''
@@ -21,34 +18,28 @@ def parse_args():
     args = parser.parse_args()
     alignment_cutoff = int(args.k)
     paired_ended = args.paired_ended
-
     return alignment_cutoff, paired_ended
-
 
 if __name__ == "__main__":
     '''
     Runs the filtering step of choosing multimapped reads
     '''
-
     [alignment_cutoff, paired_ended] = parse_args()
-
     if paired_ended:
         alignment_cutoff = int(alignment_cutoff) * 2
-
+    
     # Store each line in sam file as a list of reads,
     # where each read is a list of elements to easily
     # modify or grab things
     current_reads = []
     current_qname = ''
-
+    
     for line in sys.stdin:
-
         read_elems = line.strip().split('\t')
-
         if read_elems[0].startswith('@'):
             sys.stdout.write(line)
             continue
-
+        
         # Keep taking lines that have the same qname
         if read_elems[0] == current_qname:
             # Add line to current reads
@@ -64,7 +55,6 @@ if __name__ == "__main__":
                 # samtools
                 for read in current_reads:
                     sys.stdout.write(str(read))
-
                 # And then discard
                 current_reads = [line]
                 current_qname = read_elems[0]

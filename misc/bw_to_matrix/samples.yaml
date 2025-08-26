@@ -104,3 +104,7 @@ COLORS:
   - "253,191,111" # - Light orange/peach
   - "202,178,214" # - Light purple/lavender
     
+
+CONTAINER:
+    "docker://bberickson/bodhi-snakemake:v1.0.0"
+    

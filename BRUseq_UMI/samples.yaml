@@ -127,6 +127,9 @@ COLORS:
   - "253,191,111" # - Light orange/peach
   - "202,178,214" # - Light purple/lavender
 
+CONTAINER:
+    "docker://bberickson/bodhi-snakemake:v1.1.0"
+    
 ## Additional common parameters for various processing steps
 ### Clumpify.py ##
 # overwrite=f         (ow) Set to false to force the program to abort rather 

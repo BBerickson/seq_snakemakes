@@ -43,11 +43,17 @@ rule calculating_subsample_summary:
         err = PROJ + "/logs/" + PROJ + "_calculating_{index}_subsample_summary.err"
     threads:
         1
-    run:
-        with open(output[0], "w") as out:
-            for file in input:
-                for line in open(file, "r"):
-                    out.write(line)
+    shell:
+        """
+        python - << 'EOF'
+import sys
+sys.path.insert(0, "pipelines/")
+
+import rules
+
+rules._concat_lines("{input}".split(), "{output[0]}")
+EOF
+        """
 
 
 

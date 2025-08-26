@@ -1,24 +1,15 @@
 #!/usr/bin/env bash
 
-#BSUB -J snake
-#BSUB -o logs/snake_%J.out
-#BSUB -e logs/snake_%J.err
-
+#BSUB -J ChIPseq
+#BSUB -o logs/ChIPseq_%J.out
+#BSUB -e logs/ChIPseq_%J.err
 
 set -o nounset -o pipefail -o errexit -x
 
 mkdir -p logs
 
-# Load modules
-. /usr/share/Modules/init/bash
-module load modules modules-init modules-python
-module load python/3.8.5
-module load samtools/1.9
-module load bbtools/39.01
-module load bowtie2/2.3.2
-module load R/4.3.3
-module load fastqc/0.11.9
-module load subread
+bind_dir='/beevol/home'
+ssh_key_dir='$HOME/.ssh'
 
 # Function to run snakemake
 run_snakemake() {
@@ -33,24 +24,26 @@ run_snakemake() {
         -n {threads} '
 
     snakemake \
+        --use-singularity \
+        --singularity-args "--bind $bind_dir" \
         --snakefile $snake_file \
         --drmaa "$args" \
         --jobs 100 \
+        --config SSH_KEY_DIR="$ssh_key_dir" \
         --configfile $config_file
 }
 
-# Run pipeline to process ChIPseq reads
-pipe_dir=pipelines
+
 # index and configs
-snake=$pipe_dir/ChIPseq.snake
+snake=pipelines/ChIPseq.snake
 samples=samples.yaml
 
+# Run pipeline to process ChIPseq reads
 run_snakemake $snake "$samples"
 
+# configs 
+snake=pipelines/UnStranded_matrix.snake
+config=pipelines/UnStranded_matrix.yaml
+
 # Run pipeline to make table files of sample
-snake=$pipe_dir/UnStranded_matrix.snake
-config=$pipe_dir/UnStranded_matrix.yaml
-
 run_snakemake $snake "$samples $config"
-
-
