@@ -1,4 +1,0 @@
-KeyError in line 49 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/04_bamCoverage_stranded.snake:
-'bamCoveragef'
-  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/RNAseq.snake", line 187, in <module>
-  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/04_bamCoverage_stranded.snake", line 49, in <module>

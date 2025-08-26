@@ -1,4 +1,0 @@
-WorkflowError in line 183 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/Hisat.snake:
-Failed to open source file /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/02c_align_hisat.snake
-FileNotFoundError: [Errno 2] No such file or directory: '/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/02c_align_hisat.snake'
-  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/Hisat.snake", line 183, in <module>

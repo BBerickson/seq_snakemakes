@@ -1,3 +1,0 @@
-NameError in line 154 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/NETseq_spikein.snake:
-name 'get_bampath' is not defined
-  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/NETseq_spikein.snake", line 154, in <module>

@@ -1,4 +1,0 @@
-WorkflowError in line 170 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/Bowtie.snake:
-Failed to open source file /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/01_fastqc.snake
-FileNotFoundError: [Errno 2] No such file or directory: '/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/01_fastqc.snake'
-  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/Bowtie.snake", line 170, in <module>

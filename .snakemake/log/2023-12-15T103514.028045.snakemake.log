@@ -1,6 +1,0 @@
-Building DAG of jobs...
-MissingInputException in line 150 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/ChIPseq_spikeIN.snake:
-Missing input files for rule all:
-    affected files:
-        Temp2/stats/Temp2_hg38_fragmentSize.png
-        Temp2/stats/Temp2_mm10_fragmentSize.png

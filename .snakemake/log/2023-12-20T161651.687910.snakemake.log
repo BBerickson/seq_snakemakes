@@ -1,3 +1,0 @@
-SyntaxError in line 26 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/02d_align_sub.snake:
-invalid syntax
-  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/NETseq_spikein.snake", line 191, in <module>

@@ -1,9 +1,0 @@
-Building DAG of jobs...
-MissingInputException in line 107 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/02d_align_sub_spikeIN.snake:
-Missing input files for rule subsample_summary:
-    output: Temp_NET/stats/Temp_NET_hg38_subsample.tsv
-    affected files:
-        Temp_NET/bams/PP1H66KpDoxS2Ser5_hg38.txt
-        Temp_NET/bams/PP1H66KmDoxS2Ser5_hg38.txt
-        Temp_NET/bams/PP1H66KpDS2Ser53_hg38.txt
-        Temp_NET/bams/PP1H66KmDS2Ser53_hg38.txt

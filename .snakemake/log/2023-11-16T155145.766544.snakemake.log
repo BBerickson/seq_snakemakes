@@ -1,7 +1,0 @@
-Building DAG of jobs...
-MissingInputException in line 5 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/01_fastqc.snake:
-Missing input files for rule fastqc:
-    output: Temp/fastqc/PP1H66KmDS2Ser53_CKDL230028616-1A_HCLMNDSX7_L4_1_fastqc.zip, Temp/fastqc/PP1H66KmDS2Ser53_CKDL230028616-1A_HCLMNDSX7_L4_1_fastqc.html
-    wildcards: fastq=PP1H66KmDS2Ser53_CKDL230028616-1A_HCLMNDSX7_L4_1
-    affected files:
-        Temp/fastqs/PP1H66KmDS2Ser53_CKDL230028616-1A_HCLMNDSX7_L4_1.fq.gz

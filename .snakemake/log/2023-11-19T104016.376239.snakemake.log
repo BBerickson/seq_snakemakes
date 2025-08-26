@@ -1,9 +1,0 @@
-Building DAG of jobs...
-MissingInputException in line 4 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rules/03_results.snake:
-Missing input files for rule gathering_results:
-    output: Temp_star/stats/Temp_star_results.tsv
-    affected files:
-        Temp_star/stats/PP1H66KmDS2Ser53_count.txt
-        Temp_star/stats/PP1H66KpDoxS2Ser5_count.txt
-        Temp_star/stats/PP1H66KpDS2Ser53_count.txt
-        Temp_star/stats/PP1H66KmDoxS2Ser5_count.txt

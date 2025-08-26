@@ -1,4 +1,0 @@
-TypeError in line 49 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rmats.snake:
-list indices must be integers or slices, not str
-  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rmats.snake", line 49, in <module>
-  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rmats.snake", line 49, in <listcomp>

@@ -1,3 +1,0 @@
-KeyError in line 28 of /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rmats.snake:
-'GTF'
-  File "/beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines/rmats.snake", line 28, in <module>
