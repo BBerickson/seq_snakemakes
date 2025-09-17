@@ -390,25 +390,6 @@ def _get_norm(df, newnam, suffix, index, norm_files):
     return results
 
 
-# grab bowtie options for multimap cleaning 
-def _extract_k_option(bowtie2, orientation): 
-    # Extract the -k value using regex
-    match = re.search(r'-k\s*(\d+)', bowtie2)
-    if not match:
-        return ""  # Return empty string if -k is not found
-
-    # Normalize the output to "-k <value>"
-    k_value = match.group(1)
-    result = f"-k {k_value}"
-
-    # Add --paired-end if orientation doesn't match R1 or R2
-    if orientation not in {"R1", "R2"}:
-        result += " --paired-end"
-    
-    return result
-
-  
-    
 # file nameing based on normalization and filter options    
 def _get_normtype(normUsing, norm_type, blacklist, orientation):
     word = norm_type
@@ -586,7 +567,7 @@ def _rgb2hex(samples,group,cols_dict):
     hex_colors = hex_colors + hex_colors
     return " ".join(hex_colors)
     
-#    
+# sense heatmap   
 def _rgb2hexplus(samples,group,cols_dict):
     hex_colors = []
     hex_colors2 = []
@@ -604,7 +585,7 @@ def _rgb2hexplus(samples,group,cols_dict):
     hex_colors = hex_colors + hex_colors2
     return " ".join(hex_colors)
 
-#
+# antisense heatmap
 def _rgb2hexplus2(samples,group,cols_dict):
     hex_colors = []
     hex_colors2 = []
@@ -622,4 +603,5 @@ def _rgb2hexplus2(samples,group,cols_dict):
     hex_colors = hex_colors2 + hex_colors
     return " ".join(hex_colors)
 
-#
+
+

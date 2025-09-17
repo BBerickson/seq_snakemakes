@@ -35,7 +35,10 @@ INDEXES = [raw_indexes] if isinstance(raw_indexes, str) else [raw_indexes[0]]
 
 
 # Paths to additional config files
-GENOME_CONFIG1 = Path("pipelines/ref") / f"{INDEXES[0]}.yaml"
+if config.get("GENELIST"):
+    GENOME_CONFIG1 = GENOME_CONFIG
+else:
+    GENOME_CONFIG1 = Path("pipelines/ref") / f"{INDEXES[0]}.yaml"
 
 # Validate existence
 if not GENOME_CONFIG1.exists():
@@ -138,6 +141,7 @@ NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS.get("bamCoverage
 BAM_PATH = _get_bampath(NORM)
 
 COVARGS = _get_all_matrixtypes(REGIONS,CMD_PARAMS,GENELIST)
+GENELIST = config1.get("GENELIST") or "all"
 
 # Create the Cartesian product
 product = [(s, i, v) for s in NAMS_UNIQ for i, v in zip(REGIONS, COVARGS)]

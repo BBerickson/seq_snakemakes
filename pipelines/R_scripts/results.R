@@ -59,8 +59,8 @@ aligner <- read_tsv(aligner_file,col_names = c("sample","type","alignment_rate")
   dplyr::select(sample,alignment_rate)
 
 # gather results
-sn <- full_join(sn,aligner,by="sample") %>%
-  full_join(.,pre_alignment,by="sample") %>% 
+sn <- full_join(sn,pre_alignment,by="sample") %>%
+  full_join(.,aligner,by="sample") %>% 
   arrange(new_name) %>% 
   mutate(new_name=if_else(is.na(new_name),sample,new_name))
 

@@ -1,309 +1,247 @@
 # rule for heatmap overview
 
-rule create_5_mixed_sense_antisense_matrix:
+rule create_heatmap_plots:
     input:
-        lambda wildcards: expand(
-          PROJ + "/matrix/5_{newnam}_aligned_{index}_" + SEQ_DATE + NORM5S + "_matrix.gz",
-          newnam = GROUPS[wildcards.group]
+        lambda wildcards: sorted(list(set([
+            PROJ + f"/matrix/{row['Region']}/{wildcards.group}/"
+            f"{wildcards.group}_aligned_{row['Index']}_{SEQ_DATE}_"
+            f"{row['Region']}_{row['Value']}_norm_{row['Suffix']}_{wildcards.sense_asense}_matrix.gz"
+            for _, row in DF_SAM_NORM.iterrows()
+            if (
+                row['Sample'] in GROUPS[wildcards.group]
+                and str(row['Region']) == wildcards.region
+                and str(row['Region']) in HEATMAP_REGIONS  # Explicit whitelist
+                and str(row['Index']) == wildcards.index
+                and str(row['Value']) == wildcards.covarg
+                and str(row['Suffix']) == wildcards.suffix
+            )
+        ])))
+    output:
+        tempplot = temp(
+            PROJ + "/heatmap/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_heatmap.svg"
         ),
-        lambda wildcards: expand(
-          PROJ + "/matrix/5_{newnam}_aligned_{index}_" + SEQ_DATE + NORM5S + "_anti_matrix.gz",
-          newnam = GROUPS[wildcards.group]
+        heatmap = temp(
+            PROJ + "/heatmap/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_heatmap.png"
         )
-    output:
-        PROJ + "/matrix2/5_{group}_aligned_{index}_" + SEQ_DATE + NORM5S + "_sense_antisense.matrix.gz"
     params:
-        job_name  = PROJ + "{group}_aligned_{index}_5mixOrient",
-        samplab   = GROUPS,
-        groulab   = "{group}"
-    resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 2, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/" + PROJ + "_{group}_{index}_5prim_mixed_sense_antisense_matrix.out",
-        err = PROJ + "/logs/" + PROJ + "_{group}_{index}_5prim_mixed_sense_antisense_matrix.err"
-    message:
-        "Creating merged 5prim matrix files for sense antisense {wildcards.group}"
-    threads: 
-        1
-    script:
-        '../R_scripts/MatrixMerge.R'
-
-rule create_5_mixed_sense_matrix:
-    input:
-        lambda wildcards: expand(
-          PROJ + "/matrix/5_{newnam}_aligned_{index}_" + SEQ_DATE + NORM5S + "_matrix.gz",
-          newnam = GROUPS[wildcards.group]
-        )
-    output:
-        PROJ + "/matrix2/5_{group}_aligned_{index}_" + SEQ_DATE + NORM5S + "_sense.matrix.gz"
-    params:
-        job_name  = PROJ + "{group}_aligned_{index}_5mix_sense",
-        samplab   = GROUPS,
-        groulab   = "{group}"
-    resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 2, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/" + PROJ + "_{group}_{index}_5prim_mixed_sense_matrix.out",
-        err = PROJ + "/logs/" + PROJ + "_{group}_{index}_5prim_mixed_sense_matrix.err"
-    message:
-        "Creating merged 5prim matrix files for sense {wildcards.group}"
-    threads: 
-        1
-    script:
-        '../R_scripts/MatrixMerge.R'
-
-rule create_5_mixed_antisense_matrix:
-    input:
-        lambda wildcards: expand(
-          PROJ + "/matrix/5_{newnam}_aligned_{index}_" + SEQ_DATE + NORM5A + "_anti_matrix.gz",
-          newnam = GROUPS[wildcards.group]
-        )
-    output:
-        PROJ + "/matrix2/5_{group}_aligned_{index}_" + SEQ_DATE + NORM5A + "_antisense.matrix.gz"
-    params:
-        job_name  = PROJ + "{group}_aligned_{index}_5mixAsense",
-        samplab   = GROUPS,
-        groulab   = "{group}"
-    resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 2, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/" + PROJ + "_{group}_aligned_{index}_5prim_mixed_antisense_matrix.out",
-        err = PROJ + "/logs/" + PROJ + "_{group}_aligned_{index}_5prim_mixed_antisense_matrix.err"
-    message:
-        "Creating merged 5prim matrix files for antisense {wildcards.group}"
-    threads: 
-        1
-    script:
-        '../R_scripts/MatrixMerge.R'
-
-rule create_3_mixed_sense_matrix:
-    input:
-        lambda wildcards: expand(
-          PROJ + "/matrix/3_{newnam}_aligned_{index}_" + SEQ_DATE + NORM3 + "_matrix.gz",
-          newnam = GROUPS[wildcards.group]
-        )
-    output:
-        PROJ + "/matrix2/3_{group}_aligned_{index}_" + SEQ_DATE + NORM3 + "_sense.matrix.gz"
-    params:
-        job_name  = PROJ + "{group}_aligned_{index}_3mix_sense",
-        samplab   = GROUPS,
-        groulab   = "{group}"
-    resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 2, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/" + PROJ + "_{group}_aligned_{index}_3prim_mixed_sense_matrix.out",
-        err = PROJ + "/logs/" + PROJ + "_{group}_aligned_{index}_3prim_mixed_sense_matrix.err"
-    message:
-        "Creating merged 3prim matrix files for {wildcards.group}"
-    threads: 
-        1
-    script:
-        '../R_scripts/MatrixMerge.R'
-
-
-rule create_5_sense_antisense_heatmap_plots:
-    input:
-        PROJ + "/matrix2/5_{group}_aligned_{index}_" + SEQ_DATE + NORM5S + "_sense_antisense.matrix.gz",
-        PROJ + "/matrix2/5_{group}_aligned_{index}_" + SEQ_DATE + NORM5S + "_sense.matrix.gz",
-        PROJ + "/matrix2/5_{group}_aligned_{index}_" + SEQ_DATE + NORM5A + "_antisense.matrix.gz"
-    output:
-        temp(PROJ + "/heatmap/5_{group}_aligned_{index}_" + SEQ_DATE + NORM5S + ".svg"),
-        temp(PROJ + "/heatmap/5_{group}_aligned_{index}_" + SEQ_DATE + NORM5S + "_cluster_sense.svg"),
-        temp(PROJ + "/heatmap/5_{group}_aligned_{index}_" + SEQ_DATE + NORM5A + "_cluster_anti.svg"),
-        PROJ + "/heatmap/5_{group}_aligned_{index}_" + SEQ_DATE + NORM5S + "_cluster_sense.bed",
-        PROJ + "/heatmap/5_{group}_aligned_{index}_" + SEQ_DATE + NORM5A + "_cluster_anti.bed"
-    params:
-        job_name = PROJ + "_{group}_{index}_5heatmap",
-        title    = "{group}",
+        job_name = PROJ + "/heatmap/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_heatmap",
         args     = CMD_PARAMS["heatmap"],
-        args2    = CMD_PARAMS["csheatmap"],
-        args3    = CMD_PARAMS["caheatmap"],
-        setcol   = lambda wildcards: _rgb2hexplus(SAMPLES,wildcards.group,COLS_DICT),
-        setcol2  = lambda wildcards: _rgb2hexplus2(SAMPLES,wildcards.group,COLS_DICT)
+        setcol   = lambda wildcards: _rgb2hexplus2(SAMPLES, wildcards.group, COLS_DICT) if wildcards.sense_asense == "anti" else _rgb2hexplus(SAMPLES, wildcards.group, COLS_DICT),
+        script   = "pipelines/R_scripts/SvgToPng.R",
+        texty    = "2"
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 2, 5) # multiplier, min, max, unit=GB
+        memory = lambda wildcards, input: memory_estimator(input, 2, 5) # multiplier, min, max, unit=GB
     log:
-        out = PROJ + "/logs/" + PROJ + "_{group}_aligned_{index}_5prim_heatmap_plots.out",
-        err = PROJ + "/logs/" + PROJ + "_{group}_aligned_{index}_5prim_heatmap_plots.err"
-    message:
-        "Creating 5prim heatmap plots for {wildcards.group}"
+        out = PROJ + "/logs/{region}_{group}_aligned_{index}__{covarg}_norm_{suffix}_{sense_asense}_heatmap.out",
+        err = PROJ + "/logs/{region}_{group}_aligned_{index}__{covarg}_norm_{suffix}_{sense_asense}_heatmap.err"
+    threads: 1
+    shell:
+        """
+        colors=("{params.setcol}") 
+        
+        plotHeatmap -m {input} \
+            --heatmapWidth 15 --heatmapHeight 30 \
+            {params.args} \
+            --colorList ${{colors}} \
+            -out {output.tempplot} 
+        
+        Rscript {params.script} "{output.tempplot}" "{params.texty}" "{output.heatmap}"
+        """
+
+rule heatmap_pdf:
+    input:
+        lambda wildcards: sorted(list(set([
+        PROJ + f"/heatmap/{row['Region']}_{group}_aligned_{row['Index']}_temp_{row['Value']}_norm_{row['Suffix']}_{sense_asense}_heatmap.png"
+        for _, row in DF_SAM_NORM.iterrows()
+        for group in GROUPS.keys()
+        for sense_asense in SENSE_ASENSE
+        if (
+            str(row['Index']) == wildcards.index
+            and str(row['Region']) == wildcards.region
+            and str(row['Region']) in HEATMAP_REGIONS  # Explicit whitelist
+            )
+    ])))
+    output:
+        PROJ + "/report/" + PROJ + "_{genelist}_{region}_{index}_heatmap.pdf"  
+    params:
+        job_name  = "{genelist}_{region}_{index}_heatmap_pdf",
+        script    = "pipelines/R_scripts/pngToPDF.R",
+        pdf_title = lambda wildcards: [
+        f"{row['Region']}_{row['Value']}_norm_{row['Suffix']}: {SEQ_DATE}"
+        for _, row in DF_SAM_NORM.iterrows()
+        if str(row['Index']) == wildcards.index and str(row['Region']) == wildcards.region
+    ][0], 
+        chunkSize = 2
+    resources:
+        memory = lambda wildcards, input: memory_estimator(input, 4, 2) # multiplier, min, max, unit=GB
+    log:
+        out = PROJ + "/logs/{genelist}_{region}_{index}_heatmap_pdf.out",
+        err = PROJ + "/logs/{genelist}_{region}_{index}_heatmap_pdf.err"
+    threads: 1
+    shell:
+        """
+        Rscript {params.script} "{input}" "{params.chunkSize}" "{params.pdf_title}" "{output}"
+        """
+
+rule cluster_heatmap_plots:
+    input:
+        lambda wildcards: sorted(list(set([
+            PROJ + f"/matrix/{row['Region']}/{wildcards.group}/"
+            f"{wildcards.group}_aligned_{row['Index']}_{SEQ_DATE}_"
+            f"{row['Region']}_{row['Value']}_norm_{row['Suffix']}_{wildcards.sense_asense}_matrix.gz"
+            for _, row in DF_SAM_NORM.iterrows()
+            if (
+                row['Sample'] in GROUPS[wildcards.group]
+                and str(row['Region']) == wildcards.region
+                and str(row['Region']) in HEATMAP_REGIONS  # Explicit whitelist
+                and str(row['Index']) == wildcards.index
+                and str(row['Value']) == wildcards.covarg
+                and str(row['Suffix']) == wildcards.suffix
+            )
+        ])))
+    output:
+        tempplot = temp(
+            PROJ + "/heatmap/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_cluster.svg"
+        ),
+        heatmap = temp(
+            PROJ + "/heatmap/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_cluster.png"
+        ),
+        bedfile  = PROJ + "/heatmap/{region}_{group}_aligned_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_{sense_asense}_cluster.bed"
+    params:
+        job_name = PROJ + "/heatmap/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_cluster",
+        args     = lambda wildcards: CMD_PARAMS["clusterHM"]["anti" if wildcards.sense_asense == "anti" else "sense"],
+        setcol   = lambda wildcards: _rgb2hexplus2(SAMPLES,wildcards.group,COLS_DICT) if wildcards.sense_asense == "anti" else _rgb2hexplus(SAMPLES,wildcards.group,COLS_DICT),
+        script = "pipelines/R_scripts/SvgToPng.R",
+        texty    = "2"
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
+    log:
+        out = PROJ + "/logs/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_cluster.out",
+        err = PROJ + "/logs/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_cluster.err"
     threads:
         1
     shell:
         """
         colors=("{params.setcol}") 
-        colors2=("{params.setcol2}") 
         
-        plotHeatmap -m {input[0]} \
+        plotHeatmap -m {input} \
         --heatmapWidth 15 --heatmapHeight 30 \
         {params.args} \
-        --plotTitle {params.title} \
         --colorList ${{colors}} \
-        -out {output[0]} 
+        -out {output.tempplot} \
+        --outFileSortedRegions {output.bedfile}
         
-        plotHeatmap -m {input[1]} \
-        --heatmapWidth 15 --heatmapHeight 30 \
-        {params.args2} \
-        --plotTitle {params.title} \
-        --colorList ${{colors}} \
-        -out {output[1]} \
-        --outFileSortedRegions {output[3]}
-        
-        plotHeatmap -m {input[2]} \
-        --heatmapWidth 15 --heatmapHeight 30 \
-        {params.args3} \
-        --plotTitle {params.title} \
-        --colorList ${{colors2}} \
-        -out {output[2]} \
-        --outFileSortedRegions {output[4]}
-        
+        Rscript {params.script} "{output.tempplot}" "{params.texty}" "{output.heatmap}"
         """
-        
-rule create_3_sense_heatmap_plots:
+
+rule cluster_pdf:
     input:
-        PROJ + "/matrix2/3_{group}_aligned_{index}_" + SEQ_DATE + NORM3 + "_sense.matrix.gz"
+        lambda wildcards: sorted(list(set([
+        PROJ + f"/heatmap/{row['Region']}_{group}_aligned_{row['Index']}_temp_{row['Value']}_norm_{row['Suffix']}_{sense_asense}_cluster.png"
+        for _, row in DF_SAM_NORM.iterrows()
+        for group in GROUPS.keys()
+        for sense_asense in SENSE_ASENSE
+        if (
+            str(row['Index']) == wildcards.index
+            and str(row['Region']) == wildcards.region
+            and str(row['Region']) in HEATMAP_REGIONS  # Explicit whitelist
+            )
+    ])))
     output:
-        temp(PROJ + "/heatmap/3_{group}_aligned_{index}_" + SEQ_DATE + NORM3 + ".svg"),
-        temp(PROJ + "/heatmap/3_{group}_aligned_{index}_" + SEQ_DATE + NORM3 + "_cluster_sense.svg"),
-        PROJ + "/heatmap/3_{group}_aligned_{index}_" + SEQ_DATE + NORM3 + "_cluster_sense.bed"
+        PROJ + "/report/" + PROJ + "_{genelist}_{region}_{index}_cluster.pdf"  
     params:
-        job_name = PROJ + "_{group}_aligned_{index}_3heatmap",
-        title    = "{group}",
-        args     = CMD_PARAMS["heatmap"],
-        args2    = CMD_PARAMS["csheatmap"],
-        setcol   = lambda wildcards: _rgb2hexplus(SAMPLES,wildcards.group,COLS_DICT)
+        job_name  = "{genelist}_{region}_{index}_cluster_pdf",
+        script    = "pipelines/R_scripts/pngToPDF.R",
+        pdf_title = lambda wildcards: [
+        f"{row['Region']}_{row['Value']}_norm_{row['Suffix']}: {SEQ_DATE}"
+        for _, row in DF_SAM_NORM.iterrows()
+        if str(row['Index']) == wildcards.index and str(row['Region']) == wildcards.region
+    ][0], 
+        chunkSize = 1
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
+        memory = lambda wildcards, input: memory_estimator(input, 1, 1)
     log:
-        out = PROJ + "/logs/" + PROJ + "_{group}_aligned_{index}_3prim_heatmap_plots.out",
-        err = PROJ + "/logs/" + PROJ + "_{group}_aligned_{index}_3prim_heatmap_plots.err"
-    message:
-        "Creating 3prim heatmap plots for {wildcards.group}"
-    threads:
-        1
+        out = PROJ + "/logs/{genelist}_{region}_{index}_cluster_pdf.out",
+        err = PROJ + "/logs/{genelist}_{region}_{index}_cluster_pdf.err"
+    threads: 1
     shell:
         """
-        colors=("{params.setcol}") 
-        
-        plotHeatmap -m {input[0]} \
-        --heatmapWidth 15 --heatmapHeight 30 \
-        {params.args} \
-        --plotTitle {params.title} \
-        --colorList ${{colors}} \
-        -out {output[0]} 
-        
-        plotHeatmap -m {input[0]} \
-        --heatmapWidth 15 --heatmapHeight 30 \
-        {params.args2} \
-        --plotTitle {params.title} \
-        --colorList ${{colors}} \
-        -out {output[1]} \
-        --outFileSortedRegions {output[2]}
-        
-        
-        """
-        
-rule create_5_sense_antisense_profile_plots:
-    input:
-        PROJ + "/matrix2/5_{group}_aligned_{index}_" + SEQ_DATE + NORM5S + "_sense_antisense.matrix.gz"
-    output:
-        PROJ + "/heatmap/5_{group}_aligned_{index}_" + SEQ_DATE + NORM5S + "_profile.png"
-    params:
-        job_name = PROJ + "_{group}_aligned_{index}_5profile",
-        setcol   = lambda wildcards: _rgb2hex(SAMPLES,wildcards.group,COLS_DICT)
-    resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
-    log:
-        out = PROJ + "/logs/" + PROJ + "_{group}_aligned_{index}_5prim_profile_plots.out",
-        err = PROJ + "/logs/" + PROJ + "_{group}_aligned_{index}_5prim_profile_plots.err"
-    message:
-        "Creating 5prim profile plots for {wildcards.group}"
-    threads:
-        1
-    shell:
-        """
-        colors=("{params.setcol}") 
-        
-        plotProfile -m {input} \
-        --perGroup --legendLocation upper-left \
-        --colors ${{colors}} \
-        -out {output[0]} 
-        
-        """
-        
-rule create_3_sense_profile_plots:
-    input:
-        PROJ + "/matrix2/3_{group}_aligned_{index}_" + SEQ_DATE + NORM3 + "_sense.matrix.gz"
-    output:
-        PROJ + "/heatmap/3_{group}_aligned_{index}_" + SEQ_DATE + NORM3 + "_profile.png"
-    params:
-        job_name = PROJ + "_{group}_aligned_{index}_5profile",
-        setcol   = lambda wildcards: _rgb2hex(SAMPLES,wildcards.group,COLS_DICT)
-    resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
-    log:
-        out = PROJ + "/logs/" + PROJ + "_{group}_aligned_{index}_3prim_profile_plots.out",
-        err = PROJ + "/logs/" + PROJ + "_{group}_aligned_{index}_3prim_profile_plots.err"
-    message:
-        "Creating 3prim profile plots for {wildcards.group}"
-    threads:
-        1
-    shell:
-        """
-        colors=("{params.setcol}") 
-        
-        plotProfile -m {input} \
-        --perGroup --legendLocation upper-right \
-        --colors ${{colors}} \
-        -out {output[0]} 
-        
+        Rscript {params.script} "{input}" "{params.chunkSize}" "{params.pdf_title}" "{output}"
         """
                 
-rule create_5_sense_antisense_heatmap_png:
+rule create_profile_plots:
     input:
-        PROJ + "/heatmap/5_{group}_aligned_{index}_" + SEQ_DATE + NORM5S + ".svg",
-        PROJ + "/heatmap/5_{group}_aligned_{index}_" + SEQ_DATE + NORM5S + "_cluster_sense.svg",
-        PROJ + "/heatmap/5_{group}_aligned_{index}_" + SEQ_DATE + NORM5A + "_cluster_anti.svg"
+        lambda wildcards: sorted(list(set([
+            PROJ + f"/matrix/{row['Region']}/{wildcards.group}/"
+            f"{wildcards.group}_aligned_{row['Index']}_{SEQ_DATE}_"
+            f"{row['Region']}_{row['Value']}_norm_{row['Suffix']}_{wildcards.sense_asense}_matrix.gz"
+            for _, row in DF_SAM_NORM.iterrows()
+            if (
+                row['Sample'] in GROUPS[wildcards.group]
+                and str(row['Region']) == wildcards.region
+                and str(row['Region']) in HEATMAP_REGIONS  # Explicit whitelist
+                and str(row['Index']) == wildcards.index
+                and str(row['Value']) == wildcards.covarg
+                and str(row['Suffix']) == wildcards.suffix
+            )
+        ])))
     output:
-        PROJ + "/heatmap/5_{group}_aligned_{index}_" + SEQ_DATE + NORM5S + ".png",
-        PROJ + "/heatmap/5_{group}_aligned_{index}_" + SEQ_DATE + NORM5S + "_cluster_sense.png",
-        PROJ + "/heatmap/5_{group}_aligned_{index}_" + SEQ_DATE + NORM5A + "_cluster_anti.png"
+        heatmap = temp(
+            PROJ + "/heatmap/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_profile_plots.png"
+        )
     params:
-        job_name = PROJ + "_{group}_{index}_heatmap5png",
-        texty    = "2 1.5 1.5"
+        job_name = PROJ + "/heatmap/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_profile",
+        setcol   = lambda wildcards: _rgb2hex(SAMPLES,wildcards.group,COLS_DICT)
     resources:
-        memory   = 4
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
     log:
-        out = PROJ + "/logs/" + PROJ + "_{group}_aligned_{index}_5prim_heatmap_png.out",
-        err = PROJ + "/logs/" + PROJ + "_{group}_aligned_{index}_5prim_heatmap_png.err"
-    message:
-        "Creating 5prim heatmap png for {wildcards.group}"
+        out = PROJ + "/logs/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_profile_plots.out",
+        err = PROJ + "/logs/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_profile_plots.err"
     threads:
         1
-    script:
-        '../R_scripts/SvgToPng.R'
+    shell:
+        """
+        colors=("{params.setcol}") 
         
-rule create_3_sense_heatmap_png:
-    input:
-        PROJ + "/heatmap/3_{group}_aligned_{index}_" + SEQ_DATE + NORM3 + ".svg",
-        PROJ + "/heatmap/3_{group}_aligned_{index}_" + SEQ_DATE + NORM3 + "_cluster_sense.svg"
-    output:
-        PROJ + "/heatmap/3_{group}_aligned_{index}_" + SEQ_DATE + NORM3 + ".png",
-        PROJ + "/heatmap/3_{group}_aligned_{index}_" + SEQ_DATE + NORM3 + "_cluster_sense.png"
-    params:
-        job_name = PROJ + "_{group}_aligned_{index}_heatmap3png",
-        texty    = "1.5 1.5"
-    resources:
-        memory   = 4
-    log:
-        out = PROJ + "/logs/" + PROJ + "_{group}_aligned_{index}_3prim_heatmap_png.out",
-        err = PROJ + "/logs/" + PROJ + "_{group}_aligned_{index}_3prim_heatmap_png.err"
-    message:
-        "Creating 3prim heatmap png for {wildcards.group}"
-    threads:
-        1
-    script:
-        '../R_scripts/SvgToPng.R'
+        plotProfile -m {input} \
+        --perGroup --legendLocation best \
+        --colors ${{colors}} \
+        -out {output.heatmap} 
         
+        """
 
-        
+rule profile_pdf:
+    input:
+        lambda wildcards: sorted(list(set([
+        PROJ + f"/heatmap/{row['Region']}_{group}_aligned_{row['Index']}_temp_{row['Value']}_norm_{row['Suffix']}_{sense_asense}_profile_plots.png"
+        for _, row in DF_SAM_NORM.iterrows()
+        for group in GROUPS.keys()
+        for sense_asense in SENSE_ASENSE
+        if (
+            str(row['Index']) == wildcards.index
+            and str(row['Region']) == wildcards.region
+            and str(row['Region']) in HEATMAP_REGIONS  # Explicit whitelist
+            )
+    ])))
+    output:
+        PROJ + "/report/" + PROJ + "_{genelist}_{region}_{index}_profile.pdf"  
+    params:
+        job_name  = "{genelist}_{region}_{index}_profile_pdf",
+        script    = "pipelines/R_scripts/pngToPDF.R",
+        pdf_title = lambda wildcards: [
+        f"{row['Region']}_{row['Value']}_norm_{row['Suffix']}: {SEQ_DATE}"
+        for _, row in DF_SAM_NORM.iterrows()
+        if str(row['Index']) == wildcards.index and str(row['Region']) == wildcards.region
+    ][0], 
+        chunkSize = 4
+    resources:
+        memory = lambda wildcards, input: memory_estimator(input, 1, 1)
+    log:
+        out = PROJ + "/logs/{genelist}_{region}_{index}_profile_pdf.out",
+        err = PROJ + "/logs/{genelist}_{region}_{index}_profile_pdf.err"
+    threads: 1
+    shell:
+        """
+        Rscript {params.script} "{input}" "{params.chunkSize}" "{params.pdf_title}" "{output}"
+        """
+         

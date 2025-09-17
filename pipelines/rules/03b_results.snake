@@ -95,8 +95,6 @@ rule gathering_OR_results:
         cat {input} > {output}
         """
                     
-                    
-                    
 # gathering results
 rule gathering_results:
     input:
@@ -106,7 +104,11 @@ rule gathering_results:
         fc_file = expand( PROJ + "/stats/{sample}_summary_featureCounts.tsv",
             sample = SAMS_UNIQ
         ),
-        OR      = PROJ + "/counts/" + PROJ + "_OR_summery.tsv"
+        OR      = PROJ + "/counts/" + PROJ + "_OR_summery.tsv",
+        rf_file = expand( PROJ + "/counts/{sample}_aligned_{index}_refCounts.tsv",
+            sample = SAMS_UNIQ,
+            index  = INDEXES
+        )
     output:
         PROJ + "/report/" + PROJ + "_results.tsv"
     params:
@@ -131,4 +133,34 @@ rule gathering_results:
 
         """
   
-  
+rule create_plots:
+    input:
+        PROJ + "/report/" + PROJ + "_results.tsv"
+    output:
+        SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_qc_analysis.html"
+    params:
+        job_name   = PROJ + "_qc_html"
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
+    log:
+        out = PROJ + "/logs/" + PROJ + "_qc_html.out",
+        err = PROJ + "/logs/" + PROJ + "_qc_html.err"
+    threads:
+        1
+    shell:
+        """
+        touch .here
+        Rmd=pipelines/src/Rmds/analysis.Rmd
+        script=pipelines/src/Rmds/knit_rmd.R
+        out="_qc_analysis"
+
+        Rscript $script \
+            -i $Rmd \
+            -o $out \
+            -p {PROJ} \
+            -m {INDEX_MAP} \
+            -d {SEQ_DATE} \
+            -x {INDEXES[0]} \
+            -s {SAMPLES_FILE} 
+        """
+     

@@ -78,3 +78,41 @@ rule matrix_url_summary:
         cat {input} > {output}
         """
 
+# Combine groups of matirx files for heatmap plots
+rule merge_matrix_groups:
+    input:
+        lambda wildcards: sorted(list(set([
+            PROJ + f"/matrix/{row['Region']}/"
+            f"{row['Newnam']}_aligned_{row['Index']}_{SEQ_DATE}_"
+            f"{row['Region']}_{row['Value']}_norm_{row['Suffix']}_matrix.gz"
+            for _, row in DF_SAM_NORM.iterrows()
+            if (
+                row['Sample'] in GROUPS[wildcards.group]
+                and str(row['Region']) == wildcards.region
+                and str(row['Region']) in HEATMAP_REGIONS  # Explicit whitelist
+                and str(row['Index']) == wildcards.index
+                and str(row['Value']) == wildcards.covarg
+                and str(row['Suffix']) == wildcards.suffix
+            )
+        ])))
+    output:
+        matemp = temp(
+            PROJ + "/matrix/{region}/{group}/{group}_aligned_{index}_temp_{region}_{covarg}_norm_{suffix}_{sense_asense}_matrix.gz"
+        ),
+        matrix = PROJ + "/matrix/{region}/{group}/{group}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_{sense_asense}_matrix.gz"
+    params:
+        job_name = "{group}_aligned_{index}__{region}_{covarg}_norm_{suffix}_{sense_asense}_matrix_merge",
+        script = "pipelines/R_scripts/MatrixMerge.R"
+    resources:
+        memory = lambda wildcards, input: memory_estimator(input, 2, 1)
+    log:
+        out = PROJ + "/logs/{group}_aligned_{index}__{region}_{covarg}_norm_{suffix}_{sense_asense}_matrix_merge.out",
+        err = PROJ + "/logs/{group}_aligned_{index}__{region}_{covarg}_norm_{suffix}_{sense_asense}_matrix_merge.err"
+    threads: 1
+    shell:
+        """
+        # concatenate files
+        Rscript {params.script} "{input}" "{output.matemp}"
+        computeMatrixOperations relabel -m {output.matemp} -o {output.matrix} 2>> {log.err}
+        """
+        

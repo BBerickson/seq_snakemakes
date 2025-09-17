@@ -14,7 +14,7 @@ rule align_filter_multimap:
         job_name = "{sample}_multimap_filter",
         samp = "{sample}_" + INDEX_MAP,
         args = CMD_PARAMS["samtools"],
-        args2 = lambda wildcards: _extract_k_option(CMD_PARAMS[ALIGNER]["paired" if PAIREDMAP[wildcards.sample] else "single"], ORIENTATION),
+        args2 = CMD_PARAMS["multimap"],
         sortname = PROJ + "/{sample}_multimap.temp",
         is_paired = lambda wildcards: PAIREDMAP[wildcards.sample]
     resources:
@@ -32,24 +32,33 @@ rule align_filter_multimap:
         if [ -z "$args2_trimmed" ]; then
             # No multimap filtering needed
             touch {output.bamt}
-            cp {input.bam} {output.bam}
-            cp {input.bai} {output.bai}
-            echo "{params.samp} Multimap_Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
+            samtools view {params.args} {input.bam} > {output.bam}
+            samtools index -@ {threads} {output.bam}
+            echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
         else
             # Apply multimap filtering
-            samtools view {params.args} -u {input.bam} \
-              | samtools sort -n -T {params.sortname} -@ {threads} \
-              | samtools view -h - \
-              | python pipelines/multimappers.py {params.args2} \
-              | samtools fixmate -r - {output.bamt}
             
             if [ "{params.is_paired}" = "True" ]; then
+            
+              samtools view {params.args} -u {input.bam} \
+                | samtools sort -n -T {params.sortname} -@ {threads} \
+                | samtools view -h - \
+                | python pipelines/multimappers.py {params.args2} --paired-end \
+                | samtools fixmate -r - {output.bamt}
+                
                 # Paired-end filtering
                 samtools view -F 1804 -f 2 -u {output.bamt} \
                   | samtools sort - -T {params.sortname} -@ {threads} -O bam \
                   > {output.bam}
             else
                 # Single-end filtering
+            
+                samtools view {params.args} -u {input.bam} \
+                  | samtools sort -n -T {params.sortname} -@ {threads} \
+                  | samtools view -h - \
+                  | python pipelines/multimappers2.py {params.args2} \
+                  | samtools fixmate -r - {output.bamt}
+                
                 samtools view -F 1804 -u {output.bamt} \
                   | samtools sort - -T {params.sortname} -@ {threads} -O bam \
                   > {output.bam}

@@ -76,6 +76,8 @@ rule fragment_png:
         PROJ + "/report/" + PROJ + "_{index}_fragmentSize.pdf"
     params:
         job_name  = "fragment_{index}_results_pdf",
+        script = "pipelines/R_scripts/pngToPDF.R",
+        pdf_title = PROJ + "_{index}",
         chunkSize = 4
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 1, 1)
@@ -83,6 +85,9 @@ rule fragment_png:
         out = PROJ + "/logs/fragment_{index}_results_pdf.out",
         err = PROJ + "/logs/fragment_{index}_results_pdf.err"
     threads: 1
-    script:
-        "../R_scripts/pngToPDF.R"
+    shell:
+        """
+        Rscript {params.script} "{input}" "{params.chunkSize}" "{params.pdf_title}" "{output}"
+        """
+    
     

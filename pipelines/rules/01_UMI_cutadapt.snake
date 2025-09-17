@@ -8,8 +8,8 @@ rule extract_umi:
     input:
         lambda wildcards: _get_fqs(wildcards.sample, RAW_DATA, FASTQ_DIR, full_name=True, paired=True)
     output:
-        R1  = temp(PROJ + "/{sample}_R1_umi.fastq.gz"),
-        R2  = temp(PROJ + "/{sample}_R2_umi.fastq.gz"),
+        R1  = temp(PROJ + "/{sample}_R1_umi.fastq" + (".gz" if config.get("compress_temp", True) else "")),
+        R2  = temp(PROJ + "/{sample}_R2_umi.fastq" + (".gz" if config.get("compress_temp", True) else "")),
         log = PROJ + "/logs/{sample}_extract_umi.out"
     params:
         job_name = "{sample}_umi_extract",
@@ -60,11 +60,11 @@ rule extract_umi:
 # Trim reads with cutadapt
 rule cutadapt:
     input:
-        R1 = PROJ + "/{sample}_R1_umi.fastq.gz",
-        R2 = PROJ + "/{sample}_R2_umi.fastq.gz"
+        R1 = PROJ + "/{sample}_R1_umi.fastq" + (".gz" if config.get("compress_temp", True) else ""),
+        R2 = PROJ + "/{sample}_R2_umi.fastq" + (".gz" if config.get("compress_temp", True) else "")
     output:
-        R1    = temp(PROJ + "/{sample}_R1.fastq.gz"),
-        R2    = temp(PROJ + "/{sample}_R2.fastq.gz"),
+        R1    = temp(PROJ + "/{sample}_R1.fastq" + (".gz" if config.get("compress_temp", True) else "")),
+        R2    = temp(PROJ + "/{sample}_R2.fastq" + (".gz" if config.get("compress_temp", True) else "")),
         stats = PROJ + "/cutadapt/{sample}_cutadapt_stats.txt"
     params:
         job_name = "{sample}_cutadapt",

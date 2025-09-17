@@ -3,11 +3,11 @@
 # Run bbduk
 rule bbduk:
     input:
-        R1  = PROJ + "/{sample}_R1_clumpify.fastq.gz",
-        R2  = PROJ + "/{sample}_R2_clumpify.fastq.gz"
+        R1  = PROJ + "/{sample}_R1_clumpify.fastq" + (".gz" if config.get("compress_temp", True) else ""),
+        R2  = PROJ + "/{sample}_R2_clumpify.fastq" + (".gz" if config.get("compress_temp", True) else "")
     output:
-        R1 = temp(PROJ + "/{sample}_R1.fastq.gz"),
-        R2 = temp(PROJ + "/{sample}_R2.fastq.gz"),
+        R1 = temp(PROJ + "/{sample}_R1.fastq" + (".gz" if config.get("compress_temp", True) else "")),
+        R2 = temp(PROJ + "/{sample}_R2.fastq" + (".gz" if config.get("compress_temp", True) else "")),
         log = PROJ + "/bbduk/{sample}_bbduk.log"
     params:
         job_name = "{sample}_bbduk",

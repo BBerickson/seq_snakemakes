@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # from Anshul Kundaje's lab
-# piped script to take multimappers and randomly assign
+# piped script to keep multimappers <= -k n
 # requires a qname sorted file!!
 import sys
 import random

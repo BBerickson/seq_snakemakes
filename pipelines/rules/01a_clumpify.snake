@@ -5,8 +5,8 @@ rule clumpify:
     input:
         lambda wildcards: _get_fqs(wildcards.sample, RAW_DATA, FASTQ_DIR, full_name=True, paired=PAIREDMAP[wildcards.sample])
     output:
-        R1 = temp(PROJ + "/{sample}_R1_clumpify.fastq.gz"),
-        R2 = temp(PROJ + "/{sample}_R2_clumpify.fastq.gz"),
+        R1 = temp(PROJ + "/{sample}_R1_clumpify.fastq" + (".gz" if config.get("compress_temp", True) else "")),
+        R2 = temp(PROJ + "/{sample}_R2_clumpify.fastq" + (".gz" if config.get("compress_temp", True) else "")),
         log = PROJ + "/clumpify/{sample}_clumpify.log"
     params:
         job_name = "{sample}_clumpify",

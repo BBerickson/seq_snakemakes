@@ -45,14 +45,7 @@ rule calculating_subsample_summary:
         1
     shell:
         """
-        python - << 'EOF'
-import sys
-sys.path.insert(0, "pipelines/")
-
-import rules
-
-rules._concat_lines("{input}".split(), "{output[0]}")
-EOF
+        cat {input} > {output}
         """
 
 

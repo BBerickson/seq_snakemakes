@@ -13,6 +13,9 @@ from pathlib import Path
 # Include custom Python functions
 include: "funs.py"
 
+# path of samples file
+SAMPLES_FILE = workflow.configfiles[0] if workflow.configfiles else "samples.yaml"
+
 # ------------------------------------------------------------------------------
 # Load main genome config
 # ------------------------------------------------------------------------------
@@ -49,8 +52,13 @@ for idx in INDEXES:
 # ------------------------------------------------------------------------------
 
 # Docker container
-singularity:
-    config["CONTAINER"] 
+SINGULARITY = config.get("CONTAINER", "")
+# Check if we should use Singularity
+USE_SINGULARITY = bool(SINGULARITY and SINGULARITY.strip())
+# Set container if using Singularity
+if USE_SINGULARITY:
+    singularity:
+        config["CONTAINER"]  
     
 # From main config
 PROJ         = config.get("PROJ")
@@ -167,7 +175,24 @@ rule all:
         expand(PROJ + "/stats/" + PROJ + "_{index}_fragment_results.tsv", index=INDEXES),
         expand(PROJ + "/report/" + PROJ + "_{index}_fragmentSize.pdf", index=INDEXES),
         #expand(PROJ + "/report/{index}_PCA.png", index=INDEXES),
-        PROJ + "/report/" + PROJ + "_results.tsv",
+        PROJ + "/report/" + PROJ + "_results.tsv",,
+        #expand(SEQ_DATE + "_" + PROJ + "_{index}_qc_analysis.html", index=INDEXES[0]) if USE_SINGULARITY else [],
+        
+        # bamCoverage
+        expand(
+            PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_fw.bw",
+            zip,
+            newnam=DF_SAM_NORM['Newnam'],
+            index=DF_SAM_NORM['Index'],
+            suffix=DF_SAM_NORM['Suffix']
+        ),
+        expand(
+            PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_rev.bw",
+            zip,
+            newnam=DF_SAM_NORM['Newnam'],
+            index=DF_SAM_NORM['Index'],
+            suffix=DF_SAM_NORM['Suffix']
+        ),
         
         # bamCoverage URL
         expand(

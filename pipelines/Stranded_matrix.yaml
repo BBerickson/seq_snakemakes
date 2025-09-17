@@ -10,8 +10,9 @@ CMD_PARAMS:
     regionPI:      " scale-regions --regionBodyLength 330 --binSize 330 --unscaled5prime 0 --unscaled3prime 0 --upstream 330 --downstream 0 --missingDataAsZero --skipZeros -q "
     regionEI:      " scale-regions --regionBodyLength 1000 --binSize 1000 --unscaled5prime 0 --unscaled3prime 0 --upstream 0 --downstream 1000 --missingDataAsZero --skipZeros -q "
     heatmap:       " --sortUsing mean --regionsLabel '' --whatToShow 'plot, heatmap and colorbar' --zMin auto --zMax auto "
-    csheatmap:     " --sortUsing mean --hclust 4 --whatToShow 'heatmap and colorbar' --zMin 0  --zMax auto  "
-    caheatmap:     " --sortUsing mean --hclust 4 --whatToShow 'heatmap and colorbar' --zMin auto --zMax 0  "
+    clusterHM:
+      sense:          " --sortUsing mean --hclust 4 --whatToShow 'heatmap and colorbar' --zMin 0  --zMax auto  "
+      anti:           " --sortUsing mean --hclust 4 --whatToShow 'heatmap and colorbar' --zMin auto --zMax 0  "
     
 
 

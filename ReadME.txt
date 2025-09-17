@@ -1,28 +1,34 @@
-# pipeline notes
+# Run on LSF system with snakemake in a singularity container
 
-#1 fastQC R1 and R2 if avalible
+#1 Quality Control & Preprocessing
+  # FastQC on R1 and R2 (if available)
+  # Clean up fastq files:
+    # UMI workflow: extract UMI from R2/R1, use cutadapt to filter for adaptor-containing reads
+    # OR Standard workflow:
+      # clumpify: remove duplicates based on exact sequence/cluster location
+      # bbduk: trim adaptors
+  
+#2 align paired or single end fastqs, R1R2 or R2R1, clean up and outputs bam file(s) (mask is only sample not spikeIN)
+  #a bowtie | hisat | star
+  #b clean up, filter, sort bam files
+    # +/- UMI filtering, +/- subset bams, +/- mask blacklist regions, filter/split genomes -> output bam(s)
+  #c optional cp bams to amc-sandbox and makes a URL ref file
+  
+#3 Statistics & QC reporting
+  # Collect metrics: featureCounts, fragment size, PCA, preprocessing stats, alignment rates, filtering stats
+  # Compile into summary table
+  # Generate QC R Markdown HTML report 
 
-#1 clean up fastq
-  #UMI: extract UMI from read 2, using cutadapt look for and keep reads with adaptors
-  #a clumpify: remove duplicates based on exact sequence and location of cluster, other options
-  #b bbduk: trim adaptors, provided or looks at fastq header and gets adaptor from list
+#4 genome covrage bigwig files, 
+  # normalized: none, CPM, RPKM, spikeIN +/- inputs, chrM, 
+  # unstranded | stranded pos neg files
+  # cp to amc-sandbox and make URLs for UCSC browser
   
-#2 align and fastqs, cleans up and outputs bam final form(s) (mask is only sample not spikeIN)
-  #a bowtie, hisat, star
-  #b clean up, filter, sort bam
-    # filter/split based on common chromosomes -> output bam(s)
-    # mask filter/split based on common chromosomes -> output bam(s) 
-    # UMI filtering, +/- subset bams, filter/split -> output bam(s)
-    # UMI filtering, +/- subset bams, mask filter/split -> output bam(s)
-  #c cp bams to sandbox and makes a URL
+#5 deeptools matrix files 
+  # scale-regions: 543, reference-point: 5, 3, PI
+  # cp to amc-sandbox and make URLs for bentools
   
-#3 pull together all log files into a results file
-  # used to indicate if there is a spike in file to separate out or not
-  # UMI processing produces diffrnet logs so its own rule is needed
-
-#4 make bigwig files from bams, normalizing, cp to sandbox and make URLs for UCSC browser
-  # +/- stranded 
-  # UMI can't be renamed with group name so nogroup rule
-  
-#5 make matrix files from bigwigs, cp to sandbox and make URLs for bentools
-  # scale-regions or reference-point
+#6 deeptools profile, heatmap, cluster plots
+  # merging and plotting grouped samples
+  # pdf of plots per region
+#7 rmarkdown HTML QC report + plots

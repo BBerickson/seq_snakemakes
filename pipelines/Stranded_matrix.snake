@@ -12,6 +12,8 @@ from pathlib import Path
 
 # Include custom Python functions
 include: "funs.py"
+# path of samples file
+SAMPLES_FILE = workflow.configfiles[0] if workflow.configfiles else "samples.yaml"
 
 # ------------------------------------------------------------------------------
 # Load main genome config
@@ -35,7 +37,10 @@ INDEXES = [raw_indexes] if isinstance(raw_indexes, str) else [raw_indexes[0]]
 
 
 # Paths to additional config files
-GENOME_CONFIG1 = Path("pipelines/ref") / f"{INDEXES[0]}.yaml"
+if config.get("GENELIST"):
+    GENOME_CONFIG1 = GENOME_CONFIG
+else:
+    GENOME_CONFIG1 = Path("pipelines/ref") / f"{INDEXES[0]}.yaml"
 
 # Validate existence
 if not GENOME_CONFIG1.exists():
@@ -50,8 +55,13 @@ with open(GENOME_CONFIG1) as f:
 # ------------------------------------------------------------------------------
 
 # Docker container
-singularity:
-    config["CONTAINER"] 
+SINGULARITY = config.get("CONTAINER", "")
+# Check if we should use Singularity
+USE_SINGULARITY = bool(SINGULARITY and SINGULARITY.strip())
+# Set container if using Singularity
+if USE_SINGULARITY:
+    singularity:
+        config["CONTAINER"] 
     
 # From main config
 PROJ         = config.get("PROJ")
@@ -59,13 +69,17 @@ RAW_DATA     = config.get("RAW_DATA")
 ALL_SAMPLES  = config.get("SAMPLES")
 SEQ_DATE     = config.get("SEQ_DATE")
 INDEX_PATH   = config.get("INDEX_PATH")
+INDEX_MAP    = config.get("INDEX_MAP")
 CMD_PARAMS   = config.get("CMD_PARAMS")
 COLORS       = config.get("COLORS")
 NORM         = config.get("NORM")
 ORIENTATION  = config.get("ORIENTATION")
-SENSE_ASENSE = config.get("SENSE_ASENSE")
+SENSE_ASENSE = config.get("SENSE_ASENSE", [])
 REGIONS      = config.get("REGIONS")
 USER         = config.get("USER")
+
+if not SENSE_ASENSE:
+    SENSE_ASENSE = [""]  # Empty string for no sense/antisense distinction
 
 # From additional configs
 FW_REF      = config1.get("FW_REF")
@@ -129,7 +143,10 @@ wildcard_constraints:
     index  = WILDCARD_REGEX,
     suffix = WILDCARD_REGEX,
     covarg = "[a-zA-Z0-9_.\\-]+",
-    region = "543|5|3|PI|EI"
+    region = "543|5|3|PI|EI",
+    sense_asense = r"(sense|anti|)"  # Allow empty, "sense", or "anti"
+
+HEATMAP_REGIONS = ["543", "5", "5L", "3"]
 
 COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
 
@@ -138,6 +155,7 @@ NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS.get("bamCoverage
 BAM_PATH = _get_bampath(NORM)
 
 COVARGS = _get_all_matrixtypes(REGIONS,CMD_PARAMS,GENELIST)
+GENELIST = config1.get("GENELIST") or "all"
 
 # Create the Cartesian product
 product = [(s, i, v, sa) for s in NAMS_UNIQ for i, v in zip(REGIONS, COVARGS) for sa in SENSE_ASENSE]
@@ -177,16 +195,34 @@ rule all:
             index=DF_SAM_NORM['Index'],
             suffix=DF_SAM_NORM['Suffix']
         ),
-        # matrix file
+        
+        # matrix files
+        expand(
+            PROJ + "/matrix/{region}/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_{sense_asense}_matrix.gz",
+            zip, 
+            region=DF_SAM_NORM['Region'], 
+            newnam=DF_SAM_NORM['Newnam'],
+            index=DF_SAM_NORM['Index'], 
+            covarg=DF_SAM_NORM['Value'], 
+            suffix=DF_SAM_NORM['Suffix'], 
+            sense_asense=DF_SAM_NORM['Sense_Asense']
+        ),
+        
+        # matrix url file for amc-sandbox
         expand(
           PROJ + "/URLS/{region}_aligned_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_{sense_asense}_matrix.url.txt",
            zip, region=DF_SAM_NORM['Region'], index=DF_SAM_NORM['Index'], covarg=DF_SAM_NORM['Value'], 
            suffix=DF_SAM_NORM['Suffix'], sense_asense=DF_SAM_NORM['Sense_Asense']
-        )
+        ),
+        
+        # qc with heatmap, cluster, profile plots 
+        expand(SEQ_DATE + "_" + PROJ + "_{index}_qc_plots_analysis.html", index=INDEXES[0]) if USE_SINGULARITY else []
 
 
 # BW with deeptools bamCoverage
 include: "rules/04a_bamCoverage_stranded.snake"
 # 5 sense matrix file
 include: "rules/05_Stranded_matrix.snake"
+include: "rules/06_matrix_heatmap.snake"
+include: "rules/07_results_html.snake"
 

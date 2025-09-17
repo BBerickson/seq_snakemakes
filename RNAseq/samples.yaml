@@ -115,6 +115,7 @@ CMD_PARAMS:
     star:      
       paired:  " --limitSjdbInsertNsj 2000000 --outSAMattributes NH HI AS nM MD --alignSJoverhangMin 10 --outMultimapperOrder Random "
       single:  " --limitSjdbInsertNsj 2000000 --outSAMattributes NH HI AS nM MD --alignSJoverhangMin 10 --outMultimapperOrder Random "
+    multimap:     ""  # " -k 1 " # all but -k n multi-mapper from will be randomly filtered out.
     samtools:      " -bF4q1 "
     bamCoverage:   " --binSize 10 --skipNonCoveredRegions "
     fragment_size: 
@@ -149,7 +150,11 @@ SENSE_ASENSE:
   - "anti"
 
 CONTAINER:
-    "docker://bberickson/bodhi-snakemake:v1.1.0"
+    "docker://bberickson/bodhi-snakemake:v1.2.0"
+
+# speed up steps by ~2X by not gzip compressing temp files,
+# ~4X-5X more space needed for temp files
+compress_temp: false  # Set to true for gzip compression, false for uncompressed
     
 ## Additional common parameters for various processing steps
 ### Clumpify.py ##

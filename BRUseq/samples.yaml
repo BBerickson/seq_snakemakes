@@ -86,8 +86,9 @@ CMD_PARAMS:
       paired: " overwrite=t ftm=5 minlen=50 ktrim=r k=23 hdist=1 mink=11 tpe tbo ecco=t " # PE settings
       single: " overwrite=t ftm=5 minlen=20 ktrim=r k=23 hdist=1 mink=11 " # SE settings
     bowtie2:      
-      paired:  " --end-to-end --very-sensitive --no-mixed --no-discordant " # -k2 all but 1 multi-mapper from -k will be filtered out.
-      single:  " --end-to-end --very-sensitive " # -k2 all but 1 multi-mapper from -k will be filtered out.
+      paired:  " --end-to-end --very-sensitive --no-mixed --no-discordant " 
+      single:  " --end-to-end --very-sensitive "  
+    multimap:     ""  # " -k 1 " # all but -k n multi-mapper from will be randomly filtered out.
     samtools:      " -bF4q10 "
     bamCoverage:   " --binSize 10 --skipNonCoveredRegions "
     fragment_size: 
@@ -137,8 +138,12 @@ COLORS:
 
 
 CONTAINER:
-    "docker://bberickson/bodhi-snakemake:v1.1.0"
-    
+    "docker://bberickson/bodhi-snakemake:v1.2.0"
+
+# speed up steps by ~2X by not gzip compressing temp files,
+# ~4X-5X more space needed for temp files
+compress_temp: false  # Set to true for gzip compression, false for uncompressed
+
 ## Additional common parameters for various processing steps
 ### Clumpify.py ##
 # overwrite=f         (ow) Set to false to force the program to abort rather 

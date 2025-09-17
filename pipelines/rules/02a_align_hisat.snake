@@ -4,8 +4,8 @@
 # Align trimmed reads with hisat2 PE
 rule hisatPE:
     input:
-        R1  = PROJ + "/{sample}_R1.fastq.gz",
-        R2  = PROJ + "/{sample}_R2.fastq.gz"
+        R1  = PROJ + "/{sample}_R1.fastq" + (".gz" if config.get("compress_temp", True) else ""),
+        R2  = PROJ + "/{sample}_R2.fastq" + (".gz" if config.get("compress_temp", True) else "")
     output:
         bam   = temp(PROJ + "/{sample}_" + INDEX_MAP + ".bam"),
         bai   = temp(PROJ + "/{sample}_" + INDEX_MAP + ".bam.bai"),
