@@ -14,33 +14,38 @@ rule bamCoverage:
             for sample in SAMPLES[wildcards.newnam]
         ]
     output:
-        bigwig  = PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}.bw"
+        bigwig = PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}.bw"
     params:
         job_name = "{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage",
-        args     = CMD_PARAMS["bamCoverage"] + CMD_PARAMS.get("bamCoverageBL", ""),
-        scale    = lambda wildcards, input: _get_norm(
-            DF_SAM_NORM, 
-            wildcards.newnam, 
-            wildcards.suffix, 
-            wildcards.index,
-            input.norm_files
-        )
+        args = CMD_PARAMS["bamCoverage"] + CMD_PARAMS.get("bamCoverageBL", ""),
+        sam_norm = SAM_NORM  # Pass the original data
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input.bam, 0.2, 5)
+        memory = lambda wildcards, input: memory_estimator(input.bam, 0.2, 5)
     log:
         out = PROJ + "/logs/{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage.out",
         err = PROJ + "/logs/{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage.err"
-    threads: 
-        12
+    threads: 12
     shell:
         """
+        SCALE=$(python -c "
+import sys
+import pandas as pd
+sys.path.append('pipelines')
+from funs import _get_norm
+
+# Recreate the dataframe from the passed data
+df_sam_norm = pd.DataFrame({params.sam_norm!r}, columns=['Sample', 'Newnam', 'Index', 'Norm', 'Suffix'])
+scale = _get_norm(df_sam_norm, '{wildcards.newnam}', '{wildcards.suffix}', '{wildcards.index}', {input.norm_files!r})
+print(scale)
+")
+        
         bamCoverage \
           -b {input.bam[0]} \
           -of bigwig \
           -o {output.bigwig} \
           {params.args} \
-          {params.scale} \
+          $SCALE \
           -p {threads}
-        """ 
+        """
         
 

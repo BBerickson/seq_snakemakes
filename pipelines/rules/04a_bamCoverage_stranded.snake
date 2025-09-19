@@ -22,13 +22,7 @@ rule bamCoverage:
         args     = CMD_PARAMS["bamCoverage"] + CMD_PARAMS.get("bamCoverageBL", ""),
         argsf    = _get_bamCov_strand("forward", ORIENTATION),
         argsr    = _get_bamCov_strand("reverse", ORIENTATION),
-        scale    = lambda wildcards, input: _get_norm(
-            DF_SAM_NORM, 
-            wildcards.newnam, 
-            wildcards.suffix, 
-            wildcards.index,
-            input.norm_files
-        )
+        sam_norm = SAM_NORM  # Pass the original data
     resources:
         memory   = lambda wildcards, input: memory_estimator(input.bam, 0.2, 5)
     log:
@@ -38,13 +32,26 @@ rule bamCoverage:
         12
     shell:
         """
+        """
+        SCALE=$(python -c "
+import sys
+import pandas as pd
+sys.path.append('pipelines')
+from funs import _get_norm
+
+# Recreate the dataframe from the passed data
+df_sam_norm = pd.DataFrame({params.sam_norm!r}, columns=['Sample', 'Newnam', 'Index', 'Norm', 'Suffix'])
+scale = _get_norm(df_sam_norm, '{wildcards.newnam}', '{wildcards.suffix}', '{wildcards.index}', {input.norm_files!r})
+print(scale)
+")
+        
         # Generate forward strand coverage
         bamCoverage \
           -b {input.bam[0]} \
           -of bigwig \
           -o {output.fw} \
           {params.args} \
-          {params.scale} \
+          $SCALE \
           -p {threads} \
           --filterRNAstrand {params.argsf}
           
@@ -54,7 +61,7 @@ rule bamCoverage:
           -of bigwig \
           -o {output.rev} \
           {params.args} \
-          {params.scale} \
+          $SCALE \
           -p {threads} \
           --filterRNAstrand {params.argsr}
         """

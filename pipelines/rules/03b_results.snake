@@ -105,9 +105,10 @@ rule gathering_results:
             sample = SAMS_UNIQ
         ),
         OR      = PROJ + "/counts/" + PROJ + "_OR_summery.tsv",
-        rf_file = expand( PROJ + "/counts/{sample}_aligned_{index}_refCounts.tsv",
+        rf_file = expand( PROJ + "/counts/{sample}_aligned_{index}_norm_{suffix}_refCounts.tsv",
             sample = SAMS_UNIQ,
-            index  = INDEXES
+            index  = INDEXES,
+            suffix=DF_SAM_NORM['Suffix'].unique() 
         )
     output:
         PROJ + "/report/" + PROJ + "_results.tsv"

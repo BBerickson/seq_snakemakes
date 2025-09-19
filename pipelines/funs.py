@@ -332,8 +332,9 @@ def _get_norm_scale(sample, norm_type, index_sample, norm_files):
             break
     
     if matching_file is None:
-        print(f"WARNING: No featureCounts file found for sample {sample} in provided files: {norm_files}")
-        return 1
+        error_msg = f"ERROR: No featureCounts file found for sample {sample} in provided files: {norm_files}"
+        print(error_msg)
+        raise FileNotFoundError(error_msg)
     
     try:
         with open(matching_file, "r") as f:
@@ -343,19 +344,24 @@ def _get_norm_scale(sample, norm_type, index_sample, norm_files):
                     try:
                         value = float(num[1])
                         return 1000000 / value if value != 0 else 1
-                    except (IndexError, ValueError):
-                        print(f"WARNING: Could not parse normalization value from line: {line}")
-                        return 1
+                    except (IndexError, ValueError) as e:
+                        error_msg = f"ERROR: Could not parse normalization value from line: {line}. Parse error: {e}"
+                        print(error_msg)
+                        raise ValueError(error_msg)
         
-        print(f"WARNING: Normalization type '{norm_type_with_index}' not found in file '{matching_file}'")
-        return 1
+        # If we reach here, the norm_type_with_index was not found in the file
+        error_msg = f"ERROR: Normalization type '{norm_type_with_index}' not found in file '{matching_file}'"
+        print(error_msg)
+        raise ValueError(error_msg)
         
-    except FileNotFoundError:
-        print(f"WARNING: Could not open file '{matching_file}'")
-        return 1
+    except FileNotFoundError as e:
+        error_msg = f"ERROR: Could not open file '{matching_file}': {e}"
+        print(error_msg)
+        raise FileNotFoundError(error_msg)
     except Exception as e:
-        print(f"WARNING: Error reading normalization file '{matching_file}': {e}")
-        return 1
+        error_msg = f"ERROR: Error reading normalization file '{matching_file}': {e}"
+        print(error_msg)
+        raise RuntimeError(error_msg)
 
 
 # grab normalization options for bamCoverage for each sample 
@@ -367,11 +373,13 @@ def _get_norm(df, newnam, suffix, index, norm_files):
     ]
     
     if row.empty:
-        print(f"WARNING: No matching normalization found for {newnam}, {index}, {suffix}")
-        print(f"Available combinations in dataframe:")
+        error_msg = f"ERROR: No matching normalization found for {newnam}, {index}, {suffix}"
+        print(error_msg)
         if not df.empty:
+            print("Available combinations in dataframe:")
             print(df[['Newnam', 'Index', 'Suffix']].drop_duplicates().to_string())
-        return "--normalizeUsing None --scaleFactor 1.0"
+        # Raise an exception to stop the Snakemake pipeline
+        raise ValueError(error_msg)
     
     sample = row.iloc[0]['Sample']
     index_val = row.iloc[0]['Index']
