@@ -104,6 +104,7 @@ CMD_PARAMS:
     multimap:     ""  # " -k 1 " # all but -k n multi-mapper from will be randomly filtered out.
     samtools:      " -bF4q10 "
     bamCoverage:   " --binSize 1 --skipNonCoveredRegions --Offset -1 " # --Offset -1 = last bp --Offset 1 = first bp, 
+    refBed:         "" # bed file for select feature norm, "/beevol/home/erickson/ref/hg38_p14/base_ref/matrix_ref/tRNA.bed"
     fragment_size: 
       paired:  " --maxFragmentLength 1000 "
       single:  " bin=10 max=1010 "
@@ -114,9 +115,11 @@ CMD_PARAMS:
 USER:
   "User7"
 
-# "subsample" or "" ... make bw and matix files from sub-sampled or normal bam files
+# "subsample" or "" ... make bw and matix files from sub-sampled or normal bam files 
+# refBed use file name without .bed "tRNA"
 NORM:
   "CPM"
+  
 # set orentation of fastq files, can list one for each file   
 ORIENTATION:
     "R1R2" # R2R1

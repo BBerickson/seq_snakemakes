@@ -43,7 +43,7 @@ rule align_filter_multimap:
               samtools view {params.args} -u {input.bam} \
                 | samtools sort -n -T {params.sortname} -@ {threads} \
                 | samtools view -h - \
-                | python pipelines/multimappers.py {params.args2} --paired-end \
+                | python pipelines/multimappers2.py {params.args2} --paired-end \
                 | samtools fixmate -r - {output.bamt}
                 
                 # Paired-end filtering

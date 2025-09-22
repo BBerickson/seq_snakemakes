@@ -319,7 +319,7 @@ def _get_col(sample, cols_dict):
         
 # build bamCoverage scaleFactor sample dictonary
 def _get_norm_scale(sample, norm_type, index_sample, norm_files):
-    if norm_type.lower() in ["subsample", "none", "rpkm", "cpm", "bpm", "rpgc", "c"] or norm_type.isspace():
+    if norm_type.lower() in ["subsample", "none", "rpkm", "cpm", "bpm", "rpgc"] or norm_type.isspace():
         return 1
     
     norm_type_with_index = norm_type + "_" + index_sample
