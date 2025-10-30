@@ -98,44 +98,4 @@ rule featurecount_summary:
         Rscript {params.script} "{input}" "{params.index}" "{output.summary}"
         """
 
-# ref file alignment counts        
-rule refCounts_sample:
-    input:
-        bam = PROJ + "/" + BAM_PATH + "/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
-        bai = PROJ + "/" + BAM_PATH + "/{sample}_aligned_{index}_" + SEQ_DATE + ".bam.bai",
-        summary = PROJ + "/stats/{sample}_summary_featureCounts.tsv"
-    output:
-        counts = PROJ + "/counts/{sample}_aligned_{index}_norm_{suffix}_refCounts.tsv"
-    params:
-        job_name = "{sample}_{index}_{suffix}_refCounts",
-        bed = lambda wildcards: config["CMD_PARAMS"].get("refBed", ""),
-        is_paired = lambda wildcards: PAIREDMAP[wildcards.sample]
-    resources:
-        memory = lambda wildcards, input: memory_estimator(input, 1, 4)
-    log:
-        out = PROJ + "/logs/{sample}_aligned_{index}_norm_{suffix}_refCounts.out",
-        err = PROJ + "/logs/{sample}_aligned_{index}_norm_{suffix}_refCounts.err"
-    threads: 1
-    shell:
-        """
-        if [ -n "{params.bed}" ] && [ -f "{params.bed}" ]; then
-            bed_name=$(basename {params.bed} .bed)
-            bed_name_with_index="${{bed_name}}_{wildcards.index}"
-            count=$(samtools view {input.bam} -L {params.bed} -c)
-            
-            # Divide by 2 if paired-end sequencing
-            if [ "{params.is_paired}" = "True" ] || [ "{params.is_paired}" = "true" ]; then
-                count=$((count / 2))
-            fi
-            
-            # Write to output counts file
-            echo -e "${{bed_name_with_index}} ${{count}}" > {output.counts}
-            
-            # Append the same info to the summary file
-            echo -e "${{bed_name_with_index}} ${{count}}" >> {input.summary}
-        else
-            # If bed file is empty string or doesn't exist, just create empty output file
-            touch {output.counts}
-        fi
-        """
         

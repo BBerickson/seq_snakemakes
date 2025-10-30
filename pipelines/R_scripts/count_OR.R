@@ -34,7 +34,7 @@ if(!is.null(input) & length(indexs) > 1){
     full_join(Input,by="name") %>% 
     full_join(InputSpike,by="name") %>% 
     summarise(value=round((value1*value2_en)/(value3*value4_en),digits = 5)) %>% 
-    mutate(name= "test", type= "OR_enrich") 
+    mutate(name= "test", type= "OR") 
   out1 <- out %>% full_join(ChIP,.,by="name") %>% 
     mutate(value=as.integer(value*value2)) %>% 
     dplyr::select(-value2) %>% 

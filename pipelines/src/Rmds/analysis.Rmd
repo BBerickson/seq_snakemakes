@@ -39,7 +39,7 @@ plot_grpss   <- yaml::read_yaml(ymls)
 # proj="PNUTS_H66K_CTD_Ser5"
 #res_dir="PNUTS_H66K_CTD_Ser5"
 # index_map="hg38"
-# index_sample="hg38"
+# index_Sample="hg38"
 template_dir="pipelines/src/Rmds"
 
 knitr::knit(here::here(template_dir, "setup.Rmd"), "")

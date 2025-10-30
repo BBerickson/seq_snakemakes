@@ -54,9 +54,12 @@ if(str_detect(dedup_file,"clumpify")){
 }
 
 # alignment
-aligner <- read_tsv(aligner_file,col_names = c("sample","type","alignment_rate"),show_col_types = FALSE) %>% 
+aligner <- read_tsv(aligner_file,col_names = c("index", "sample","type","alignment_rate"),show_col_types = FALSE) %>% 
   dplyr::filter(type == "overall_alignment_rate") %>% 
-  dplyr::select(sample,alignment_rate)
+  dplyr::select(sample, index, alignment_rate) %>%
+  pivot_wider(names_from = index, 
+              values_from = alignment_rate,
+              names_glue = "{index}_alignment_rate")
 
 # gather results
 sn <- full_join(sn,pre_alignment,by="sample") %>%

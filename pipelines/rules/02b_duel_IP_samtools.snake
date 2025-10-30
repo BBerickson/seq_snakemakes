@@ -3,16 +3,16 @@
 # filter aligned reads
 rule align_filter_multimap:
     input:
-        bam = PROJ + "/{sample}_" + INDEX_MAP + ".bam",
-        bai = PROJ + "/{sample}_" + INDEX_MAP + ".bam.bai"
+        bam = PROJ + "/{sample}_{index}.bam",
+        bai = PROJ + "/{sample}_{index}.bam.bai"
     output:
-        bam = temp(PROJ + "/{sample}_" + INDEX_MAP + "_multimap.bam"),
-        bai = temp(PROJ + "/{sample}_" + INDEX_MAP + "_multimap.bam.bai"),
-        bamt = temp(PROJ + "/{sample}_" + INDEX_MAP + "_multimap_temp.bam"),
-        counts = PROJ + "/bams/{sample}_" + INDEX_MAP + "_count_multimap.txt"
+        bam = temp(PROJ + "/{sample}_{index}_multimap.bam"),
+        bai = temp(PROJ + "/{sample}_{index}_multimap.bam.bai"),
+        bamt = temp(PROJ + "/{sample}_{index}_multimap_temp.bam"),
+        counts = PROJ + "/bams/{sample}_{index}_count_multimap.txt"
     params:
         job_name = "{sample}_multimap_filter",
-        samp = "{sample}_" + INDEX_MAP,
+        samp = "{sample}_{index}",
         args = CMD_PARAMS["samtools"],
         args2 = CMD_PARAMS["multimap"],
         sortname = PROJ + "/{sample}_multimap.temp",
@@ -20,8 +20,8 @@ rule align_filter_multimap:
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 0.5, 2)
     log:
-        out = PROJ + "/logs/{sample}" + INDEX_MAP + "_multimap_filter.out",
-        err = PROJ + "/logs/{sample}" + INDEX_MAP + "_multimap_filter.err"
+        out = PROJ + "/logs/{sample}{index}_multimap_filter.out",
+        err = PROJ + "/logs/{sample}{index}_multimap_filter.err"
     threads: 
         12
     shell:
@@ -74,8 +74,8 @@ rule align_filter_multimap:
 # filter aligned reads
 rule align_filter_indexed:
     input:
-        bam = PROJ + "/{sample}_" + INDEX_MAP + "_multimap.bam",
-        bai = PROJ + "/{sample}_" + INDEX_MAP + "_multimap.bam.bai"
+        bam = PROJ + "/{sample}_{index}_multimap.bam",
+        bai = PROJ + "/{sample}_{index}_multimap.bam.bai"
     output:
         bam    = PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
         bai    = PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam.bai",

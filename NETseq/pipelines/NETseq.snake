@@ -165,7 +165,7 @@ rule all:
         expand(PROJ + "/stats/" + PROJ + "_{index}_fragment_results.tsv", index=INDEXES),
         expand(PROJ + "/report/" + PROJ + "_{index}_fragmentSize.pdf", index=INDEXES),
         #expand(PROJ + "/report/{index}_PCA.png", index=INDEXES),
-        PROJ + "/report/" + PROJ + "_results.tsv",,
+        PROJ + "/report/" + PROJ + "_results.tsv",
         #expand(SEQ_DATE + "_" + PROJ + "_{index}_qc_analysis.html", index=INDEXES[0]) if USE_SINGULARITY else [],
         
         # bamCoverage

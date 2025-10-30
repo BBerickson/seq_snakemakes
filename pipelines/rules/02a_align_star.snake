@@ -47,7 +47,7 @@ rule star_twopass:
         """
         
 
-# ====== Rules for aligning reads summmary =================================
+# ====== Rules for aligning reads summary =================================
 
 
 rule star_2pass_summary:

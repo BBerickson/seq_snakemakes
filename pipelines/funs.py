@@ -372,20 +372,22 @@ def _get_norm(df, newnam, suffix, index, norm_files):
         (df['Suffix'] == suffix)
     ]
     
-    if row.empty:
-        error_msg = f"ERROR: No matching normalization found for {newnam}, {index}, {suffix}"
-        print(error_msg)
-        if not df.empty:
-            print("Available combinations in dataframe:")
-            print(df[['Newnam', 'Index', 'Suffix']].drop_duplicates().to_string())
-        # Raise an exception to stop the Snakemake pipeline
-        raise ValueError(error_msg)
-    
     sample = row.iloc[0]['Sample']
-    index_val = row.iloc[0]['Index']
     norm = row.iloc[0]['Norm']
     
-    # Pass the norm_files to the scale function
+    # For scalefactor, if duel IP or spikein get the corresponding row to extract its Index
+    if norm.lower() == 'scalefactor':
+        cpm_rows = df[
+            (df['Newnam'] == newnam) &
+            (df['Norm'] == 'CPM')
+        ]
+        if cpm_rows.empty:
+            index_val = row.iloc[0]['Index']
+        else:
+            index_val = cpm_rows.iloc[0]['Index']
+    else:
+        index_val = row.iloc[0]['Index']
+        
     norm_value = _get_norm_scale(sample, norm, index_val, norm_files)
     norm_upper = norm.upper()
     

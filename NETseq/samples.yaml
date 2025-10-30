@@ -96,12 +96,12 @@ CMD_PARAMS:
     multimap:     ""  # " -k 1 " # all but -k n multi-mapper from will be randomly filtered out.
     samtools:      " -bF4q10 "
     bamCoverage:   " --binSize 1 --skipNonCoveredRegions --Offset -1 " # --Offset -1 = last bp --Offset 1 = first bp
-    refBed:         "" # bed file for select feature norm, "/beevol/home/erickson/ref/hg38_p14/base_ref/matrix_ref/tRNA.bed"
+    scalingFactors:         "" # " BED-file --BED /beevol/home/erickson/ref/hg38_p14/PolIII/polIII_fitered_slop200.bed " or " bins --binSize 100 "
     fragment_size: 
       paired:  " --maxFragmentLength 1000 "
       single:  " bin=10 max=1010 "
     featureCounts: " --readExtension5 2000 --readExtension3 2000 " #--largestOverlap
-    filter_results: "protein_coding"
+    filter_results: "protein_coding|scalefactor"
     
 # sandbox User #
 USER:
@@ -110,9 +110,8 @@ USER:
 # Norm sample bw and matix files, spike-in is CPM      
 # with "RPKM","CPM","BPM","RPGC" 
 # Or with scaleFactor from count file i.e. "chrM", 
-# if input with spike in is paired up: "OR", "OR_enrich" 
-# if no input spike in scaleFactor within a group is used: "spikin"  
-# refBed use file name without .bed "tRNA"
+# if input with spike in is paired up: "OR"
+# scaleFactor within a group for bed file or bins, used: "scalefactor"
 # Or "subsample" : make bw and matix files from sub-sampled bam files (paired groups)
 NORM:
   "subsample" 

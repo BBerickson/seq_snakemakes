@@ -31,7 +31,7 @@ rule bbduk:
             else
                 touch {output.R2}
             fi
-            echo "Total Removed:  0 reads (0.0%)  0 bases (0.0%)" >> {output.log}
+            printf "Total Removed:\t0 reads (0.00%%)\t0 bases (0.00%%)\n" > {output.log}
         elif [ "{params.is_paired}" = "True" ]; then
             # Paired-end processing
             bbduk.sh -Xmx{resources.memory}g threads={threads} \

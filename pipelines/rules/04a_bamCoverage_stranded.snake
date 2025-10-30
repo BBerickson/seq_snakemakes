@@ -32,7 +32,6 @@ rule bamCoverage:
         12
     shell:
         """
-        """
         SCALE=$(python -c "
 import sys
 import pandas as pd

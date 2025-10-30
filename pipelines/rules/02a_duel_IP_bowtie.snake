@@ -1,0 +1,188 @@
+# ====== Rules for aligning reads =================================
+
+
+# Align trimmed reads with bowtie2 R1 or R2
+rule bowtie_first_pass:
+    input:
+        R1 = PROJ + "/{sample}_R1.fastq" + (".gz" if config.get("compress_temp", True) else ""),
+        R2 = PROJ + "/{sample}_R2.fastq" + (".gz" if config.get("compress_temp", True) else "")
+    output:
+        bam   = temp(PROJ + "/{sample}_" + INDEX_MAP + ".bam"),
+        bai   = temp(PROJ + "/{sample}_" + INDEX_MAP + ".bam.bai"),
+        stats = PROJ + "/bams/{sample}_" + INDEX_MAP + "_bowtie_stats.txt",
+        unaligned_R1 = temp(PROJ + "/unaligned/{sample}_unaligned_R1_001.fastq.gz"),
+        unaligned_R2 = temp(PROJ + "/unaligned/{sample}_unaligned_R2_001.fastq.gz")
+    params:
+        job_name = INDEX_MAP + "_{sample}_bowtie",
+        idx      = INDEX_PATH2 + INDEX_MAP,
+        args     = lambda wildcards: CMD_PARAMS["bowtie2"]["first"],
+        sortname = PROJ + "/{sample}.temp." + INDEX_MAP,
+        unaligned_base = PROJ + "/unaligned/{sample}_unaligned.fastq.gz",
+        unaligned_1 = PROJ + "/unaligned/{sample}_unaligned.fastq.1.gz",
+        unaligned_2 = PROJ + "/unaligned/{sample}_unaligned.fastq.2.gz"
+    resources:
+        memory = lambda wildcards, input: memory_estimator(input, 3, 18)
+    log:
+        out = PROJ + "/logs/{sample}_bowtie.out",
+        err = PROJ + "/logs/{sample}_bowtie.err"
+    threads: 
+        12
+    shell:
+        """
+        # Paired-end alignment
+        bowtie2 \
+            -p {threads} \
+            -x {params.idx} \
+            -1 {input.R1} -2 {input.R2} \
+            {params.args} \
+            --un-conc-gz {params.unaligned_base} \
+            -S {params.sortname}.sam \
+            2> {output.stats}
+            
+        samtools sort {params.sortname}.sam -T {params.sortname} -@ {threads} -O bam -o {output.bam}
+        rm {params.sortname}.sam
+            
+        # Rename unaligned files to match Snakemake outputs
+        mv {params.unaligned_1} {output.unaligned_R1}
+        mv {params.unaligned_2} {output.unaligned_R2}
+        
+        # Index the BAM file
+        samtools index -@ {threads} {output.bam}
+        """
+
+# Align trimmed reads with bowtie2 R1 or R2
+rule bowtie_second_pass:
+    input:
+        U1 = PROJ + "/unaligned/{sample}_unaligned_R1_001.fastq.gz",
+        U2 = PROJ + "/unaligned/{sample}_unaligned_R2_001.fastq.gz",
+        R1 = PROJ + "/{sample}_R1.fastq" + (".gz" if config.get("compress_temp", True) else ""),
+        R2 = PROJ + "/{sample}_R2.fastq" + (".gz" if config.get("compress_temp", True) else "")
+    output:
+        bam   = temp(PROJ + "/{sample}_" + INDEX_SECOND + ".bam"),
+        bai   = temp(PROJ + "/{sample}_" + INDEX_SECOND + ".bam.bai"),
+        stats = PROJ + "/bams/{sample}_" + INDEX_SECOND + "_bowtie_stats.txt"
+    params:
+        job_name = INDEX_SECOND + "_{sample}_bowtie",
+        idx      = INDEX_PATH + INDEX_SECOND,
+        args     = lambda wildcards: CMD_PARAMS["bowtie2"]["second"],
+        sortname = PROJ + "/{sample}.temp." + INDEX_SECOND,
+        unaligned = UNALIGNED
+    resources:
+        memory = lambda wildcards, input: memory_estimator(input, 3, 18)
+    log:
+        out = PROJ + "/logs/{sample}_bowtie.out",
+        err = PROJ + "/logs/{sample}_bowtie.err"
+    threads: 
+        12
+    shell:
+        """
+        # Paired-end alignment
+        if [ "{params.unaligned}" = "True" ]; then
+            bowtie2 \
+              -p {threads} \
+              -x {params.idx} \
+              -1 {input.U1} -2 {input.U2} \
+              {params.args} \
+              -S {params.sortname}.sam \
+              2> {output.stats}
+        else
+          bowtie2 \
+              -p {threads} \
+              -x {params.idx} \
+              -1 {input.R1} -2 {input.R2} \
+              {params.args} \
+              -S {params.sortname}.sam \
+              2> {output.stats}
+        fi
+        
+        samtools sort {params.sortname}.sam -T {params.sortname} -@ {threads} -O bam -o {output.bam}
+        rm {params.sortname}.sam
+        
+        # Index the BAM file
+        samtools index -@ {threads} {output.bam}
+        """
+
+# ====== Rules for aligning reads summary =================================
+
+
+# Align trimmed reads with bowtie2 summary
+rule bowtie_summary1:
+    input:
+        expand(
+            PROJ + "/bams/{sample}_" + INDEX_MAP + "_bowtie_stats.txt",
+            sample = SAMS_UNIQ
+        )
+    output:
+        PROJ + "/stats/" + INDEX_MAP + "_aligned.tsv"
+    params:
+        job_name = INDEX_MAP + "_bowtie_summary",
+        index = INDEX_MAP
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
+    log:
+        out = PROJ + "/logs/" + INDEX_MAP + "_bowtie_summary.out",
+        err = PROJ + "/logs/" + INDEX_MAP + "_bowtie_summary.err"
+    threads:
+        1
+    shell:
+        """
+        python - << 'EOF'
+import sys
+sys.path.insert(0, "pipelines/")
+
+import rules
+
+rules._bowtie_summary("{input}".split(), "{output[0]}", "{params.index}")
+EOF
+        """
+
+# Align trimmed reads with bowtie2 summary
+rule bowtie_summary2:
+    input:
+        expand(
+            PROJ + "/bams/{sample}_" + INDEX_SECOND + "_bowtie_stats.txt",
+            sample = SAMS_UNIQ
+        )
+    output:
+        PROJ + "/stats/" + INDEX_SECOND + "_aligned.tsv"
+    params:
+        job_name = INDEX_SECOND + "_bowtie_summary",
+        index = INDEX_SECOND
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
+    log:
+        out = PROJ + "/logs/" + INDEX_SECOND + "_bowtie_summary.out",
+        err = PROJ + "/logs/" + INDEX_SECOND + "_bowtie_summary.err"
+    threads:
+        1
+    shell:
+        """
+        python - << 'EOF'
+import sys
+sys.path.insert(0, "pipelines/")
+
+import rules
+
+rules._bowtie_summary("{input}".split(), "{output[0]}", "{params.index}")
+EOF
+        """  
+        
+rule bowtie_summary:
+    input:
+        PROJ + "/stats/" + INDEX_MAP + "_aligned.tsv",
+        PROJ + "/stats/" + INDEX_SECOND + "_aligned.tsv"
+    output:
+        PROJ + "/stats/" + PROJ + "_aligned.tsv"
+    params:
+        job_name = PROJ + "_bowtie_summary"
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
+    log:
+        out = PROJ + "/logs/" + PROJ + "_bowtie_summary.out",
+        err = PROJ + "/logs/" + PROJ + "_bowtie_summary.err"
+    threads:
+        1
+    shell:
+        """
+        cat {input} > {output}
+        """                                

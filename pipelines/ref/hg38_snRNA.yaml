@@ -21,8 +21,8 @@ FA_SAMPLE:
 MY_REF:
   "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_snRNA.bed"
 FW_REF:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_snRNA_fw.bed"
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_snRNA_pos.bed"
 REV_REF:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_snRNA_rev.bed"
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_snRNA_neg.bed"
 PI_REF:
   "/beevol/home/bentleyd/ref/hg38/ref_bed/PI.bed"

@@ -156,6 +156,10 @@ if(file.exists(trim_cut)){
 
 ```{r "bwt summary", fig.width = 16, fig.height = 10}
 
+if(!file.exists(bwt_sum)){
+  bwt_sum    <- str_c(stats_dir, index_Sample, "_aligned.tsv")
+}
+
 # Bowtie2 stats
 mets <- c(
   "aligned exactly 1 time",
@@ -164,9 +168,9 @@ mets <- c(
 )
 
 bwt_sum <- bwt_sum %>%
-  read_tsv(col_names = c("sample", "metric", "value"),show_col_types = FALSE) %>%
+  read_tsv(col_names = c("index", "sample", "metric", "value"),show_col_types = FALSE) %>%
   dplyr::mutate(metric=str_remove(metric,"concordantly ")) %>% 
-  dplyr::filter(metric %in% mets) %>%
+  dplyr::filter(metric %in% mets, index == index_Sample) %>%
   dplyr::mutate(value = as.numeric(value))
 
 

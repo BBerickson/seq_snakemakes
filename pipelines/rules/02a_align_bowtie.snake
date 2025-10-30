@@ -53,11 +53,11 @@ rule bowtie:
 
 
 
-# ====== Rules for aligning reads summmary =================================
+# ====== Rules for aligning reads summary =================================
 
 
-# Align trimmed reads with bowtie2 summmary
-rule bowtie_summmary:
+# Align trimmed reads with bowtie2 summary
+rule bowtie_summary:
     input:
         expand(
             PROJ + "/bams/{sample}_" + INDEX_MAP + "_bowtie_stats.txt",
@@ -66,15 +66,13 @@ rule bowtie_summmary:
     output:
         PROJ + "/stats/" + PROJ + "_aligned.tsv"
     params:
-        job_name = "bowtie_summmary",
+        job_name = "bowtie_summary",
         index = INDEX_MAP
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
-        out = PROJ + "/logs/bowtie_summmary.out",
-        err = PROJ + "/logs/bowtie_summmary.err"
-    message:
-        "summmary Bowtie2 for"
+        out = PROJ + "/logs/bowtie_summary.out",
+        err = PROJ + "/logs/bowtie_summary.err"
     threads:
         1
     shell:
@@ -85,7 +83,7 @@ sys.path.insert(0, "pipelines/")
 
 import rules
 
-rules._bowtie_summmary("{input}".split(), "{output[0]}", "{params.index}")
+rules._bowtie_summary("{input}".split(), "{output[0]}", "{params.index}")
 EOF
         """
         

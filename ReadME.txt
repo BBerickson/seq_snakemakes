@@ -20,7 +20,7 @@
   # Generate QC R Markdown HTML report 
 
 #4 genome covrage bigwig files, 
-  # normalized: none, CPM, RPKM, spikeIN +/- inputs, chrM, 
+  # normalized: none, CPM, RPKM, scalefactor, spikeIN +/- inputs, chrM, featureCounts Geneid: ("snRNA","snoRNA","rRNA")
   # unstranded | stranded pos neg files
   # cp to amc-sandbox and make URLs for UCSC browser
   

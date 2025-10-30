@@ -1,24 +1,24 @@
 #===== Config file containing samples ==========================================
 # This gets appended to config
 
-# Project name to use for naming Directory and summary files
+# Project name to use for naming summary files
 PROJ:
-    "RTF1_DRB_BrUseq"
+    "INT6KO_pp1-PNUTS_CTD_Ser5_polIII"
     
 SEQ_DATE:
-    "220812"
+    "250909"
 
 # Directories containing fastq files, this can be a relative path.
 # Multiple directories can be provided. The sample names must correspond
 # to the begining of the fastq name.
 RAW_DATA:
-    - "/beevol/home/erickson/fastqs/220812_A00405_0612_AHCLTGDSX5"
+    - "/beevol/home/erickson/fastqs/250909_LH00407_0172_B22YGVGLT3"
 
 # Genome to use for analysis
 # * The specified genome must have a config file present in pipelines/ref
 GENOME:
-    "hg38"
-    
+    "hg38_polIII_SEQL_hg38"
+     
 # The sample names must match the beginning of a fastq file in one of the
 # directories listed under RAW_DATA. If the sample name
 # matches multiple fastqs, an error will be thrown.
@@ -28,13 +28,13 @@ GENOME:
 #
 # SAMPLES:
 #     SECTION-1:
-#         SAMPLING-GROUP-1: # subsample norm example
+#         GROUP-1: # subsample norm example
 #             sample_nickname-1:
 #                  - "fastq_sample_1_prefix"
 #             sample_nickname-2:
 #                  - "fastq_sample_2_prefix"
 # 
-#         SAMPLING-GROUP-2: # with input for OR norm example
+#         GROUP-2: # with input for OR norm example
 #             sample_nickname-3:
 #                  - "fastq_sample_3_prefix"
 #                  - "fastq_input_3_prefix"
@@ -48,77 +48,34 @@ GENOME:
 
 SAMPLES:
     SECTION-1:
-        SAMPLING-GROUP-1:
-            RTF1_WT_pDox_DRB_0: 
-              - "293flpIN_RTF1_WT_DRB_t0"
-            RTF1_WT_pDox_DRB_15: 
-              - "293flpIN_RTF1_WT_DRB_t15"
-
-        SAMPLING-GROUP-2:
-            RTF1_MT_pDox_DRB_0: 
-              - "293flpIN_RTF1_MT_DRB_t0"
-            RTF1_WT_pDox_DRB_15: 
-              - "293flpIN_RTF1_WT_DRB_t15"
-      
-
-# Norm sample bw and matix files, spike-in is CPM      
-# with "RPKM","CPM","BPM","RPGC" 
+        INT6KO_pp1-PNUTS-CTD:
+            INT6KO_pp1-PNUTS-WT_pDox_CTD: 
+                - "INT6KO_pp1-PNUTS-WT_pDox_polIII_CTD"
+                
+            INT6KO_pp1-PNUTS-H66K_pDox_CTD: 
+                - "INT6KO_pp1-PNUTS-H66K_pDox_polIII_CTD"
+                
+            INT6KO_pp1-PNUTS-WT_pDox_Ser5: 
+                - "INT6KO_pp1-PNUTS-WT_pDox_polIII_Ser5"
+                
+            INT6KO_pp1-PNUTS-H66K_pDox_Ser5: 
+                - "INT6KO_pp1-PNUTS-H66K_pDox_polIII_Ser5"
+           
+                  
+# Norm sample bw and matix files,
+# with "RPKM","CPM","BPM","RPGC" (spike-in will be CPM)
 # Or with scaleFactor from count file i.e. "chrM", 
 # if input with spike in is paired up: "OR"
-# scaleFactor within a group for bed file or bins, used: "scalefactor"
+# scaleFactor within a group for bed file or bins, used: "scalefactor" 
+#     first aligned index used to norm second aligned index
 # Or "subsample" : make bw and matix files from sub-sampled bam files (paired groups)
 NORM:
-  "chrM"
-  
-# sandbox User #
-USER:
-  "User7"
+  "scalefactor"
 
-# HiSeq 1T     dupedist=40 (BC...XX)
-# HiSeq 2500   dupedist=40 (AM...XX, BC...XX)
-# HiSeq 3k/4k  dupedist=2500 (AC...XX, AN...XX)
-# Novaseq      dupedist=12000
-CMD_PARAMS:
-    clumpify:      
-      paired: " lowcomplexity=t overwrite=t dedupe=t dupedist=12000 optical=f subs=0 " # PE settings
-      single: " lowcomplexity=t overwrite=t dedupe=t dupedist=40 optical=f subs=0 " #  SE settings
-    bbduk:      
-      paired: " overwrite=t ftm=5 minlen=50 ktrim=r k=23 hdist=1 mink=11 tpe tbo ecco=t " # PE settings
-      single: " overwrite=t ftm=5 minlen=20 ktrim=r k=23 hdist=1 mink=11 " # SE settings
-    bowtie2:      
-      paired:  " --end-to-end --very-sensitive --no-mixed --no-discordant " 
-      single:  " --end-to-end --very-sensitive "  
-    multimap:     ""  # " -k 1 " # all but -k n multi-mapper from will be randomly filtered out.
-    samtools:      " -bF4q10 "
-    bamCoverage:   " --binSize 10 --skipNonCoveredRegions "
-    scalingFactors:         "" # " BED-file --BED /beevol/home/erickson/ref/hg38_p14/PolIII/polIII_fitered_slop200.bed " or " bins --binSize 100 "
-    fragment_size: 
-      paired:  " --maxFragmentLength 1000 "
-      single:  " bin=10 max=1010 "
-    featureCounts: " --readExtension5 2000 --readExtension3 2000 " #--largestOverlap
-    filter_results: "protein_coding|scalefactor"
-    
-# a fasta file with the universal adaptors or literal strings
-# "pipelines/ref/truseq_i5i7.fa"
-# "pipelines/ref/truseq_rna.fa"
-# "GATCGGAAGAGCACACGTCT,ACACTCTTTCCCTACACGACGCTCTTCCGATCT"
-BARCODES:
-    "pipelines/ref/truseq_rna.fa"
-# set orentation of fastq files, can list one for each file     
-ORIENTATION:
-    "R2R1" # R2, R1R2, R1
-    
-# which matrix type(s) to make
-# deeptools options set in Stranded_matrix.yaml
-# can only to be "543", "5", "3", "PI", or "EI" 
-REGIONS:
-  - "5"
-# valid options = "sense", "anti"
-SENSE_ASENSE:
-  - "sense"
-  - "anti"
 
-# set colors for bw urls and table files, if missing 0,0,0 is default
+  # set RGB colors for bw urls and table files, 
+  # list as many colors as samples (not inputs) 
+  # applied in order of samples ignoring inputs
 COLORS:
   - "0,0,0"       # - Black
   - "225,0,0"     # - Bright red
@@ -137,6 +94,56 @@ COLORS:
   - "253,191,111" # - Light orange/peach
   - "202,178,214" # - Light purple/lavender
 
+# second alignment on unmapped from first?
+UNALIGNED:
+    "False" # True
+    
+# program options 
+# HiSeq 1T     dupedist=40 (BC...XX)
+# HiSeq 2500   dupedist=40 (AM...XX, BC...XX)
+# HiSeq 3k/4k  dupedist=2500 (AC...XX, AN...XX)
+# Novaseq      dupedist=12000
+CMD_PARAMS:
+    clumpify:      
+      paired:       " overwrite=t dedupe=t dupedist=12000 optical=f " # PE settings
+    bbduk:      
+      paired:       " overwrite=t ftm=5 minlen=50 ktrim=r k=23 hdist=1 mink=11 tpe tbo ecco=t " # PE settings
+    bowtie2:      
+      first:        " --end-to-end --very-fast --no-mixed --no-discordant -k100 "  
+      second:       " --end-to-end --very-sensitive --no-mixed --no-discordant " 
+    multimap:       "" # " -k 2 " # all but -k n multi-mapper from will be randomly filtered out.
+    samtools:       " -bF4q5 "
+    bamCoverage:    " --binSize 10 --skipNonCoveredRegions --centerReads "
+    scalingFactors: " BED-file --BED /beevol/home/erickson/ref/hg38_p14/PolIII/CTD_Ser5_polIII_fitered_slop200.bed --centerReads " # " bins --binSize 100 --centerReads "
+    fragment_size: 
+      paired:       " --maxFragmentLength 1000 "
+    featureCounts:  " --readExtension5 2000 --readExtension3 2000 " #--largestOverlap
+    filter_results: "chrM|snRNA|snoRNA|rRNA|protein_coding|scalefactor"
+    
+# sandbox User #
+USER:
+  "User7"
+  
+# a fasta file with the universal adaptors or literal strings
+# "pipelines/ref/truseq_i5i7.fa"
+# "pipelines/ref/truseq_rna.fa"
+# "GATCGGAAGAGCACACGTCT,ACACTCTTTCCCTACACGACGCTCTTCCGATCT"
+BARCODES:
+    "pipelines/ref/truseq_i5i7.fa"
+# set strand orentation of fastq files, can list one for each file         
+ORIENTATION:
+    "Unstranded" # if single end R1
+    
+# which matrix type(s) to make
+# deeptools options set in Stranded_matrix.yaml
+# can only to be "543", "5", "5L", "3", "PI", or "EI" 
+REGIONS:
+  - "543"
+  - "5"
+  - "5L"
+  - "3"
+  - "PI"
+
 
 CONTAINER:
     "docker://bberickson/bodhi-snakemake:v1.2.0"
@@ -145,7 +152,7 @@ CONTAINER:
 # ~4X-5X more space needed for temp files
 compress_temp: false  # Set to true for gzip compression, false for uncompressed
 
-## Additional common parameters for various processing steps
+## Additional common parameters for various processing steps ###
 ### Clumpify.py ##
 # overwrite=f         (ow) Set to false to force the program to abort rather 
 # than overwrite an existing file.

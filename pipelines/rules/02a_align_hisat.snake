@@ -54,11 +54,11 @@ rule hisatPE:
 
     
 
-# ====== Rules for aligning reads summmary =================================
+# ====== Rules for aligning reads summary =================================
 
 
-# Align trimmed reads with hisat2 PE summmary
-rule hisatPE_summmary:
+# Align trimmed reads with hisat2 PE summary
+rule hisatPE_summary:
     input:
         expand(
            PROJ + "/bams/{sample}_" + INDEX_MAP + "_hisat_stats.txt",
@@ -67,15 +67,13 @@ rule hisatPE_summmary:
     output:
         PROJ + "/stats/" + PROJ + "_aligned.tsv"
     params:
-        job_name = "hisatPE_summmary",
+        job_name = "hisatPE_summary",
         index = INDEX_MAP
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
-        out = PROJ + "/logs/hisat_summmary.out",
-        err = PROJ + "/logs/_hisat_summmary.err"
-    message:
-        "summmary hisat2 "
+        out = PROJ + "/logs/hisat_summary.out",
+        err = PROJ + "/logs/_hisat_summary.err"
     threads:
         1
     shell:
@@ -86,7 +84,7 @@ sys.path.insert(0, "pipelines/")
 
 import rules
 
-rules._hisatPE_summmary("{input}".split(), "{output[0]}", "{params.index}")
+rules._hisatPE_summary("{input}".split(), "{output[0]}", "{params.index}")
 EOF
         """
 

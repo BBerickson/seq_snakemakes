@@ -54,22 +54,28 @@ def _bbduk_summary(input, output):
         for file in input:
             name = os.path.basename(file)
             name = re.sub("_bbduk.log", "", name)
-
             for line in open(file, "r"):
-                match = re.search("Total Removed:", line)
-
-                if match:
+                if "Total Removed:" in line:
+                    # Split by tab
                     mett = line.strip().split("\t")
-                    num = mett[1].strip()
-                    num = re.sub(" reads ", "", num)
-                    met = re.search("[\w\(\) ]+:", line).group(0)
-                    met = re.sub(":", "", met)
-                    met = met.strip()
-                    met = re.sub(" ", "_", met)
                     
-                    out.write("%s\t%s\t%s\n" % (name, met, num))
+                    # Handle case where there might not be tabs (malformed log)
+                    if len(mett) < 2:
+                        # Try splitting by multiple spaces as fallback
+                        mett = re.split(r'\s{2,}', line.strip())
+                    
+                    if len(mett) >= 2:
+                        num = mett[1].strip()
+                        num = re.sub(" reads ", "", num)
+                        met = re.search(r"[\w\(\) ]+:", line).group(0)
+                        met = re.sub(":", "", met)
+                        met = met.strip()
+                        met = re.sub(" ", "_", met)
+                        
+                        out.write("%s\t%s\t%s\n" % (name, met, num))
+                    break  # Only process first matching line per file
 
-def _bowtie_summmary(input, output, index):
+def _bowtie_summary(input, output, index):
     with open(output, "w") as out:
         for file in input:
             name = os.path.basename(file)
@@ -85,7 +91,7 @@ def _bowtie_summmary(input, output, index):
                     met = met.strip()
                     met = re.sub(" ", "_", met)
 
-                    out.write("%s\t%s\t%s\n" % (name, met, num))
+                    out.write("%s\t%s\t%s\t%s\n" % (index, name, met, num))
                 else:
                     line  = re.sub("; of these:", "", line.strip())
                     line  = re.sub(" \([0-9\.%]+\)", "", line)
@@ -94,9 +100,9 @@ def _bowtie_summmary(input, output, index):
                     met   = words[1:]
                     met   = " ".join(met)
 
-                    out.write("%s\t%s\t%s\n" % (name, met, num))
+                    out.write("%s\t%s\t%s\t%s\n" % (index, name, met, num))
 
-def _hisatPE_summmary(input, output, index):
+def _hisatPE_summary(input, output, index):
     with open(output, "w") as out:
         for file in input:
             name = os.path.basename(file)
@@ -112,7 +118,7 @@ def _hisatPE_summmary(input, output, index):
                     met = met.strip()
                     met = re.sub(" ", "_", met)
 
-                    out.write("%s\t%s\t%s\n" % (name, met, num))
+                    out.write("%s\t%s\t%s\t%s\n" % (index, name, met, num))
                 else:
                     line  = re.sub("; of these:", "", line.strip())
                     line  = re.sub(" \([0-9\.%]+\)", "", line)
@@ -121,7 +127,7 @@ def _hisatPE_summmary(input, output, index):
                     met   = words[1:]
                     met   = " ".join(met)
 
-                    out.write("%s\t%s\t%s\n" % (name, met, num))
+                    out.write("%s\t%s\t%s\t%s\n" % (index, name, met, num))
 
 def _dedup_summary(input, output):
     with open(output, "w") as out:

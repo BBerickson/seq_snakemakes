@@ -6,6 +6,7 @@ library("tidyverse")
 
 featurecount_files <- strsplit(args[1], " ")[[1]]
 indexs <- strsplit(args[2], " ")[[1]]
+indexs <- indexs[order(-nchar(indexs))]
 outfile <- args[3]
 
 samp <- list()

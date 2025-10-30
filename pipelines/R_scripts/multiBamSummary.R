@@ -11,10 +11,10 @@ index <- args[3]
 for(i in scalefactor$sample){
   cc <- counts[str_detect(counts,paste0(i,"_summary_featureCounts.tsv$"))]
   ccc <- read_delim(cc,col_names = c("sample","scalingFactor"),delim = " ",show_col_types = FALSE)
-  
-  ccc %>% bind_rows(.,scalefactor %>% filter(sample == i) %>% mutate(sample=paste0("spikin_",index[1]),scalingFactor=1000000/scalingFactor)) %>%
+  sf <- scalefactor %>% filter(sample == i) %>% mutate(sample=paste0("ScalingFactor_",index))
+  sf <- bind_rows(sf,tibble(sample=paste0("scalefactor_",index),scalingFactor=1000000/sf$scalingFactor))
+  ccc %>% bind_rows(.,sf) %>%
     distinct() %>% 
     write_delim(., cc,col_names = F,delim = " ")
 }
-
 

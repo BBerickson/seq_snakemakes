@@ -12,7 +12,8 @@ rule clumpify:
         job_name = "{sample}_clumpify",
         args = lambda wildcards: CMD_PARAMS["clumpify"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
         is_paired = lambda wildcards: PAIREDMAP[wildcards.sample],
-        reduced_mem = lambda wildcards, resources: int(resources.memory * 0.9)
+        reduced_mem = lambda wildcards, resources: int(resources.memory * 0.9),
+        input_r2 = lambda wildcards, input: input[1] if len(input) > 1 else ""
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 10, 15)
     log:
@@ -26,7 +27,7 @@ rule clumpify:
             # No clumpify args, just copy files
             cp {input[0]} {output.R1}
             if [ "{params.is_paired}" = "True" ]; then
-                cp {input[1]} {output.R2}
+                cp {params.input_r2} {output.R2}
             else
                 touch {output.R2}
             fi
@@ -36,7 +37,7 @@ rule clumpify:
             # Paired-end processing
             clumpify.sh -Xmx{params.reduced_mem}g \
                 groups={params.reduced_mem} \
-                in1={input[0]} in2={input[1]} \
+                in1={input[0]} in2={params.input_r2} \
                 out1={output.R1} out2={output.R2} \
                 {params.args} 2>> {output.log}
         else

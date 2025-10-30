@@ -1,4 +1,4 @@
-# ===== Snake file for processing ChIP-seq data ================================
+# ===== Snake file for processing Bowtie ================================
 
 # Configure shell for all rules
 shell.executable("/bin/bash")
@@ -12,6 +12,7 @@ from pathlib import Path
 
 # Include custom Python functions
 include: "funs.py"
+
 # path of samples file
 SAMPLES_FILE = workflow.configfiles[0] if workflow.configfiles else "samples.yaml"
 
@@ -32,23 +33,19 @@ configfile: str(GENOME_CONFIG)
 # Load additional genome-specific configs manually
 # ------------------------------------------------------------------------------
 
-raw_indexes = config['INDEXES']
-INDEXES = [raw_indexes] if isinstance(raw_indexes, str) else [raw_indexes[0]]
+INDEXES = config['INDEXES']
+if isinstance(INDEXES, str):
+    INDEXES = [INDEXES]
 
+# Load genome-specific config files into a dictionary
+config_indexes = {}
+for idx in INDEXES:
+    path = Path("pipelines/ref") / f"{idx}.yaml"
+    if not path.exists():
+        sys.exit(f"ERROR: {idx} is not a valid genome index.")
+    with open(path) as f:
+        config_indexes[idx] = yaml.safe_load(f)
 
-# Paths to additional config files
-if config.get("GENELIST"):
-    GENOME_CONFIG1 = GENOME_CONFIG
-else:
-    GENOME_CONFIG1 = Path("pipelines/ref") / f"{INDEXES[0]}.yaml"
-
-# Validate existence
-if not GENOME_CONFIG1.exists():
-    sys.exit(f"ERROR: Config file not found for index '{INDEXES[0]}'. Expected at: {GENOME_CONFIG1}")
-
-# Load additional configs
-with open(GENOME_CONFIG1) as f:
-    config1 = yaml.safe_load(f)
 
 # ------------------------------------------------------------------------------
 # Assign parameters from configs
@@ -62,35 +59,36 @@ USE_SINGULARITY = bool(SINGULARITY and SINGULARITY.strip())
 if USE_SINGULARITY:
     singularity:
         config["CONTAINER"] 
+
     
 # From main config
 PROJ         = config.get("PROJ")
 RAW_DATA     = config.get("RAW_DATA")
 ALL_SAMPLES  = config.get("SAMPLES")
 SEQ_DATE     = config.get("SEQ_DATE")
-INDEX_PATH   = config.get("INDEX_PATH")
-INDEX_MAP    = config.get("INDEX_MAP")
-NORM         = config.get("NORM")
+BARCODES     = config.get("BARCODES")
 CMD_PARAMS   = config.get("CMD_PARAMS")
+NORM         = config.get('NORM')
 COLORS       = config.get("COLORS")
 ORIENTATION  = config.get("ORIENTATION")
-SENSE_ASENSE = config.get("SENSE_ASENSE", [])
-REGIONS      = config.get("REGIONS")
 USER         = config.get("USER")
+UNALIGNED    = config.get("UNALIGNED")
 
-if not SENSE_ASENSE:
-    SENSE_ASENSE = [""]  # Empty string for no sense/antisense distinction
-    
-# From additional configs
-MY_REF      = config1.get("MY_REF")
-PI_REF      = config1.get("PI_REF")
-GENELIST = config1.get("GENELIST") or ""
+# Directories for data and scripts
+FASTQ_DIR = PROJ + "/fastqs"
 
+os.makedirs(FASTQ_DIR, exist_ok = True)
 
 # Simplify ALL_SAMPLES dictionary
 SAMPLES, SAMPIN, GROUPS, NORMMAP, PAIREDMAP = process_samples(
     ALL_SAMPLES, INDEXES, NORM, ORIENTATION
 )
+
+# align to the second entry then the first
+INDEX_SECOND = INDEXES[0]
+INDEX_PATH   = config_indexes.get(INDEXES[0], {}).get("INDEX_PATH", config["INDEX_PATH"])
+INDEX_PATH2  = config_indexes.get(INDEXES[1], {}).get("INDEX_PATH", config["INDEX_PATH"])
+INDEX_MAP    = config_indexes.get(INDEXES[1], {}).get("INDEX_MAP", config["INDEX_MAP"])
 
 # make file suffix from bamCoverage settings and NORM 
 for sample, norm_list in NORMMAP.items():
@@ -116,7 +114,7 @@ for key in SAMPIN:
 DF_SAM_NORM = pd.DataFrame(SAM_NORM, columns=['Sample', 'Newnam', 'Index', 'Norm', 'Suffix'])
 
 # unpack samples and groups
-SAMS = [[y, x] for y in SAMPLES for x in SAMPLES[y]]
+SAMS = [[y, x] for y in SAMPIN for x in SAMPIN[y]]
 NAMS = [x[0] for x in SAMS] # newnames
 SAMS = [x[1] for x in SAMS] # samples
 GRPS = [[y, x] for y in GROUPS for x in GROUPS[y]]
@@ -133,7 +131,19 @@ print("SAMS_UNIQ (%s): %s\n" % (len(SAMS_UNIQ), SAMS_UNIQ))
 print("NAMS_UNIQ (%s): %s\n" % (len(NAMS_UNIQ), NAMS_UNIQ))
 print("GRPS_UNIQ (%s): %s\n" % (len(GRPS_UNIQ), GRPS_UNIQ))
 print("NORMMAP (%s): %s\n" % (len(NORMMAP), NORMMAP))
+print("PAIREDMAP (%s): %s\n" % (len(PAIREDMAP), PAIREDMAP))
 print(DF_SAM_NORM.to_string(index=False))
+
+# Create symlinks for fastqs
+FASTQS = [_get_fqs(x, RAW_DATA, FASTQ_DIR, paired=PAIREDMAP[x]) for x in SAMS_UNIQ]
+FASTQS = sum(FASTQS, [])
+
+# color dictionary 
+COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
+
+# for optinal subsetting bam directory
+BAM_PATH = _get_bampath(NORM)
+ALIGNER = "bowtie2"
 
 # Wildcard constraints
 WILDCARD_REGEX = "[a-zA-Z0-9_\-]+" # Matches alphanumeric characters, underscores, and hyphens
@@ -143,46 +153,24 @@ wildcard_constraints:
     newnam = WILDCARD_REGEX,
     group  = WILDCARD_REGEX,
     index  = WILDCARD_REGEX,
-    suffix = WILDCARD_REGEX,
-    covarg = "[a-zA-Z0-9_.\\-]+",
-    region = "543|5|5L|3|PI|EI",
-    sense_asense = r"(sense|anti|)"  # Allow empty, "sense", or "anti"
+    suffix = WILDCARD_REGEX
 
-HEATMAP_REGIONS = ["543"]
-
-COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
-
-NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS.get("bamCoverageBL", ""),ORIENTATION)
-
-BAM_PATH = _get_bampath(NORM)
-
-COVARGS = _get_all_matrixtypes(REGIONS,CMD_PARAMS,GENELIST)
-GENELIST = config1.get("GENELIST") or "all"
-
-# Create the Cartesian product
-product = [(s, i, v) for s in NAMS_UNIQ for i, v in zip(REGIONS, COVARGS)]
-
-# Convert to DataFrame
-REGIONS_COVARGS = pd.DataFrame(product, columns=['Newnam', 'Region', 'Value'])
-# Combine into a list of records with expanded NormMap
-SAM_NORM = []
-for key in SAMPIN:
-    sam_value = SAMPIN[key][0]
-    for index, norm, suffix in NORMMAP[key]:
-        SAM_NORM.append([sam_value, key, index, norm, suffix])
-
-# Create DataFrame
-DF_SAM_NORM = pd.DataFrame(SAM_NORM, columns=['Sample', 'Newnam', 'Index', 'Norm', 'Suffix'])
-print(DF_SAM_NORM.to_string(index=False))
-
-# Merge on 'Newnam' and 'Index'
-DF_SAM_NORM = REGIONS_COVARGS.merge(DF_SAM_NORM, on=['Newnam'], how='left')
-
-print(DF_SAM_NORM.to_string(index=False))
 
 # Final output files
 rule all:
     input:
+        # process summary files
+        expand("{proj}/stats/{proj}_{step}.tsv", proj=PROJ, step=["fastqc", "clumpify", "bbduk", "aligned"]),
+        
+        # bam URL
+        #expand(PROJ + "/URLS/" + PROJ + "_{index}_bam_URL.txt", index=INDEXES),
+        
+        # results
+        expand(PROJ + "/stats/" + PROJ + "_{index}_fragment_results.tsv", index=INDEXES),
+        expand(PROJ + "/report/" + PROJ + "_{index}_fragmentSize.pdf", index=INDEXES),
+        PROJ + "/report/" + PROJ + "_results.tsv",
+        #expand(SEQ_DATE + "_" + PROJ + "_{index}_qc_analysis.html", index=INDEXES[0]) if USE_SINGULARITY else [],
+        
         # bamCoverage
         expand(
             PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}.bw",
@@ -191,34 +179,28 @@ rule all:
             index=DF_SAM_NORM['Index'],
             suffix=DF_SAM_NORM['Suffix']
         ),
-        
-        # matrix files
+        # bamCoverage URL for amc-sandbox
         expand(
-            PROJ + "/matrix/{region}/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_matrix.gz",
-            zip, 
-            region=DF_SAM_NORM['Region'], 
-            newnam=DF_SAM_NORM['Newnam'],
-            index=DF_SAM_NORM['Index'], 
-            covarg=DF_SAM_NORM['Value'], 
-            suffix=DF_SAM_NORM['Suffix']
-        ),
-        
-        # matrix url file for amc-sandbox
-        expand(
-            PROJ + "/URLS/{region}_aligned_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_matrix.url.txt",
-            zip, 
-            region=DF_SAM_NORM['Region'], 
-            index=DF_SAM_NORM['Index'], 
-            covarg=DF_SAM_NORM['Value'], 
-            suffix=DF_SAM_NORM['Suffix']
-        ),
-        
-        # qc with heatmap, cluster, profile plots 
-        expand(SEQ_DATE + "_" + PROJ + "_{index}_qc_plots_analysis.html", index=INDEXES[0]) if USE_SINGULARITY else []
-        
+          PROJ + "/URLS/" + PROJ + "_{index}_" + SEQ_DATE + "_norm_{suffix}_bw_URL.txt",
+           zip, index=DF_SAM_NORM['Index'], suffix=DF_SAM_NORM['Suffix']
+        )
+
+
+# Run FastQC
+include: "rules/01_fastqc.snake"
+# Run clumpify
+include: "rules/01a_clumpify.snake"
+# Run bbmerge
+include: "rules/01b_bbduk.snake"
+# Align reads 
+include: "rules/02a_duel_IP_bowtie.snake"
+include: "rules/02b_duel_IP_samtools.snake"
+include: "rules/02c_align_URLS.snake"
+include: "rules/02s_align_subsample.snake"
+# Results
+include: "rules/03a_featureCounts.snake"
+include: "rules/03a_fragmentSize.snake"
+include: "rules/03b_results.snake"
 # BW with deeptools bamCoverage
 include: "rules/04a_bamCoverage.snake"
-# make matrix files
-include: "rules/05_UnStranded_matrix.snake"
-include: "rules/06_matrix_heatmap.snake"
-include: "rules/07_results_html.snake"
+include: "rules/04b_bw_UCSC_URL.snake"

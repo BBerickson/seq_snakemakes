@@ -13,12 +13,13 @@ rule multiBamSummary:
             sample = GROUPS[wildcards.group]
         )
     output:
-        npz  = PROJ + "/" + BAM_PATH + "/{group}_aligned_{index}_" + SEQ_DATE + ".npz",
+        npz  = temp(PROJ + "/" + BAM_PATH + "/{group}_aligned_{index}_" + SEQ_DATE + ".npz"),
         gsf  = PROJ + "/" + BAM_PATH + "/{group}_aligned_{index}_" + SEQ_DATE + "_scalefactor.txt"
     params:
         job_name = "{group}_aligned_{index}_multiBamSummary",
-        index_sample = INDEXES,
+        index_sample = "{index}",
         labs = lambda wildcards: " ".join(GROUPS[wildcards.group]),
+        args = lambda wildcards: config["CMD_PARAMS"].get("scalingFactors", ""),
         script = "pipelines/R_scripts/multiBamSummary.R"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input.bam, 0.2, 5)
@@ -29,8 +30,13 @@ rule multiBamSummary:
         12
     shell:
         """
-          multiBamSummary bins \
-            --binSize 100 \
+        if [ -z "{params.args}" ]; then
+            # No args, just make empty files
+            touch {output.npz}
+            touch {output.gsf}
+        else
+            multiBamSummary \
+            {params.args} \
             --bamfiles {input.bam} \
             --labels {params.labs} \
             -p {threads} \
@@ -38,6 +44,8 @@ rule multiBamSummary:
             -o {output.npz}
         
           Rscript {params.script} {output.gsf} "{input.counts}" "{params.index_sample}"
+        fi
+          
         
         """
 
@@ -105,10 +113,9 @@ rule gathering_results:
             sample = SAMS_UNIQ
         ),
         OR      = PROJ + "/counts/" + PROJ + "_OR_summery.tsv",
-        rf_file = expand( PROJ + "/counts/{sample}_aligned_{index}_norm_{suffix}_refCounts.tsv",
-            sample = SAMS_UNIQ,
-            index  = INDEXES,
-            suffix=DF_SAM_NORM['Suffix'].unique() 
+        SF_file = expand( PROJ + "/" + BAM_PATH + "/{group}_aligned_{index}_" + SEQ_DATE + "_scalefactor.txt",
+            group = GRPS_UNIQ,
+            index  = INDEXES
         )
     output:
         PROJ + "/report/" + PROJ + "_results.tsv"
