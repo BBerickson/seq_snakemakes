@@ -62,9 +62,9 @@ rule heatmap_pdf:
             )
     ])))
     output:
-        PROJ + "/report/" + PROJ + "_{genelist}_{region}_{index}_heatmap.pdf"  
+        PROJ + "/report/" + PROJ + "_{genelist}_{region}_{index}_norm_{suffix}_heatmap.pdf"  
     params:
-        job_name  = "{genelist}_{region}_{index}_heatmap_pdf",
+        job_name  = "{genelist}_{region}_{index}_norm_{suffix}_heatmap_pdf",
         script    = "pipelines/R_scripts/pngToPDF.R",
         pdf_title = lambda wildcards: [
         f"{row['Region']}_{row['Value']}_norm_{row['Suffix']}: {SEQ_DATE}"
@@ -75,8 +75,8 @@ rule heatmap_pdf:
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 4, 2) # multiplier, min, max, unit=GB
     log:
-        out = PROJ + "/logs/{genelist}_{region}_{index}_heatmap_pdf.out",
-        err = PROJ + "/logs/{genelist}_{region}_{index}_heatmap_pdf.err"
+        out = PROJ + "/logs/{genelist}_{region}_{index}_norm_{suffix}_heatmap_pdf.out",
+        err = PROJ + "/logs/{genelist}_{region}_{index}_norm_{suffix}_heatmap_pdf.err"
     threads: 1
     shell:
         """
@@ -148,9 +148,9 @@ rule cluster_pdf:
             )
     ])))
     output:
-        PROJ + "/report/" + PROJ + "_{genelist}_{region}_{index}_cluster.pdf"  
+        PROJ + "/report/" + PROJ + "_{genelist}_{region}_{index}_norm_{suffix}_cluster.pdf"  
     params:
-        job_name  = "{genelist}_{region}_{index}_cluster_pdf",
+        job_name  = "{genelist}_{region}_{index}_norm_{suffix}_cluster_pdf",
         script    = "pipelines/R_scripts/pngToPDF.R",
         pdf_title = lambda wildcards: [
         f"{row['Region']}_{row['Value']}_norm_{row['Suffix']}: {SEQ_DATE}"
@@ -161,8 +161,8 @@ rule cluster_pdf:
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 1, 1)
     log:
-        out = PROJ + "/logs/{genelist}_{region}_{index}_cluster_pdf.out",
-        err = PROJ + "/logs/{genelist}_{region}_{index}_cluster_pdf.err"
+        out = PROJ + "/logs/{genelist}_{region}_{index}_norm_{suffix}_cluster_pdf.out",
+        err = PROJ + "/logs/{genelist}_{region}_{index}_norm_{suffix}_cluster_pdf.err"
     threads: 1
     shell:
         """
@@ -224,9 +224,9 @@ rule profile_pdf:
             )
     ])))
     output:
-        PROJ + "/report/" + PROJ + "_{genelist}_{region}_{index}_profile.pdf"  
+        PROJ + "/report/" + PROJ + "_{genelist}_{region}_{index}_norm_{suffix}_profile.pdf"  
     params:
-        job_name  = "{genelist}_{region}_{index}_profile_pdf",
+        job_name  = "{genelist}_{region}_{index}_profile_norm_{suffix}_pdf",
         script    = "pipelines/R_scripts/pngToPDF.R",
         pdf_title = lambda wildcards: [
         f"{row['Region']}_{row['Value']}_norm_{row['Suffix']}: {SEQ_DATE}"
@@ -237,8 +237,8 @@ rule profile_pdf:
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 1, 1)
     log:
-        out = PROJ + "/logs/{genelist}_{region}_{index}_profile_pdf.out",
-        err = PROJ + "/logs/{genelist}_{region}_{index}_profile_pdf.err"
+        out = PROJ + "/logs/{genelist}_{region}_{index}_norm_{suffix}_profile_pdf.out",
+        err = PROJ + "/logs/{genelist}_{region}_{index}_norm_{suffix}_profile_pdf.err"
     threads: 1
     shell:
         """

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#BSUB -J snake
+#BSUB -J test_mapping
 #BSUB -o logs/snake_test_%J.out
 #BSUB -e logs/snake_test_%J.err
 

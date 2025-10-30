@@ -1,6 +1,7 @@
 #!/usr/bin/env Rscript
 # merge deeptools computeMatrix files 
 library("tidyverse")
+library("valr")
 args = commandArgs(trailingOnly=TRUE)
 infile <- strsplit(args[1], " ")[[1]]
 outfile <- args[2]
@@ -24,6 +25,34 @@ for(i in seq_along(infile)){
   }
 }
 gl[is.na(gl)] <- 0
+# gather info for filtering 
+mylist <- c("ref point:","upstream:","downstream:","unscaled 5 prime:","unscaled 3 prime:")
+mm <- meta %>% str_remove_all("[@{}]|\\]|\\[") %>% str_split(",",simplify = T) %>% 
+  str_replace_all(.,fixed('\"'),"")
+mm <- mm[str_detect(mm,paste(mylist,collapse = "|"))] 
+upstream <- mm[str_detect(mm,"upstream")] %>% str_remove("upstream:") %>% as.numeric()
+downstream <- mm[str_detect(mm,"downstream")] %>% str_remove("downstream:") %>% as.numeric()
+un5 <- mm[str_detect(mm,"unscaled 5 prime:")] %>% str_remove("unscaled 5 prime:") %>% as.numeric()
+un3 <- mm[str_detect(mm,"unscaled 3 prime:")] %>% str_remove("unscaled 3 prime:") %>% as.numeric()
+if(any(str_detect(mm,"ref point:TSS"))){
+  sep_bins <- max(upstream,1)
+  gene_length <- max(downstream,10)
+} else if(any(str_detect(mm,"ref point:TES"))) {
+  sep_bins <- max(downstream,1)
+  gene_length <- max(upstream,10)
+} else{
+  sep_bins <- max(c(upstream,downstream),1)
+  gene_length <- max(sum(c(un5, un3)),10)
+}
+
+gl <- gl %>% 
+  bed_cluster(max_dist = as.numeric(sep_bins))%>% 
+  filter(!(duplicated(.id) | duplicated(.id, fromLast=TRUE))) %>% 
+  filter(end-start >= as.numeric(gene_length)) %>% 
+  mutate(score=rowMeans(across(contains(".x")))) %>% arrange(score) %>% 
+  slice_tail(prop = 0.90) %>% select(-.id,-score) %>% bed_sort() 
+  
+
 n <- length(infile) 
 # Calculate number of genes
 ngenes <- nrow(gl)

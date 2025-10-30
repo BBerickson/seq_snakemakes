@@ -3,18 +3,21 @@
 rule create_plots:
     input:
         PROJ + "/report/" + PROJ + "_results.tsv",
-        expand(PROJ + "/report/" + PROJ + "_{genelist}_{region}_{index}_heatmap.pdf",
+        expand(PROJ + "/report/" + PROJ + "_{genelist}_{region}_{index}_norm_{suffix}_heatmap.pdf",
                genelist=GENELIST,
                region=[r for r in REGIONS if r in HEATMAP_REGIONS], 
-               index=INDEXES),
-        expand(PROJ + "/report/" + PROJ + "_{genelist}_{region}_{index}_cluster.pdf",
+               index=INDEXES,
+               suffix=DF_SAM_NORM['Suffix'].unique()),
+        expand(PROJ + "/report/" + PROJ + "_{genelist}_{region}_{index}_norm_{suffix}_cluster.pdf",
                genelist=GENELIST, 
                region=[r for r in REGIONS if r in HEATMAP_REGIONS], 
-               index=INDEXES),
-        expand(PROJ + "/report/" + PROJ + "_{genelist}_{region}_{index}_profile.pdf",
+               index=INDEXES,
+               suffix=DF_SAM_NORM['Suffix'].unique()),
+        expand(PROJ + "/report/" + PROJ + "_{genelist}_{region}_{index}_norm_{suffix}_profile.pdf",
                genelist=GENELIST, 
                region=[r for r in REGIONS if r in HEATMAP_REGIONS], 
-               index=INDEXES)
+               index=INDEXES,
+               suffix=DF_SAM_NORM['Suffix'].unique())
     output:
         SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_qc_plots_analysis.html"
     params:
