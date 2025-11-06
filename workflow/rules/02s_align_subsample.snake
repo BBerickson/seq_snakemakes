@@ -1,0 +1,84 @@
+# ====== Rules for subsampling aligned reads with samtools =================================
+
+# calculating subsample numbers for group
+rule calculating_subsample_group:
+    input:
+        lambda wildcards: expand(
+            PROJ + "/bams/{sample}_aligned_{index}_count.txt",
+            sample = GROUPS[wildcards.group],
+            index = [wildcards.index]
+        )
+    output:
+        temp(PROJ + "/bams/{group}_aligned_{index}_subsample_frac.txt")
+    params:
+        job_name = "{group}_aligned_{index}_subsample",
+        group   = "{group}"
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
+    log:
+        out = PROJ + "/logs/{group}_aligned_{index}_subsample.out",
+        err = PROJ + "/logs/{group}_aligned_{index}_subsample.err"
+    threads: 
+        1
+    script:
+        '../scripts/count_subsample.R'
+
+
+# Combine bamCoverage summaries
+rule calculating_subsample_summary:
+    input:
+        lambda wildcards: sorted(expand(
+            PROJ + "/bams/{group}_aligned_{index}_subsample_frac.txt",
+            group = GRPS_UNIQ,
+            index = [wildcards.index]
+        ))
+    output:
+        PROJ + "/stats/" + PROJ + "_{index}_subsample_frac.tsv"
+    params:
+        job_name = PROJ + "_calculating_{index}_subsample_summary"
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
+    log:
+        out = PROJ + "/logs/" + PROJ + "_calculating_{index}_subsample_summary.out",
+        err = PROJ + "/logs/" + PROJ + "_calculating_{index}_subsample_summary.err"
+    threads:
+        1
+    shell:
+        """
+        cat {input} > {output}
+        """
+
+
+
+# output subsampled bamfile
+rule subsample_dedup:
+    input:
+        bam    = PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
+        bai    = PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam.bai",
+        counts = PROJ + "/stats/" + PROJ + "_{index}_subsample_frac.tsv"
+    output:
+        bam   = PROJ + "/bams_sub/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
+        bai   = PROJ + "/bams_sub/{sample}_aligned_{index}_" + SEQ_DATE + ".bam.bai",
+        stats = PROJ + "/bams_sub/{sample}_aligned_{index}_subsample.txt"
+    params:
+        job_name = "subsample_{sample}_aligned_{index}",
+        samp     = "{sample}_{index}",
+        scale    = lambda wildcards, input: _get_norm_fraction(wildcards, wildcards.index, input.counts)
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
+    log:
+        out = PROJ + "/logs/subsample_{sample}_aligned_{index}.out",
+        err = PROJ + "/logs/subsample_{sample}_aligned_{index}.err"
+    threads:
+        16
+    shell:
+        """
+          # find the min read count, calcuate the fraction of the reads to keep, samtools subset 
+          samtools view -@ {threads} -s {params.scale} -b {input.bam} > {output.bam}
+          
+          samtools index -@ {threads} {output.bam}
+        
+          echo "{params.samp} Sampled_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" >> {output.stats}
+        """
+
+                    

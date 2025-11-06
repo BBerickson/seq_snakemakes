@@ -1,0 +1,40 @@
+# Bodhi LSF cluster profile for Snakemake
+# Usage: snakemake --profile profiles/Bodhi
+
+
+# Job submission settings
+jobs: 100
+latency-wait: 60
+
+# Singularity settings
+use-singularity: true
+singularity-args: "--bind /beevol/home"
+
+# DRMAA template for LSF
+drmaa: >
+  -oo {log.out}
+  -eo {log.err}
+  -J {params.job_name}
+  -R "rusage[mem={resources.memory}] span[hosts=1]"
+  -n {threads}
+
+# Restart failed jobs
+retries: 0
+restart-times: 0
+
+# Keep going if some jobs fail
+keep-going: false
+
+# Minimal output
+printshellcmds: false    # Don't print shell commands (set true for debugging)
+reason: false            # Don't explain why each rule runs
+show-failed-logs: true  # Still show errors
+
+# Selective quieting (alternative to quiet: true)
+# quiet: ["progress", "rules"]  # Suppress specific message types
+
+# Rerun incomplete jobs
+rerun-incomplete: true
+
+# Show rule execution reason
+reason: true

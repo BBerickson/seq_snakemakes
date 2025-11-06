@@ -1,0 +1,90 @@
+# ====== Rules for aligning reads =================================
+
+
+# Align trimmed reads with bowtie2 R1 or R2
+rule bowtie:
+    input:
+        R1 = PROJ + "/{sample}_R1.fastq" + (".gz" if config.get("compress_temp", True) else ""),
+        R2 = PROJ + "/{sample}_R2.fastq" + (".gz" if config.get("compress_temp", True) else "")
+    output:
+        bam   = temp(PROJ + "/{sample}_" + INDEX_MAP + ".bam"),
+        bai   = temp(PROJ + "/{sample}_" + INDEX_MAP + ".bam.bai"),
+        stats = PROJ + "/bams/{sample}_" + INDEX_MAP + "_bowtie_stats.txt"
+    params:
+        job_name = "{sample}_bowtie",
+        idx      = INDEX_PATH + INDEX_MAP,
+        args     = lambda wildcards: CMD_PARAMS["bowtie2"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
+        sortname = PROJ + "/{sample}.temp",
+        is_paired = lambda wildcards: PAIREDMAP[wildcards.sample]
+    resources:
+        memory = lambda wildcards, input: memory_estimator(input, 3, 18)
+    log:
+        out = PROJ + "/logs/{sample}_bowtie.out",
+        err = PROJ + "/logs/{sample}_bowtie.err"
+    threads: 
+        12
+    shell:
+        """
+        if [ "{params.is_paired}" = "True" ]; then
+            # Paired-end alignment
+            bowtie2 \
+                -p {threads} \
+                -x {params.idx} \
+                -1 {input.R1} -2 {input.R2} \
+                {params.args} \
+                2> {output.stats} \
+                | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+                > {output.bam}
+        else
+            # Single-end alignment
+            bowtie2 \
+                -p {threads} \
+                -x {params.idx} \
+                -U {input.R1} \
+                {params.args} \
+                2> {output.stats} \
+                | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+                > {output.bam}
+        fi
+        
+        # Index the BAM file
+        samtools index -@ {threads} {output.bam}
+        """
+
+
+
+# ====== Rules for aligning reads summary =================================
+
+
+# Align trimmed reads with bowtie2 summary
+rule bowtie_summary:
+    input:
+        expand(
+            PROJ + "/bams/{sample}_" + INDEX_MAP + "_bowtie_stats.txt",
+            sample = SAMS_UNIQ
+        )
+    output:
+        PROJ + "/stats/" + PROJ + "_aligned.tsv"
+    params:
+        job_name = "bowtie_summary",
+        index = INDEX_MAP
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
+    log:
+        out = PROJ + "/logs/bowtie_summary.out",
+        err = PROJ + "/logs/bowtie_summary.err"
+    threads:
+        1
+    shell:
+        """
+        python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+
+import rules
+
+rules._bowtie_summary("{input}".split(), "{output[0]}", "{params.index}")
+EOF
+        """
+        
+                        

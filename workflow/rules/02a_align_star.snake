@@ -1,0 +1,85 @@
+# ====== Rules for aligning reads =================================
+
+
+# Align trimmed reads with star
+rule star_twopass:
+    input:
+        R1 = PROJ + "/{sample}_R1.fastq" + (".gz" if config.get("compress_temp", True) else ""),
+        R2 = PROJ + "/{sample}_R2.fastq" + (".gz" if config.get("compress_temp", True) else "")
+    output:
+        bam   = temp(PROJ + "/{sample}_" + INDEX_MAP + ".bam"),
+        bai   = temp(PROJ + "/{sample}_" + INDEX_MAP + ".bam.bai"),
+        stats = PROJ + "/bams/{sample}_Log.out",
+        final = PROJ + "/bams/{sample}_Log.final.out"
+
+    params:
+        job_name = "{sample}_star_twopass",
+        gtf      = FC_FILE,
+        bam_out  = PROJ + "/bams/{sample}_Aligned.sortedByCoord.out.bam",
+        args     = lambda wildcards: CMD_PARAMS["star"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
+        out      = PROJ + "/bams/{sample}_"
+    resources:
+        memory = lambda wildcards, input: memory_estimator([input.R1, input.R2], 5, 30, 250) # multiplier, min, max, unit=GB
+    log:
+        out = PROJ + "/logs/{sample}_star_twopass.out",
+        err = PROJ + "/logs/{sample}_star_twopass.err"
+    message:
+        "Running STAR alignment with two-pass mode"
+    threads: 
+        16
+    shell:
+        """
+        STAR \
+          --genomeDir {INDEX_PATH} \
+          --runThreadN {threads} \
+          --readFilesIn {input.R1} {input.R2} \
+          --outSAMtype BAM SortedByCoordinate \
+          --limitBAMsortRAM {resources.memory}000000000 \
+          --readFilesCommand gunzip -c \
+          --outFileNamePrefix {params.out} \
+          --sjdbGTFfile {params.gtf} \
+          {params.args} \
+          --twopassMode Basic
+          
+        mv {params.bam_out} {output.bam}
+
+        samtools index -@ {threads} {output.bam}
+        """
+        
+
+# ====== Rules for aligning reads summary =================================
+
+
+rule star_2pass_summary:
+    input:
+        expand(
+            PROJ + "/bams/{sample}_Log.final.out",
+            sample=SAMS_UNIQ
+        )
+    output:
+        PROJ + "/stats/" + PROJ + "_aligned.tsv"
+    params:
+        job_name = "star_2pass_summary"
+    resources:
+        memory = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
+    log:
+        out=PROJ + "/logs/star_summary.out",
+        err=PROJ + "/logs/star_summary.err"
+    message:
+        "Summary of STAR alignments"
+    threads:
+        4
+    shell:
+        """
+        python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import rules
+        
+rules._extract_star_log_info("{input}".split(), "{output}")
+EOF
+        """
+                        
+
+
+                    

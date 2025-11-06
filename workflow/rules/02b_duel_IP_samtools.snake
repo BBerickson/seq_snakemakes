@@ -1,0 +1,108 @@
+# ====== Rules for filtering aligned reads with samtools =================================
+
+# filter aligned reads
+rule align_filter_multimap:
+    input:
+        bam = PROJ + "/{sample}_{index}.bam",
+        bai = PROJ + "/{sample}_{index}.bam.bai"
+    output:
+        bam = temp(PROJ + "/{sample}_{index}_multimap.bam"),
+        bai = temp(PROJ + "/{sample}_{index}_multimap.bam.bai"),
+        bamt = temp(PROJ + "/{sample}_{index}_multimap_temp.bam"),
+        counts = PROJ + "/bams/{sample}_{index}_count_multimap.txt"
+    params:
+        job_name = "{sample}_multimap_filter",
+        samp = "{sample}_{index}",
+        args = CMD_PARAMS["samtools"],
+        args2 = CMD_PARAMS["multimap"],
+        sortname = PROJ + "/{sample}_multimap.temp",
+        is_paired = lambda wildcards: PAIREDMAP[wildcards.sample]
+    resources:
+        memory = lambda wildcards, input: memory_estimator(input, 0.5, 2)
+    log:
+        out = PROJ + "/logs/{sample}{index}_multimap_filter.out",
+        err = PROJ + "/logs/{sample}{index}_multimap_filter.err"
+    threads: 
+        12
+    shell:
+        """
+        # Check if args2 is empty (after stripping whitespace)
+        args2_trimmed=$(echo "{params.args2}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+        
+        if [ -z "$args2_trimmed" ]; then
+            # No multimap filtering needed
+            touch {output.bamt}
+            samtools view {params.args} {input.bam} > {output.bam}
+            samtools index -@ {threads} {output.bam}
+            echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
+        else
+            # Apply multimap filtering
+            
+            if [ "{params.is_paired}" = "True" ]; then
+            
+              samtools view {params.args} -u {input.bam} \
+                | samtools sort -n -T {params.sortname} -@ {threads} \
+                | samtools view -h - \
+                | python pipelines/multimappers2.py {params.args2} --paired-end \
+                | samtools fixmate -r - {output.bamt}
+                
+                # Paired-end filtering
+                samtools view -F 1804 -f 2 -u {output.bamt} \
+                  | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+                  > {output.bam}
+            else
+                # Single-end filtering
+            
+                samtools view {params.args} -u {input.bam} \
+                  | samtools sort -n -T {params.sortname} -@ {threads} \
+                  | samtools view -h - \
+                  | python pipelines/multimappers2.py {params.args2} \
+                  | samtools fixmate -r - {output.bamt}
+                
+                samtools view -F 1804 -u {output.bamt} \
+                  | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+                  > {output.bam}
+            fi
+            
+            # Index and count reads
+            samtools index -@ {threads} {output.bam}
+            echo "{params.samp} Multimap_Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
+        fi
+        """
+    
+        
+# filter aligned reads
+rule align_filter_indexed:
+    input:
+        bam = PROJ + "/{sample}_{index}_multimap.bam",
+        bai = PROJ + "/{sample}_{index}_multimap.bam.bai"
+    output:
+        bam    = PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
+        bai    = PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam.bai",
+        counts = PROJ + "/bams/{sample}_aligned_{index}_count.txt"
+    params:
+        job_name = "{sample}_align_filter_{index}",
+        idx      = lambda wildcards: INDEX_PATH + wildcards.index + ".txt",
+        samp     = "{sample}_{index}",
+        args     = CMD_PARAMS["samtools"],
+        fa       = lambda wildcards: config_indexes[wildcards.index].get("FA_SAMPLE"),
+        sortname = PROJ + "/{sample}_aligned_{index}.temp"
+    resources:
+        memory = lambda wildcards, input: memory_estimator(input, 0.5, 2)
+    log:
+        out = PROJ + "/logs/{sample}_align_filter_{index}.out",
+        err = PROJ + "/logs/{sample}_align_filter_{index}.err"
+    threads: 12
+    shell:
+        """
+        samtools view {input.bam} $(head -n1 {params.idx}) \
+        | sed 's/spike_*//g' \
+        | samtools view -bT {params.fa} - \
+        | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+        > {output.bam}
+        samtools index -@ {threads} {output.bam}
+        echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
+        """
+
+
+                    

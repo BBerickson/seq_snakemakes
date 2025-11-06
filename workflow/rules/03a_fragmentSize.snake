@@ -1,0 +1,93 @@
+# ====== Rules for getting read and fragment size from paired end data =================================
+
+
+# fragment size of mapped paired end reads
+rule fragment_size:
+    input:
+        bam  = PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
+        bai  = PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam.bai"
+    output:
+        log  = temp(PROJ + "/stats/{sample}_aligned_{index}_fragment.txt"),
+        pic  = temp(PROJ + "/stats/{sample}_aligned_{index}_fragmentSize.png")
+    params:
+        job_name = "{sample}_fragment_size_{index}",
+        labels   = lambda wildcards: wildcards.sample if "spike" not in wildcards.index else f"{wildcards.sample}_spike",
+        script   = "pipelines/R_scripts/read_size_png.R",
+        args     = lambda wildcards: CMD_PARAMS["fragment_size"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
+        is_paired = lambda wildcards: PAIREDMAP[wildcards.sample]
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 0.2, 5)
+    log:
+        out = PROJ + "/logs/{sample}_fragment_{index}_size.out",
+        err = PROJ + "/logs/{sample}_fragment_{index}_size.err"
+    threads: 
+        12
+    shell:
+        """
+        if [ "{params.is_paired}" = "True" ]; then
+            # Paired-end fragment size analysis
+            bamPEFragmentSize \
+              -hist {output.pic} \
+              --numberOfProcessors {threads} \
+              -T "Fragment size of PE data" \
+              -b  {input.bam} {params.args} \
+              --samplesLabel {params.labels} \
+              --table {output.log}
+        else
+            # Single-end read length analysis
+            readlength.sh \
+              in={input.bam} \
+              out={output.log} \
+              bin=10 max=1010
+              
+            Rscript {params.script} {output.log} {output.pic}
+        fi
+        """
+  
+        
+rule fragment_results:
+    input:
+        lambda wildcards: sorted([
+            PROJ + f"/stats/{sample}_aligned_{wildcards.index}_fragment.txt"
+            for sample in SAMS_UNIQ
+        ])
+    output:
+        PROJ + "/stats/" + PROJ + "_{index}_fragment_results.tsv"
+    params:
+        job_name = "fragment_results_{index}",
+        samp     = "{index}"
+    resources:
+        memory = lambda wildcards, input: memory_estimator(input, 1, 1)
+    log:
+        out = PROJ + "/logs/fragment_{index}_results.out",
+        err = PROJ + "/logs/fragment_{index}_results.err"
+    threads: 1
+    script:
+        "../scripts/fragment_results.R"
+
+
+rule fragment_png:
+    input:
+        lambda wildcards: sorted([
+            PROJ + f"/stats/{sample}_aligned_{wildcards.index}_fragmentSize.png"
+            for sample in SAMS_UNIQ
+        ])
+    output:
+        PROJ + "/report/" + PROJ + "_{index}_fragmentSize.pdf"
+    params:
+        job_name  = "fragment_{index}_results_pdf",
+        script = "workflow/scripts/pngToPDF.R",
+        pdf_title = PROJ + "_{index}",
+        chunkSize = 4
+    resources:
+        memory = lambda wildcards, input: memory_estimator(input, 1, 1)
+    log:
+        out = PROJ + "/logs/fragment_{index}_results_pdf.out",
+        err = PROJ + "/logs/fragment_{index}_results_pdf.err"
+    threads: 1
+    shell:
+        """
+        Rscript {params.script} "{input}" "{params.chunkSize}" "{params.pdf_title}" "{output}"
+        """
+    
+    

@@ -1,0 +1,118 @@
+# ====== Rules for making standard matrix files ======
+
+# matrix files
+rule standared_matrix:
+    input:
+        bw  =  PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}.bw"
+    output:
+        matrix = PROJ + "/matrix/{region}/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_matrix.gz"
+    params:
+        job_name = "{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_matrix",
+        args = lambda wildcards: CMD_PARAMS[f"region{wildcards.region}"] + CMD_PARAMS["bamCoverageBL"],
+        my_ref = lambda wildcards: PI_REF if wildcards.region == "PI" else MY_REF
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
+    log:
+        out = PROJ + "/logs/{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_matrix.out",
+        err = PROJ + "/logs/{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_matrix.err"
+    threads: 
+        12
+    shell:
+        """
+        # deeptools
+        computeMatrix {params.args} -R {params.my_ref} -S {input.bw} -p {threads} -o {output.matrix} 
+        """
+
+# make url's and scp to sandbox
+rule standared_marix_url:
+    input:
+        PROJ + "/matrix/{region}/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_matrix.gz"
+    output:
+        temp(PROJ + "/matrix/{region}/{newnam}_aligned_{index}_temp_{covarg}_norm_{suffix}_matrix.url.txt")
+    params:
+        job_name = "{newnam}_aligned_{index}_{region}__{covarg}_norm_{suffix}_matrix_url",
+        color    = lambda wildcards: _get_col(wildcards.newnam, COLS_DICT),
+        groupkey = lambda wildcards: next((k for k, v in GROUPS.items() if wildcards.newnam in v), "self"),
+        url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_matrix.gz"
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
+    log:
+        out = PROJ + "/logs/{newnam}_aligned_{index}_{region}__{covarg}_norm_{suffix}_matrix_url.out",
+        err = PROJ + "/logs/{newnam}_aligned_{index}_{region}__{covarg}_norm_{suffix}_matrix_url.err"
+    threads:
+        1
+    container: None
+    shell:
+        """
+        echo {params.url_out} {params.groupkey} {wildcards.newnam}_norm_{wildcards.suffix}_{SEQ_DATE} {params.color} >> {output[0]}
+        ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
+        scp {input[0]} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
+        """
+        
+
+# Combine URLs
+rule matrix_url_summary:
+    input:
+        lambda wildcards: sorted([
+            PROJ + f"/matrix/{row['Region']}/{row['Newnam']}_aligned_{row['Index']}_temp_{row['Value']}_norm_{row['Suffix']}_matrix.url.txt"
+            for _, row in DF_SAM_NORM.iterrows()
+            if (str(row['Region']) == wildcards.region and 
+                str(row['Index']) == wildcards.index and
+                str(row['Value']) == wildcards.covarg and 
+                str(row['Suffix']) == wildcards.suffix)
+        ])
+    output:
+        PROJ + "/URLS/{region}_aligned_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_matrix.url.txt"
+    params:
+        job_name = "{region}_aligned_{index}__{covarg}_norm_{suffix}_matrix_url_summary"
+    resources:
+        memory = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
+    log:
+        out = PROJ + "/logs/{region}_aligned_{index}__{covarg}_norm_{suffix}_matrix_url_summary.out",
+        err = PROJ + "/logs/{region}_aligned_{index}__{covarg}_norm_{suffix}_matrix_url_summary.err"
+    threads:
+        1
+    shell:
+        """
+        # concatenate files
+        cat {input} > {output}
+        """
+
+# Combine groups of matirx files for heatmap plots
+rule merge_matrix_groups:
+    input:
+        lambda wildcards: sorted(list(set([
+            PROJ + f"/matrix/{row['Region']}/"
+            f"{row['Newnam']}_aligned_{row['Index']}_{SEQ_DATE}_"
+            f"{row['Region']}_{row['Value']}_norm_{row['Suffix']}_matrix.gz"
+            for _, row in DF_SAM_NORM.iterrows()
+            if (
+                row['Sample'] in GROUPS[wildcards.group]
+                and str(row['Region']) == wildcards.region
+                and str(row['Region']) in HEATMAP_REGIONS  # Explicit whitelist
+                and str(row['Index']) == wildcards.index
+                and str(row['Value']) == wildcards.covarg
+                and str(row['Suffix']) == wildcards.suffix
+            )
+        ])))
+    output:
+        matemp = temp(
+            PROJ + "/matrix/{region}/{group}/{group}_aligned_{index}_temp_{region}_{covarg}_norm_{suffix}_{sense_asense}_matrix.gz"
+        ),
+        matrix = PROJ + "/matrix/{region}/{group}/{group}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_{sense_asense}_matrix.gz"
+    params:
+        job_name = "{group}_aligned_{index}__{region}_{covarg}_norm_{suffix}_{sense_asense}_matrix_merge",
+        script = "workflow/scripts/MatrixMerge.R"
+    resources:
+        memory = lambda wildcards, input: memory_estimator(input, 2, 1)
+    log:
+        out = PROJ + "/logs/{group}_aligned_{index}__{region}_{covarg}_norm_{suffix}_{sense_asense}_matrix_merge.out",
+        err = PROJ + "/logs/{group}_aligned_{index}__{region}_{covarg}_norm_{suffix}_{sense_asense}_matrix_merge.err"
+    threads: 1
+    shell:
+        """
+        # concatenate files
+        Rscript {params.script} "{input}" "{output.matemp}"
+        computeMatrixOperations relabel -m {output.matemp} -o {output.matrix} 2>> {log.err}
+        """
+        

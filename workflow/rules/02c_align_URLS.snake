@@ -1,0 +1,53 @@
+# ====== Rules for making bam URLs =================================
+
+
+# make URLS and copy files to sandbox
+rule my_bowtie_url:
+    input:
+        bam = PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
+        bai = PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam.bai",
+    output:
+        temp(PROJ + "/bams/{sample}_aligned_{index}_url.txt")
+    params:
+        job_name = "{sample}_aligned_{index}_bowtie_url",
+        url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{sample}_aligned_{index}_" + SEQ_DATE + ".bam"
+    resources:
+        memory = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
+    log:
+        out = PROJ + "/logs/{sample}_aligned_{index}" + PROJ + "_bowtie_url.out",
+        err = PROJ + "/logs/{sample}_aligned_{index}" + PROJ + "_bowtie_url.err"
+    threads:
+        1
+    container: None
+    shell:
+        """
+          echo "{params.url}" >> {output}
+          ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
+          scp {input.bam}* amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
+          
+        """
+        
+rule bowtie_urls:
+    input:
+        lambda wildcards: expand(
+            PROJ + "/bams/{sample}_aligned_" + wildcards.index + "_url.txt",
+            sample=SAMS_UNIQ
+        )
+    output:
+        PROJ + "/URLS/" + PROJ + "_{index}_bam_URL.txt"
+    params:
+        job_name = lambda wildcards: PROJ + "_" + wildcards.index + "_bowtie_urls"
+    resources:
+        memory = lambda wildcards, input: memory_estimator(input, 1, 1)
+    log:
+        out = PROJ + "/logs/" + PROJ + "_{index}_bowtie_urls.out",
+        err = PROJ + "/logs/" + PROJ + "_{index}_bowtie_urls.err"
+    shell:
+        """
+        cat {input} > {output}
+        """
+                                       
+                                       
+
+
+                                       

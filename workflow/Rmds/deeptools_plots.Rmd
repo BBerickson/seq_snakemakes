@@ -1,0 +1,57 @@
+
+## Profile plots
+
+```{r "profile plots", fig.width = 20, fig.height = 20}
+if(length(profile_pdfs) > 0) {
+  profile_pdfs <- str_c(report_dir, profile_pdfs)
+  
+  # Create a list of embed tags
+  embed_tags <- lapply(profile_pdfs, function(i) {
+    htmltools::tags$embed(src = i, 
+                         type = "application/pdf", 
+                         width = "100%", 
+                         height = "900px")
+  })
+  
+  # Print the tagList
+  htmltools::tagList(embed_tags)
+}
+```
+
+## Heatmap plots
+
+```{r "heatmap plots", fig.width = 20, fig.height = 20}
+if(length(heatmap_pdfs) > 0) {
+  heatmap_pdfs <- str_c(report_dir, heatmap_pdfs)
+  
+  # Create a list of embed tags
+  embed_tags <- lapply(heatmap_pdfs, function(i) {
+    htmltools::tags$embed(src = i, 
+                         type = "application/pdf", 
+                         width = "100%", 
+                         height = "900px")
+  })
+  
+  # Print the tagList
+  htmltools::tagList(embed_tags)
+}
+```
+
+## Cluster plots
+
+```{r "cluster plots", fig.width = 20, fig.height = 20}
+if(length(cluster_pdfs) > 0) {
+  cluster_pdfs <- str_c(report_dir, cluster_pdfs)
+  
+  # Create a list of embed tags
+  embed_tags <- lapply(cluster_pdfs, function(i) {
+    htmltools::tags$embed(src = i, 
+                         type = "application/pdf", 
+                         width = "100%", 
+                         height = "900px")
+  })
+  
+  # Print the tagList
+  htmltools::tagList(embed_tags)
+}
+```

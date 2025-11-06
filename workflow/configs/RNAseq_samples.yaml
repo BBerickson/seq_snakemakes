@@ -1,0 +1,370 @@
+#===== Config file containing samples ==========================================
+# This gets appended to config
+
+# Project name to use for naming summary files
+PROJ:
+  "RTF1_RNAseq"
+    
+SEQ_DATE:
+  "220121"
+
+# Directories containing fastq files, this can be a relative path.
+# Multiple directories can be provided. The sample names must correspond
+# to the begining of the fastq name.
+RAW_DATA:
+    - "/beevol/home/erickson/fastqs/220812_A00405_0612_AHCLTGDSX5"
+
+# Genome to use for analysis
+# * The specified genome must have a config file present in pipelines/ref
+GENOME:
+    "hg38"
+ 
+# The sample names must match the beginning of a fastq file in one of the
+# directories listed under RAW_DATA. If the sample name
+# matches multiple fastqs, an error will be thrown.
+# If samples have a input pair with a spikeIN list together
+# subsampling works on samples within a group
+# nicknames will be used for bw and matrix/plots names
+#
+# SAMPLES:
+#     SECTION-1:
+#         SAMPLING-GROUP-1: # subsample norm example
+#             sample_nickname-1:
+#                  - "fastq_sample_1_prefix"
+#             sample_nickname-2:
+#                  - "fastq_sample_2_prefix"
+# 
+#         SAMPLING-GROUP-2: # with input for OR norm example
+#             sample_nickname-3:
+#                  - "fastq_sample_3_prefix"
+#                  - "fastq_input_3_prefix"
+#             sample_nickname-4:
+#                  - "fastq_sample_4_prefix"
+#                  - "fastq_input_4_prefix"
+# 
+#     SECTION-2:
+#         ...
+#
+
+SAMPLES:
+    SECTION-1:
+        SAMPLING-GROUP-1:
+            RTF1_WT1: 
+              - "293flpIN_RTF1_WT1"
+            RTF1_MT1: 
+              - "293flpIN_RTF1_MT_R1"
+
+        SAMPLING-GROUP-2:
+            RTF1_WT2: 
+              - "293flpIN_RTF1_WT2"
+            RTF1_MT2: 
+              - "293flpIN_RTF1_MT_R2"
+
+        SAMPLING-GROUP-3:
+            RTF1_WT3: 
+              - "293flpIN_RTF1_WT3"
+            RTF1_MT3: 
+              - "293flpIN_RTF1_MT_R3"
+      
+# Norm sample bw and matix files, spike-in is CPM      
+# with "RPKM","CPM","BPM","RPGC" 
+# Or with scaleFactor from count file i.e. "chrM", 
+# if input with spike in is paired up: "OR"
+# scaleFactor within a group for bed file or bins, used: "scalefactor"
+# Or "subsample" : make bw and matix files from sub-sampled bam files (paired groups)
+NORM:
+  "CPM"
+
+  
+ # set RGB colors for bw urls and table files, 
+  # list as many colors as samples (not inputs) 
+  # applied in order of samples ignoring inputs
+COLORS:
+  - "0,0,0"       # - Black
+  - "225,0,0"     # - Bright red
+  - "0,225,0"     # - Bright green
+  - "0,0,225"     # - Bright blue
+  - "255,127,0"   # - Orange
+  - "177,89,40"   # - Brown
+  - "106,61,154"  # - Purple
+  - "255,55,153"  # - Hot pink/magenta
+  - "166,206,22"  # - Lime green/yellow-green
+  - "31,120,180"  # - Steel blue
+  - "251,154,153" # - Light pink/salmon pink
+  - "178,223,138" # - Light green/pale green
+  - "51,160,44"   # - Forest green 
+  - "227,26,28"   # - Red
+  - "253,191,111" # - Light orange/peach
+  - "202,178,214" # - Light purple/lavender
+
+# program options
+# HiSeq 1T     dupedist=40 (BC...XX)
+# HiSeq 2500   dupedist=40 (AM...XX, BC...XX)
+# HiSeq 3k/4k  dupedist=2500 (AC...XX, AN...XX)
+# Novaseq      dupedist=12000
+CMD_PARAMS:
+    clumpify:      
+      paired: " lowcomplexity=t overwrite=t dedupe=t dupedist=12000 optical=f subs=0 " # PE settings
+      single: " lowcomplexity=t overwrite=t dedupe=t dupedist=40 optical=f subs=0 " #  SE settings
+    bbduk:      
+      paired: " overwrite=t ftm=5 minlen=50 ktrim=r k=23 hdist=1 mink=11 tpe tbo ecco=t " # PE settings
+      single: " overwrite=t ftm=5 minlen=20 ktrim=r k=23 hdist=1 mink=11 " # SE settings
+    hisat2:      
+      paired: " --add-chrname --no-softclip --no-mixed --no-discordant "
+      single: " --add-chrname --no-softclip "
+    star:      
+      paired:  " --limitSjdbInsertNsj 2000000 --outSAMattributes NH HI AS nM MD --alignSJoverhangMin 10 --outMultimapperOrder Random "
+      single:  " --limitSjdbInsertNsj 2000000 --outSAMattributes NH HI AS nM MD --alignSJoverhangMin 10 --outMultimapperOrder Random "
+    multimap:     ""  # " -k 1 " # all but -k n multi-mapper from will be randomly filtered out.
+    samtools:      " -bF4q1 "
+    bamCoverage:   " --binSize 10 --skipNonCoveredRegions "
+    scalingFactors:         "" # " BED-file --BED /beevol/home/erickson/ref/hg38_p14/PolIII/polIII_fitered_slop200.bed " or " bins --binSize 100 "
+    fragment_size: 
+      paired:  " --maxFragmentLength 1000 "
+      single:  " bin=10 max=1010 "
+    featureCounts: " --readExtension5 2000 --readExtension3 2000 " #--largestOverlap
+    filter_results: "protein_coding|scalefactor"
+    
+# sandbox User #
+USER:
+  "User7"
+  
+# a fasta file with the universal adaptors or literal strings
+# "pipelines/ref/truseq_i5i7.fa"
+# "pipelines/ref/truseq_rna.fa"
+# "GATCGGAAGAGCACACGTCT,ACACTCTTTCCCTACACGACGCTCTTCCGATCT"
+BARCODES:
+    "pipelines/ref/truseq_rna.fa"
+
+# set orentation of fastq files, can list one for each file        
+ORIENTATION:
+    "R2R1" # R1R2, R1
+
+# which matrix type(s) to make
+# deeptools options set in Stranded_matrix.yaml
+# can only to be "543", "5", "3", "PI", or "EI" 
+REGIONS:
+  - "5"
+# valid options = "sense", "anti"
+SENSE_ASENSE:
+  - "sense"
+  - "anti"
+
+CONTAINER:
+    "docker://bberickson/bodhi-snakemake:v1.2.0"
+
+# speed up steps by ~2X by not gzip compressing temp files,
+# ~4X-5X more space needed for temp files
+compress_temp: false  # Set to true for gzip compression, false for uncompressed
+
+# Save data on amc-sandbox and make URLS
+skip_bam_urls: true
+skip_bw_urls: false
+skip_matrix_url: false
+
+# html report
+skip_html_report: true
+skip_matrix_html_report: false
+
+## Additional common parameters for various processing steps
+### Clumpify.py ##
+# overwrite=f         (ow) Set to false to force the program to abort rather 
+# than overwrite an existing file.
+# dedupe=f            Remove duplicate reads.  
+# markduplicates=f    Don't remove; just append ' duplicate' to the name.
+# allduplicates=f     Mark or remove all copies of duplicates, instead of
+#                     keeping the highest-quality copy.
+# subs=2              (s) Maximum substitutions allowed between duplicates.
+# subrate=0.0         (dsr) If set, the number of substitutions allowed will be
+#                     max(subs, subrate*min(length1, length2)) for 2 sequences.
+# optical=f           If true, mark or remove optical duplicates only.
+#                     This means they are Illumina reads within a certain
+#                     distance on the flowcell.  Normal Illumina names needed.
+#                     Also for tile-edge and well duplicates.
+# dupedist=40         (dist) Max distance to consider for optical duplicates.
+#                     Higher removes more duplicates but is more likely to
+#                     remove PCR rather than optical duplicates.
+#                     This is platform-specific; recommendations:
+#                        NextSeq      40  (and spany=t)
+#                        HiSeq 1T     40
+#                        HiSeq 2500   40
+#                        HiSeq 3k/4k  2500
+#                        Novaseq      12000
+#
+### BBDUK ##
+# reads=-1            If positive, quit after processing X reads or pairs.
+# stats=<file>        Write statistics about which contamininants were detected.
+# rpkm=<file>         Write RPKM for each reference sequence (for RNA-seq).
+# overwrite=t         (ow) Grant permission to overwrite files.
+# bhist=<file>        Base composition histogram by position.
+# qhist=<file>        Quality histogram by position.
+# qchist=<file>       Count of bases with each quality value.
+# aqhist=<file>       Histogram of average read quality.
+# bqhist=<file>       Quality histogram designed for box plots.
+# lhist=<file>        Read length histogram.
+# phist=<file>        Polymer length histogram.
+# gchist=<file>       Read GC content histogram.
+# enthist=<file>      Read entropy histogram.
+# ihist=<file>        Insert size histogram, for paired reads in mapped sam.
+# gcbins=100          Number gchist bins.  Set to 'auto' to use read length.
+# maxhistlen=6000     Set an upper bound for histogram lengths; higher uses 
+# more memory.  The default is 6000 for some histograms
+# and 80000 for others.
+# k=27                Kmer length used for finding contaminants.  Contaminants 
+# shorter than k will not be found.  k must be at least 1.
+# rcomp=t             Look for reverse-complements of kmers in addition to 
+# forward kmers.
+# maskmiddle=t        (mm) Treat the middle base of a kmer as a wildcard, to 
+# increase sensitivity in the presence of errors.
+# minkmerhits=1       (mkh) Reads need at least this many matching kmers 
+# to be considered as matching the reference.
+# minkmerfraction=0.0 (mkf) A reads needs at least this fraction of its total
+# kmers to hit a ref, in order to be considered a match.
+# If this and minkmerhits are set, the greater is used.
+# mincovfraction=0.0  (mcf) A reads needs at least this fraction of its total
+# bases to be covered by ref kmers to be considered a match.
+# If specified, mcf overrides mkh and mkf.
+# hammingdistance=0   (hdist) Maximum Hamming distance for ref kmers (subs only).
+# Memory use is proportional to (3*K)^hdist.
+# qhdist=0            Hamming distance for query kmers; impacts speed, not memory.
+# editdistance=0      (edist) Maximum edit distance from ref kmers (subs 
+#                     and indels).  Memory use is proportional to (8*K)^edist.
+# hammingdistance2=0  (hdist2) Sets hdist for short kmers, when using mink.
+# qhdist2=0           Sets qhdist for short kmers, when using mink.
+# editdistance2=0     (edist2) Sets edist for short kmers, when using mink.
+# forbidn=f           (fn) Forbids matching of read kmers containing N.
+# By default, these will match a reference 'A' if 
+# hdist>0 or edist>0, to increase sensitivity.
+# removeifeitherbad=t (rieb) Paired reads get sent to 'outmatch' if either is 
+# match (or either is trimmed shorter than minlen).  
+# Set to false to require both.
+# ecco=f              For overlapping paired reads only.  Performs error-
+#   correction with BBMerge prior to kmer operations.
+# threads=auto        (t) Set number of threads to use; default is number of 
+# logical processors.
+# prealloc=f          Preallocate memory in table.  Allows faster table loading 
+# and more efficient memory usage, for a large reference.
+# ktrim=f             Trim reads to remove bases matching reference kmers.
+# Values: 
+#   f (don't trim), 
+#                        r (trim to the right), 
+#                        l (trim to the left)
+# qtrim=f             Trim read ends to remove bases with quality below trimq.
+#                     Performed AFTER looking for kmers.  Values: 
+#                        rl (trim both ends), 
+#                        f (neither end), 
+#                        r (right end only), 
+#                        l (left end only),
+#                        w (sliding window).
+# trimq=6             Regions with average quality BELOW this will be trimmed,
+#                     if qtrim is set to something other than f.  Can be a 
+#                     floating-point number like 7.3.
+# minlength=10        (ml) Reads shorter than this after trimming will be 
+#                     discarded.  Pairs will be discarded if both are shorter.
+# mlf=0               (minlengthfraction) Reads shorter than this fraction of 
+#                     original length after trimming will be discarded.
+# maxlength=          Reads longer than this after trimming will be discarded.
+# minavgquality=0     (maq) Reads with average quality (after trimming) below 
+#                     this will be discarded.
+# maqb=0              If positive, calculate maq from this many initial bases.
+# minbasequality=0    (mbq) Reads with any base below this quality (after 
+#                     trimming) will be discarded.
+# maxns=-1            If non-negative, reads with more Ns than this 
+#                     (after trimming) will be discarded.
+# mcb=0               (minconsecutivebases) Discard reads without at least 
+#                     this many consecutive called bases.
+# ottm=f              (outputtrimmedtomatch) Output reads trimmed to shorter 
+#                     than minlength to outm rather than discarding.
+# tp=0                (trimpad) Trim this much extra around matching kmers.
+# tbo=f               (trimbyoverlap) Trim adapters based on where paired 
+#                     reads overlap.
+# strictoverlap=t     Adjust sensitivity for trimbyoverlap mode.
+# minoverlap=14       Require this many bases of overlap for detection.
+# mininsert=40        Require insert size of at least this for overlap.
+#                     Should be reduced to 16 for small RNA sequencing.
+# tpe=f               (trimpairsevenly) When kmer right-trimming, trim both 
+#                     reads to the minimum length of either.
+# forcetrimleft=0     (ftl) If positive, trim bases to the left of this position
+#                     (exclusive, 0-based).
+# forcetrimright=0    (ftr) If positive, trim bases to the right of this position
+#                     (exclusive, 0-based).
+# forcetrimright2=0   (ftr2) If positive, trim this many bases on the right end.
+# forcetrimmod=0      (ftm) If positive, right-trim length to be equal to zero,
+#                     modulo this number.
+# restrictleft=0      If positive, only look for kmer matches in the 
+#                     leftmost X bases.
+# restrictright=0     If positive, only look for kmer matches in the 
+#                     rightmost X bases.
+# mingc=0             Discard reads with GC content below this.
+# maxgc=1             Discard reads with GC content above this.
+# gcpairs=t           Use average GC of paired reads.
+#                     Also affects gchist.
+# tossjunk=f          Discard reads with invalid characters as bases.
+# barcodefilter=f     Remove reads with unexpected barcodes if barcodes is set,
+#                     or barcodes containing 'N' otherwise.  A barcode must be
+#                     the last part of the read header.  Values:
+#                        t:     Remove reads with bad barcodes.
+#                        f:     Ignore barcodes.
+#                        crash: Crash upon encountering bad barcodes.
+# barcodes=           Comma-delimited list of barcodes or files of barcodes.
+# trimpolya=0         If greater than 0, trim poly-A or poly-T tails of
+#                     at least this length on either end of reads.
+# trimpolygleft=0     If greater than 0, trim poly-G prefixes of at least this
+#                     length on the left end of reads.  Does not trim poly-C.
+# trimpolygright=0    If greater than 0, trim poly-G tails of at least this 
+#                     length on the right end of reads.  Does not trim poly-C.
+# trimpolyg=0         This sets both left and right at once.
+# filterpolyg=0       If greater than 0, remove reads with a poly-G prefix of
+#                     at least this length (on the left).
+# Note: there are also equivalent poly-C flags.
+# pratio=base,base    'pratio=G,C' will print the ratio of G to C polymers.
+# plen=20             Length of homopolymers to count.
+### Bowtie2 ###
+# 
+# --end-to-end       entire read must align; no clipping (on)
+# OR
+# --local            local alignment; ends might be soft clipped (off)
+# Presets:                 Same as:
+#   For --end-to-end:
+#   --very-fast            -D 5 -R 1 -N 0 -L 22 -i S,0,2.50
+#   --fast                 -D 10 -R 2 -N 0 -L 22 -i S,0,2.50
+#   --sensitive            -D 15 -R 2 -N 0 -L 22 -i S,1,1.15 (default)
+#   --very-sensitive       -D 20 -R 3 -N 0 -L 20 -i S,1,0.50
+# 
+# For --local:
+#   --very-fast-local      -D 5 -R 1 -N 0 -L 25 -i S,1,2.00
+#   --fast-local           -D 10 -R 2 -N 0 -L 22 -i S,1,1.75
+#   --sensitive-local      -D 15 -R 2 -N 0 -L 20 -i S,1,0.75 (default)
+#   --very-sensitive-local -D 20 -R 3 -N 0 -L 20 -i S,1,0.50
+####bamCoverage#####
+# --binSize INT 
+#                   Size of the bins, in bases, for the output of the bigwig/bedgraph file. (Default: 50)
+#                   Read coverage normalization options:
+# --effectiveGenomeSize EFFECTIVEGENOMESIZE
+#                  The effective genome size is the portion of the genome that is mappable. (default: None)
+# --normalizeUsing {RPKM,CPM,BPM,RPGC,None}
+#                  (Default: None)
+# --ignoreForNormalization IGNOREFORNORMALIZATION [IGNOREFORNORMALIZATION ...]
+#                  A list of space-delimited chromosome names containing those chromosomes that should be excluded for computing the normalization. 
+#                  example: --ignoreForNormalization chrX chrM. (default: None)
+# --skipNonCoveredRegions, --skipNAs
+#                  This parameter determines if non-covered regions. The default is to treat those regions as having a value of zero. (default: False)
+# --smoothLength INT bp
+#                  The smooth length defines a window, larger than the binSize, to average the number of reads. 
+#                  example: --binSize is set to 20 and the --smoothLength is set to 60, (default: None)
+# 
+# Read processing options:
+#   ---ignoreDuplicates    
+#                        reads with same orientation and start will be considered only once. paired: the mate's position considered. (default: False)
+#   --minMappingQuality INT
+#                         If set, only reads that have a mapping quality score of at least this are considered. (default: None)
+#   --centerReads         
+#                         Centered with respect to the fragment length.  (default: False)
+#   --samFlagInclude INT  
+#                         Include reads based on the SAM flag.  (Default: None)
+#   --samFlagExclude INT  
+#                         Exclude reads based on the SAM flag. (Default: None)
+#   --minFragmentLength INT
+#                         The minimum fragment length needed for read/pair inclusion. (Default: 0)
+#   --maxFragmentLength INT
+#                         The maximum fragment length needed for read/pair inclusion. (Default: 0)

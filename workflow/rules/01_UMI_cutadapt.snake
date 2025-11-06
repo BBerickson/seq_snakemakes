@@ -1,0 +1,134 @@
+# ===== Snakefile for trimming and filtering NET-seq reads =====================
+
+# Extract UMI sequence R1R2
+# The UMI is the first 12 bases of read 2. By default umi_tools assumes
+# the given UMI pattern starts at the 5' end of the read. To account for
+# this read 2 is provided with -I and read 1 is provided with --read2-in.
+rule extract_umi:
+    input:
+        lambda wildcards: _get_fqs(wildcards.sample, RAW_DATA, FASTQ_DIR, full_name=True, paired=True)
+    output:
+        R1  = temp(PROJ + "/{sample}_R1_umi.fastq" + (".gz" if config.get("compress_temp", True) else "")),
+        R2  = temp(PROJ + "/{sample}_R2_umi.fastq" + (".gz" if config.get("compress_temp", True) else "")),
+        log = PROJ + "/logs/{sample}_extract_umi.out"
+    params:
+        job_name = "{sample}_umi_extract",
+        umi_pat  = CMD_PARAMS["umi_pattern"],
+        orientation = ORIENTATION
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 5)
+    log:
+        out = PROJ + "/logs/{sample}_extract_umi.out",
+        err = PROJ + "/logs/{sample}_extract_umi.err"
+    message:
+        "Extracting UMIs for {wildcards.sample}"
+    threads:
+        1
+    shell:
+        """
+        if [ -z "{params.umi_pat}" ]; then
+            # If no UMI pattern, create symlinks
+            ln -sf {input[0]} {output.R1}
+            ln -sf {input[1]} {output.R2}
+            touch {output.log}
+        elif [ "{params.orientation}" = "R1" ]; then
+            # Extract UMIs from R1
+            umi_tools extract \
+              -I {input[1]} \
+              --extract-method=string \
+              --bc-pattern={params.umi_pat} \
+              --read2-in={input[0]} \
+              --read2-out={output.R1} \
+              -L {output.log} \
+              | gzip \
+              > {output.R2}
+        else
+            # Extract UMIs from R2
+            umi_tools extract \
+              -I {input[0]} \
+              --extract-method=string \
+              --bc-pattern={params.umi_pat} \
+              --read2-in={input[1]} \
+              --read2-out={output.R2} \
+              -L {output.log} \
+              | gzip \
+              > {output.R1}
+        fi
+        """
+
+
+# Trim reads with cutadapt
+rule cutadapt:
+    input:
+        R1 = PROJ + "/{sample}_R1_umi.fastq" + (".gz" if config.get("compress_temp", True) else ""),
+        R2 = PROJ + "/{sample}_R2_umi.fastq" + (".gz" if config.get("compress_temp", True) else "")
+    output:
+        R1    = temp(PROJ + "/{sample}_R1.fastq" + (".gz" if config.get("compress_temp", True) else "")),
+        R2    = temp(PROJ + "/{sample}_R2.fastq" + (".gz" if config.get("compress_temp", True) else "")),
+        stats = PROJ + "/cutadapt/{sample}_cutadapt_stats.txt"
+    params:
+        job_name = "{sample}_cutadapt",
+        args     = CMD_PARAMS["cutadapt"]
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
+    log:
+        out = PROJ + "/logs/{sample}_cutadapt.out",
+        err = PROJ + "/logs/{sample}_cutadapt.err"
+    message:
+        "Running cutadapt on {wildcards.sample}"
+    threads:
+        6
+    shell:
+        """
+        if [ -z "{params.args}" ]; then
+            # No cutadapt args, create symlinks to original files
+            ln -sf {input.R1} {output.R1}
+            ln -sf {input.R2} {output.R2}
+            touch {output.stats}
+        else
+            # Run cutadapt with provided arguments
+            python3 -m cutadapt \
+              {params.args} \
+              -j {threads} \
+              -o {output.R1} \
+              -p {output.R2} \
+              {input.R1} \
+              {input.R2} \
+              > {output.stats}
+        fi
+        """
+
+
+# Create cutadapt summary
+rule cutadapt_summary:
+    input:
+        expand(
+            PROJ + "/cutadapt/{sample}_cutadapt_stats.txt",
+            sample = SAMS_UNIQ
+        )
+    output:
+        PROJ + "/stats/" + PROJ + "_cutadapt.tsv"
+    params:
+        job_name = PROJ + "_cutadapt_summary"
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
+    log:
+        out = PROJ + "/logs/" + PROJ + "_cutadapt_summary.out",
+        err = PROJ + "/logs/" + PROJ + "_cutadapt_summary.err"
+    message:
+        "Creating " + PROJ + " cutadapt summary"
+    threads:
+        1
+    shell:
+        """
+        python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+
+import rules
+
+rules._cutadapt_summary("{input}".split(), "{output[0]}")
+EOF
+        """
+
+

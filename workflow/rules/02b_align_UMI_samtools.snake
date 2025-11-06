@@ -1,0 +1,109 @@
+# ====== Rules for filtering aligned reads with umi_tools and samtools =================================
+
+# Remove duplicate reads
+rule dedup_UMI:
+    input:
+        bam   = PROJ  + "/{sample}_" + INDEX_MAP + ".bam",
+        bai   = PROJ  + "/{sample}_" + INDEX_MAP + ".bam.bai"
+    output:
+        bamt   = temp(PROJ + "/bams/{sample}_" + INDEX_MAP + "_" + SEQ_DATE + "_temp.bam"),
+        bamti  = temp(PROJ + "/bams/{sample}_" + INDEX_MAP + "_" + SEQ_DATE + "_temp.bam.bai"),
+        stats  = PROJ + "/bams/{sample}_" + INDEX_MAP + "_UMI_dedup_stats.txt"
+    params:
+        job_name = "{sample}_dedup",
+        samp     = "{sample}_" + INDEX_MAP,
+        sortname = PROJ + "/{sample}.temp",
+        args     = CMD_PARAMS["umi_tools"]
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 3, 10)
+    log:
+        out = PROJ + "/logs/{sample}_dedup.out",
+        err = PROJ + "/logs/{sample}_dedup.err"
+    threads:
+        4
+    shell:
+        """
+        umi_tools dedup \
+            {params.args} \
+            -I {input.bam} \
+            -S {output.bamt} \
+            -L {output.stats}
+        
+        samtools index -@ {threads} {output.bamt}
+        
+        """
+
+# Create duplication summary
+rule dedup_summary:
+    input:
+        sorted(expand(
+            PROJ + "/bams/{sample}_" + INDEX_MAP + "_UMI_dedup_stats.txt",
+            sample = SAMS_UNIQ
+        ))
+    output:
+        PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_UMI_dedup.tsv"
+    params:
+        job_name = PROJ + "_dedup_summary",
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
+    log:
+        out = PROJ + "/logs/" + PROJ + "_dedup_summary.out",
+        err = PROJ + "/logs/" + PROJ + "_dedup_summary.err"
+    threads:
+        1
+    shell:
+        """
+        python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+
+import rules
+
+rules._dedup_summary("{input}".split(), "{output[0]}")
+EOF
+        """
+
+
+# filter aligned reads
+rule align_filter:
+    input:
+        bam    = PROJ + "/bams/{sample}_" + INDEX_MAP + "_" + SEQ_DATE + "_temp.bam",
+        bai    = PROJ + "/bams/{sample}_" + INDEX_MAP + "_" + SEQ_DATE + "_temp.bam.bai"
+    output:
+        bam    = PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
+        bai    = PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam.bai",
+        counts = PROJ + "/bams/{sample}_aligned_{index}_count.txt",
+        bamt   = temp(PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + "_temp2.bam"),
+        bamit  = temp(PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + "_temp2.bam.bai")
+    params:
+        job_name = "{sample}_aligned_{index}_align_filter",
+        idx      = lambda wildcards: INDEX_PATH + wildcards.index + ".txt",
+        samp     = "{sample}_{index}",
+        args     = CMD_PARAMS["samtools"],
+        fa2      = lambda wildcards: config_indexes[wildcards.index].get("FA_SAMPLE"),
+        sortname = PROJ + "/{sample}_aligned_{index}.temp"
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
+    log:
+        out = PROJ + "/logs/{sample}_aligned_{index}_align_filter.out",
+        err = PROJ + "/logs/{sample}_aligned_{index}_align_filter.err"
+    threads: 
+        12
+    shell:
+        """
+        # filter
+        samtools view {params.args} {input.bam} > {output.bamt}
+        samtools index -@ {threads} {output.bamt}
+        
+        samtools view {output.bamt} $(head -n1 {params.idx}) \
+        | sed 's/spike_*//g' | samtools view -bT {params.fa2} - \
+        | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+        > {output.bam}
+        
+        samtools index -@ {threads} {output.bam}
+        echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
+        
+        """
+
+
+                    

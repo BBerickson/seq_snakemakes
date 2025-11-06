@@ -1,0 +1,52 @@
+# ====== Rules for saving files on amc-sandbox and creating URLS for UCSC genome browser =================================
+
+# copy to amc-sandbox and make URL
+rule bamCoverageURL:
+    input:
+        bigwig  = PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}.bw"
+    output:
+        stats   = temp(PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_bamCoverage_stats.txt")
+    params:
+        job_name = "{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_UCSC_URL",
+        color    = lambda wildcards: _get_col(wildcards.newnam, COLS_DICT),
+        url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}.bw"
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
+    log:
+        out = PROJ + "/logs/{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage_URL.out",
+        err = PROJ + "/logs/{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage_URL.err"
+    threads: 
+        1
+    container: None
+    shell:
+        """
+        
+        echo "track type=bigWig visibility=full name='{wildcards.newnam}_{SEQ_DATE}_{wildcards.suffix}' description='{wildcards.newnam}_{SEQ_DATE}_{wildcards.suffix}' color={params.color} bigDataUrl={params.url}" > {output.stats}
+        ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
+        scp {input.bigwig} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
+        
+        """
+
+# Combine URLS into one file
+rule bamCoverage_summary:
+    input:
+        lambda wildcards: sorted([
+            PROJ + f"/bw/{newnam}_aligned_{index}_{SEQ_DATE}_norm_{suffix}_bamCoverage_stats.txt"
+            for newnam, index, suffix in zip(DF_SAM_NORM['Newnam'], DF_SAM_NORM['Index'], DF_SAM_NORM['Suffix'])
+            if index == wildcards.index
+        ])
+    output:
+        PROJ + "/URLS/" + PROJ + "_{index}_" + SEQ_DATE + "_norm_{suffix}_bw_URL.txt"
+    params:
+        job_name = PROJ + "_{index}_" + SEQ_DATE + "_{suffix}_cat_URL"
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
+    log:
+        out = PROJ + "/logs/" + PROJ + "_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage_summary.out",
+        err = PROJ + "/logs/" + PROJ + "_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage_summary.err"
+    threads:
+        1
+    shell:
+        """
+        cat {input} > {output}
+        """

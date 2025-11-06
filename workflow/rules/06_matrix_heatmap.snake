@@ -1,0 +1,247 @@
+# rule for heatmap overview
+
+rule create_heatmap_plots:
+    input:
+        lambda wildcards: sorted(list(set([
+            PROJ + f"/matrix/{row['Region']}/{wildcards.group}/"
+            f"{wildcards.group}_aligned_{row['Index']}_{SEQ_DATE}_"
+            f"{row['Region']}_{row['Value']}_norm_{row['Suffix']}_{wildcards.sense_asense}_matrix.gz"
+            for _, row in DF_SAM_NORM.iterrows()
+            if (
+                row['Sample'] in GROUPS[wildcards.group]
+                and str(row['Region']) == wildcards.region
+                and str(row['Region']) in HEATMAP_REGIONS  # Explicit whitelist
+                and str(row['Index']) == wildcards.index
+                and str(row['Value']) == wildcards.covarg
+                and str(row['Suffix']) == wildcards.suffix
+            )
+        ])))
+    output:
+        tempplot = temp(
+            PROJ + "/heatmap/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_heatmap.svg"
+        ),
+        heatmap = temp(
+            PROJ + "/heatmap/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_heatmap.png"
+        )
+    params:
+        job_name = PROJ + "/heatmap/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_heatmap",
+        args     = CMD_PARAMS["heatmap"],
+        setcol   = lambda wildcards: _rgb2hexplus2(SAMPLES, wildcards.group, COLS_DICT) if wildcards.sense_asense == "anti" else _rgb2hexplus(SAMPLES, wildcards.group, COLS_DICT),
+        script   = "workflow/scripts/SvgToPng.R",
+        texty    = "2"
+    resources:
+        memory = lambda wildcards, input: memory_estimator(input, 2, 5) # multiplier, min, max, unit=GB
+    log:
+        out = PROJ + "/logs/{region}_{group}_aligned_{index}__{covarg}_norm_{suffix}_{sense_asense}_heatmap.out",
+        err = PROJ + "/logs/{region}_{group}_aligned_{index}__{covarg}_norm_{suffix}_{sense_asense}_heatmap.err"
+    threads: 1
+    shell:
+        """
+        colors=("{params.setcol}") 
+        
+        plotHeatmap -m {input} \
+            --heatmapWidth 15 --heatmapHeight 30 \
+            {params.args} \
+            --colorList ${{colors}} \
+            -out {output.tempplot} 
+        
+        Rscript {params.script} "{output.tempplot}" "{params.texty}" "{output.heatmap}"
+        """
+
+rule heatmap_pdf:
+    input:
+        lambda wildcards: sorted(list(set([
+        PROJ + f"/heatmap/{row['Region']}_{group}_aligned_{row['Index']}_temp_{row['Value']}_norm_{row['Suffix']}_{sense_asense}_heatmap.png"
+        for _, row in DF_SAM_NORM.iterrows()
+        for group in GROUPS.keys()
+        for sense_asense in SENSE_ASENSE
+        if (
+            str(row['Index']) == wildcards.index
+            and str(row['Region']) == wildcards.region
+            and str(row['Region']) in HEATMAP_REGIONS  # Explicit whitelist
+            )
+    ])))
+    output:
+        PROJ + "/report/" + PROJ + "_{genelist}_{region}_{index}_norm_{suffix}_heatmap.pdf"  
+    params:
+        job_name  = "{genelist}_{region}_{index}_norm_{suffix}_heatmap_pdf",
+        script    = "workflow/scripts/pngToPDF.R",
+        pdf_title = lambda wildcards: [
+        f"{row['Region']}_{row['Value']}_norm_{row['Suffix']}: {SEQ_DATE}"
+        for _, row in DF_SAM_NORM.iterrows()
+        if str(row['Index']) == wildcards.index and str(row['Region']) == wildcards.region
+    ][0], 
+        chunkSize = 2
+    resources:
+        memory = lambda wildcards, input: memory_estimator(input, 4, 2) # multiplier, min, max, unit=GB
+    log:
+        out = PROJ + "/logs/{genelist}_{region}_{index}_norm_{suffix}_heatmap_pdf.out",
+        err = PROJ + "/logs/{genelist}_{region}_{index}_norm_{suffix}_heatmap_pdf.err"
+    threads: 1
+    shell:
+        """
+        Rscript {params.script} "{input}" "{params.chunkSize}" "{params.pdf_title}" "{output}"
+        """
+
+rule cluster_heatmap_plots:
+    input:
+        lambda wildcards: sorted(list(set([
+            PROJ + f"/matrix/{row['Region']}/{wildcards.group}/"
+            f"{wildcards.group}_aligned_{row['Index']}_{SEQ_DATE}_"
+            f"{row['Region']}_{row['Value']}_norm_{row['Suffix']}_{wildcards.sense_asense}_matrix.gz"
+            for _, row in DF_SAM_NORM.iterrows()
+            if (
+                row['Sample'] in GROUPS[wildcards.group]
+                and str(row['Region']) == wildcards.region
+                and str(row['Region']) in HEATMAP_REGIONS  # Explicit whitelist
+                and str(row['Index']) == wildcards.index
+                and str(row['Value']) == wildcards.covarg
+                and str(row['Suffix']) == wildcards.suffix
+            )
+        ])))
+    output:
+        tempplot = temp(
+            PROJ + "/heatmap/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_cluster.svg"
+        ),
+        heatmap = temp(
+            PROJ + "/heatmap/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_cluster.png"
+        ),
+        bedfile  = PROJ + "/heatmap/{region}_{group}_aligned_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_{sense_asense}_cluster.bed"
+    params:
+        job_name = PROJ + "/heatmap/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_cluster",
+        args     = lambda wildcards: CMD_PARAMS["clusterHM"]["anti" if wildcards.sense_asense == "anti" else "sense"],
+        setcol   = lambda wildcards: _rgb2hexplus2(SAMPLES,wildcards.group,COLS_DICT) if wildcards.sense_asense == "anti" else _rgb2hexplus(SAMPLES,wildcards.group,COLS_DICT),
+        script = "workflow/scripts/SvgToPng.R",
+        texty    = "2"
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
+    log:
+        out = PROJ + "/logs/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_cluster.out",
+        err = PROJ + "/logs/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_cluster.err"
+    threads:
+        1
+    shell:
+        """
+        colors=("{params.setcol}") 
+        
+        plotHeatmap -m {input} \
+        --heatmapWidth 15 --heatmapHeight 30 \
+        {params.args} \
+        --colorList ${{colors}} \
+        -out {output.tempplot} \
+        --outFileSortedRegions {output.bedfile}
+        
+        Rscript {params.script} "{output.tempplot}" "{params.texty}" "{output.heatmap}"
+        """
+
+rule cluster_pdf:
+    input:
+        lambda wildcards: sorted(list(set([
+        PROJ + f"/heatmap/{row['Region']}_{group}_aligned_{row['Index']}_temp_{row['Value']}_norm_{row['Suffix']}_{sense_asense}_cluster.png"
+        for _, row in DF_SAM_NORM.iterrows()
+        for group in GROUPS.keys()
+        for sense_asense in SENSE_ASENSE
+        if (
+            str(row['Index']) == wildcards.index
+            and str(row['Region']) == wildcards.region
+            and str(row['Region']) in HEATMAP_REGIONS  # Explicit whitelist
+            )
+    ])))
+    output:
+        PROJ + "/report/" + PROJ + "_{genelist}_{region}_{index}_norm_{suffix}_cluster.pdf"  
+    params:
+        job_name  = "{genelist}_{region}_{index}_norm_{suffix}_cluster_pdf",
+        script    = "workflow/scripts/pngToPDF.R",
+        pdf_title = lambda wildcards: [
+        f"{row['Region']}_{row['Value']}_norm_{row['Suffix']}: {SEQ_DATE}"
+        for _, row in DF_SAM_NORM.iterrows()
+        if str(row['Index']) == wildcards.index and str(row['Region']) == wildcards.region
+    ][0], 
+        chunkSize = 1
+    resources:
+        memory = lambda wildcards, input: memory_estimator(input, 1, 1)
+    log:
+        out = PROJ + "/logs/{genelist}_{region}_{index}_norm_{suffix}_cluster_pdf.out",
+        err = PROJ + "/logs/{genelist}_{region}_{index}_norm_{suffix}_cluster_pdf.err"
+    threads: 1
+    shell:
+        """
+        Rscript {params.script} "{input}" "{params.chunkSize}" "{params.pdf_title}" "{output}"
+        """
+                
+rule create_profile_plots:
+    input:
+        lambda wildcards: sorted(list(set([
+            PROJ + f"/matrix/{row['Region']}/{wildcards.group}/"
+            f"{wildcards.group}_aligned_{row['Index']}_{SEQ_DATE}_"
+            f"{row['Region']}_{row['Value']}_norm_{row['Suffix']}_{wildcards.sense_asense}_matrix.gz"
+            for _, row in DF_SAM_NORM.iterrows()
+            if (
+                row['Sample'] in GROUPS[wildcards.group]
+                and str(row['Region']) == wildcards.region
+                and str(row['Region']) in HEATMAP_REGIONS  # Explicit whitelist
+                and str(row['Index']) == wildcards.index
+                and str(row['Value']) == wildcards.covarg
+                and str(row['Suffix']) == wildcards.suffix
+            )
+        ])))
+    output:
+        heatmap = temp(
+            PROJ + "/heatmap/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_profile_plots.png"
+        )
+    params:
+        job_name = PROJ + "/heatmap/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_profile",
+        setcol   = lambda wildcards: _rgb2hex(SAMPLES,wildcards.group,COLS_DICT)
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
+    log:
+        out = PROJ + "/logs/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_profile_plots.out",
+        err = PROJ + "/logs/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_profile_plots.err"
+    threads:
+        1
+    shell:
+        """
+        colors=("{params.setcol}") 
+        
+        plotProfile -m {input} \
+        --perGroup --legendLocation best \
+        --colors ${{colors}} \
+        -out {output.heatmap} 
+        
+        """
+
+rule profile_pdf:
+    input:
+        lambda wildcards: sorted(list(set([
+        PROJ + f"/heatmap/{row['Region']}_{group}_aligned_{row['Index']}_temp_{row['Value']}_norm_{row['Suffix']}_{sense_asense}_profile_plots.png"
+        for _, row in DF_SAM_NORM.iterrows()
+        for group in GROUPS.keys()
+        for sense_asense in SENSE_ASENSE
+        if (
+            str(row['Index']) == wildcards.index
+            and str(row['Region']) == wildcards.region
+            and str(row['Region']) in HEATMAP_REGIONS  # Explicit whitelist
+            )
+    ])))
+    output:
+        PROJ + "/report/" + PROJ + "_{genelist}_{region}_{index}_norm_{suffix}_profile.pdf"  
+    params:
+        job_name  = "{genelist}_{region}_{index}_profile_norm_{suffix}_pdf",
+        script    = "workflow/scripts/pngToPDF.R",
+        pdf_title = lambda wildcards: [
+        f"{row['Region']}_{row['Value']}_norm_{row['Suffix']}: {SEQ_DATE}"
+        for _, row in DF_SAM_NORM.iterrows()
+        if str(row['Index']) == wildcards.index and str(row['Region']) == wildcards.region
+    ][0], 
+        chunkSize = 4
+    resources:
+        memory = lambda wildcards, input: memory_estimator(input, 1, 1)
+    log:
+        out = PROJ + "/logs/{genelist}_{region}_{index}_norm_{suffix}_profile_pdf.out",
+        err = PROJ + "/logs/{genelist}_{region}_{index}_norm_{suffix}_profile_pdf.err"
+    threads: 1
+    shell:
+        """
+        Rscript {params.script} "{input}" "{params.chunkSize}" "{params.pdf_title}" "{output}"
+        """
+         

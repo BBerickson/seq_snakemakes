@@ -1,0 +1,66 @@
+# ====== Rules for running rMATS from bam files =================================
+
+# gathering results
+rule gathering_bams_groups:
+    input:
+        PROJ + "/report/" + PROJ + "_results.tsv"
+    output:
+        PROJ + "/rmats/{compgroups}_S1.txt",
+        PROJ + "/rmats/{compgroups}_S2.txt",
+        PROJ + "/rmats/{compgroups}_bams.tsv",
+        PROJ + "/rmats/{compgroups}_palette.txt"
+    params:
+        job_name = "{compgroups}_rmats_bams_groups",
+        project  = PROJ + "/" + BAM_PATH,
+        mygroup  = "{compgroups}",
+        mycols   = COLS_DICT,
+        mysamps  = SAM_GRPS
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
+    log:
+        out = PROJ + "/logs/rmats_bams_{compgroups}.out",
+        err = PROJ + "/logs/rmats_bams_{compgroups}.err"
+    message:
+        "getting final rmats_bams_groups  {wildcards.compgroups}"
+    threads: 
+        1
+    script:
+        '../scripts/rmats_groups.R'
+  
+
+# Align trimmed reads with star rmats
+rule fastq_rmats:
+    input:
+        S1 = PROJ + "/rmats/{compgroups}_S1.txt",
+        S2 = PROJ + "/rmats/{compgroups}_S2.txt"
+    output:
+        SE = PROJ + "/rmats/{compgroups}/SE.MATS.JC.txt"
+    params:
+        job_name  = "{compgroups}_fastq_rmats",
+        outdir    = PROJ + "/rmats/{compgroups}",
+        outdirtmp = PROJ + "/rmats/{compgroups}/tmp",
+        gtf       = GTF,
+        args      = CMD_PARAMS["rmats"]
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 10, 30) # multiplier, min, max, unit=GB
+    log:
+        out = PROJ + "/logs/{compgroups}_fastq_rmats.out",
+        err = PROJ + "/logs/{compgroups}_fastq_rmats.err"
+    threads: 
+        12
+    shell:
+        """
+        mkdir -p {params.outdirtmp}
+        
+        rmats.py --b1 {input.S1} --b2 {input.S2} \
+        --gtf {params.gtf} \
+        --od {params.outdir} \
+        --tmp {params.outdirtmp} \
+        --nthread {threads} \
+        {params.args}
+        
+        rm -rf {params.outdirtmp}
+        """
+                    
+                    
+                    
