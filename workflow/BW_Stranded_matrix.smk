@@ -11,14 +11,14 @@ import yaml
 from pathlib import Path
 
 # Include custom Python functions
-include: "funs.py"
+include: workflow.source_path("scripts/funs.py")
 
 # ------------------------------------------------------------------------------
 # Load main genome config
 # ------------------------------------------------------------------------------
 
 GENOME = config["GENOME"]
-GENOME_CONFIG = Path("pipelines/ref") / f"{GENOME}.yaml"
+GENOME_CONFIG = Path("workflow/ref") / f"{GENOME}.yaml"
 
 if not GENOME_CONFIG.exists():
     sys.exit(f"ERROR: {GENOME} is not a valid GENOME selection.")
@@ -34,7 +34,7 @@ raw_indexes = config['INDEXES']
 INDEXES = [raw_indexes] if isinstance(raw_indexes, str) else [raw_indexes[0]]
 
 # Paths to additional config files
-GENOME_CONFIG1 = Path("pipelines/ref") / f"{INDEXES[0]}.yaml"
+GENOME_CONFIG1 = Path("workflow/ref") / f"{INDEXES[0]}.yaml"
 
 # Validate existence
 if not GENOME_CONFIG1.exists():
@@ -169,12 +169,30 @@ rule all:
             index=DF_SAM_NORM['Index'],
             suffix=DF_SAM_NORM['Suffix']
         ),
-        # matrix file
-        expand(
-          PROJ + "/URLS/{region}_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_{sense_asense}_matrix.url.txt",
-           zip, region=DF_SAM_NORM['Region'], index=DF_SAM_NORM['Index'], covarg=DF_SAM_NORM['Value'], 
-           suffix=DF_SAM_NORM['Suffix'], sense_asense=DF_SAM_NORM['Sense_Asense']
-        )
+        # matrix files
+          expand(
+              PROJ + "/matrix/{region}/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_{sense_asense}_matrix.gz",
+              zip, 
+              region=DF_SAM_NORM['Region'], 
+              newnam=DF_SAM_NORM['Newnam'],
+              index=DF_SAM_NORM['Index'], 
+              covarg=DF_SAM_NORM['Value'], 
+              suffix=DF_SAM_NORM['Suffix'], 
+              sense_asense=DF_SAM_NORM['Sense_Asense']
+          ),
+          
+        # matrix url file for amc-sandbox
+          [] if config.get("skip_matrix_url") else [
+            expand(
+                PROJ + "/URLS/{region}_aligned_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_{sense_asense}_matrix.url.txt",
+                zip, 
+                region=DF_SAM_NORM['Region'], 
+                index=DF_SAM_NORM['Index'], 
+                covarg=DF_SAM_NORM['Value'], 
+                suffix=DF_SAM_NORM['Suffix'], 
+                sense_asense=DF_SAM_NORM['Sense_Asense']
+            )
+          ]
 
 
 # BW with deeptools bamCoverage

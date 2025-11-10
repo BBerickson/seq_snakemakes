@@ -1,4 +1,4 @@
-# ===== Snake file for processing ChIP-seq data ================================
+# ===== Snake file for processing mNET-seq data ================================
 
 # Configure shell for all rules
 shell.executable("/bin/bash")
@@ -11,14 +11,14 @@ import yaml
 from pathlib import Path
 
 # Include custom Python functions
-include: "funs.py"
+include: workflow.source_path("scripts/funs.py")
 
 # ------------------------------------------------------------------------------
 # Load main genome config
 # ------------------------------------------------------------------------------
 
 GENOME = config["GENOME"]
-GENOME_CONFIG = Path("pipelines/ref") / f"{GENOME}.yaml"
+GENOME_CONFIG = Path("workflow/ref") / f"{GENOME}.yaml"
 
 if not GENOME_CONFIG.exists():
     sys.exit(f"ERROR: {GENOME} is not a valid GENOME selection.")
@@ -35,7 +35,7 @@ INDEXES = [raw_indexes] if isinstance(raw_indexes, str) else [raw_indexes[0]]
 
 
 # Paths to additional config files
-GENOME_CONFIG1 = Path("pipelines/ref") / f"{INDEXES[0]}.yaml"
+GENOME_CONFIG1 = Path("workflow/ref") / f"{INDEXES[0]}.yaml"
 
 # Validate existence
 if not GENOME_CONFIG1.exists():
@@ -67,9 +67,10 @@ REGIONS      = config.get("REGIONS")
 USER         = config.get("USER")
 
 # From additional configs
-MY_REF      = config1.get("MY_REF")
-PI_REF      = config1.get("PI_REF")
+FW_REF      = config1.get("FW_REF")
+REV_REF     = config1.get("REV_REF")
 GENELIST = config1.get("GENELIST") or ""
+
 
 BW_DIR = PROJ + "/raw_bw"
 os.makedirs(BW_DIR, exist_ok = True)
@@ -134,7 +135,7 @@ wildcard_constraints:
     index  = WILDCARD_REGEX,
     suffix = WILDCARD_REGEX,
     covarg = "[a-zA-Z0-9_.\\-]+",
-    region = "543|5|5L|3|PI|EI"
+    region = "543|5|3|PI|EI"
 
 COLS_DICT = _get_colors(SAMS_UNIQ, COLORS)
 
@@ -157,21 +158,35 @@ rule all:
     input:
         # bamCoverage
         expand(
-            PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}.bw",
+            PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_fw.bw",
             zip,
             newnam=DF_SAM_NORM['Newnam'],
             index=DF_SAM_NORM['Index'],
             suffix=DF_SAM_NORM['Suffix']
         ),
-        
-        # matrix file
         expand(
-          PROJ + "/URLS/{region}_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_matrix.url.txt",
-           zip, region=DF_SAM_NORM['Region'], index=DF_SAM_NORM['Index'], covarg=DF_SAM_NORM['Value'], suffix=DF_SAM_NORM['Suffix']
-        )
+            PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_suffix}_rev.bw",
+            zip,
+            newnam=DF_SAM_NORM['Newnam'],
+            index=DF_SAM_NORM['Index'],
+            suffix=DF_SAM_NORM['Suffix']
+        ),
+        # matrix url file for amc-sandbox
+          [] if config.get("skip_matrix_url") else [
+            expand(
+                PROJ + "/URLS/{region}_aligned_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_bidirectonal_matrix.url.txt",
+                zip, 
+                region=DF_SAM_NORM['Region'], 
+                index=DF_SAM_NORM['Index'], 
+                covarg=DF_SAM_NORM['Value'], 
+                suffix=DF_SAM_NORM['Suffix']
+            )
+          ]
+        
 
 # BW with deeptools bamCoverage
-include: "rules/04_get_BW_UnStranded.snake"
-# make matrix files
-include: "rules/05_UnStranded_matrix.snake"
+include: "rules/04_get_BW_Stranded.snake"
+# 5 sense matrix file
+include: "rules/05_bidirectional_matrix.snake"
+
 

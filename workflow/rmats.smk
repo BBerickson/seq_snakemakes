@@ -11,14 +11,14 @@ import yaml
 from pathlib import Path
 
 # Include custom Python functions
-include: "funs.py"
+include: workflow.source_path("scripts/funs.py")
 
 # ------------------------------------------------------------------------------
 # Load main genome config
 # ------------------------------------------------------------------------------
 
 GENOME = config["GENOME"]
-GENOME_CONFIG = Path("pipelines/ref") / f"{GENOME}.yaml"
+GENOME_CONFIG = Path("workflow/ref") / f"{GENOME}.yaml"
 
 if not GENOME_CONFIG.exists():
     sys.exit(f"ERROR: {GENOME} is not a valid GENOME selection.")
@@ -39,7 +39,7 @@ INDEXES = [raw_indexes] if isinstance(raw_indexes, str) else [raw_indexes[0]]
 
 
 # Paths to additional config files
-GENOME_CONFIG1 = Path("pipelines/ref") / f"{INDEXES[0]}.yaml"
+GENOME_CONFIG1 = Path("workflow/ref") / f"{INDEXES[0]}.yaml"
 
 # Validate existence
 if not GENOME_CONFIG1.exists():

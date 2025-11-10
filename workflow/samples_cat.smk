@@ -11,7 +11,7 @@ import yaml
 from pathlib import Path
 
 # Include custom Python functions
-include: "funs.py"
+include: workflow.source_path("scripts/funs.py")
 
 # ------------------------------------------------------------------------------
 # Assign parameters from configs

@@ -150,20 +150,8 @@ SENSE_ASENSE:
   - "sense"
   - "anti"
 
-CONTAINER:
-    "docker://bberickson/bodhi-snakemake:v1.2.0"
-
-# speed up steps by ~2X by not gzip compressing temp files,
-# ~4X-5X more space needed for temp files
-compress_temp: false  # Set to true for gzip compression, false for uncompressed
-
 # stop after alignment, used for small single gene genome expression alignment
 stop_after_alignment: false
-
-# Save data on amc-sandbox and make URLS
-skip_bam_urls: true
-skip_bw_urls: false
-skip_matrix_url: false
 
 # html report
 skip_html_report: true

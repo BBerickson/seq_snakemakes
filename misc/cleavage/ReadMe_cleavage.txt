@@ -1,3 +1,1 @@
-# in project folder sync cleavage pipeline after running normal pipeline
-
-rsync -artuv ~/Ben_pipelines/snakemake_pipelines/misc/cleavage/* .
+# side project that is from old pipeline and needs updating

@@ -13,20 +13,14 @@ mkdir -p logs
 
 # Configuration
 PROFILE="workflow/profiles/Bodhi"
-LSF_CONFIG="workflow/profiles/Bodhi/Bodhi_config.yaml"
 SSH_KEY_DIR="${HOME}/.ssh"
-SAMPLES_FILE="ChIPseq_samples.yaml"
-MATRIX_FILE="UnStranded_matrix.yaml"
+SAMPLES_FILE="samples_cat.yaml"
 
 snakemake \
     --profile ${PROFILE} \
-    --snakefile workflow/ChIPseq.smk \
+    --snakefile workflow/samples_cat.smk \
     --configfile ${SAMPLES_FILE} \
     --config SSH_KEY_DIR="${SSH_KEY_DIR}"
 
-snakemake \
-    --profile ${PROFILE} \
-    --snakefile workflow/UnStranded_matrix.smk \
-    --configfile ${SAMPLES_FILE} ${LSF_CONFIG} ${MATRIX_FILE} \
-    --config SSH_KEY_DIR="${SSH_KEY_DIR}"
+
 

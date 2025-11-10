@@ -13,6 +13,7 @@ mkdir -p logs
 
 # Configuration
 PROFILE="workflow/profiles/Bodhi"
+LSF_CONFIG="workflow/profiles/Bodhi/Bodhi_config.yaml"
 SSH_KEY_DIR="${HOME}/.ssh"
 SAMPLES_FILE="NETseq_samples.yaml"
 MATRIX_FILE="Stranded_matrix.yaml"
@@ -26,6 +27,6 @@ snakemake \
 snakemake \
     --profile ${PROFILE} \
     --snakefile workflow/Stranded_matrix.smk \
-    --configfile ${SAMPLES_FILE} ${MATRIX_FILE} \
+    --configfile ${SAMPLES_FILE} ${LSF_CONFIG} ${MATRIX_FILE} \
     --config SSH_KEY_DIR="${SSH_KEY_DIR}"
 

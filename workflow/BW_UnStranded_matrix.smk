@@ -1,24 +1,24 @@
-# ===== Snake file for processing Bowtie ================================
+# ===== Snake file for processing ChIP-seq data ================================
 
 # Configure shell for all rules
 shell.executable("/bin/bash")
 shell.prefix("[ -f ~/.bash_profile ] && source ~/.bash_profile; set -o nounset -o pipefail -o errexit -x; ")
 
-# python packages
+# Python packages
 import os
 import sys
 import yaml
 from pathlib import Path
 
 # Include custom Python functions
-include: "funs.py"
+include: workflow.source_path("scripts/funs.py")
 
 # ------------------------------------------------------------------------------
 # Load main genome config
 # ------------------------------------------------------------------------------
 
 GENOME = config["GENOME"]
-GENOME_CONFIG = Path("pipelines/ref") / f"{GENOME}.yaml"
+GENOME_CONFIG = Path("workflow/ref") / f"{GENOME}.yaml"
 
 if not GENOME_CONFIG.exists():
     sys.exit(f"ERROR: {GENOME} is not a valid GENOME selection.")
@@ -30,19 +30,20 @@ configfile: str(GENOME_CONFIG)
 # Load additional genome-specific configs manually
 # ------------------------------------------------------------------------------
 
-INDEXES = config['INDEXES']
-if isinstance(INDEXES, str):
-    INDEXES = [INDEXES]
+raw_indexes = config['INDEXES']
+INDEXES = [raw_indexes] if isinstance(raw_indexes, str) else [raw_indexes[0]]
 
-# Load genome-specific config files into a dictionary
-config_indexes = {}
-for idx in INDEXES:
-    path = Path("pipelines/ref") / f"{idx}.yaml"
-    if not path.exists():
-        sys.exit(f"ERROR: {idx} is not a valid genome index.")
-    with open(path) as f:
-        config_indexes[idx] = yaml.safe_load(f)
 
+# Paths to additional config files
+GENOME_CONFIG1 = Path("workflow/ref") / f"{INDEXES[0]}.yaml"
+
+# Validate existence
+if not GENOME_CONFIG1.exists():
+    sys.exit(f"ERROR: Config file not found for index '{INDEXES[0]}'. Expected at: {GENOME_CONFIG1}")
+
+# Load additional configs
+with open(GENOME_CONFIG1) as f:
+    config1 = yaml.safe_load(f)
 
 # ------------------------------------------------------------------------------
 # Assign parameters from configs
@@ -57,24 +58,21 @@ PROJ         = config.get("PROJ")
 RAW_DATA     = config.get("RAW_DATA")
 ALL_SAMPLES  = config.get("SAMPLES")
 SEQ_DATE     = config.get("SEQ_DATE")
-BARCODES     = config.get("BARCODES")
 INDEX_PATH   = config.get("INDEX_PATH")
-INDEX_MAP    = config.get("INDEX_MAP")
+NORM         = config.get("NORM")
 CMD_PARAMS   = config.get("CMD_PARAMS")
-NORM         = config.get('NORM')
 COLORS       = config.get("COLORS")
 ORIENTATION  = config.get("ORIENTATION")
+REGIONS      = config.get("REGIONS")
 USER         = config.get("USER")
-GENELIST     = config.get("GENELIST","test")
 
-PROJ          =  PROJ + "_" + GENELIST
+# From additional configs
+MY_REF      = config1.get("MY_REF")
+PI_REF      = config1.get("PI_REF")
+GENELIST = config1.get("GENELIST") or ""
 
-CMD_PARAMS["featureCounts"] = ""
-
-# Directories for data and scripts
-FASTQ_DIR = PROJ + "/fastqs"
-
-os.makedirs(FASTQ_DIR, exist_ok = True)
+BW_DIR = PROJ + "/raw_bw"
+os.makedirs(BW_DIR, exist_ok = True)
 
 # Simplify ALL_SAMPLES dictionary
 SAMPLES, SAMPIN, GROUPS, NORMMAP, PAIREDMAP = process_samples(
@@ -104,13 +102,14 @@ for key in SAMPIN:
 # Create DataFrame
 DF_SAM_NORM = pd.DataFrame(SAM_NORM, columns=['Sample', 'Newnam', 'Index', 'Norm', 'Suffix'])
 
+
 # unpack samples and groups
-SAMS = [[y, x] for y in SAMPIN for x in SAMPIN[y]]
+SAMS = [[y, x] for y in SAMPLES for x in SAMPLES[y]]
 NAMS = [x[0] for x in SAMS] # newnames
 SAMS = [x[1] for x in SAMS] # samples
 GRPS = [[y, x] for y in GROUPS for x in GROUPS[y]]
 GRPS = [x[0] for x in GRPS] # groups
-NAMS_UNIQ = list(dict.fromkeys(NAMS))
+NAMS_UNIQ = list(dict.fromkeys(SAMS))
 GRPS_UNIQ = list(dict.fromkeys(GRPS))
 SAMS_UNIQ = list(dict.fromkeys(SAMS))
 
@@ -133,42 +132,71 @@ wildcard_constraints:
     newnam = WILDCARD_REGEX,
     group  = WILDCARD_REGEX,
     index  = WILDCARD_REGEX,
-    suffix = WILDCARD_REGEX   
+    suffix = WILDCARD_REGEX,
+    covarg = "[a-zA-Z0-9_.\\-]+",
+    region = "543|5|5L|3|PI|EI"
 
-# Create symlinks for fastqs
-FASTQS = [_get_fqs(x, RAW_DATA, FASTQ_DIR, paired=PAIREDMAP[x]) for x in SAMS_UNIQ]
-FASTQS = sum(FASTQS, [])
+COLS_DICT = _get_colors(SAMS_UNIQ, COLORS)
 
-COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
+NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS.get("bamCoverageBL", ""),ORIENTATION)
 
 BAM_PATH = _get_bampath(NORM)
-ALIGNER = "bowtie2"
+
+COVARGS = _get_all_matrixtypes(REGIONS,NORMS,CMD_PARAMS,GENELIST)
+
+# Create the Cartesian product
+product = [(s, i, v) for s in SAMS_UNIQ for i, v in zip(REGIONS, COVARGS)]
+
+# Convert to DataFrame
+REGIONS_COVARGS = pd.DataFrame(product, columns=['Newnam', 'Region', 'Value'])
+
+print(REGIONS_COVARGS)
 
 # Final output files
 rule all:
     input:
-        # process summary files
-        expand("{proj}/stats/{proj}_{step}.tsv", proj=PROJ, step=["clumpify", "bbduk", "aligned"]),
+        # bamCoverage
+        expand(
+            PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}.bw",
+            zip,
+            newnam=DF_SAM_NORM['Newnam'],
+            index=DF_SAM_NORM['Index'],
+            suffix=DF_SAM_NORM['Suffix']
+        ),
         
-        # bam URL
-        #expand(PROJ + "/URLS/" + PROJ + "_{index}_bam_URL.txt", index=INDEXES),
-        
-        # results
-        #expand(PROJ + "/report/" + PROJ + "_{index}_fragmentSize.pdf", index=INDEXES),
-        PROJ + "/report/" + PROJ + "_results.tsv"
+        # matrix file
+        expand(
+              PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}.bw",
+              zip,
+              newnam=DF_SAM_NORM['Newnam'],
+              index=DF_SAM_NORM['Index'],
+              suffix=DF_SAM_NORM['Suffix']
+          ),
+          
+          # matrix files
+          expand(
+              PROJ + "/matrix/{region}/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_matrix.gz",
+              zip, 
+              region=DF_SAM_NORM['Region'], 
+              newnam=DF_SAM_NORM['Newnam'],
+              index=DF_SAM_NORM['Index'], 
+              covarg=DF_SAM_NORM['Value'], 
+              suffix=DF_SAM_NORM['Suffix']
+          ),
+          
+          # matrix url file for amc-sandbox
+          [] if config.get("skip_matrix_url") else [
+            expand(
+                PROJ + "/URLS/{region}_aligned_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_matrix.url.txt",
+                zip, 
+                region=DF_SAM_NORM['Region'], 
+                index=DF_SAM_NORM['Index'], 
+                covarg=DF_SAM_NORM['Value'], 
+                suffix=DF_SAM_NORM['Suffix']
+            )
 
-
-# Run clumpify
-include: "rules/01a_clumpify.snake"
-# Run bbmerge
-include: "rules/01b_bbduk.snake"
-# Align reads 
-include: "rules/02a_align_bowtie.snake"
-include: "rules/02b_align_samtools.snake"
-include: "rules/02c_align_URLS.snake"
-include: "rules/02s_align_subsample.snake"
-# Results
-include: "rules/03a_featureCounts.snake"
-include: "rules/03a_fragmentSize.snake"
-include: "rules/03b_results.snake"
+# BW with deeptools bamCoverage
+include: "rules/04_get_BW_UnStranded.snake"
+# make matrix files
+include: "rules/05_UnStranded_matrix.snake"
 
