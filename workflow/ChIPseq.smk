@@ -155,28 +155,32 @@ rule all:
         ],
         
         # results
-        expand(PROJ + "/stats/" + PROJ + "_{index}_fragment_results.tsv", index=INDEXES),
-        expand(PROJ + "/report/" + PROJ + "_{index}_fragmentSize.pdf", index=INDEXES),
+        [] if config.get("stop_after_alignment") else [
+          expand(PROJ + "/stats/" + PROJ + "_{index}_fragment_results.tsv", index=INDEXES),
+          expand(PROJ + "/report/" + PROJ + "_{index}_fragmentSize.pdf", index=INDEXES)
+        ],
         PROJ + "/report/" + PROJ + "_results.tsv",
         [] if config.get("skip_html_report") else [
             expand(SEQ_DATE + "_" + PROJ + "_{index}_qc_analysis.html", index=INDEXES[0])
         ],
         
         # bamCoverage
-        expand(
-            PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}.bw",
-            zip,
-            newnam=DF_SAM_NORM['Newnam'],
-            index=DF_SAM_NORM['Index'],
-            suffix=DF_SAM_NORM['Suffix']
-        ),
-        
-        # bamCoverage URL for amc-sandbox
-        [] if config.get("skip_bw_urls") else [
-            expand(
-              PROJ + "/URLS/" + PROJ + "_{index}_" + SEQ_DATE + "_norm_{suffix}_bw_URL.txt",
-              zip, index=DF_SAM_NORM['Index'], suffix=DF_SAM_NORM['Suffix']
-            )
+        [] if config.get("stop_after_alignment") else [
+          expand(
+              PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}.bw",
+              zip,
+              newnam=DF_SAM_NORM['Newnam'],
+              index=DF_SAM_NORM['Index'],
+              suffix=DF_SAM_NORM['Suffix']
+          ),
+          
+          # bamCoverage URL for amc-sandbox
+          [] if config.get("skip_bw_urls") else [
+              expand(
+                PROJ + "/URLS/" + PROJ + "_{index}_" + SEQ_DATE + "_norm_{suffix}_bw_URL.txt",
+                zip, index=DF_SAM_NORM['Index'], suffix=DF_SAM_NORM['Suffix']
+              )
+          ]
         ]
         
 

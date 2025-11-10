@@ -1,4 +1,8 @@
-# in project folder sync ChIPseq pipeline
+# in project folder sync ChIPseq_duel_IP pipeline
 
-rsync -artuv /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/ChIPseq_duel_IP/* .
-rsync -artuv /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines .
+wget https://raw.githubusercontent.com/BBerickson/seq_snakemakes/main/ChIPseq_duel_IP/setup_pipeline.sh
+# run script with one of the profiles: Bodhi | Alpine
+bash setup_pipeline.sh Bodhi
+
+# edit ChIPseq_duel_IP_samples.yaml with your sample information
+# run script by submitting to Bodhi (lsf) or Alpine (slerm) 

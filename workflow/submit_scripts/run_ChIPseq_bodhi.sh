@@ -12,7 +12,7 @@ set -o nounset -o pipefail -o errexit -x
 mkdir -p logs
 
 # Configuration
-PROFILE="profiles/Bodhi"
+PROFILE="workflow/profiles/Bodhi"
 SSH_KEY_DIR="${HOME}/.ssh"
 SAMPLES_FILE="ChIPseq_samples.yaml"
 MATRIX_FILE="UnStranded_matrix.yaml"

@@ -1,8 +1,9 @@
-# in project folder sync ChIPseq pipeline
+# in project folder get ChIPseq setup script
 
-rsync -artuv /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/ChIPseq/* .
-rsync -artuv /beevol/home/erickson/Ben_pipelines/snakemake_pipelines/pipelines .
+wget https://raw.githubusercontent.com/BBerickson/seq_snakemakes/main/ChIPseq/setup_pipeline.sh
+# run script with one of the profiles: Bodhi | Alpine
+bash setup_pipeline.sh Bodhi
 
-######
-wget https://github.com/BBerickson/seq_snakemakes/blob/main/ChIPseq/setup_pipeline.sh
-bash setup_pipeline.sh
+# edit ChIPseq_samples.yaml with your sample information
+# run script by submitting to Bodhi (lsf) or Alpine (slerm) 
+

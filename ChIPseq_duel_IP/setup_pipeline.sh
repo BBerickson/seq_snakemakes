@@ -20,8 +20,8 @@ if [ $# -eq 0 ]; then
     show_usage
 fi
 
-SMK_FILE="ChIPseq.smk"
-CONFIG_FILE="ChIPseq_samples.yaml"
+SMK_FILE="ChIPseq_duel_IP.smk"
+CONFIG_FILE="ChIPseq_duel_IP_samples.yaml"
 MTX_FILE="UnStranded_matrix.smk"
 MTX_CONFIG_FILE="UnStranded_matrix.yaml"
 
@@ -29,11 +29,11 @@ PIPELINE_TYPE="$1"
 
 case "$PIPELINE_TYPE" in
     Bodhi)
-        SUBMIT_GLOB="run_ChIPseq_bodhi.sh"
+        SUBMIT_GLOB="run_ChIPseq_duel_IP_bodhi.sh"
         PROFILES="Bodhi"
         ;;
     Alpine)
-        SUBMIT_GLOB="run_ChIPseq_alpine.sh"
+        SUBMIT_GLOB="run_ChIPseq_duel_IP_alpine.sh"
         PROFILES="Alpine"
         ;;
     *)

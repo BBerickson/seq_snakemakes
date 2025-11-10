@@ -20,20 +20,20 @@ if [ $# -eq 0 ]; then
     show_usage
 fi
 
-SMK_FILE="ChIPseq.smk"
-CONFIG_FILE="ChIPseq_samples.yaml"
-MTX_FILE="UnStranded_matrix.smk"
-MTX_CONFIG_FILE="UnStranded_matrix.yaml"
+SMK_FILE="BRUseq.smk"
+CONFIG_FILE="BRUseq_samples.yaml"
+MTX_FILE="Stranded_matrix.smk"
+MTX_CONFIG_FILE="Stranded_matrix.yaml"
 
 PIPELINE_TYPE="$1"
 
 case "$PIPELINE_TYPE" in
     Bodhi)
-        SUBMIT_GLOB="run_ChIPseq_bodhi.sh"
+        SUBMIT_GLOB="run_BRUseq_bodhi.sh"
         PROFILES="Bodhi"
         ;;
     Alpine)
-        SUBMIT_GLOB="run_ChIPseq_alpine.sh"
+        SUBMIT_GLOB="run_BRUseq_alpine.sh"
         PROFILES="Alpine"
         ;;
     *)
