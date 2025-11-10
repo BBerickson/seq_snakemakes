@@ -11,7 +11,7 @@ INDEXES:
   "hg38"
 # ref file locations
 MASK:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_snoRNA.bed"
+  "/beevol/home/erickson/ref/hg38/ref/merge_filter_RNAs.bed"
 GTF:
   "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_chrfix_GRCh38.113.gtf"
 FA_SAMPLE:
