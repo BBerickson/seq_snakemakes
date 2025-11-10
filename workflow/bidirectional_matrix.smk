@@ -164,33 +164,34 @@ print(DF_SAM_NORM.to_string(index=False))
 rule all:
     input:
         # bamCoverage
-        expand(
-            PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_fw.bw",
-            zip,
-            newnam=DF_SAM_NORM['Newnam'],
-            index=DF_SAM_NORM['Index'],
-            suffix=DF_SAM_NORM['Suffix']
-        ),
-        expand(
-            PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_rev.bw",
-            zip,
-            newnam=DF_SAM_NORM['Newnam'],
-            index=DF_SAM_NORM['Index'],
-            suffix=DF_SAM_NORM['Suffix']
-        ),
-        
-        # matrix url file for amc-sandbox
-        [] if config.get("skip_matrix_url") else [
+        [] if config.get("stop_after_alignment") else [
           expand(
-              PROJ + "/URLS/{region}_aligned_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_bidirectonal_matrix.url.txt",
-              zip, 
-              region=DF_SAM_NORM['Region'], 
-              index=DF_SAM_NORM['Index'], 
-              covarg=DF_SAM_NORM['Value'], 
+              PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_fw.bw",
+              zip,
+              newnam=DF_SAM_NORM['Newnam'],
+              index=DF_SAM_NORM['Index'],
               suffix=DF_SAM_NORM['Suffix']
-          )
+          ),
+          expand(
+              PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_rev.bw",
+              zip,
+              newnam=DF_SAM_NORM['Newnam'],
+              index=DF_SAM_NORM['Index'],
+              suffix=DF_SAM_NORM['Suffix']
+          ),
+          
+          # matrix url file for amc-sandbox
+          [] if config.get("skip_matrix_url") else [
+            expand(
+                PROJ + "/URLS/{region}_aligned_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_bidirectonal_matrix.url.txt",
+                zip, 
+                region=DF_SAM_NORM['Region'], 
+                index=DF_SAM_NORM['Index'], 
+                covarg=DF_SAM_NORM['Value'], 
+                suffix=DF_SAM_NORM['Suffix']
+            )
+          ]
         ]
-        
 
 # BW with deeptools bamCoverage
 include: "rules/04a_bamCoverage_stranded.snake"

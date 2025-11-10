@@ -15,7 +15,7 @@ RAW_DATA:
     - "/beevol/home/erickson/fastqs/220812_A00405_0612_AHCLTGDSX5"
 
 # Genome to use for analysis
-# * The specified genome must have a config file present in pipelines/ref
+# * The specified genome must have a config file present in workflow/ref
 GENOME:
     "hg38"
     
@@ -99,11 +99,11 @@ CMD_PARAMS:
     filter_results: "protein_coding|scalefactor"
     
 # a fasta file with the universal adaptors or literal strings
-# "pipelines/ref/truseq_i5i7.fa"
-# "pipelines/ref/truseq_rna.fa"
+# "workflow/ref/truseq_i5i7.fa"
+# "workflow/ref/truseq_rna.fa"
 # "GATCGGAAGAGCACACGTCT,ACACTCTTTCCCTACACGACGCTCTTCCGATCT"
 BARCODES:
-    "pipelines/ref/truseq_rna.fa"
+    "workflow/ref/truseq_rna.fa"
 # set orentation of fastq files, can list one for each file     
 ORIENTATION:
     "R2R1" # R2, R1R2, R1

@@ -15,7 +15,7 @@ RAW_DATA:
     - "/beevol/home/erickson/Human/NetSeq/SRR1736063_mNET_CMA603_siLuc/fastqs"
 
 # Genome to use for analysis
-# * The specified genome must have a config file present in pipelines/ref
+# * The specified genome must have a config file present in workflow/ref
 GENOME:
     "hg38"
  
@@ -120,8 +120,8 @@ ORIENTATION:
     "R1" # R1, R2, 
 
 # a fasta file with the universal adaptors or literal strings
-# "pipelines/ref/truseq_i5i7.fa"
-# "pipelines/ref/truseq_rna.fa"
+# "workflow/ref/truseq_i5i7.fa"
+# "workflow/ref/truseq_rna.fa"
 # "GATCGGAAGAGCACACGTCT,ACACTCTTTCCCTACACGACGCTCTTCCGATCT"
 BARCODES:
     "GATCGGAAGAGCACACGTCT,ACACTCTTTCCCTACACGACGCTCTTCCGATCT"

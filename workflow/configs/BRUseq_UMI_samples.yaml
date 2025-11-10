@@ -15,7 +15,7 @@ RAW_DATA:
     - "/beevol/home/erickson/fastqs/220812_A00405_0612_AHCLTGDSX5"
 
 # Genome to use for analysis
-# * The specified genome must have a config file present in pipelines/ref
+# * The specified genome must have a config file present in workflow/ref
 GENOME:
     "hg38"
     

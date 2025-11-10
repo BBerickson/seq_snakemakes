@@ -178,40 +178,42 @@ print(DF_SAM_NORM.to_string(index=False))
 rule all:
     input:
         # bamCoverage
-        expand(
-            PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}.bw",
-            zip,
-            newnam=DF_SAM_NORM['Newnam'],
-            index=DF_SAM_NORM['Index'],
-            suffix=DF_SAM_NORM['Suffix']
-        ),
-        
-        # matrix files
-        expand(
-            PROJ + "/matrix/{region}/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_matrix.gz",
-            zip, 
-            region=DF_SAM_NORM['Region'], 
-            newnam=DF_SAM_NORM['Newnam'],
-            index=DF_SAM_NORM['Index'], 
-            covarg=DF_SAM_NORM['Value'], 
-            suffix=DF_SAM_NORM['Suffix']
-        ),
-        
-        # matrix url file for amc-sandbox
-        [] if config.get("skip_matrix_url") else [
+        [] if config.get("stop_after_alignment") else [
           expand(
-              PROJ + "/URLS/{region}_aligned_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_matrix.url.txt",
+              PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}.bw",
+              zip,
+              newnam=DF_SAM_NORM['Newnam'],
+              index=DF_SAM_NORM['Index'],
+              suffix=DF_SAM_NORM['Suffix']
+          ),
+          
+          # matrix files
+          expand(
+              PROJ + "/matrix/{region}/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_matrix.gz",
               zip, 
               region=DF_SAM_NORM['Region'], 
+              newnam=DF_SAM_NORM['Newnam'],
               index=DF_SAM_NORM['Index'], 
               covarg=DF_SAM_NORM['Value'], 
               suffix=DF_SAM_NORM['Suffix']
-          )
-        ],
-        
-        # qc with heatmap, cluster, profile plots
-        [] if config.get("skip_matrix_html_report") else [
-            expand(SEQ_DATE + "_" + PROJ + "_{index}_qc_plots_analysis.html", index=INDEXES[0])
+          ),
+          
+          # matrix url file for amc-sandbox
+          [] if config.get("skip_matrix_url") else [
+            expand(
+                PROJ + "/URLS/{region}_aligned_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_matrix.url.txt",
+                zip, 
+                region=DF_SAM_NORM['Region'], 
+                index=DF_SAM_NORM['Index'], 
+                covarg=DF_SAM_NORM['Value'], 
+                suffix=DF_SAM_NORM['Suffix']
+            )
+          ],
+          
+          # qc with heatmap, cluster, profile plots
+          [] if config.get("skip_matrix_html_report") else [
+              expand(SEQ_DATE + "_" + PROJ + "_{index}_qc_plots_analysis.html", index=INDEXES[0])
+          ]
         ]
         
         
