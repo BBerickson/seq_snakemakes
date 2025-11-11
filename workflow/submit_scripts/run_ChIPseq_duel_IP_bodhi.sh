@@ -21,7 +21,7 @@ MATRIX_FILE="UnStranded_matrix.yaml"
 snakemake \
     --profile ${PROFILE} \
     --snakefile workflow/ChIPseq_duel_IP.smk \
-    --configfile ${SAMPLES_FILE} \
+    --configfile ${SAMPLES_FILE} ${LSF_CONFIG} \
     --config SSH_KEY_DIR="${SSH_KEY_DIR}"
 
 snakemake \

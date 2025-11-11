@@ -9,7 +9,7 @@ compress_temp: true  # Set to true for gzip compression, false for uncompressed
 
 # Save data on amc-sandbox and make URLS
 skip_bam_urls: true
-skip_bw_urls: false
-skip_matrix_url: false
+skip_bw_urls: true
+skip_matrix_url: true
 
 

@@ -3,16 +3,16 @@
 
 # Project name to use for naming summary files
 PROJ:
-  "RTF1_RNAseq"
+  "RPB1_mut_RNAseq_star"
     
 SEQ_DATE:
-  "220121"
+  "240919"
 
 # Directories containing fastq files, this can be a relative path.
 # Multiple directories can be provided. The sample names must correspond
 # to the begining of the fastq name.
 RAW_DATA:
-    - "/beevol/home/erickson/fastqs/220812_A00405_0612_AHCLTGDSX5"
+    - "/beevol/home/erickson/fastqs/240919_novogene"
 
 # Genome to use for analysis
 # * The specified genome must have a config file present in workflow/ref
@@ -49,22 +49,28 @@ GENOME:
 SAMPLES:
     SECTION-1:
         SAMPLING-GROUP-1:
-            RTF1_WT1: 
-              - "293flpIN_RTF1_WT1"
-            RTF1_MT1: 
-              - "293flpIN_RTF1_MT_R1"
+            RPB1_E1126G_R1: 
+              - "B10E1126G1"
+            RPB1_E1126G_R2: 
+              - "B10E1126G2"
+            RPB1_E1126G_R3: 
+              - "B10E1126G3"
 
         SAMPLING-GROUP-2:
-            RTF1_WT2: 
-              - "293flpIN_RTF1_WT2"
-            RTF1_MT2: 
-              - "293flpIN_RTF1_MT_R2"
+            RPB1_WT_R1: 
+              - "B10Rpb1WT2"
+            RPB1_WT_R2: 
+              - "B10Rpb1WT3"
+            RPB1_WT_R3: 
+              - "B10Rpb1WT4"
 
         SAMPLING-GROUP-3:
-            RTF1_WT3: 
-              - "293flpIN_RTF1_WT3"
-            RTF1_MT3: 
-              - "293flpIN_RTF1_MT_R3"
+            RPB1_R749H_R1: 
+              - "B10C4R749H1"
+            RPB1_R749H_R2: 
+              - "B10C4R749H2"
+            RPB1_R749H_R3: 
+              - "B10C4R749H3"
       
 # Norm sample bw and matix files, spike-in is CPM      
 # with "RPKM","CPM","BPM","RPGC" 

@@ -21,6 +21,7 @@ if [ $# -eq 0 ]; then
 fi
 
 SMK_FILE="RNAseq.smk"
+SMK_FILE2="star.smk"
 CONFIG_FILE="RNAseq_samples.yaml"
 MTX_FILE="Stranded_matrix.smk"
 MTX_CONFIG_FILE="Stranded_matrix.yaml"
@@ -29,11 +30,13 @@ PIPELINE_TYPE="$1"
 
 case "$PIPELINE_TYPE" in
     Bodhi)
-        SUBMIT_GLOB="run_RNAseq_bodhi.sh"
+        SUBMIT_GLOB1="run_RNAseq_Hisat_bodhi.sh"
+        SUBMIT_GLOB2="run_RNAseq_STAR_bodhi.sh"
         PROFILES="Bodhi"
         ;;
     Alpine)
-        SUBMIT_GLOB="run_RNAseq_alpine.sh"
+        SUBMIT_GLOB1="run_RNAseq_Hisat_alpine.sh"
+        SUBMIT_GLOB2="run_RNAseq_STAR_alpine.sh"
         PROFILES="Alpine"
         ;;
     *)
@@ -65,6 +68,7 @@ mkdir -p workflow/profiles workflow/ref
 
 # Copy pipeline-specific files
 cp "$EXTRACT_DIR/workflow/$SMK_FILE" workflow/
+cp "$EXTRACT_DIR/workflow/$SMK_FILE2" workflow/
 if [ ! -f "$CONFIG_FILE" ]; then
     cp "$EXTRACT_DIR/workflow/configs/$CONFIG_FILE" .
 fi
@@ -72,7 +76,8 @@ cp "$EXTRACT_DIR/workflow/$MTX_FILE" workflow/
 if [ ! -f "$MTX_CONFIG_FILE" ]; then
     cp "$EXTRACT_DIR/workflow/configs/$MTX_CONFIG_FILE" .
 fi
-cp $EXTRACT_DIR/workflow/submit_scripts/$SUBMIT_GLOB . 2>/dev/null
+cp $EXTRACT_DIR/workflow/submit_scripts/$SUBMIT_GLOB1 . 2>/dev/null
+cp $EXTRACT_DIR/workflow/submit_scripts/$SUBMIT_GLOB2 . 2>/dev/null
 
 # Copy shared directories
 cp -r "$EXTRACT_DIR/workflow/rules" workflow/
@@ -91,6 +96,7 @@ echo "✓ $PIPELINE_TYPE pipeline setup complete!"
 echo ""
 echo "Files created:"
 echo "  - workflow/$SMK_FILE"
+echo "  - workflow/$SMK_FILE2"
 echo "  - $CONFIG_FILE"
 echo "  - workflow/rules/"
 echo "  - workflow/ref/"

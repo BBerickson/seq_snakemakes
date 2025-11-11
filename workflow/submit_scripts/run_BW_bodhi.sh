@@ -24,7 +24,7 @@ MATRIX_SNAKE="${MATRIXSET}_matrix.smk"
 
 snakemake \
     --profile ${PROFILE} \
-    --snakefile workflow/${MATRIX_SNAKE} \
+    --snakefile workflow/${MATRIX_SNAKE} ${LSF_CONFIG} \
     --configfile ${SAMPLES_FILE} ${LSF_CONFIG} ${MATRIX_FILE} \
     --config SSH_KEY_DIR="${SSH_KEY_DIR}"
 
