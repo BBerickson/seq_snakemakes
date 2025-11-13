@@ -88,7 +88,7 @@ rule align_filter_indexed:
         fa       = lambda wildcards: config_indexes[wildcards.index].get("FA_SAMPLE"),
         sortname = PROJ + "/{sample}_aligned_{index}.temp"
     resources:
-        memory = lambda wildcards, input: memory_estimator(input, 0.5, 2)
+        memory = lambda wildcards, input: memory_estimator(input, 2, 2)
     log:
         out = PROJ + "/logs/{sample}_align_filter_{index}.out",
         err = PROJ + "/logs/{sample}_align_filter_{index}.err"

@@ -5,7 +5,7 @@ CONTAINER:
 
 # speed up steps by ~2X by not gzip compressing temp files,
 # ~4X-5X more space needed for temp files
-compress_temp: true  # Set to true for gzip compression, false for uncompressed
+compress_temp: false  # Set to true for gzip compression, false for uncompressed
 
 # Save data on amc-sandbox and make URLS
 skip_bam_urls: true

@@ -130,7 +130,7 @@ SAMS_UNIQ = list(dict.fromkeys(SAMS))
 print(DF_SAM_NORM.to_string(index=False))
 
 # Wildcard constraints
-WILDCARD_REGEX = "[a-zA-Z0-9_\-]+" # Matches alphanumeric characters, underscores, and hyphens
+WILDCARD_REGEX = r"[a-zA-Z0-9_\-]+" # Matches alphanumeric characters, underscores, and hyphens
 
 wildcard_constraints:
     sample = WILDCARD_REGEX,
@@ -138,7 +138,7 @@ wildcard_constraints:
     group  = WILDCARD_REGEX,
     index  = WILDCARD_REGEX,
     suffix = WILDCARD_REGEX,
-    covarg = "[a-zA-Z0-9_.\\-]+",
+    covarg = r"[a-zA-Z0-9_.-]+",
     region = "543|5|5L|3|PI|EI",
     sense_asense = r"(sense|anti|)"  # Allow empty, "sense", or "anti"
 

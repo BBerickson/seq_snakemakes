@@ -76,7 +76,7 @@ print("SAMPLES (%s): %s\n" % (len(SAMPLES), SAMPLES))
 print("FASTQ_GROUPS (%s): %s\n" % (len(FASTQ_GROUPS), FASTQ_GROUPS))
 
 # Wildcard constraints
-WILDCARD_REGEX = "[a-zA-Z0-9_\-]+" # Matches alphanumeric characters, underscores, and hyphens
+WILDCARD_REGEX = r"[a-zA-Z0-9_\-]+" # Matches alphanumeric characters, underscores, and hyphens
 
 wildcard_constraints:
     sample = WILDCARD_REGEX,

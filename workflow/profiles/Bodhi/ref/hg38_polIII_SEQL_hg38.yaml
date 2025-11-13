@@ -1,0 +1,12 @@
+#===== Config file for standared hg38 with mm10 spikeIN  ===================
+
+# Path to mixed bowtie2 index and chrom name txt files
+INDEX_PATH:
+    "/beevol/home/erickson/ref/hg38_p14/PolIII/"
+# bowtie2 index prefix
+INDEX_MAP:
+    "hg38_polIII"
+# index.yaml prefix(s)
+INDEXES:
+  - "hg38"
+  - "hg38_polIII"

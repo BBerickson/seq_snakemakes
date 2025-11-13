@@ -86,10 +86,10 @@ print("GRPS_UNIQ (%s): %s\n" % (len(GRPS_UNIQ), GRPS_UNIQ))
 print("SAM_GRPS (%s): %s\n" % (len(SAM_GRPS), SAM_GRPS))
 
 # Wildcard constraints
-GRP_REGEX = "[a-zA-Z0-9_\-,]+"
+GRP_REGEX = r"[a-zA-Z0-9_\-,]+"
 
 wildcard_constraints:
-    sample  = "[a-zA-Z0-9_\-]+",
+    sample  = r"[a-zA-Z0-9_\-]+",
     group   = GRP_REGEX,
 
 BAM_PATH = _get_bampath(NORM)

@@ -138,7 +138,7 @@ BAM_PATH = _get_bampath(NORM)
 ALIGNER = "bowtie2"
 
 # Wildcard constraints
-WILDCARD_REGEX = "[a-zA-Z0-9_\-]+" # Matches alphanumeric characters, underscores, and hyphens
+WILDCARD_REGEX = r"[a-zA-Z0-9_\-]+" # Matches alphanumeric characters, underscores, and hyphens
 
 wildcard_constraints:
     sample = WILDCARD_REGEX,

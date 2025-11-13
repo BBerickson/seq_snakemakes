@@ -12,7 +12,6 @@ rule clumpify:
         job_name = "{sample}_clumpify",
         args = lambda wildcards: CMD_PARAMS["clumpify"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
         is_paired = lambda wildcards: PAIREDMAP[wildcards.sample],
-        reduced_mem = lambda wildcards, resources: int(resources.memory * 0.9),
         input_r2 = lambda wildcards, input: input[1] if len(input) > 1 else ""
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 8, 15) # multiplier, min, max=250, unit=GB
@@ -23,6 +22,9 @@ rule clumpify:
         1
     shell:
         """
+        # Calculate 90% of allocated memory for clumpify
+        REDUCED_MEM=$(( {resources.memory} * 9 / 10))
+        
         if [ -z "{params.args}" ]; then
             # No clumpify args, just copy files
             cp {input[0]} {output.R1}
@@ -35,15 +37,15 @@ rule clumpify:
             echo "Duplicates Found:  0,0" >> {output.log}
         elif [ "{params.is_paired}" = "True" ]; then
             # Paired-end processing
-            clumpify.sh -Xmx{params.reduced_mem}g \
-                groups={params.reduced_mem} \
+            clumpify.sh -Xmx${{REDUCED_MEM}}g \
+                groups=${{REDUCED_MEM}} \
                 in1={input[0]} in2={params.input_r2} \
                 out1={output.R1} out2={output.R2} \
                 {params.args} 2>> {output.log}
         else
             # Single-end processing
-            clumpify.sh -Xmx{params.reduced_mem}g \
-                groups={params.reduced_mem} \
+            clumpify.sh -Xmx${{REDUCED_MEM}}g \
+                groups=${{REDUCED_MEM}} \
                 in={input[0]} \
                 out={output.R1} \
                 {params.args} 2>> {output.log}

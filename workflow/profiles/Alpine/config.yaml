@@ -1,38 +1,23 @@
 # Slurm cluster profile for Snakemake
 # Usage: snakemake --profile profiles/Alpine
 
+# Slurm cluster configuration
+cluster: "sbatch --account={cluster.account} --partition={cluster.partition} --qos={cluster.qos} --cpus-per-task={threads} --mem={resources.memory}G --time={cluster.time} --job-name={params.job_name} --output={log.out} --error={log.err}"
+cluster-config: "workflow/profiles/Alpine/cluster.yaml"
+
 # Job submission settings
 jobs: 100
 latency-wait: 60
 
 # Singularity settings
 use-singularity: true
-singularity-prefix: "/projects/$USER/.snakemake/singularity"
-singularity-args: "--bind /scratch,/data,/projects"
+singularity-args: "--bind /scratch,/projects"
 
-# Slurm cluster configuration
-cluster: >
-  sbatch
-  --output={log.out}
-  --error={log.err}
-  --job-name={params.job_name}
-  --cpus-per-task={threads}
-  --mem={resources.memory}G
-
-# Restart failed jobs
+# Job retry policy
 retries: 1
-restart-times: 1
 
-# Keep going if some jobs fail
+# Behavior settings
 keep-going: false
-
-# Minimal output
-printshellcmds: false    # Don't print shell commands (set true for debugging)
-reason: false            # Don't explain why each rule runs
-show-failed-logs: true   # Still show errors
-
-# Selective quieting (alternative to quiet: true)
-# quiet: ["progress", "rules"]  # Suppress specific message types
-
-# Rerun incomplete jobs
+printshellcmds: true
+show-failed-logs: true
 rerun-incomplete: true

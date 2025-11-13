@@ -2,7 +2,7 @@
 
 # Path to bowtie2 index ref files
 INDEX_PATH:
-  "/projects/$USER/ref/hg38/"
+  "/projects/berickson@xsede.org/ref/hg38/"
 # bowtie2 index prefix
 INDEX_MAP:
   "hg38"
@@ -11,17 +11,17 @@ INDEXES:
   "hg38"
 # ref file locations
 MASK:
-  "/projects/$USER/ref/hg38/base_ref/matrix_ref/merge_filter_RNAs.bed"
+  "/projects/berickson@xsede.org/ref/hg38/base_ref/matrix_ref/merge_filter_RNAs.bed"
 GTF:
-  "/projects/$USER/ref/hg38/base_ref/hg38_chrfix_GRCh38.113.gtf"
+  "/projects/berickson@xsede.org/ref/hg38/base_ref/hg38_chrfix_GRCh38.113.gtf"
 FA_SAMPLE:
-  "/projects/$USER/ref/hg38/hg38.p14.fa"
+  "/projects/berickson@xsede.org/ref/hg38/Homo_sapiens.GRCh38.dna.primary_assembly.fa"
 MY_REF:
-  "/projects/$USER/ref/hg38/base_ref/matrix_ref/hg38.bed"
+  "/projects/berickson@xsede.org/ref/hg38/base_ref/matrix_ref/hg38.bed"
 FW_REF:
-  "/projects/$USER/ref/hg38/base_ref/matrix_ref/hg38_pos.bed"
+  "/projects/berickson@xsede.org/ref/hg38/base_ref/matrix_ref/hg38_pos.bed"
 REV_REF:
-  "/projects/$USER/ref/hg38/base_ref/matrix_ref/hg38_neg.bed"
+  "/projects/berickson@xsede.org/ref/hg38/base_ref/matrix_ref/hg38_neg.bed"
 PI_REF:
-  "/projects/$USER/ref/hg38/base_ref/matrix_ref/PI.bed"
+  "/projects/berickson@xsede.org/ref/hg38/base_ref/matrix_ref/PI.bed"
 

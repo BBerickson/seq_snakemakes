@@ -1,0 +1,27 @@
+#===== Config file for standared hg38 genome  ===================
+
+# Path to mixed bowtie2 index and chrom name txt files
+INDEX_PATH:
+    "/projects/berickson@xsede.org/ref/hg38/genome/star_idx/"
+# bowtie2 index prefix
+INDEX_MAP:
+  "hg38"
+# index.yaml prefix
+INDEXES:
+  "hg38"
+# ref file locations
+MASK:
+  "/beevol/home/erickson/ref/hg38/ref/merge_filter_RNAs.bed"
+GTF:
+  "/projects/berickson@xsede.org/ref/hg38/ref_bed/hg38_chrfix_GRCh38.113.gtf"
+FA_SAMPLE:
+  "/projects/berickson@xsede.org/ref/hg38/genome/Homo_sapiens.GRCh38.dna.primary_assembly.fa"
+MY_REF:
+  "/projects/berickson@xsede.org/ref/hg38/ref_bed/hg38.bed"
+FW_REF:
+  "/projects/berickson@xsede.org/ref/hg38/ref_bed/hg38_pos.bed"
+REV_REF:
+  "/projects/berickson@xsede.org/ref/hg38/ref_bed/hg38_neg.bed"
+PI_REF:
+  "/projects/berickson@xsede.org/ref/hg38/ref_bed/PI.bed"
+
