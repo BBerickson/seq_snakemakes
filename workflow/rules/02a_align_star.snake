@@ -14,7 +14,7 @@ rule star_twopass:
 
     params:
         job_name = "{sample}_star_twopass",
-        gtf      = FC_FILE,
+        gtf      = lambda wildcards: config_indexes[wildcards.index].get("GTF"),
         bam_out  = PROJ + "/bams/{sample}_Aligned.sortedByCoord.out.bam",
         args     = lambda wildcards: CMD_PARAMS["star"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
         out      = PROJ + "/bams/{sample}_"

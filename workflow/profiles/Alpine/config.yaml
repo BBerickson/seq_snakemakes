@@ -2,7 +2,8 @@
 # Usage: snakemake --profile profiles/Alpine
 
 # Slurm cluster configuration
-cluster: "sbatch --account={cluster.account} --partition={cluster.partition} --qos={cluster.qos} --cpus-per-task={threads} --mem={resources.memory}G --time={cluster.time} --job-name={params.job_name} --output={log.out} --error={log.err}"
+#cluster: "sbatch --account={cluster.account} --partition={cluster.partition} --qos={cluster.qos} --cpus-per-task={threads} --mem={resources.memory}G --time={cluster.time} --job-name={params.job_name} --output={log.out} --error={log.err}"
+cluster: "sbatch --account={cluster.account} --partition={cluster.partition} --qos={cluster.qos} --cpus-per-task={threads} --mem={resources.memory}G --time={cluster.time} --job-name={params.job_name} --output=slurm_logs/%x.out --error=slurm_logs/%x.err"
 cluster-config: "workflow/profiles/Alpine/cluster.yaml"
 
 # Job submission settings
