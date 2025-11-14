@@ -161,7 +161,7 @@ rule all:
           expand(PROJ + "/report/" + PROJ + "_{index}_fragmentSize.pdf", index=INDEXES)
         ],
         #expand(PROJ + "/report/{index}_PCA.png", index=INDEXES),
-        PROJ + "/report/" + PROJ + "_results.tsv",,
+        PROJ + "/report/" + PROJ + "_results.tsv",
         [] if config.get("skip_html_report") else [
             expand(SEQ_DATE + "_" + PROJ + "_{index}_qc_analysis.html", index=INDEXES[0])
         ],
