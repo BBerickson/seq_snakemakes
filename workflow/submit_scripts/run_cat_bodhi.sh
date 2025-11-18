@@ -13,7 +13,6 @@ SINGULARITY_PREFIX="/beevol/home/${USER}/.singularity_cache"
 
 # Create necessary directories
 mkdir -p logs
-mkdir -p "${SINGULARITY_CACHEDIR}" 
 
 # Configuration
 DATASET="samples_cat"  # Set your dataset name here
