@@ -50,8 +50,8 @@ This snakemake pipeline runs in a container and is set up to run on AMC Bodhi (L
  
 ## Usage Guide
 
-  open directory of experement type and follow instructions in the ReadMe to copy from github the setup script to the project directory on bodhi or alpine
+  Open directory of experement type and follow instructions in the ReadMe to copy from github the setup script to the project directory on bodhi or alpine
   Run the setup script that will copy all needed files for experement type to the project directory
-  Edit sample.yaml and if needed the matrix yaml
+  Edit sample.yaml and if needed the matrix.yaml
   Run the snakemake script
   

@@ -1,7 +1,7 @@
 #===== Config file for Bodhi ==========================================
 
 CONTAINER:
-    "docker://bberickson/bodhi-snakemake:v1.2.0"
+    "docker://bberickson/bodhi-snakemake:latest"
 
 # speed up steps by ~2X by not gzip compressing temp files,
 # ~4X-5X more space needed for temp files

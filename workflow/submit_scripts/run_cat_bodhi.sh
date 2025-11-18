@@ -8,8 +8,12 @@
 
 set -o nounset -o pipefail -o errexit -x
 
+# Shared Singularity cache for all Snakemake projects
+SINGULARITY_PREFIX="/beevol/home/${USER}/.singularity_cache"
+
 # Create necessary directories
 mkdir -p logs
+mkdir -p "${SINGULARITY_CACHEDIR}" 
 
 # Configuration
 DATASET="samples_cat"  # Set your dataset name here
@@ -24,6 +28,7 @@ snakemake \
     --profile ${PROFILE} \
     --snakefile workflow/${SNAKE_FILE} \
     --configfile ${SAMPLES_FILE} ${LSF_CONFIG} \
+    --singularity-prefix "${SINGULARITY_PREFIX}" \
     --config SSH_KEY_DIR="${SSH_KEY_DIR}"
 
 

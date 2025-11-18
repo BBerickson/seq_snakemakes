@@ -8,8 +8,12 @@
 
 set -o nounset -o pipefail -o errexit -x
 
+# Shared Singularity cache for all Snakemake projects
+SINGULARITY_PREFIX="/beevol/home/${USER}/.singularity_cache"
+
 # Create necessary directories
 mkdir -p logs
+mkdir -p "${SINGULARITY_CACHEDIR}" 
 
 # Configuration
 PROFILE="workflow/profiles/Bodhi"
@@ -22,11 +26,13 @@ snakemake \
     --profile ${PROFILE} \
     --snakefile workflow/BRUseq_UMI.smk \
     --configfile ${SAMPLES_FILE} ${LSF_CONFIG} \
+    --singularity-prefix "${SINGULARITY_PREFIX}" \
     --config SSH_KEY_DIR="${SSH_KEY_DIR}"
 
 snakemake \
     --profile ${PROFILE} \
     --snakefile workflow/Stranded_matrix.smk \
     --configfile ${SAMPLES_FILE} ${LSF_CONFIG} ${MATRIX_FILE} \
+    --singularity-prefix "${SINGULARITY_PREFIX}" \
     --config SSH_KEY_DIR="${SSH_KEY_DIR}"
 

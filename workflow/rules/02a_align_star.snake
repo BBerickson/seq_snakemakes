@@ -4,22 +4,22 @@
 # Align trimmed reads with star
 rule star_twopass:
     input:
-        R1 = PROJ + "/{sample}_R1.fastq" + (".gz" if config.get("compress_temp", True) else ""),
-        R2 = PROJ + "/{sample}_R2.fastq" + (".gz" if config.get("compress_temp", True) else "")
+        R1 = lambda wildcards: PROJ + f"/{wildcards.sample}_R1.fastq" + (".gz" if config.get("compress_temp", True) else ""),
+        R2 = lambda wildcards: PROJ + f"/{wildcards.sample}_R2.fastq" + (".gz" if config.get("compress_temp", True) else "")
     output:
         bam   = temp(PROJ + "/{sample}_" + INDEX_MAP + ".bam"),
         bai   = temp(PROJ + "/{sample}_" + INDEX_MAP + ".bam.bai"),
         stats = PROJ + "/bams/{sample}_Log.out",
         final = PROJ + "/bams/{sample}_Log.final.out"
-
     params:
         job_name = "{sample}_star_twopass",
         gtf      = config_indexes[INDEXES[0]].get("GTF"),
-        bam_out  = PROJ + "/bams/{sample}_Aligned.sortedByCoord.out.bam",
+        bam_unsorted = PROJ + "/bams/{sample}_Aligned.out.bam",
         args     = lambda wildcards: CMD_PARAMS["star"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
-        out      = PROJ + "/bams/{sample}_"
+        out      = PROJ + "/bams/{sample}_",
+        read_cmd = "--readFilesCommand gunzip -c" if config.get("compress_temp", True) else ""
     resources:
-        memory = lambda wildcards, input: memory_estimator([input.R1, input.R2], 5, 30, 250) # multiplier, min, max, unit=GB
+        memory = lambda wildcards, input: memory_estimator([input.R1, input.R2], 3, 40, 250)
     log:
         out = PROJ + "/logs/{sample}_star_twopass.out",
         err = PROJ + "/logs/{sample}_star_twopass.err"
@@ -29,22 +29,31 @@ rule star_twopass:
         16
     shell:
         """
+        # Use 80% of allocated memory for samtools, split across threads
+        mem_per_thread=$(( {resources.memory} * 1024 * 80 / 100 / {threads} ))
+        
         STAR \
           --genomeDir {INDEX_PATH} \
           --runThreadN {threads} \
           --readFilesIn {input.R1} {input.R2} \
-          --outSAMtype BAM SortedByCoordinate \
-          --limitBAMsortRAM {resources.memory}000000000 \
-          --readFilesCommand gunzip -c \
+          --outSAMtype BAM Unsorted \
+          {params.read_cmd} \
           --outFileNamePrefix {params.out} \
           --sjdbGTFfile {params.gtf} \
           {params.args} \
           --twopassMode Basic
-          
-        mv {params.bam_out} {output.bam}
-
+        
+        samtools sort {params.bam_unsorted} \
+            -T {params.out}tmp \
+            -@ {threads} \
+            -m "${{mem_per_thread}}M" \
+            -o {output.bam}
+            
         samtools index -@ {threads} {output.bam}
+        
+        rm {params.bam_unsorted}
         """
+
         
 
 # ====== Rules for aligning reads summary =================================

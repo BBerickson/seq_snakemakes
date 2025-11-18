@@ -7,3 +7,4 @@ bash setup_pipeline.sh Bodhi
 # edit RNAseq_samples.yaml with your sample information
 # run script by submitting to Bodhi (lsf) or Alpine (slerm) 
 
+!!!STAR is not set up for mixed genome alignment!!!
