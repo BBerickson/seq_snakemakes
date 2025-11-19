@@ -68,7 +68,8 @@ rule star_2pass_summary:
     output:
         PROJ + "/stats/" + PROJ + "_aligned.tsv"
     params:
-        job_name = "star_2pass_summary"
+        job_name = "star_2pass_summary",
+        index = INDEX_MAP
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
@@ -85,7 +86,7 @@ import sys
 sys.path.insert(0, "workflow/scripts/")
 import rules
         
-rules._extract_star_log_info("{input}".split(), "{output}")
+rules._extract_star_log_info("{input}".split(), "{output}", "{params.index}")
 EOF
         """
                         

@@ -155,7 +155,7 @@ def _dedup_summary(input, output):
                           out.write("%s\t%s\t%s\n" % (name, met, num))
 
                       
-def _extract_star_log_info(input_files, output_file):
+def _extract_star_log_info(input_files, output_file, index):
     patterns = {
         "Number of input reads": ("reads", re.compile(r"Number of input reads \|\s+(.*)")),
         "Uniquely mapped reads number": ("aligned exactly 1 time", re.compile(r"Uniquely mapped reads number \|\s+(.*)")),
@@ -174,6 +174,6 @@ def _extract_star_log_info(input_files, output_file):
                             num = match.group(1)
                             if key == "Uniquely mapped reads %":
                                 num += "%"
-                            out.write("%s\t%s\t%s\n" % (name, metric, num))
+                            out.write("%s\t%s\t%s\t%s\n" % (, index, name, metric, num))
                             break
 

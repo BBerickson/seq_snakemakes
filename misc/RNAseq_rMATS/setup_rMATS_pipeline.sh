@@ -10,7 +10,7 @@ show_usage() {
     echo ""
     echo "Available profiles:"
     echo "  Bodhi      - LSF"
-    echo "  Alpine     - SLERM"
+    echo "  Alpine     - SLURM"
     echo ""
     echo "Example: $0 Bodhi"
     exit 1
@@ -55,22 +55,27 @@ fi
 
 echo "Extracting files..."
 tar -xzf "$TEMP_DIR/repo.tar.gz" -C "$TEMP_DIR"
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to extract repository"
+    rm -rf "$TEMP_DIR"
+    exit 1
+fi
 
 EXTRACT_DIR="$TEMP_DIR/$REPO-$BRANCH"
 
 # Create directory structure
-mkdir -p workflow/profiles workflow/ref
+mkdir -p workflow/{profiles,ref,rules,Rmds,scripts}
 
 # Copy pipeline-specific files
-cp "$EXTRACT_DIR/workflow/$SMK_FILE" workflow/
+rsync -a "$EXTRACT_DIR/workflow/$SMK_FILE" workflow/
 if [ ! -f "$CONFIG_FILE" ]; then
-    cp "$EXTRACT_DIR/workflow/configs/$CONFIG_FILE" .
+    rsync -a "$EXTRACT_DIR/workflow/configs/$CONFIG_FILE" .
 fi
 
-cp $EXTRACT_DIR/workflow/submit_scripts/$SUBMIT_GLOB . 2>/dev/null
+rsync -a "$EXTRACT_DIR/workflow/submit_scripts/$SUBMIT_GLOB" . 2>/dev/null
 
 # Copy shared directories
-cp -r "$EXTRACT_DIR/workflow/misc/rMATS" workflow/
+rsync -a "$EXTRACT_DIR/workflow/misc/rMATS" workflow/
 
 # Cleanup
 rm -rf "$TEMP_DIR"
