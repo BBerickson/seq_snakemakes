@@ -174,6 +174,6 @@ def _extract_star_log_info(input_files, output_file, index):
                             num = match.group(1)
                             if key == "Uniquely mapped reads %":
                                 num += "%"
-                            out.write("%s\t%s\t%s\t%s\n" % (, index, name, metric, num))
+                            out.write("%s\t%s\t%s\t%s\n" % (index, name, metric, num))
                             break
 
