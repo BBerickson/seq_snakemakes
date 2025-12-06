@@ -15,7 +15,7 @@ INDEXES:
 MASK:
   ""
 GTF:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_chrfix_GRCh38.113.gtf"
+  "/projects/berickson@xsede.org/ref/hg38/base_ref/hg38_chrfix_GRCh38.113.gtf"
 FA_SAMPLE:
   "/projects/berickson@xsede.org/ref/hg38/PolIII/CTD_Ser5_polIII_fitered_slop200.fa"
 MY_REF:
