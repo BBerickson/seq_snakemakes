@@ -88,20 +88,34 @@ rule align_filter_indexed:
         fa       = lambda wildcards: config_indexes[wildcards.index].get("FA_SAMPLE"),
         sortname = PROJ + "/{sample}_aligned_{index}.temp"
     resources:
-        memory = lambda wildcards, input: memory_estimator(input, 0.5, 2)
+        memory = lambda wildcards, input: memory_estimator(input, 2, 4)
     log:
         out = PROJ + "/logs/{sample}_align_filter_{index}.out",
         err = PROJ + "/logs/{sample}_align_filter_{index}.err"
     threads: 12
     shell:
         """
+        # Use 80% of allocated memory for samtools, split across threads
+        mem_per_thread=$(( {resources.memory} * 1024 * 80 / 100 / {threads} ))
+        
         samtools view {input.bam} $(head -n1 {params.idx}) \
         | sed 's/spike_*//g' \
         | samtools view -bT {params.fa} - \
-        | samtools sort - -T {params.sortname} -@ {threads} -O bam \
-        > {output.bam}
+        > {params.sortname}.unsorted.bam
+        
+        samtools sort {params.sortname}.unsorted.bam \
+            -T {params.sortname} \
+            -@ {threads} \
+            -m "${{mem_per_thread}}M" \
+            -O bam \
+            -o {output.bam}
+        
         samtools index -@ {threads} {output.bam}
+        
         echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
+        
+        rm -f {params.sortname}.unsorted.bam
+        
         """
 
 
