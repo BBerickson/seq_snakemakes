@@ -12,7 +12,7 @@ rule fragment_size:
     params:
         job_name = "{sample}_fragment_size_{index}",
         labels   = lambda wildcards: wildcards.sample if "spike" not in wildcards.index else f"{wildcards.sample}_spike",
-        script   = "pipelines/R_scripts/read_size_png.R",
+        script   = "workflow/scripts/read_size_png.R",
         args     = lambda wildcards: CMD_PARAMS["fragment_size"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
         is_paired = lambda wildcards: PAIREDMAP[wildcards.sample]
     resources:
@@ -38,7 +38,7 @@ rule fragment_size:
             readlength.sh \
               in={input.bam} \
               out={output.log} \
-              bin=10 max=1010
+              {params.args}
               
             Rscript {params.script} {output.log} {output.pic}
         fi
