@@ -55,15 +55,18 @@ rule fragment_results:
         PROJ + "/stats/" + PROJ + "_{index}_fragment_results.tsv"
     params:
         job_name = "fragment_results_{index}",
-        samp     = "{index}"
+        samp     = "{index}",
+        script   = "workflow/scripts/fragment_results.R"
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 1, 1)
     log:
         out = PROJ + "/logs/fragment_{index}_results.out",
         err = PROJ + "/logs/fragment_{index}_results.err"
     threads: 1
-    script:
-        "../scripts/fragment_results.R"
+    shell:
+        """
+        Rscript {params.script} "{input}" "{params.samp}" "{output}"
+        """
 
 
 rule fragment_png:
