@@ -19,7 +19,7 @@ rule bamCoverage:
         rev     =   PROJ   + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_rev.bw"
     params:
         job_name = "{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage",
-        args = CMD_PARAMS["bamCoverage"] + ("--blackListFileName " + config["MASK"] if CMD_PARAMS.get("bamCoverageBL","False") and config.get("MASK") else ""),
+        args = CMD_PARAMS["bamCoverage"] + ("--blackListFileName " + config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else ""),
         argsf    = _get_bamCov_strand("forward", ORIENTATION),
         argsr    = _get_bamCov_strand("reverse", ORIENTATION),
         sam_norm = SAM_NORM  # Pass the original data

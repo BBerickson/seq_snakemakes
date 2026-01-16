@@ -418,7 +418,7 @@ def _get_normtype(normUsing, norm_type, blacklist, orientation):
       else:
         offset = "_Offset" + str(num)
       word = word + offset
-    if re.search(r"\S", blacklist):
+    if blacklist:
       word = word + "_FilterBL"
     return " ".join(word.split())
   

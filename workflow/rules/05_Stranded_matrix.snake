@@ -13,7 +13,7 @@ rule create_strand_matrix:
     params:
         job_name = "{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_{sense_asense}_matrix",
         args = lambda wildcards: (
-            CMD_PARAMS[f"region{wildcards.region}"] + ("--blackListFileName " + config["MASK"] if CMD_PARAMS.get("bamCoverageBL","False") and config.get("MASK") else "") +
+            CMD_PARAMS[f"region{wildcards.region}"] + ("--blackListFileName " + config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else "") +
             (" --scale -1 " if wildcards.sense_asense == "anti" else "")
         ),
         fw_ref   = lambda wildcards: FW_REF if wildcards.sense_asense == "sense" else REV_REF,

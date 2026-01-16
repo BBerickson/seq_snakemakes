@@ -10,7 +10,7 @@ rule my_5_bidirectonal_matrix:
         rev      = PROJ + "/matrix/{region}/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_neg_matrix.gz"
     params:
         job_name = "{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_bi_matrix",
-        args     = lambda wildcards: CMD_PARAMS[f"region{wildcards.region}"] + ("--blackListFileName " + config["MASK"] if CMD_PARAMS.get("bamCoverageBL","False") and config.get("MASK") else ""),
+        args     = lambda wildcards: CMD_PARAMS[f"region{wildcards.region}"] + ("--blackListFileName " + config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else ""),
         fw_ref   = lambda wildcards: FW_REF if wildcards.sense_asense == "sense" else REV_REF,
         rev_ref  = lambda wildcards: REV_REF if wildcards.sense_asense == "sense" else FW_REF
     resources:

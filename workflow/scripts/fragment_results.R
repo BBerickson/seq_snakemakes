@@ -30,14 +30,14 @@ if(num_cols > 2){
     frag <- bind_rows(frag,frag_temp)
   }
 } else {
-  samp <- paste(samp,c("Read_Len_Mean", "Read_Len_Median"),sep = "_")
+  samp2 <- paste(samp,c("Read_Len_Mean", "Read_Len_Median"),sep = "_")
   for(i in seq_along(frag_files)){
     samp_name <- frag_files[i] %>% str_replace(., ".*/", "") %>% 
       str_remove(.,paste0("_aligned_", samp,"_fragment.txt"))
     
     frag_temp <- read_tsv(frag_files[i], show_col_types = FALSE, col_names = F, skip = 4, n_max = 2) %>% 
       mutate(sample=samp_name) %>% pivot_wider(values_from =X2,names_from = X1) %>% 
-      dplyr::rename(!!samp[1] := `#Avg:`, !!samp[2] := `#Median:`)
+      dplyr::rename(!!samp2[1] := `#Avg:`, !!samp2[2] := `#Median:`)
     frag <- bind_rows(frag,frag_temp)
   }
 }

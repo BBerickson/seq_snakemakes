@@ -90,7 +90,7 @@ for sample, norm_list in NORMMAP.items():
         (index, norm_value, _get_normtype(
             CMD_PARAMS["bamCoverage"],
             norm_value,
-            CMD_PARAMS.get("bamCoverageBL", ""),
+            CMD_PARAMS.get("bamCoverageBL", False),
             ORIENTATION
         ))
         for index, norm_value in norm_list
@@ -136,7 +136,7 @@ FASTQS = sum(FASTQS, [])
 
 COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
 
-NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS.get("bamCoverageBL", ""),ORIENTATION)
+NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS.get("bamCoverageBL", False),ORIENTATION)
 
 BAM_PATH = _get_bampath(NORM)
 ALIGNER = "star"

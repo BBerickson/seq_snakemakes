@@ -3,7 +3,7 @@
 # program options for computeMatrix
 
 CMD_PARAMS:
-    bamCoverageBL:    "False" # True or False, if True will use MASK file from ref.yaml
+    bamCoverageBL:    False # True or False, if True will use MASK file from ref.yaml
     region543:        " scale-regions --regionBodyLength 200 --binSize 20 --unscaled5prime 0 --unscaled3prime 0 --upstream 100 --downstream 100 --missingDataAsZero --skipZeros -q "
     region5:          " reference-point --referencePoint TSS --binSize 20 --upstream 500 --downstream 500 --missingDataAsZero --skipZeros -q "
     region5L:         " reference-point --referencePoint TSS --binSize 50 --upstream 100 --downstream 1000 --missingDataAsZero --skipZeros -q "

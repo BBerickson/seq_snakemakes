@@ -8,7 +8,7 @@ rule standared_matrix:
         matrix = PROJ + "/matrix/{region}/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_matrix.gz"
     params:
         job_name = "{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_matrix",
-        args = lambda wildcards: CMD_PARAMS[f"region{wildcards.region}"] + ("--blackListFileName " + config["MASK"] if CMD_PARAMS.get("bamCoverageBL","False") and config.get("MASK") else ""),
+        args = lambda wildcards: CMD_PARAMS[f"region{wildcards.region}"] + ("--blackListFileName " + config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else ""),
         my_ref = lambda wildcards: PI_REF if wildcards.region == "PI" else MY_REF
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
