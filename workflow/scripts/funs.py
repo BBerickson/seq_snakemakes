@@ -339,10 +339,11 @@ def _get_norm_scale(sample, norm_type, index_sample, norm_files):
     try:
         with open(matching_file, "r") as f:
             for line in f:
-                if norm_type_with_index in line:
-                    num = line.strip().split()
+                parts = line.strip().split()
+                if parts and parts[0] == norm_type_with_index:  # Exact match on first field
+                    num = parts[1] if len(parts) > 1 else None
                     try:
-                        value = float(num[1])
+                        value = float(num)
                         return 1000000 / value if value != 0 else 1
                     except (IndexError, ValueError) as e:
                         error_msg = f"ERROR: Could not parse normalization value from line: {line}. Parse error: {e}"

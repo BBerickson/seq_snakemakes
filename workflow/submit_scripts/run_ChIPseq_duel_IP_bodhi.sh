@@ -33,5 +33,6 @@ snakemake \
     --snakefile workflow/UnStranded_matrix.smk \
     --configfile ${SAMPLES_FILE} ${LSF_CONFIG} ${MATRIX_FILE} \
     --singularity-prefix "${SINGULARITY_PREFIX}" \
-    --config SSH_KEY_DIR="${SSH_KEY_DIR}"
+    --config SSH_KEY_DIR="${SSH_KEY_DIR}" \
+    --rerun-triggers mtime input code
 
