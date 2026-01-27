@@ -102,6 +102,11 @@ for sample, norm_list in NORMMAP.items():
         for index, norm_value in norm_list
     ]
     NORMMAP[sample] = updated_list
+
+# add scalefactor index info
+for key in NORMMAP:
+    NORMMAP[key] = [(index, norm, f'scalefactor_{INDEXES[-1]}' if suffix.lower() == 'scalefactor' else suffix) 
+                    for index, norm, suffix in NORMMAP[key]]
     
 # Combine into a list of records with expanded NormMap
 SAM_NORM = []
