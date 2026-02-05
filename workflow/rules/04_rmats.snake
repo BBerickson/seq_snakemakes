@@ -13,8 +13,9 @@ rule gathering_bams_groups:
         job_name = "{compgroups}_rmats_bams_groups",
         project  = PROJ + "/" + BAM_PATH,
         mygroup  = "{compgroups}",
-        mycols   = COLS_DICT,
-        mysamps  = SAM_GRPS
+        mycols   = lambda w: " ".join(f"{k}={v}" for k, v in COLS_DICT.items()),
+        mysamps  = SAM_GRPS,
+        script   = "workflow/scripts/rmats_groups.R"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
@@ -24,8 +25,10 @@ rule gathering_bams_groups:
         "getting final rmats_bams_groups  {wildcards.compgroups}"
     threads: 
         1
-    script:
-        '../scripts/rmats_groups.R'
+    shell:
+        """
+        Rscript {params.script} "{params.project}" "{params.mygroup}" "{params.mysamps}" "{params.mycols}" "{output}"
+        """
   
 
 # Align trimmed reads with star rmats

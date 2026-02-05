@@ -10,7 +10,7 @@ library(tidyverse)
 library(ggpubr)
 library(RColorBrewer)
 library(gridExtra)
-source("pipelines/R_scripts/rMATS_funs.R")
+source("workflow/scripts/rMATS_funs.R")
 
 min_count <- 2 # min_count × number of replicates total reads needed to pass filter
 max_FDR <- 0.05 # Standard 5% significance threshold for FDR adjusted pValue
