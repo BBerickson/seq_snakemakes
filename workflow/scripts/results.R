@@ -48,9 +48,12 @@ if(str_detect(dedup_file,"clumpify")){
     dplyr::select(sample,Total_reads,passing_filters_Cutadapt)
   dedup2 <- read_tsv(dedup_file, col_names = c("sample", "type","value"), show_col_types = FALSE) %>% 
     dplyr::mutate(sample=str_remove(sample, paste0("_",index_map,"_UMI"))) %>%
-    dplyr::mutate(type=str_replace_all(type," ","_")) 
-  
-  pre_alignment <- full_join(dedup1,dedup2,by="sample") %>% pivot_wider(names_from = type,values_from = value)
+    dplyr::mutate(type=str_replace_all(type," ","_")) %>% 
+    dplyr::filter(type == "Input_Reads" | type == "Number_of_reads_out" ) %>%
+    spread(type,value) %>% 
+    dplyr::mutate(Unique_UMI_reads=paste0(Number_of_reads_out,"(",paste0(round(Number_of_reads_out/Input_Reads*100,1),"%"),")")) %>% 
+    dplyr::select(sample,Unique_UMI_reads)
+  pre_alignment <- full_join(dedup1,dedup2,by="sample")
 }
 
 # alignment

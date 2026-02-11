@@ -205,7 +205,7 @@ bwt_sum %>%
 mets <- c("Input Reads", "Number of reads out")
 
 if(file.exists(dedup_sum)){
-  cat("## PCR duplicates\n\n")
+  cat("## UMI duplicates\n\n")
   cat("Duplicate reads were removed using `umi-tools`, metrics are shown below. The number of reads written is displayed on each bar.\n\n")
 
   dup_sum <- dedup_sum %>%

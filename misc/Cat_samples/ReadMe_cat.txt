@@ -7,3 +7,5 @@ bash setup_pipeline.sh Bodhi
 # edit samples_cat.yaml with your sample information
 # run script by submitting to Bodhi (lsf) or Alpine (slerm) 
 
+### Pipeline Overview ###
+1. cat fastq files 

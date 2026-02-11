@@ -7,5 +7,7 @@ bash setup_rMATS_pipeline.sh Bodhi
 # edit samples_rMATS.yaml and run_rMATS.sh with your sample information
 # run script by submitting to Bodhi (lsf) or Alpine (slerm) after running main alignment script
 
-# the additinal scripts are not set up for Alpine yet
-
+!!! This is an addon to be ran after RNAseq pipeline !!!
+Runs rMATS
+includes Rscripts to make results summary plots
+inclueds scripts to make sashimi plots
