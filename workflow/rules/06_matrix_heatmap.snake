@@ -20,7 +20,7 @@ rule create_heatmap_plots:
         tempplot = temp(
             PROJ + "/heatmap/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_heatmap.svg"
         ),
-        heatmap = temp(
+        heatmap = (
             PROJ + "/heatmap/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_heatmap.png"
         )
     params:
@@ -103,7 +103,7 @@ rule cluster_heatmap_plots:
         tempplot = temp(
             PROJ + "/heatmap/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_cluster.svg"
         ),
-        heatmap = temp(
+        heatmap = (
             PROJ + "/heatmap/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_cluster.png"
         ),
         bedfile  = PROJ + "/heatmap/{region}_{group}_aligned_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_{sense_asense}_cluster.bed"
@@ -152,6 +152,7 @@ rule cluster_pdf:
     params:
         job_name  = "{genelist}_{region}_{index}_norm_{suffix}_cluster_pdf",
         script    = "workflow/scripts/pngToPDF.R",
+        script2   = "workflow/scripts/pngMerge.R",
         pdf_title = lambda wildcards: [
         f"{row['Region']}_{row['Value']}_norm_{row['Suffix']}: {SEQ_DATE}"
         for _, row in DF_SAM_NORM.iterrows()
@@ -186,7 +187,7 @@ rule create_profile_plots:
             )
         ])))
     output:
-        heatmap = temp(
+        heatmap = (
             PROJ + "/heatmap/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_profile_plots.png"
         )
     params:
@@ -204,6 +205,7 @@ rule create_profile_plots:
         colors=("{params.setcol}") 
         
         plotProfile -m {input} \
+        --plotHeight 15 --plotWidth 30 \
         --perGroup --legendLocation best \
         --colors ${{colors}} \
         -out {output.heatmap} 

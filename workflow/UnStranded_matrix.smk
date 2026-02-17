@@ -147,7 +147,7 @@ wildcard_constraints:
     region = "543|5|5L|3|PI|EI",
     sense_asense = r"(sense|anti|)"  # Allow empty, "sense", or "anti"
 
-HEATMAP_REGIONS = ["543"]
+HEATMAP_REGIONS = ["543","5","5L","3"]
 
 COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
 

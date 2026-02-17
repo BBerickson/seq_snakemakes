@@ -46,14 +46,15 @@ knitr::knit(here::here(template_dir, "setup.Rmd"), "")
 
 ```
 
-```{r "pdf setup", echo=FALSE}
+```{r "png setup", echo=FALSE}
 # Summary files
-report_dir <- here::here(res_dir, "report/")
-profile_pdfs     <- list.files(path = report_dir, pattern = "*_profile.pdf$")
-heatmap_pdfs     <- list.files(path = report_dir, pattern = "*_heatmap.pdf$")
-cluster_pdfs     <- list.files(path = report_dir, pattern = "*_cluster.pdf$")
+plots_dir <- here::here(res_dir,"heatmap/")
+
+profile_png     <- list.files(path = plots_dir, pattern = "*_profile_plots.png$")
+heatmap_png     <- list.files(path = plots_dir, pattern = "*_heatmap.png$")
+cluster_png     <- list.files(path = plots_dir, pattern = "*_cluster.png$")
 # Check if any plots exist
-has_plots <- length(profile_pdfs) > 0 || length(heatmap_pdfs) > 0 || length(cluster_pdfs) > 0
+has_plots <- length(profile_png) > 0 || length(heatmap_png) > 0 || length(cluster_png) > 0
 ```
 
 

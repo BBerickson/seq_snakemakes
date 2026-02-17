@@ -136,6 +136,8 @@ wildcard_constraints:
     covarg = r"[a-zA-Z0-9_.-]+",
     region = "543|5|5L|3|PI|EI"
 
+HEATMAP_REGIONS = ["543","5","5L","3"]
+
 COLS_DICT = _get_colors(SAMS_UNIQ, COLORS)
 
 NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS.get("bamCoverageBL", False),ORIENTATION)

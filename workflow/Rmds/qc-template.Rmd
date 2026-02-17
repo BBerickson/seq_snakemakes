@@ -13,7 +13,7 @@ dedup_sum  <- str_c(stats_dir, proj, "_", index_map, "_UMI_dedup.tsv")
 bwt_sum    <- str_c(stats_dir, proj, "_aligned.tsv")
 
 # Sample names and groups
-qc_sams <- lapply(plot_grpss$SAMPLES[[1]], function(x) unlist(x)) %>% bind_cols() 
+qc_sams <- lapply(plot_grpss$SAMPLES[[1]], function(x) unlist(x)) 
 
 
 # Create table of sample groups

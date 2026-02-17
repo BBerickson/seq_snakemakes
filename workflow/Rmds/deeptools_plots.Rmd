@@ -1,57 +1,123 @@
 
 ## Profile plots
 
-```{r "profile plots", fig.width = 20, fig.height = 20}
-if(length(profile_pdfs) > 0) {
-  profile_pdfs <- str_c(report_dir, profile_pdfs)
+```{r "profile plots", out.width="100%", out.height="auto", fig.align='center'}
+if(length(profile_png) > 0) {
+  nsize <- length(profile_png)
+  chunkSize <- min(1,nsize)
+  profile_png <- str_c(plots_dir, profile_png)
   
-  # Create a list of embed tags
-  embed_tags <- lapply(profile_pdfs, function(i) {
-    htmltools::tags$embed(src = i, 
-                         type = "application/pdf", 
-                         width = "100%", 
-                         height = "900px")
-  })
-  
-  # Print the tagList
-  htmltools::tagList(embed_tags)
+  # Function to trim whitespace from PNG array
+  trim_png <- function(img_array) {
+    # Check if image has alpha channel
+    if(dim(img_array)[3] == 4) {
+      alpha <- img_array[,,4]
+      non_white <- alpha > 0
+    } else {
+      # For RGB, find non-white pixels (assuming white is ~1)
+      non_white <- apply(img_array, 1:2, function(x) any(x < 0.99))
+    }
+    
+    # Find bounding box
+    rows <- which(rowSums(non_white) > 0)
+    cols <- which(colSums(non_white) > 0)
+    
+    if(length(rows) > 0 && length(cols) > 0) {
+      img_array[min(rows):max(rows), min(cols):max(cols), , drop=FALSE]
+    } else {
+      img_array
+    }
+  }
+  for(i in 1:ceiling(nsize / chunkSize)){  
+    rl = lapply(sprintf(profile_png[((i-1)*chunkSize+1):min(nsize,(i*chunkSize))]), function(x) {
+      img <- png::readPNG(x)
+      trim_png(img)
+    })
+    gl = lapply(rl, grid::rasterGrob)
+    gridExtra::grid.arrange(grobs=gl,ncol=chunkSize)
+  }
+
 }
 ```
 
 ## Heatmap plots
 
-```{r "heatmap plots", fig.width = 20, fig.height = 20}
-if(length(heatmap_pdfs) > 0) {
-  heatmap_pdfs <- str_c(report_dir, heatmap_pdfs)
+```{r "heatmap plots", out.width="100%", out.height="auto", fig.align='center'}
+if(length(heatmap_png) > 0) {
+  nsize <- length(heatmap_png)
+  heatmap_png <- str_c(plots_dir, heatmap_png)
+  chunkSize <- min(1,nsize)
   
-  # Create a list of embed tags
-  embed_tags <- lapply(heatmap_pdfs, function(i) {
-    htmltools::tags$embed(src = i, 
-                         type = "application/pdf", 
-                         width = "100%", 
-                         height = "900px")
-  })
-  
-  # Print the tagList
-  htmltools::tagList(embed_tags)
+  # Function to trim whitespace from PNG array
+  trim_png <- function(img_array) {
+    # Check if image has alpha channel
+    if(dim(img_array)[3] == 4) {
+      alpha <- img_array[,,4]
+      non_white <- alpha > 0
+    } else {
+      # For RGB, find non-white pixels (assuming white is ~1)
+      non_white <- apply(img_array, 1:2, function(x) any(x < 0.99))
+    }
+    
+    # Find bounding box
+    rows <- which(rowSums(non_white) > 0)
+    cols <- which(colSums(non_white) > 0)
+    
+    if(length(rows) > 0 && length(cols) > 0) {
+      img_array[min(rows):max(rows), min(cols):max(cols), , drop=FALSE]
+    } else {
+      img_array
+    }
+  }
+  for(i in 1:ceiling(nsize / chunkSize)){  
+    rl = lapply(sprintf(heatmap_png[((i-1)*chunkSize+1):min(nsize,(i*chunkSize))]), function(x) {
+      img <- png::readPNG(x)
+      trim_png(img)
+    })
+    gl = lapply(rl, grid::rasterGrob)
+    gridExtra::grid.arrange(grobs=gl,ncol=chunkSize)
+  }
+
 }
 ```
 
 ## Cluster plots
 
-```{r "cluster plots", fig.width = 20, fig.height = 20}
-if(length(cluster_pdfs) > 0) {
-  cluster_pdfs <- str_c(report_dir, cluster_pdfs)
+```{r "cluster plots", out.width="100%", out.height="auto", fig.align='center'}
+if(length(cluster_png) > 0) {
+  nsize <- length(cluster_png)
+  cluster_png <- str_c(plots_dir, cluster_png)
+  chunkSize <- min(1,nsize)
   
-  # Create a list of embed tags
-  embed_tags <- lapply(cluster_pdfs, function(i) {
-    htmltools::tags$embed(src = i, 
-                         type = "application/pdf", 
-                         width = "100%", 
-                         height = "900px")
-  })
-  
-  # Print the tagList
-  htmltools::tagList(embed_tags)
+  # Function to trim whitespace from PNG array
+  trim_png <- function(img_array) {
+    # Check if image has alpha channel
+    if(dim(img_array)[3] == 4) {
+      alpha <- img_array[,,4]
+      non_white <- alpha > 0
+    } else {
+      # For RGB, find non-white pixels (assuming white is ~1)
+      non_white <- apply(img_array, 1:2, function(x) any(x < 0.99))
+    }
+    
+    # Find bounding box
+    rows <- which(rowSums(non_white) > 0)
+    cols <- which(colSums(non_white) > 0)
+    
+    if(length(rows) > 0 && length(cols) > 0) {
+      img_array[min(rows):max(rows), min(cols):max(cols), , drop=FALSE]
+    } else {
+      img_array
+    }
+  }
+  for(i in 1:ceiling(nsize / chunkSize)){  
+    rl = lapply(sprintf(cluster_png[((i-1)*chunkSize+1):min(nsize,(i*chunkSize))]), function(x) {
+      img <- png::readPNG(x)
+      trim_png(img)
+    })
+    gl = lapply(rl, grid::rasterGrob)
+    gridExtra::grid.arrange(grobs=gl,ncol=chunkSize)
+  }
+
 }
 ```
