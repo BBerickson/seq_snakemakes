@@ -201,8 +201,8 @@ include: "rules/01a_clumpify.snake"
 # Run bbmerge
 include: "rules/01b_bbduk.snake"
 # Align reads 
-include: "rules/02a_duel_IP_bowtie.snake"
-include: "rules/02b_duel_IP_samtools.snake"
+include: "rules/02a_dual_IP_bowtie.snake"
+include: "rules/02b_dual_IP_samtools.snake"
 include: "rules/02c_align_URLS.snake"
 include: "rules/02s_align_subsample.snake"
 # Results

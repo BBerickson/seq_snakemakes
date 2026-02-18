@@ -141,6 +141,11 @@ COLORS:
 # stop after alignment, used for small single gene genome expression alignment
 stop_after_alignment: false
 
+# Save data on amc-sandbox and make URLS
+skip_bam_urls: true
+skip_bw_urls: false
+skip_matrix_url: false
+
 # html report
 skip_html_report: true
 skip_matrix_html_report: false

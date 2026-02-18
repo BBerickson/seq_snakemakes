@@ -12,10 +12,10 @@ This snakemake pipeline runs in a container and is set up to run on AMC Bodhi (L
       -clumpify: remove duplicates based on exact sequence/cluster location
       -bbduk: trim adaptors
   
-2. align paired or single end fastqs in R1R2 or R2R1 orentation, mixed genomes and duel IP saported, outputs bam filtered file(s)
+2. align paired or single end fastqs in R1R2 or R2R1 orentation, mixed genomes and dual IP saported, outputs bam filtered file(s)
   a bowtie | hisat | star
     - splits out mixed genome alignment
-    - sequenctual or independent duel IP alignment
+    - sequenctual or independent dual IP alignment
   b filter bam files
     - samtools filtering
     - multimappers max k filtering
@@ -34,7 +34,7 @@ This snakemake pipeline runs in a container and is set up to run on AMC Bodhi (L
   b optional compile into summary table and generate QC R Markdown HTML report 
 
 4. genome covrage bigwig files with deeptools, 
-  - normalized: none, CPM, RPKM, scalefactor (duel IP), spikeIN +/- inputs (mixed genomes), chrM, featureCounts Geneid: ("snRNA","snoRNA","rRNA" ...)
+  - normalized: none, CPM, RPKM, scalefactor (dual IP), spikeIN +/- inputs (mixed genomes), chrM, featureCounts Geneid: ("snRNA","snoRNA","rRNA" ...)
   - unstranded | stranded pos neg files
   - optional cp to amc-sandbox and make URLs for UCSC browser
   

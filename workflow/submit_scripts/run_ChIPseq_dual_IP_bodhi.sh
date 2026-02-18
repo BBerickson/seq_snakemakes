@@ -18,12 +18,12 @@ mkdir -p logs
 PROFILE="workflow/profiles/Bodhi"
 LSF_CONFIG="workflow/profiles/Bodhi/Bodhi_config.yaml"
 SSH_KEY_DIR="${HOME}/.ssh"
-SAMPLES_FILE="ChIPseq_duel_IP_samples.yaml"
+SAMPLES_FILE="ChIPseq_dual_IP_samples.yaml"
 MATRIX_FILE="UnStranded_matrix.yaml"
 
 snakemake \
     --profile ${PROFILE} \
-    --snakefile workflow/ChIPseq_duel_IP.smk \
+    --snakefile workflow/ChIPseq_dual_IP.smk \
     --configfile ${SAMPLES_FILE} ${LSF_CONFIG} \
     --singularity-prefix "${SINGULARITY_PREFIX}" \
     --config SSH_KEY_DIR="${SSH_KEY_DIR}"

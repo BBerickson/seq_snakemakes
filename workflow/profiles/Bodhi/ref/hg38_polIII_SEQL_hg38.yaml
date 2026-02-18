@@ -1,4 +1,4 @@
-#===== Config file for standared hg38 with mm10 spikeIN  ===================
+#===== Config file for standared hg38 and hg38 pol III alignments  ===================
 
 # Path to mixed bowtie2 index and chrom name txt files
 INDEX_PATH:

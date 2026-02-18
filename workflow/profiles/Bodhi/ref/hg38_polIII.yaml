@@ -1,4 +1,4 @@
-#===== Config file for hg38 and ensembl v113 genome  ===================
+#===== Config file for select hg38 pol III ensembl v113 genome  ===================
 
 GENELIST:
     "polIII"

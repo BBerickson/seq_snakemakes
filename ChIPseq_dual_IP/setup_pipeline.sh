@@ -20,19 +20,19 @@ if [ $# -eq 0 ]; then
     show_usage
 fi
 
-SMK_FILE="ChIPseq_duel_IP.smk"
-CONFIG_FILE="ChIPseq_duel_IP_samples.yaml"
+SMK_FILE="ChIPseq_dual_IP.smk"
+CONFIG_FILE="ChIPseq_dual_IP_samples.yaml"
 MTX_CONFIG_FILE="UnStranded_matrix.yaml"
 
 PIPELINE_TYPE="$1"
 
 case "$PIPELINE_TYPE" in
     Bodhi)
-        SUBMIT_GLOB="run_ChIPseq_duel_IP_bodhi.sh"
+        SUBMIT_GLOB="run_ChIPseq_dual_IP_bodhi.sh"
         PROFILES="Bodhi"
         ;;
     Alpine)
-        SUBMIT_GLOB="run_ChIPseq_duel_IP_alpine.sh"
+        SUBMIT_GLOB="run_ChIPseq_dual_IP_alpine.sh"
         PROFILES="Alpine"
         ;;
     *)
@@ -68,7 +68,7 @@ EXTRACT_DIR="$TEMP_DIR/$REPO-$BRANCH"
 mkdir -p workflow/{profiles,ref,rules,Rmds,scripts}
 
 # Copy pipeline-specific files
-rsync -a "$EXTRACT_DIR/ChIPseq_duel_IP/ReadMe.txt" .
+rsync -a "$EXTRACT_DIR/ChIPseq_dual_IP/ReadMe.txt" .
 rsync -a "$EXTRACT_DIR/workflow/$SMK_FILE" workflow/
 if [ ! -f "$CONFIG_FILE" ]; then
     rsync -a "$EXTRACT_DIR/workflow/configs/$CONFIG_FILE" .
