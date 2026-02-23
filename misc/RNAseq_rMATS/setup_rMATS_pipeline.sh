@@ -64,7 +64,7 @@ fi
 EXTRACT_DIR="$TEMP_DIR/$REPO-$BRANCH"
 
 # Create directory structure
-mkdir -p workflow/{profiles,ref,rules,Rmds,scripts}
+mkdir -p workflow/{profiles,ref,rules,Rmds,scripts,rMATS}
 
 # Copy pipeline-specific files
 rsync -a "$EXTRACT_DIR/workflow/$SMK_FILE" workflow/
@@ -75,9 +75,9 @@ fi
 rsync -a "$EXTRACT_DIR/workflow/submit_scripts/$SUBMIT_GLOB" . 2>/dev/null
 
 # Copy shared directories
-rsync -a "$EXTRACT_DIR/workflow/misc/rMATS" workflow/
-cp workflow/rMATS/rMATS_plots.R .
-cp workflow/rMATS/run_sashimi_loop.sh .
+rsync -a "$EXTRACT_DIR/misc/RNAseq_rMATS/" workflow/
+cp workflow/RNAseq_rMATS/rMATS_plots.R .
+cp workflow/RNAseq_rMATS/run_sashimi_loop.sh .
 
 # Cleanup
 rm -rf "$TEMP_DIR"

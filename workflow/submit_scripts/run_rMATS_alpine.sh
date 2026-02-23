@@ -29,7 +29,6 @@ mkdir -p $SINGULARITY_TMPDIR
 
 # Configuration
 DATASET="RNAseq"  # Set your dataset name here
-MATRIXSET="UnStranded" # set the type here
 
 PROFILE="workflow/profiles/Alpine"
 LSF_CONFIG="workflow/profiles/Alpine/Alpine_config.yaml"

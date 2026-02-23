@@ -16,7 +16,6 @@ mkdir -p logs
 
 # Configuration
 DATASET="RNAseq"  # Set your dataset name here
-MATRIXSET="UnStranded" # set the type here
 
 PROFILE="workflow/profiles/Bodhi"
 LSF_CONFIG="workflow/profiles/Bodhi/Bodhi_config.yaml"
