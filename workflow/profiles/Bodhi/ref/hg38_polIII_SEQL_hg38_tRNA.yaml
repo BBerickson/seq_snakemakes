@@ -1,0 +1,12 @@
+#===== Config file for standared hg38 and hg38 pol III alignments  ===================
+
+# Path to mixed bowtie2 index and chrom name txt files
+INDEX_PATH:
+    "/beevol/home/erickson/ref/hg38_p14/PolIII/"
+# bowtie2 index prefix
+INDEX_MAP:
+    "hg38_polIII"
+# index.yaml prefix(s)
+INDEXES:
+  - "hg38_tRNA"
+  - "hg38_polIII"
