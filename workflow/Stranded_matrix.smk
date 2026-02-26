@@ -35,7 +35,7 @@ configfile: str(GENOME_CONFIG)
 
 raw_indexes = config['INDEXES']
 INDEXES = [raw_indexes] if isinstance(raw_indexes, str) else [raw_indexes[0]]
-
+INDEXES_LAST = [raw_indexes] if isinstance(raw_indexes, str) else [raw_indexes[-1]]
 
 # Paths to additional config files
 if config.get("GENELIST"):
@@ -107,7 +107,7 @@ for sample, norm_list in NORMMAP.items():
 
 # add scalefactor index info
 for key in NORMMAP:
-    NORMMAP[key] = [(index, norm, f'scalefactor_{INDEXES[-1]}' if suffix.lower() == 'scalefactor' else suffix) 
+    NORMMAP[key] = [(index, norm, f'scalefactor_{INDEXES_LAST[0]}' if suffix.lower() == 'scalefactor' else suffix) 
                     for index, norm, suffix in NORMMAP[key]]
     
 # Combine into a list of records with expanded NormMap
