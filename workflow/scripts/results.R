@@ -169,6 +169,29 @@ if(!is_empty(FC_files)){
     dplyr::select(sample, distinct(FC,type)$type) 
   
   sn <- full_join(sn,FC,by="sample") 
+  # feature Counts summary file
+  FCS <- list()
+  col_names <- c("ID",	"Chr",	"Start", "End",	"Strand",	"Length", "gene_name",	"biotype", "count")
+  featurecount_files <- list.files(path = mydirc, pattern = '_featureCounts.tsv$',recursive = T)
+  
+  for(i in seq_along(sn$sample)) {
+    sub_reads <- read_tsv(paste0(mydirc,"/",featurecount_files[str_detect(featurecount_files,sn$sample[i])]),
+                          comment = "#",show_col_types = FALSE) 
+    names(sub_reads) <- col_names
+    FCS[[i]] <- sub_reads %>% mutate(sample=sn$sample[i]) %>% 
+      group_by(sample,biotype) %>% summarise(counts = sum(count,na.rm = T),.groups = "drop_last") %>%
+      mutate(percentage=(counts/sum(counts,na.rm = T))*100) %>%
+      mutate(category = case_when((biotype %in% c("protein_coding","snRNA","snoRNA","rRNA"))~ biotype,
+                                  (percentage <= 2) ~ "Other",
+                                  (percentage > 2) ~ biotype)) %>%
+      group_by(sample, category) %>%
+      summarise(percentage = sum(percentage),.groups = "drop") %>%
+      arrange(sample)
+    
+  } 
+  
+  bind_rows(FCS) %>% write_tsv(.,paste0(mydir,"/report/",mydir,"_featureCounts.tsv"),col_names = F)
+  
 }
 
 frag_files <- list.files(path = mydirf, pattern = "_fragment_results.tsv")

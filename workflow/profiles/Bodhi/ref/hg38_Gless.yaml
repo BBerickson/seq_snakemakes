@@ -3,7 +3,7 @@ GENELIST:
     "NDRG1_Gless"
 # Path to bowtie2 index ref files
 INDEX_PATH:
-  "/beevol/home/erickson/ref/hg38_p14/G-less_NDRG1_insertion"
+  "/beevol/home/erickson/ref/hg38_p14/G-less_NDRG1_insertion/"
 # bowtie2 index prefix
 INDEX_MAP:
   "hg38"

@@ -200,6 +200,39 @@ bwt_sum %>%
 
 <br>
 
+## Aligned Reads
+
+`FeatureCount` was used to count the number of reads over the GTF biotype's. If < 2% and not protein_coding, snRNA, snoRNA, or rRNA placed in Other category.
+
+```{r "FC summary", fig.width = 16, fig.height = 10}
+
+# FeatureCount stats
+
+fc_sum <- fc_sum %>%
+  read_tsv(col_names = c("sample", "metric", "value"),show_col_types = FALSE)  %>%
+  dplyr::mutate(value = as.numeric(value))
+
+mets <- fc_sum %>% group_by(metric) %>% summarise(value=sum(value),.groups = "drop") %>% arrange(desc(value)) %>% pull(metric)
+
+result <- ifelse(n_distinct(grp_key$grp) <= 4, 1, 2)
+# Create bar graphs
+fc_sum %>%
+  create_qc_bars(
+    grp_df     = grp_key,
+    grp_lvls   = names(qc_sams),
+    sam_lvls   = NULL,
+    met_lvls   = mets,
+    plot_cols  = replace(theme_colors[seq_along(mets)], is.na(theme_colors[seq_along(mets)]), "black"),
+    lab_metric = NULL,
+    n_rows     = result,
+    lab_size   = 20
+  ) +
+  qc_theme
+
+```
+
+<br>
+
 
 ```{r "dedup summary", fig.width = 16, fig.height = 10, results='asis', echo=FALSE}
 mets <- c("Input Reads", "Number of reads out")
