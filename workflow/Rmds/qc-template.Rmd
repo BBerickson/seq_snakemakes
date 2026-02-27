@@ -11,6 +11,7 @@ trim_cut   <- str_c(stats_dir, proj, "_cutadapt.tsv")
 bbduk_sum  <- str_c(stats_dir, proj, "_bbduk.tsv")
 dedup_sum  <- str_c(stats_dir, proj, "_", index_map, "_UMI_dedup.tsv")
 bwt_sum    <- str_c(stats_dir, proj, "_aligned.tsv")
+fc_sum     <- str_c(report_dir, proj, "_featureCounts.tsv")
 
 # Sample names and groups
 qc_sams <- lapply(plot_grpss$SAMPLES[[1]], function(x) unlist(x)) 
