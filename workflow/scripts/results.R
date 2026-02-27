@@ -75,6 +75,7 @@ mydirs <- paste0(mydir,"/bams_sub")
 mydirm <- paste0(mydir,"/bams_mask")
 mydirb <- paste0(mydir,"/bams")
 mydirf <- paste0(mydir,"/stats")
+mydirc <- paste0(mydir,"/counts")
 
 if(!is_empty(list.files(path = mydirs, pattern = '.bam',recursive = T))){
   mask_count <- list.files(path = mydirm, pattern = '_mask_count',recursive = T)
@@ -173,10 +174,10 @@ if(!is_empty(FC_files)){
   # feature Counts summary file
   FCS <- list()
   col_names <- c("ID",	"Chr",	"Start", "End",	"Strand",	"Length", "gene_name",	"biotype", "count")
-  featurecount_files <- list.files(path = mydirf, pattern = '_featureCounts.tsv$',recursive = T)
+  featurecount_files <- list.files(path = mydirc, pattern = '_featureCounts.tsv$',recursive = T)
   
   for(i in seq_along(sn$sample)) {
-    sub_reads <- read_tsv(paste0(mydirf,"/",featurecount_files[str_detect(featurecount_files,sn$sample[i])]),
+    sub_reads <- read_tsv(paste0(mydirc,"/",featurecount_files[str_detect(featurecount_files,sn$sample[i])]),
                           comment = "#",show_col_types = FALSE) 
     names(sub_reads) <- col_names
     FCS[[i]] <- sub_reads %>% mutate(sample=sn$sample[i]) %>% 
