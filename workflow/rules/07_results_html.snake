@@ -23,7 +23,7 @@ rule create_plots:
     params:
         job_name   = PROJ + "_qc_plots_html"
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 4) # multiplier, min, max, unit=GB
     log:
         out = PROJ + "/logs/" + PROJ + "_qc_plots_html.out",
         err = PROJ + "/logs/" + PROJ + "_qc_plots_html.err"

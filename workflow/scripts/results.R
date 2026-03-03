@@ -9,13 +9,14 @@ library("jsonlite")
 dedup_file <- args[1] #PROJ + "/stats/" + PROJ + "_clumpify.tsv" | PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_UMI_dedup.tsv"
 filter_file <- args[2] # PROJ + "/stats/" + PROJ + "_bbduk.tsv" | PROJ + "/stats/" + PROJ + "_cutadapt.tsv"
 aligner_file <- args[3] # PROJ + "/stats/" + PROJ + "_aligned.tsv" 
-FC_files <- strsplit(args[4], " ")[[1]] #expand( PROJ + "/stats/{sample}_summary_featureCounts.tsv",sample = SAMS_UNIQ)
+FC_sum_files <- strsplit(args[4], " ")[[1]] #expand( PROJ + "/stats/{sample}_summary_featureCounts.tsv",sample = SAMS_UNIQ)
+FC_files <- strsplit(args[5], " ")[[1]] #expand( PROJ + "/counts/{sample}_aligned_{index}_featureCounts.tsv", group = SAMS_UNIQ, index  = INDEXES[0])
 
-index_map <- args[5] # INDEX_MAP,
-sam_new <- args[6] # SAMPLES, 
-mydir <- args[7] # PROJ
-filter_type <- args[8] #  c("chrM|snRNA|snoRNA|rRNA|protein_coding")
-outfile <- args[9]
+index_map <- args[6] # INDEX_MAP,
+sam_new <- args[7] # SAMPLES, 
+mydir <- args[8] # PROJ
+filter_type <- args[9] #  c("chrM|snRNA|snoRNA|rRNA|protein_coding")
+outfile <- args[10]
 
 sam_new <- fromJSON(gsub("'", '"', sam_new))
 # file name and new name
@@ -153,11 +154,11 @@ if(!is_empty(list.files(path = mydirs, pattern = '.bam',recursive = T))){
   }
 }
 
-# featureCounts
-if(!is_empty(FC_files)){
+# feature Counts summary file
+if(!is_empty(FC_sum_files)){
   FC <- NULL
   for(i in seq_along(sn$sample)){
-    FC <- read_delim(FC_files[str_detect(FC_files,sn$sample[i])],delim = " ",
+    FC <- read_delim(FC_sum_files[str_detect(FC_sum_files,sn$sample[i])],delim = " ",
                      col_names = c("type","value"),
                      show_col_types = FALSE) %>% 
       dplyr::mutate(sample=sn$sample[i]) %>% 
@@ -171,13 +172,17 @@ if(!is_empty(FC_files)){
     dplyr::select(sample, distinct(FC,type)$type) 
   
   sn <- full_join(sn,FC,by="sample") 
-  # feature Counts summary file
+  
+}
+
+# feature Counts file
+if(!is_empty(FC_files)){
   FCS <- list()
   col_names <- c("ID",	"Chr",	"Start", "End",	"Strand",	"Length", "gene_name",	"biotype", "count")
   featurecount_files <- list.files(path = mydirc, pattern = '_featureCounts.tsv$',recursive = T)
   
   for(i in seq_along(sn$sample)) {
-    sub_reads <- read_tsv(paste0(mydirc,"/",featurecount_files[str_detect(featurecount_files,sn$sample[i])]),
+    sub_reads <- read_tsv(FC_files[str_detect(FC_files,sn$sample[i])],
                           comment = "#",show_col_types = FALSE) 
     names(sub_reads) <- col_names
     FCS[[i]] <- sub_reads %>% mutate(sample=sn$sample[i]) %>% 

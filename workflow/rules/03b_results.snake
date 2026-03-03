@@ -116,6 +116,10 @@ rule gathering_results:
         SF_file = expand( PROJ + "/" + BAM_PATH + "/{group}_aligned_{index}_" + SEQ_DATE + "_scalefactor.txt",
             group = GRPS_UNIQ,
             index  = INDEXES
+        ),
+        FC_files = expand( PROJ + "/counts/{sample}_aligned_{index}_featureCounts.tsv",
+            sample = SAMS_UNIQ,
+            index  = INDEXES[0]
         )
     output:
         PROJ + "/report/" + PROJ + "_results.tsv"
@@ -137,7 +141,7 @@ rule gathering_results:
         1
     shell:
         """
-        Rscript {params.script} "{input.clump}" "{input.bbduk}" "{input.aligned}" "{input.fc_file}" "{params.indexmap}" "{params.sam_new}" "{params.project}" "{params.filterty}" "{output}"
+        Rscript {params.script} "{input.clump}" "{input.bbduk}" "{input.aligned}" "{input.fc_file}" "{input.FC_files}" "{params.indexmap}" "{params.sam_new}" "{params.project}" "{params.filterty}" "{output}"
 
         """
   

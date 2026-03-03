@@ -8,6 +8,10 @@ rule gathering_results:
         dedup    = PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_UMI_dedup.tsv",
         fc_file  = expand( PROJ + "/stats/{sample}_summary_featureCounts.tsv",
             sample = SAMS_UNIQ
+        ),
+        FC_files = expand( PROJ + "/counts/{sample}_aligned_{index}_featureCounts.tsv",
+            sample = SAMS_UNIQ,
+            index  = INDEXES[0]
         )
     output:
         PROJ + "/report/" + PROJ + "_results.tsv"
@@ -29,7 +33,7 @@ rule gathering_results:
         1
     shell:
         """
-        Rscript {params.script} "{input.dedup}" "{input.cutadapt}" "{input.aligned}" "{input.fc_file}" "{params.indexmap}" "{params.sam_new}" "{params.project}" "{params.filterty}" "{output}"
+        Rscript {params.script} "{input.clump}" "{input.bbduk}" "{input.aligned}" "{input.fc_file}" "{input.FC_files}" "{params.indexmap}" "{params.sam_new}" "{params.project}" "{params.filterty}" "{output}"
 
         """
   
