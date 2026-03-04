@@ -85,10 +85,10 @@ SAMPLES, SAMPIN, GROUPS, NORMMAP, PAIREDMAP = process_samples(
 )
 
 # align to the second entry then the first
-INDEX_SECOND = INDEXES[0]
-INDEX_PATH   = config_indexes.get(INDEXES[0], {}).get("INDEX_PATH", config["INDEX_PATH"])
-INDEX_PATH2  = config_indexes.get(INDEXES[1], {}).get("INDEX_PATH", config["INDEX_PATH"])
 INDEX_MAP    = config_indexes.get(INDEXES[1], {}).get("INDEX_MAP", config["INDEX_MAP"])
+INDEX_PATH  = config_indexes.get(INDEXES[1], {}).get("INDEX_PATH", config["INDEX_PATH"])
+INDEX_SECOND = config_indexes.get(INDEXES[0], {}).get("INDEX_MAP", config["INDEX_MAP"])
+INDEX_PATH2   = config_indexes.get(INDEXES[0], {}).get("INDEX_PATH", config["INDEX_PATH"])
 
 # make file suffix from bamCoverage settings and NORM 
 for sample, norm_list in NORMMAP.items():

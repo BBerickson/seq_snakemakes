@@ -14,7 +14,7 @@ rule bowtie_first_pass:
         unaligned_R2 = temp(PROJ + "/unaligned/{sample}_unaligned_R2_001.fastq.gz")
     params:
         job_name = INDEX_MAP + "_{sample}_bowtie",
-        idx      = INDEX_PATH2 + INDEX_MAP,
+        idx      = INDEX_PATH + INDEX_MAP,
         args     = lambda wildcards: CMD_PARAMS["bowtie2"]["first"],
         sortname = PROJ + "/{sample}.temp." + INDEX_MAP,
         unaligned_base = PROJ + "/unaligned/{sample}_unaligned.fastq.gz",
@@ -63,7 +63,7 @@ rule bowtie_second_pass:
         stats = PROJ + "/bams/{sample}_" + INDEX_SECOND + "_bowtie_stats.txt"
     params:
         job_name = INDEX_SECOND + "_{sample}_bowtie",
-        idx      = INDEX_PATH + INDEX_SECOND,
+        idx      = INDEX_PATH2 + INDEX_SECOND,
         args     = lambda wildcards: CMD_PARAMS["bowtie2"]["second"],
         sortname = PROJ + "/{sample}.temp." + INDEX_SECOND,
         unaligned = UNALIGNED
