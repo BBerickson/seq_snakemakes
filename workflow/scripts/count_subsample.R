@@ -1,12 +1,18 @@
 #!/usr/bin/env Rscript
 
+args = commandArgs(trailingOnly=TRUE)
+
 library("tidyverse")
 
+samp_file <- strsplit(args[1], " ")[[1]]
+mygroup <- args[2]
+outfile <- args[3]
+
 samp <- list()
-for(i in seq_along(snakemake@input)) {
-  samp[[i]] <- read_delim(snakemake@input[[i]],col_names = c("name", "filtered_reads", "value"),delim = " ") 
+for(i in seq_along(samp_file)) {
+  samp[[i]] <- read_delim(samp_file[[i]],col_names = c("name", "filtered_reads", "value"),delim = " ") 
 }
 
-out <- bind_rows(samp) %>% dplyr::mutate(value=min(value)/value, group=snakemake@params[["group"]]) %>% dplyr::select(name, group, value)
+out <- bind_rows(samp) %>% dplyr::mutate(value=min(value)/value, group=mygroup) %>% dplyr::select(name, group, value)
 
-write_tsv(out, snakemake@output[[1]],col_names = F)
+write_tsv(out, outfile,col_names = F)

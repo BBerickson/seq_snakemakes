@@ -94,7 +94,8 @@ COLORS:
   - "253,191,111" # - Light orange/peach
   - "202,178,214" # - Light purple/lavender
 
-# second alignment on unmapped from first?
+# if True reads not aligned to the first index will be aligned to the second index
+# if False raw reads will be alinged to both indexes
 UNALIGNED:
     "False" # True
     

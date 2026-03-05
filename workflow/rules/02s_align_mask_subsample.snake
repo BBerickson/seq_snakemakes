@@ -57,7 +57,8 @@ rule calculating_subsample_group:
         temp(PROJ + "/bams_mask/{group}_aligned_{index}_subsample_frac.txt")
     params:
         job_name = "{group}_aligned_{index}_subsample",
-        group   = "{group}"
+        group   = "{group}",
+        script = "workflow/scripts/count_subsample.R"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
@@ -65,8 +66,11 @@ rule calculating_subsample_group:
         err = PROJ + "/logs/{group}_aligned_{index}_subsample.err"
     threads: 
         1
-    script:
-        '../scripts/count_subsample.R'
+    shell:
+        """
+        Rscript {params.script} "{input}" "{params.group}" "{output}"
+        
+        """
 
 
 # Combine bamCoverage summaries

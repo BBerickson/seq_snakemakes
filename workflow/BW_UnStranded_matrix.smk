@@ -31,15 +31,17 @@ configfile: str(GENOME_CONFIG)
 # ------------------------------------------------------------------------------
 
 raw_indexes = config['INDEXES']
-INDEXES = [raw_indexes] if isinstance(raw_indexes, str) else [raw_indexes[0]]
-
+INDEXES_FIRST = [raw_indexes] if isinstance(raw_indexes, str) else [raw_indexes[0]]
 
 # Paths to additional config files
-GENOME_CONFIG1 = Path("workflow/ref") / f"{INDEXES[0]}.yaml"
+if config.get("GENELIST"):
+    GENOME_CONFIG1 = GENOME_CONFIG
+else:
+    GENOME_CONFIG1 = Path("workflow/ref") / f"{INDEXES_FIRST[0]}.yaml"
 
 # Validate existence
 if not GENOME_CONFIG1.exists():
-    sys.exit(f"ERROR: Config file not found for index '{INDEXES[0]}'. Expected at: {GENOME_CONFIG1}")
+    sys.exit(f"ERROR: Config file not found for index '{INDEXES_FIRST[0]}'. Expected at: {GENOME_CONFIG1}")
 
 # Load additional configs
 with open(GENOME_CONFIG1) as f:
@@ -67,6 +69,8 @@ REGIONS      = config.get("REGIONS")
 USER         = config.get("USER")
 
 # From additional configs
+raw_indexes = config1['INDEXES']
+INDEXES     = [raw_indexes] if isinstance(raw_indexes, str) else [raw_indexes[0]]
 MY_REF      = config1.get("MY_REF")
 PI_REF      = config1.get("PI_REF")
 GENELIST = config1.get("GENELIST") or ""
