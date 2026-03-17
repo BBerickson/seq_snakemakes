@@ -3,8 +3,8 @@
 
 rule featureCounts_sample:
     input:
-        bam = PROJ + "/" + BAM_PATH + "/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
-        bai = PROJ + "/" + BAM_PATH + "/{sample}_aligned_{index}_" + SEQ_DATE + ".bam.bai",
+        bam = PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
+        bai = PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam.bai",
         counts = PROJ + "/bams/{sample}_aligned_{index}_count.txt"
     output:
         tsv = PROJ + "/counts/{sample}_aligned_{index}_featureCounts.tsv"

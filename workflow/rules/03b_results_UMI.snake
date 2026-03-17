@@ -33,7 +33,7 @@ rule gathering_results:
         1
     shell:
         """
-        Rscript {params.script} "{input.clump}" "{input.bbduk}" "{input.aligned}" "{input.fc_file}" "{input.FC_files}" "{params.indexmap}" "{params.sam_new}" "{params.project}" "{params.filterty}" "{output}"
+        Rscript {params.script} "{input.dedup}" "{input.cutadapt}" "{input.aligned}" "{input.fc_file}" "{input.FC_files}" "{params.indexmap}" "{params.sam_new}" "{params.project}" "{params.filterty}" "{output}"
 
         """
   

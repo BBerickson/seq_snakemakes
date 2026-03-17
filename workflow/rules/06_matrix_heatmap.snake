@@ -62,7 +62,7 @@ rule heatmap_pdf:
             )
     ])))
     output:
-        PROJ + "/report/" + PROJ + "_{genelist}_{region}_{index}_norm_{suffix}_heatmap.pdf"  
+        temp(PROJ + "/report/" + PROJ + "_{genelist}_{region}_{index}_norm_{suffix}_heatmap.pdf")  
     params:
         job_name  = "{genelist}_{region}_{index}_norm_{suffix}_heatmap_pdf",
         script    = "workflow/scripts/pngToPDF.R",
@@ -148,7 +148,7 @@ rule cluster_pdf:
             )
     ])))
     output:
-        PROJ + "/report/" + PROJ + "_{genelist}_{region}_{index}_norm_{suffix}_cluster.pdf"  
+        temp(PROJ + "/report/" + PROJ + "_{genelist}_{region}_{index}_norm_{suffix}_cluster.pdf")
     params:
         job_name  = "{genelist}_{region}_{index}_norm_{suffix}_cluster_pdf",
         script    = "workflow/scripts/pngToPDF.R",
@@ -226,7 +226,7 @@ rule profile_pdf:
             )
     ])))
     output:
-        PROJ + "/report/" + PROJ + "_{genelist}_{region}_{index}_norm_{suffix}_profile.pdf"  
+        temp(PROJ + "/report/" + PROJ + "_{genelist}_{region}_{index}_norm_{suffix}_profile.pdf")  
     params:
         job_name  = "{genelist}_{region}_{index}_profile_norm_{suffix}_pdf",
         script    = "workflow/scripts/pngToPDF.R",

@@ -1,22 +1,22 @@
 #===== Config file for hg38 and ensembl v113 genome  ===================
 GENELIST:
-    "NDRG1_Gless"
+    "NDRG1_Gless_rev"
 # Path to bowtie2 index ref files
 INDEX_PATH:
-  "/beevol/home/erickson/ref/hg38_p14/G-less_NDRG1_insertion/"
+  "/beevol/home/erickson/ref/hg38_p14/G-less_NDRG1_insertion/reverse/"
 # bowtie2 index prefix
 INDEX_MAP:
   "hg38"
 # index.yaml prefix
 INDEXES:
-  "hg38_Gless"
+  "hg38_Gless_rev"
 # ref file locations
 MASK:
   "/beevol/home/erickson/ref/hg38/ref/merge_filter_RNAs.bed"
 GTF:
   "/beevol/home/erickson/ref/hg38_p14/G-less_NDRG1_insertion/hg38_Gless_GRCh38.113.gtf"
 FA_SAMPLE:
-  "/beevol/home/erickson/ref/hg38_p14/G-less_NDRG1_insertion/Hg38.dna.primary_assembly_NDRG1_insertion.fa"
+  "/beevol/home/erickson/ref/hg38_p14/G-less_NDRG1_insertion/reverse/Hg38.dna.primary_assembly_NDRG1_insertion_reverse.fa"
 MY_REF:
   "/beevol/home/erickson/ref/hg38_p14/G-less_NDRG1_insertion/hg38_adjusted.bed"
 FW_REF:

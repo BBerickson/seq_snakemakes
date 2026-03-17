@@ -4,7 +4,7 @@
 rule multiBamSummary:
     input:
         bam = lambda wildcards: expand(
-            PROJ + "/" + BAM_PATH + "/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
+            PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
             sample = GROUPS[wildcards.group],
             index = [wildcards.index]
         ),
@@ -13,8 +13,8 @@ rule multiBamSummary:
             sample = GROUPS[wildcards.group]
         )
     output:
-        npz  = temp(PROJ + "/" + BAM_PATH + "/{group}_aligned_{index}_" + SEQ_DATE + ".npz"),
-        gsf  = PROJ + "/" + BAM_PATH + "/{group}_aligned_{index}_" + SEQ_DATE + "_scalefactor.txt"
+        npz  = temp(PROJ + "/bams/{group}_aligned_{index}_" + SEQ_DATE + ".npz"),
+        gsf  = PROJ + "/bams/{group}_aligned_{index}_" + SEQ_DATE + "_scalefactor.txt"
     params:
         job_name = "{group}_aligned_{index}_multiBamSummary",
         index_sample = "{index}",
@@ -113,7 +113,7 @@ rule gathering_results:
             sample = SAMS_UNIQ
         ),
         OR      = PROJ + "/counts/" + PROJ + "_OR_summery.tsv",
-        SF_file = expand( PROJ + "/" + BAM_PATH + "/{group}_aligned_{index}_" + SEQ_DATE + "_scalefactor.txt",
+        SF_file = expand( PROJ + "/bams/{group}_aligned_{index}_" + SEQ_DATE + "_scalefactor.txt",
             group = GRPS_UNIQ,
             index  = INDEXES
         ),
