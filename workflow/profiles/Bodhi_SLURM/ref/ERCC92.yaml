@@ -1,0 +1,29 @@
+#===== Config file for standared scer3 genome  ===================
+
+# Path to bowtie2 index ref files
+GENELIST:
+    "ERCC92"
+INDEX_PATH:
+    "/beevol/home/erickson/ref/ERCC/"
+# bowtie2 index prefix
+INDEX_MAP:
+  "ERCC92"
+# index.yaml prefix
+INDEXES:
+  "ERCC92"
+# ref file locations
+MASK:
+  ""
+GTF:
+  "/beevol/home/erickson/ref/ERCC/ERCC92_fixed.gtf"
+FA_SAMPLE:
+  "/beevol/home/erickson/ref/ERCC/ERCC92.fa"
+MY_REF:
+  ""
+FW_REF:
+  ""
+REV_REF:
+  ""
+PI_REF:
+  ""
+

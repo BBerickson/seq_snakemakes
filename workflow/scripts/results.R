@@ -13,10 +13,12 @@ FC_sum_files <- strsplit(args[4], " ")[[1]] #expand( PROJ + "/stats/{sample}_sum
 FC_files <- strsplit(args[5], " ")[[1]] #expand( PROJ + "/counts/{sample}_aligned_{index}_featureCounts.tsv", group = SAMS_UNIQ, index  = INDEXES[0])
 
 index_map <- args[6] # INDEX_MAP,
-sam_new <- args[7] # SAMPLES, 
-mydir <- args[8] # PROJ
-filter_type <- args[9] #  c("chrM|snRNA|snoRNA|rRNA|protein_coding")
-outfile <- args[10]
+indexs <- strsplit(args[7], " ")[[1]] # INDEXES,
+indexs <- indexs[order(nchar(indexs), decreasing = TRUE)] %>% paste0(collapse = "|") 
+sam_new <- args[8] # SAMPLES, 
+mydir <- args[9] # PROJ
+filter_type <- args[10] #  c("chrM|snRNA|snoRNA|rRNA|protein_coding")
+outfile <- args[11]
 
 sam_new <- fromJSON(gsub("'", '"', sam_new))
 # file name and new name
@@ -92,7 +94,8 @@ if(!is_empty(list.files(path = mydirs, pattern = '.bam',recursive = T))){
       
     }
     sn <- gg %>% 
-      separate(sample,into=c("sample","index"),sep="_(?!.*_)",extra="merge") %>% 
+      extract(sample, into  = c("sample", "index"),
+              regex = paste0("^(.+?)_(", indexs, ")$")) %>% 
       dplyr::mutate(index = paste0("aligned_", index)) %>%
       pivot_wider(names_from = "index",values_from = c("value")) %>% 
       full_join(sn,.,by="sample")
@@ -118,7 +121,8 @@ if(!is_empty(list.files(path = mydirs, pattern = '.bam',recursive = T))){
           full_join(subsample,.,by="sample") %>% 
           dplyr::mutate(read_fraction=paste0(value,"(", round(read_fraction*100,2),"%)")) %>%
           dplyr::select(-value) %>% 
-          tidyr::separate(.,sample,c("sample","index"),"_(?=[^_]+$)") %>% 
+          extract(sample, into  = c("sample", "index"),
+                  regex = paste0("^(.+?)_(", indexs, ")$")) %>%  
           dplyr::mutate(index = paste0("subsampled_", index)) %>%
           pivot_wider(names_from = "index",values_from = c("read_fraction"))
         sn <- full_join(sn,subsample,by="sample") %>% arrange(sub_group,new_name)
@@ -145,7 +149,8 @@ if(!is_empty(list.files(path = mydirs, pattern = '.bam',recursive = T))){
                               show_col_types = FALSE) %>%
           inner_join(subsample,.,by="sample") %>% 
           dplyr::mutate(read_fraction=paste0(value,"(", round(read_fraction*100,2),"%)")) %>% 
-          separate(sample,into=c("sample","index"),sep="_(?!.*_)",extra="merge") %>% 
+          extract(sample, into  = c("sample", "index"),
+                  regex = paste0("^(.+?)_(", indexs, ")$")) %>% 
           dplyr::select(-value) %>% mutate(index=paste0("subsampled_", index)) %>% 
           pivot_wider(names_from = "index",values_from = "read_fraction")
         sn <- full_join(sn,subsample,by="sample") %>% arrange(sub_group,sample)
@@ -158,12 +163,12 @@ if(!is_empty(list.files(path = mydirs, pattern = '.bam',recursive = T))){
 if(!is_empty(FC_sum_files)){
   FC <- NULL
   for(i in seq_along(sn$sample)){
-    FC <- read_delim(FC_sum_files[str_detect(FC_sum_files,sn$sample[i])],delim = " ",
-                     col_names = c("type","value"),
-                     show_col_types = FALSE) %>% 
+    FC <- read_tsv(FC_sum_files[str_detect(FC_sum_files,sn$sample[i])],
+                   col_names = c("type","value"),
+                   show_col_types = FALSE) %>% 
       dplyr::mutate(sample=sn$sample[i]) %>% 
       dplyr::filter(!str_detect(type,filter_type)) %>%
-      dplyr::mutate(value = if_else(str_detect(value, "spikin_"),1000000/value,value)) %>% 
+      dplyr::mutate(value = if_else(str_detect(type, "spikin_"),1000000/value,value)) %>% 
       bind_rows(FC)
     
   }

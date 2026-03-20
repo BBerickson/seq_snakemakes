@@ -20,7 +20,7 @@ for(i in seq_along(featurecount_files)) {
   if(nrow(sub_reads_filter)==0){
     sub_reads_filter <- sub_reads
   } 
-    
+  
   sub_reads_filter <- sub_reads_filter %>% 
     mutate(Geneid = if_else(str_detect(Chr,"chrM|chrMT") & Geneid == "protein_coding", "chrM",Geneid))
   sub_reads_filter <- sub_reads_filter %>% 
@@ -49,4 +49,4 @@ for(i in seq_along(featurecount_files)) {
 
 out <- bind_rows(samp)
 
-write_delim(out, outfile,col_names = F,delim = " ")
+write_tsv(out, outfile,col_names = F)

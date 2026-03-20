@@ -1,0 +1,26 @@
+# Bodhi SLURM cluster profile for Snakemake
+# Usage: snakemake --profile profiles/Bodhi_SLURM
+
+# Slurm cluster configuration
+cluster: "sbatch --partition={cluster.partition} --qos={cluster.qos} --cpus-per-task={threads} --mem={resources.memory}G --time={cluster.time} --job-name={params.job_name} --output={log.out} --error={log.err}"
+cluster-config: "workflow/profiles/Bodhi_SLURM/cluster.yaml"
+
+# Job submission settings
+jobs: 100
+latency-wait: 60
+
+# Singularity settings
+use-singularity: true
+singularity-args: "--bind /beevol/home"
+
+# Restart failed jobs
+retries: 1
+
+# Keep going if some jobs fail
+keep-going: false
+
+# Minimal output
+printshellcmds: false   # Don't print shell commands (set true for debugging)
+reason: false           # Don't explain why each rule runs
+show-failed-logs: true  # Still show errors
+rerun-incomplete: true  # Rerun incomplete jobs

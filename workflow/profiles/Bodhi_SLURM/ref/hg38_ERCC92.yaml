@@ -1,0 +1,14 @@
+#===== Config file for standared hg38 with ERCC92 spikeIN  ===================
+
+# Path to mixed bowtie2 index and chrom name txt files
+GENELIST:
+    ""
+INDEX_PATH:
+    "/beevol/home/bentleyd/ref/hg38_ERCC92/"
+# bowtie2 index prefix
+INDEX_MAP:
+    "hg38_ERCC92"
+# index.yaml prefix(s)
+INDEXES:
+  - "hg38"
+  - "ERCC92"

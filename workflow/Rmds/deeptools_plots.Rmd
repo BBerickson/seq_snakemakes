@@ -1,8 +1,10 @@
 
-## Profile plots
 
-```{r "profile plots", out.width="100%", out.height="auto", fig.align='center'}
+
+```{r "profile plots", out.width="100%", out.height="auto", fig.align='center',results='asis', echo=FALSE}
 if(length(profile_png) > 0) {
+  cat("## Profile plots\n\n")
+  
   nsize <- length(profile_png)
   chunkSize <- min(1,nsize)
   profile_png <- str_c(plots_dir, profile_png)
@@ -40,10 +42,12 @@ if(length(profile_png) > 0) {
 }
 ```
 
-## Heatmap plots
 
-```{r "heatmap plots", out.width="100%", out.height="auto", fig.align='center'}
+
+```{r "heatmap plots", out.width="100%", out.height="auto", fig.align='center',results='asis', echo=FALSE}
 if(length(heatmap_png) > 0) {
+  cat("## Heatmap plots\n\n")
+  
   nsize <- length(heatmap_png)
   heatmap_png <- str_c(plots_dir, heatmap_png)
   chunkSize <- min(1,nsize)
@@ -81,10 +85,12 @@ if(length(heatmap_png) > 0) {
 }
 ```
 
-## Cluster plots
 
-```{r "cluster plots", out.width="100%", out.height="auto", fig.align='center'}
+
+```{r "cluster plots", out.width="100%", out.height="auto", fig.align='center',results='asis', echo=FALSE}
 if(length(cluster_png) > 0) {
+  cat("## Cluster plots\n\n")
+  
   nsize <- length(cluster_png)
   cluster_png <- str_c(plots_dir, cluster_png)
   chunkSize <- min(1,nsize)

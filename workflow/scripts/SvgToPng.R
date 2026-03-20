@@ -34,13 +34,29 @@ PNG_WIDTH <- 800           # Base width for the output PNG
 PNG_HEIGHT_BASE <- 1500    # Base height for the output PNG
 PNG_HEIGHT_MULTIPLIER <- 300 # Multiplier for calculating additional PNG height
 
+# Subtext annotation
+SUBTEXT_FONT_SIZE <- 20    # Font size (px) for the subtext label
+SUBTEXT_MARGIN <- 5       # Gap (px) between bottom of image and subtext baseline
+
 
 # ==================== MAIN SCRIPT LOGIC ====================
 
 args = commandArgs(trailingOnly=TRUE)
-my_files <- strsplit(args[1], " ")[[1]]
+my_files  <- strsplit(args[1], " ")[[1]]
+my_sizes  <- strsplit(args[2], " ")[[1]]
 out_files <- strsplit(args[3], " ")[[1]]
-my_sizes <- strsplit(args[2], " ")[[1]]
+
+# Optional 4th argument: "sense", "antisense", or omitted/empty → no subtext
+subtext_label <- if (length(args) >= 4 && nzchar(trimws(args[4]))) {
+  trimws(args[4])
+} else {
+  NULL
+}
+
+# Validate subtext value if provided
+if (!is.null(subtext_label) && !tolower(subtext_label) %in% c("sense", "antisense")) {
+  subtext_label <- NULL
+}
 
 
 for(i in seq_along(my_files)){
@@ -246,6 +262,13 @@ for(i in seq_along(my_files)){
     # Add padding to SVG by modifying viewBox and adding background
     padding_px <- PADDING_MULTIPLIER * my_size
     
+    # Extra bottom padding when subtext will be added
+    subtext_extra_bottom <- if (!is.null(subtext_label)) {
+      (SUBTEXT_FONT_SIZE * my_size) + (SUBTEXT_MARGIN * my_size) * 2
+    } else {
+      0
+    }
+    
     # Extract current viewBox or create one
     viewbox_match <- str_match(modified_svg2, 'viewBox="([^"]*)"')
     if(!is.na(viewbox_match[1,1])) {
@@ -257,19 +280,19 @@ for(i in seq_along(my_files)){
       orig_height <- viewbox_values[4]
     } else {
       # Extract width/height attributes if no viewBox
-      width_match <- str_extract(modified_svg2, 'width="([^"]*)"')
+      width_match  <- str_extract(modified_svg2, 'width="([^"]*)"')
       height_match <- str_extract(modified_svg2, 'height="([^"]*)"')
       orig_x <- 0
       orig_y <- 0
-      orig_width <- as.numeric(str_extract(width_match, "\\d+"))
+      orig_width  <- as.numeric(str_extract(width_match,  "\\d+"))
       orig_height <- as.numeric(str_extract(height_match, "\\d+"))
     }
     
-    # Calculate new dimensions with padding
-    new_x <- orig_x - padding_px
-    new_y <- orig_y - padding_px
-    new_width <- orig_width + (2 * padding_px)
-    new_height <- orig_height + (2 * padding_px)
+    # Calculate new dimensions with padding (plus extra bottom space for subtext)
+    new_x      <- orig_x - padding_px
+    new_y      <- orig_y - padding_px
+    new_width  <- orig_width  + (2 * padding_px)
+    new_height <- orig_height + (2 * padding_px) + subtext_extra_bottom
     new_viewbox <- paste(new_x, new_y, new_width, new_height)
     
     # Update or add viewBox
@@ -280,11 +303,36 @@ for(i in seq_along(my_files)){
     }
     
     # Add white background rectangle
-    bg_rect <- paste0('<rect x="', new_x, '" y="', new_y, '" width="', new_width, 
-                      '" height="', new_height, '" fill="white"/>')
+    bg_rect <- paste0('<rect x="', new_x, '" y="', new_y,
+                      '" width="', new_width, '" height="', new_height,
+                      '" fill="white"/>')
     
     # Insert background rectangle right after opening svg tag
     modified_svg3 <- gsub('(<svg[^>]*>)', paste0('\\1\n', bg_rect), modified_svg3)
+    
+    ## ---- SUBTEXT ANNOTATION ----
+    if (!is.null(subtext_label)) {
+      # Centre the label horizontally within the (padded) viewBox
+      subtext_x <- new_x + new_width / 2
+      # Place it near the very bottom of the expanded canvas
+      subtext_y <- new_y + new_height - (SUBTEXT_MARGIN * my_size)
+      
+      subtext_font_px <- SUBTEXT_FONT_SIZE * my_size
+      
+      subtext_node <- paste0(
+        '<text x="', subtext_x, '" y="', subtext_y, '"',
+        ' text-anchor="middle"',
+        ' style="font-size: ', subtext_font_px, 'px;',
+        ' font-family: Arial, sans-serif;',
+        ' font-style: italic;',
+        ' fill: #FF0000;">',
+        subtext_label,
+        '</text>'
+      )
+      
+      # Insert just before the closing </svg> tag
+      modified_svg3 <- sub('(</svg>\\s*)$', paste0(subtext_node, '\n\\1'), modified_svg3)
+    }
     
     # Convert back to xml2 object
     doc_clean <- read_xml(modified_svg3)
@@ -294,7 +342,7 @@ for(i in seq_along(my_files)){
     tmp_svg <- tempfile(fileext = ".svg")
     write_xml(doc_clean, tmp_svg)
     rsvg::rsvg_png(tmp_svg, file = out_files[[i]], 
-                   width = PNG_WIDTH * my_size, 
+                   width  = PNG_WIDTH * my_size, 
                    height = PNG_HEIGHT_BASE + (PNG_HEIGHT_MULTIPLIER * my_size))
     
     # Clean up temp file

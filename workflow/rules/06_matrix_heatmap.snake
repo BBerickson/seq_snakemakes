@@ -28,7 +28,8 @@ rule create_heatmap_plots:
         args     = CMD_PARAMS["heatmap"],
         setcol   = lambda wildcards: _rgb2hexplus2(SAMPLES, wildcards.group, COLS_DICT) if wildcards.sense_asense == "anti" else _rgb2hexplus(SAMPLES, wildcards.group, COLS_DICT),
         script   = "workflow/scripts/SvgToPng.R",
-        texty    = "2"
+        texty    = "2",
+        s_as     = "{sense_asense}"
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 2, 5) # multiplier, min, max, unit=GB
     log:
@@ -45,7 +46,7 @@ rule create_heatmap_plots:
             --colorList ${{colors}} \
             -out {output.tempplot} 
         
-        Rscript {params.script} "{output.tempplot}" "{params.texty}" "{output.heatmap}"
+        Rscript {params.script} "{output.tempplot}" "{params.texty}" "{output.heatmap}" "{params.s_as}"
         """
 
 rule heatmap_pdf:
@@ -112,7 +113,8 @@ rule cluster_heatmap_plots:
         args     = lambda wildcards: CMD_PARAMS["clusterHM"]["anti" if wildcards.sense_asense == "anti" else "sense"],
         setcol   = lambda wildcards: _rgb2hexplus2(SAMPLES,wildcards.group,COLS_DICT) if wildcards.sense_asense == "anti" else _rgb2hexplus(SAMPLES,wildcards.group,COLS_DICT),
         script = "workflow/scripts/SvgToPng.R",
-        texty    = "2"
+        texty    = "2",
+        s_as     = "{sense_asense}"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
     log:
@@ -131,7 +133,7 @@ rule cluster_heatmap_plots:
         -out {output.tempplot} \
         --outFileSortedRegions {output.bedfile}
         
-        Rscript {params.script} "{output.tempplot}" "{params.texty}" "{output.heatmap}"
+        Rscript {params.script} "{output.tempplot}" "{params.texty}" "{output.heatmap}" "{params.s_as}"
         """
 
 rule cluster_pdf:

@@ -1,0 +1,26 @@
+#===== Config file for Xrn2_codon_optimized ===================
+
+# Path to bowtie2 index 
+GENELIST:
+    "PNUTS_condon_optimized"
+INDEX_PATH:
+    "/beevol/home/erickson/ref/misc/PNUTS_condon_optimized/"
+INDEX_MAP:
+    "PNUTS_WT_co"
+INDEXES:
+    "PNUTS_WT_co"
+MASK:
+  ""
+GTF:
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_chrfix_GRCh38.113.gtf"
+FA_SAMPLE:
+  "/beevol/home/erickson/ref/misc/PNUTS_condon_optimized/PNUTS_WT_co.fasta"
+MY_REF:
+  ""
+FW_REF:
+  ""
+REV_REF:
+  ""
+PI_REF:
+  ""
+  

@@ -10,9 +10,9 @@ indexs <- strsplit(args[3], " ")[[1]]
 outfile <- args[4]
 
 
-samp <- read_delim(samp_file[[1]],col_names = c("name","value"),delim = " ",show_col_types = FALSE) 
+samp <- read_tsv(samp_file[[1]],col_names = c("name","value"),show_col_types = FALSE) 
 if(length(samp_file)>1){
-  input <- read_delim(samp_file[[2]],col_names = c("name","value"),delim = " ",show_col_types = FALSE)
+  input <- read_tsv(samp_file[[2]],col_names = c("name","value"),show_col_types = FALSE)
 } else {
   input <- NULL
 }
@@ -50,14 +50,14 @@ if(!is.null(input) & length(indexs) > 1){
     mutate(mysamp=str_remove(mysamp,"_summary_featureCounts.tsv")) %>%  
     select(mysamp,type,value)
   
-  write_delim(out %>% select(-mysamp), samp_file[[1]],col_names = F,delim = " ", append = TRUE)
-  write_delim(out, outfile,col_names = F,delim = " ")
+  write_tsv(out %>% select(-mysamp), samp_file[[1]],col_names = F, append = TRUE)
+  write_tsv(out, outfile,col_names = F)
 } else {
   out <- tibble(mysamp=samp_file[[1]], type="OR", value = NA) %>% 
     separate(.,mysamp,c("temp","mysamp"),"/.*/") %>% 
     mutate(mysamp=str_remove(mysamp,"_summary_featureCounts.tsv")) %>%  
     select(mysamp,type,value)
-  write_delim(out, outfile,col_names = F,delim = " ")
+  write_tsv(out, outfile,col_names = F)
 }
 
 

@@ -1,0 +1,5 @@
+# profiles/Bodhi_SLURM/cluster.yaml
+__default__:
+  partition: normal
+  qos: normal
+  time: "48:00:00"
