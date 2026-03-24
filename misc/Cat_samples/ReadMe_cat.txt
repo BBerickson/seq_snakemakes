@@ -5,7 +5,7 @@ wget https://raw.githubusercontent.com/BBerickson/seq_snakemakes/main/misc/Cat_s
 bash setup_pipeline.sh Bodhi
 
 # edit samples_cat.yaml with your sample information
-# run script by submitting to Bodhi (lsf) or Alpine (slerm) 
+# run script by submitting to Bodhi (AMC) or Alpine (Boulder) 
 
 ### Pipeline Overview ###
 1. cat fastq files 

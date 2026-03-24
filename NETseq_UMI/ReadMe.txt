@@ -5,7 +5,7 @@ wget https://raw.githubusercontent.com/BBerickson/seq_snakemakes/main/NETseq_UMI
 bash setup_pipeline.sh Bodhi
 
 # edit NETseq_UMI_samples.yaml with your sample information
-# run script by submitting to Bodhi (lsf) or Alpine (slerm) 
+# run script by submitting to Bodhi (AMC) or Alpine (Boulder) 
 
 
 ### Pipeline Overview ###

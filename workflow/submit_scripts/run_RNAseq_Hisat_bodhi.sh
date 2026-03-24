@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 
-#BSUB -J RNAseq
-#BSUB -o logs/RNAseq_%J.out
-#BSUB -e logs/RNAseq_%J.err
-#BSUB -n 1
-#BSUB -R "rusage[mem=4] span[hosts=1]"
+#SBATCH --job-name=RNAseq
+#SBATCH --output=logs/RNAseq_%j.out
+#SBATCH --error=logs/RNAseq_%j.err
+#SBATCH --time=24:00:00
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=4G
+#SBATCH --partition=normal 
+#SBATCH --qos=normal
 
 set -o nounset -o pipefail -o errexit -x
 

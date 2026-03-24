@@ -5,7 +5,7 @@ wget https://raw.githubusercontent.com/BBerickson/seq_snakemakes/main/RNAseq/set
 bash setup_pipeline.sh Bodhi
 
 # edit RNAseq_samples.yaml with your sample information
-# run script by submitting to Bodhi (lsf) or Alpine (slerm) 
+# run script by submitting to Bodhi (AMC) or Alpine (Boulder) 
 
 !!!STAR is not set up for mixed genome alignment!!!
 

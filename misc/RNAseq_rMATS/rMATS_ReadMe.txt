@@ -5,7 +5,7 @@ wget https://raw.githubusercontent.com/BBerickson/seq_snakemakes/main/misc/RNAse
 bash setup_rMATS_pipeline.sh Bodhi
 
 # edit samples_rMATS.yaml and run_rMATS.sh with your sample information
-# run script by submitting to Bodhi (lsf) or Alpine (slerm) after running main alignment script
+# run script by submitting to Bodhi (AMC) or Alpine (Boulder)  after running main alignment script
 
 !!! This is an addon to be ran after RNAseq pipeline !!!
 Runs rMATS

@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 
-#BSUB -J NETseq
-#BSUB -o logs/NETseq_%J.out
-#BSUB -e logs/NETseq_%J.err
-#BSUB -n 1
-#BSUB -R "rusage[mem=4] span[hosts=1]"
+#SBATCH --job-name=NETseq_UMI
+#SBATCH --output=logs/NETseq_%j.out
+#SBATCH --error=logs/NETseq_%j.err
+#SBATCH --time=24:00:00
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=4G
+#SBATCH --partition=normal 
+#SBATCH --qos=normal
 
 set -o nounset -o pipefail -o errexit -x
 

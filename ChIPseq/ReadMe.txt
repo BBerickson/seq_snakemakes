@@ -5,7 +5,7 @@ wget https://raw.githubusercontent.com/BBerickson/seq_snakemakes/main/ChIPseq/se
 bash setup_pipeline.sh Bodhi
 
 # edit ChIPseq_samples.yaml with your sample information
-# run script by submitting to Bodhi (lsf) or Alpine (slerm) 
+# run script by submitting to Bodhi (AMC) or Alpine (Boulder) 
 
 !!! Mixxed genomes must point to ref yaml file with 2 genomes that points to 2 ref yamls !!!
 !!! see workflow/ref/hg38_mm39.yaml for example !!!

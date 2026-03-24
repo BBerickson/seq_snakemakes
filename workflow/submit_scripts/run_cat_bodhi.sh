@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 
-#BSUB -J samples_cat
-#BSUB -o logs/samples_cat_%J.out
-#BSUB -e logs/samples_cat_%J.err
-#BSUB -n 1
-#BSUB -R "rusage[mem=4] span[hosts=1]"
+#SBATCH --job-name=samples_cat
+#SBATCH --output=logs/samples_cat_%j.out
+#SBATCH --error=logs/samples_cat_%j.err
+#SBATCH --time=24:00:00
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=4G
+#SBATCH --partition=normal 
+#SBATCH --qos=normal
 
 set -o nounset -o pipefail -o errexit -x
 

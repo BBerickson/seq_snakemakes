@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 
-#BSUB -J BW
-#BSUB -o logs/BW_%J.out
-#BSUB -e logs/BW_%J.err
-#BSUB -n 1
-#BSUB -R "rusage[mem=4] span[hosts=1]"
+#SBATCH --job-name=BW
+#SBATCH --output=logs/BW_%j.out
+#SBATCH --error=logs/BW_%j.err
+#SBATCH --time=24:00:00
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=4G
+#SBATCH --partition=normal 
+#SBATCH --qos=normal
+
 
 set -o nounset -o pipefail -o errexit -x
 
