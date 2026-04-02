@@ -1,5 +1,6 @@
 # profiles/Bodhi/cluster.yaml
 __default__:
+  account: normal
   partition: normal
   qos: normal
-  time: "48:00:00"
+  time: "24:00:00"
