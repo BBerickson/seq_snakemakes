@@ -32,9 +32,6 @@ rule create_heatmap_plots:
         s_as     = "{sense_asense}"
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 2, 5) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/{region}_{group}_aligned_{index}__{covarg}_norm_{suffix}_{sense_asense}_heatmap.out",
-        err = PROJ + "/logs/{region}_{group}_aligned_{index}__{covarg}_norm_{suffix}_{sense_asense}_heatmap.err"
     threads: 1
     shell:
         """
@@ -75,9 +72,6 @@ rule heatmap_pdf:
         chunkSize = 2
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 4, 2) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/{genelist}_{region}_{index}_norm_{suffix}_heatmap_pdf.out",
-        err = PROJ + "/logs/{genelist}_{region}_{index}_norm_{suffix}_heatmap_pdf.err"
     threads: 1
     shell:
         """
@@ -117,9 +111,6 @@ rule cluster_heatmap_plots:
         s_as     = "{sense_asense}"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
-    log:
-        out = PROJ + "/logs/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_cluster.out",
-        err = PROJ + "/logs/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_cluster.err"
     threads:
         1
     shell:
@@ -163,9 +154,6 @@ rule cluster_pdf:
         chunkSize = 1
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 1, 1)
-    log:
-        out = PROJ + "/logs/{genelist}_{region}_{index}_norm_{suffix}_cluster_pdf.out",
-        err = PROJ + "/logs/{genelist}_{region}_{index}_norm_{suffix}_cluster_pdf.err"
     threads: 1
     shell:
         """
@@ -197,9 +185,6 @@ rule create_profile_plots:
         setcol   = lambda wildcards: _rgb2hex(SAMPLES,wildcards.group,COLS_DICT)
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
-    log:
-        out = PROJ + "/logs/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_profile_plots.out",
-        err = PROJ + "/logs/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_profile_plots.err"
     threads:
         1
     shell:
@@ -240,9 +225,6 @@ rule profile_pdf:
         chunkSize = 4
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 1, 1)
-    log:
-        out = PROJ + "/logs/{genelist}_{region}_{index}_norm_{suffix}_profile_pdf.out",
-        err = PROJ + "/logs/{genelist}_{region}_{index}_norm_{suffix}_profile_pdf.err"
     threads: 1
     shell:
         """

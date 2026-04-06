@@ -23,9 +23,6 @@ rule multiBamSummary:
         script = "workflow/scripts/multiBamSummary.R"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input.bam, 0.2, 5)
-    log:
-        out = PROJ + "/logs/{group}_aligned_{index}_multiBamSummary.out",
-        err = PROJ + "/logs/{group}_aligned_{index}_multiBamSummary.err"
     threads: 
         12
     shell:
@@ -65,9 +62,6 @@ rule calculating_OR:
         script   = "workflow/scripts/count_OR.R"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/{newnam}_OR.out",
-        err = PROJ + "/logs/{newnam}_OR.err"
     message:
         "getting OR norm for {wildcards.newnam}"
     threads: 
@@ -91,9 +85,6 @@ rule gathering_OR_results:
         job_name = "ORresults"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/ORresults.out",
-        err = PROJ + "/logs/ORresults.err"
     message:
         "getting final results"
     threads: 
@@ -133,9 +124,6 @@ rule gathering_results:
         script = "workflow/scripts/results.R"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/results.out",
-        err = PROJ + "/logs/results.err"
     message:
         "getting final results"
     threads: 
@@ -155,9 +143,6 @@ rule create_plots:
         job_name   = PROJ + "_qc_html"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/" + PROJ + "_qc_html.out",
-        err = PROJ + "/logs/" + PROJ + "_qc_html.err"
     threads:
         1
     shell:

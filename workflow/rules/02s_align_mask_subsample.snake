@@ -21,9 +21,6 @@ rule align_mask:
         sortname = PROJ + "/{sample}_aligned_{index}.temp"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
-    log:
-        out = PROJ + "/logs/{sample}_aligned_{index}_align_filter_mask.out",
-        err = PROJ + "/logs/{sample}_aligned_{index}_align_filter_mask.err"
     threads: 
         12
     shell:
@@ -61,9 +58,6 @@ rule calculating_subsample_group:
         script = "workflow/scripts/count_subsample.R"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/{group}_aligned_{index}_subsample.out",
-        err = PROJ + "/logs/{group}_aligned_{index}_subsample.err"
     threads: 
         1
     shell:
@@ -87,9 +81,6 @@ rule calculating_subsample_summary:
         job_name = PROJ + "_calculating_{index}_subsample_summary"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/" + PROJ + "_calculating_{index}_subsample_summary.out",
-        err = PROJ + "/logs/" + PROJ + "_calculating_{index}_subsample_summary.err"
     threads:
         1
     shell:
@@ -115,9 +106,6 @@ rule subsample_dedup:
         scale    = lambda wildcards, input: _get_norm_fraction(wildcards, wildcards.index, input.counts)
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
-    log:
-        out = PROJ + "/logs/subsample_dedup_{sample}_aligned_{index}.out",
-        err = PROJ + "/logs/subsample_dedup_{sample}_aligned_{index}.err"
     threads:
         16
     shell:
@@ -143,9 +131,6 @@ rule subsample_summary:
         job_name = PROJ + "_{index}_subsample_whole_summary"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/" + PROJ + "_{index}_subsample_sample_summary.out",
-        err = PROJ + "/logs/" + PROJ + "_{index}_subsample_sample_summary.err"
     threads:
         1
     shell:

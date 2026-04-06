@@ -15,9 +15,6 @@ rule clumpify:
         input_r2 = lambda wildcards, input: input[1] if len(input) > 1 else ""
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 8, 15) # multiplier, min, max=250, unit=GB
-    log:
-        out = PROJ + "/logs/{sample}_clumpify.out",
-        err = PROJ + "/logs/{sample}_clumpify.err"
     threads:
         1
     shell:
@@ -70,9 +67,6 @@ rule clumpify_summary:
         pairedmap = PAIREDMAP
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/" + PROJ + "_clumpify_summary.out",
-        err = PROJ + "/logs/" + PROJ + "_clumpify_summary.err"
     threads:
         1
     shell:

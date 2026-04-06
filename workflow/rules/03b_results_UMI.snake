@@ -25,9 +25,6 @@ rule gathering_results:
         script = "workflow/scripts/results.R"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/results.out",
-        err = PROJ + "/logs/results.err"
     message:
         "getting final results"
     threads: 
@@ -47,9 +44,6 @@ rule create_plots:
         job_name   = PROJ + "_qc_html"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/" + PROJ + "_qc_html.out",
-        err = PROJ + "/logs/" + PROJ + "_qc_html.err"
     threads:
         1
     shell:

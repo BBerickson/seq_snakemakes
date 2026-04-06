@@ -15,9 +15,6 @@ rule my_PCA_plot:
         groupkey = GROUPS
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 2, 4)
-    log:
-        out = PROJ + "/logs/PCA_{index}_plot.out",
-        err = PROJ + "/logs/PCA_{index}_plot.err"
     threads: 
         1
     script:

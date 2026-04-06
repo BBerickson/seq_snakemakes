@@ -16,9 +16,6 @@ rule featureCounts_sample:
         ftfile   = lambda wildcards: config_indexes[wildcards.index].get("GTF")
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 0.5, 4)
-    log:
-        out = PROJ + "/logs/{sample}_featureCounts_{index}.out",
-        err = PROJ + "/logs/{sample}_featureCounts_{index}.err"
     threads:
         12
     shell:
@@ -89,9 +86,6 @@ rule featurecount_summary:
         script = "workflow/scripts/featurecount_summary.R"
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 1, 1)
-    log:
-        out = PROJ + "/logs/{sample}_summary_featureCounts.out",
-        err = PROJ + "/logs/{sample}_summary_featureCounts.err"
     threads: 1
     shell:
         """

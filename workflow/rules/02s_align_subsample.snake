@@ -16,9 +16,6 @@ rule calculating_subsample_group:
         script = "workflow/scripts/count_subsample.R"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/{group}_aligned_{index}_subsample.out",
-        err = PROJ + "/logs/{group}_aligned_{index}_subsample.err"
     threads: 
         1
     shell:
@@ -42,9 +39,6 @@ rule calculating_subsample_summary:
         job_name = PROJ + "_calculating_{index}_subsample_summary"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/" + PROJ + "_calculating_{index}_subsample_summary.out",
-        err = PROJ + "/logs/" + PROJ + "_calculating_{index}_subsample_summary.err"
     threads:
         1
     shell:
@@ -70,9 +64,6 @@ rule subsample_dedup:
         scale    = lambda wildcards, input: _get_norm_fraction(wildcards, wildcards.index, input.counts)
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
-    log:
-        out = PROJ + "/logs/subsample_{sample}_aligned_{index}.out",
-        err = PROJ + "/logs/subsample_{sample}_aligned_{index}.err"
     threads:
         16
     shell:

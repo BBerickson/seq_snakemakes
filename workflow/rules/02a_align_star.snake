@@ -20,9 +20,6 @@ rule star_twopass:
         read_cmd = "--readFilesCommand gunzip -c" if config.get("compress_temp", True) else ""
     resources:
         memory = lambda wildcards, input: memory_estimator([input.R1, input.R2], 3, 40, 250)
-    log:
-        out = PROJ + "/logs/{sample}_star_twopass.out",
-        err = PROJ + "/logs/{sample}_star_twopass.err"
     message:
         "Running STAR alignment with two-pass mode"
     threads: 
@@ -72,9 +69,6 @@ rule star_2pass_summary:
         index = INDEX_MAP
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    log:
-        out=PROJ + "/logs/star_summary.out",
-        err=PROJ + "/logs/star_summary.err"
     message:
         "Summary of STAR alignments"
     threads:

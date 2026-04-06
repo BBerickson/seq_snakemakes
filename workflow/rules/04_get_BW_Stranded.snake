@@ -12,9 +12,6 @@ rule get_bw:
         job_name = "{newnam}_aligned_{index}_norm_{suffix}_getbw",
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/{newnam}_aligned_{index}_norm_{suffix}_get_bw.out",
-        err = PROJ + "/logs/{newnam}_aligned_{index}_norm_{suffix}_get_bw.err"
     threads: 
         1
     shell:

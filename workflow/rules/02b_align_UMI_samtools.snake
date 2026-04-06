@@ -16,9 +16,6 @@ rule dedup_UMI:
         args     = CMD_PARAMS["umi_tools"]
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 3, 10)
-    log:
-        out = PROJ + "/logs/{sample}_dedup.out",
-        err = PROJ + "/logs/{sample}_dedup.err"
     threads:
         4
     shell:
@@ -46,9 +43,6 @@ rule dedup_summary:
         job_name = PROJ + "_dedup_summary",
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/" + PROJ + "_dedup_summary.out",
-        err = PROJ + "/logs/" + PROJ + "_dedup_summary.err"
     threads:
         1
     shell:
@@ -84,9 +78,6 @@ rule align_filter:
         sortname = PROJ + "/{sample}_aligned_{index}.temp"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 3, 5)
-    log:
-        out = PROJ + "/logs/{sample}_aligned_{index}_align_filter.out",
-        err = PROJ + "/logs/{sample}_aligned_{index}_align_filter.err"
     threads: 
         12
     shell:

@@ -19,9 +19,6 @@ rule align_filter_multimap:
         is_paired = lambda wildcards: PAIREDMAP[wildcards.sample]
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 0.5, 2)
-    log:
-        out = PROJ + "/logs/{sample}{index}_multimap_filter.out",
-        err = PROJ + "/logs/{sample}{index}_multimap_filter.err"
     threads: 
         12
     shell:
@@ -89,9 +86,6 @@ rule align_filter_indexed:
         sortname = PROJ + "/{sample}_aligned_{index}.temp"
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 2, 4)
-    log:
-        out = PROJ + "/logs/{sample}_align_filter_{index}.out",
-        err = PROJ + "/logs/{sample}_align_filter_{index}.err"
     threads: 12
     shell:
         """

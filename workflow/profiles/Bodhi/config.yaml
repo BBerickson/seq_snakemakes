@@ -2,7 +2,7 @@
 # Usage: snakemake --profile profiles/Bodhi
 
 # Slurm cluster configuration
-cluster: "sbatch --account={cluster.account} --partition={cluster.partition} --qos={cluster.qos} --cpus-per-task={threads} --mem={resources.memory}G --time={cluster.time} --job-name={params.job_name} --output={log.out} --error={log.err}"
+cluster: "sbatch --account={cluster.account} --partition={cluster.partition} --qos={cluster.qos} --cpus-per-task={threads} --mem={resources.memory}G --time={cluster.time} --job-name={params.job_name} --output=rule_logs/%x.out --error=rule_logs/%x.err"
 cluster-config: "workflow/profiles/Bodhi/cluster.yaml"
 
 # Job submission settings

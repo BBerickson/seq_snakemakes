@@ -13,9 +13,6 @@ rule my_bowtie_url:
         url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{sample}_aligned_{index}_" + SEQ_DATE + ".bam"
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/{sample}_aligned_{index}" + PROJ + "_bowtie_url.out",
-        err = PROJ + "/logs/{sample}_aligned_{index}" + PROJ + "_bowtie_url.err"
     threads:
         1
     container: None
@@ -39,9 +36,6 @@ rule bowtie_urls:
         job_name = lambda wildcards: PROJ + "_" + wildcards.index + "_bowtie_urls"
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 1, 1)
-    log:
-        out = PROJ + "/logs/" + PROJ + "_{index}_bowtie_urls.out",
-        err = PROJ + "/logs/" + PROJ + "_{index}_bowtie_urls.err"
     shell:
         """
         cat {input} > {output}

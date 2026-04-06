@@ -18,9 +18,6 @@ rule bowtie:
         is_paired = lambda wildcards: PAIREDMAP[wildcards.sample]
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 3, 18)
-    log:
-        out = PROJ + "/logs/{sample}_bowtie.out",
-        err = PROJ + "/logs/{sample}_bowtie.err"
     threads: 
         12
     shell:
@@ -70,9 +67,6 @@ rule bowtie_summary:
         index = INDEX_MAP
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/bowtie_summary.out",
-        err = PROJ + "/logs/bowtie_summary.err"
     threads:
         1
     shell:

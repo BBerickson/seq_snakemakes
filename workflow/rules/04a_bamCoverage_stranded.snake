@@ -25,9 +25,6 @@ rule bamCoverage:
         sam_norm = SAM_NORM  # Pass the original data
     resources:
         memory   = lambda wildcards, input: memory_estimator(input.bam, 0.2, 5)
-    log:
-        out = PROJ + "/logs/{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage.out",
-        err = PROJ + "/logs/{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage.err"
     threads: 
         12
     shell:

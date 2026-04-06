@@ -20,9 +20,6 @@ rule create_strand_matrix:
         rev_ref  = lambda wildcards: REV_REF if wildcards.sense_asense == "sense" else FW_REF
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
-    log:
-        out = PROJ + "/logs/{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_{sense_asense}_matrix.out",
-        err = PROJ + "/logs/{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_{sense_asense}_matrix.err"
     threads: 
         12
     shell:
@@ -46,9 +43,6 @@ rule standared_marix_url:
         url_out  = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_{sense_asense}_matrix.gz"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_{sense_asense}_matrix_url.out",
-        err = PROJ + "/logs/{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_{sense_asense}_matrix_url.err"
     threads:
         1
     container: None
@@ -77,9 +71,6 @@ rule matrix_url_summary:
         job_name = "{region}_aligned_{index}__{covarg}_norm_{suffix}_{sense_asense}_matrix_url_summary"
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/{region}_aligned_{index}__{covarg}_norm_{suffix}_{sense_asense}_matrix_url_summary.out",
-        err = PROJ + "/logs/{region}_aligned_{index}__{covarg}_norm_{suffix}_{sense_asense}_matrix_url_summary.err"
     threads:
         1
     shell:
@@ -116,9 +107,6 @@ rule merge_matrix_groups:
         script = "workflow/scripts/MatrixMerge.R"
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 2, 1)
-    log:
-        out = PROJ + "/logs/{group}_aligned_{index}__{region}_{covarg}_norm_{suffix}_{sense_asense}_matrix_merge.out",
-        err = PROJ + "/logs/{group}_aligned_{index}__{region}_{covarg}_norm_{suffix}_{sense_asense}_matrix_merge.err"
     threads: 1
     shell:
         """

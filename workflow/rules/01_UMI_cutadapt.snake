@@ -17,9 +17,6 @@ rule extract_umi:
         orientation = ORIENTATION
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 5)
-    log:
-        out = PROJ + "/logs/{sample}_extract_umi.out",
-        err = PROJ + "/logs/{sample}_extract_umi.err"
     message:
         "Extracting UMIs for {wildcards.sample}"
     threads:
@@ -71,9 +68,6 @@ rule cutadapt:
         args     = CMD_PARAMS["cutadapt"]
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
-    log:
-        out = PROJ + "/logs/{sample}_cutadapt.out",
-        err = PROJ + "/logs/{sample}_cutadapt.err"
     message:
         "Running cutadapt on {wildcards.sample}"
     threads:
@@ -112,9 +106,6 @@ rule cutadapt_summary:
         job_name = PROJ + "_cutadapt_summary"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/" + PROJ + "_cutadapt_summary.out",
-        err = PROJ + "/logs/" + PROJ + "_cutadapt_summary.err"
     message:
         "Creating " + PROJ + " cutadapt summary"
     threads:

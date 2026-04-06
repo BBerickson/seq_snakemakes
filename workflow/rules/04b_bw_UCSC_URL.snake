@@ -12,9 +12,6 @@ rule bamCoverageURL:
         url      = "http://amc-sandbox.ucdenver.edu/" + USER + "/" + SEQ_DATE + "_" + PROJ + "/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}.bw"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage_URL.out",
-        err = PROJ + "/logs/{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage_URL.err"
     threads: 
         1
     container: None
@@ -41,9 +38,6 @@ rule bamCoverage_summary:
         job_name = PROJ + "_{index}_" + SEQ_DATE + "_{suffix}_cat_URL"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    log:
-        out = PROJ + "/logs/" + PROJ + "_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage_summary.out",
-        err = PROJ + "/logs/" + PROJ + "_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage_summary.err"
     threads:
         1
     shell:
