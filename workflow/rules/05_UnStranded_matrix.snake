@@ -101,6 +101,6 @@ rule merge_matrix_groups:
         """
         # concatenate files
         Rscript {params.script} "{input}" "{output.matemp}"
-        computeMatrixOperations relabel -m {output.matemp} -o {output.matrix} 2>> {log.err}
+        computeMatrixOperations relabel -m {output.matemp} -o {output.matrix} 
         """
         

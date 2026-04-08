@@ -24,9 +24,9 @@ rule create_strand_matrix:
         12
     shell:
         """
-        computeMatrix {params.args} -R {params.fw_ref} -S {input.fw} -p {threads} -o {output.fw} 2>> {log.err}
-        computeMatrix {params.args} -R {params.rev_ref} -S {input.rev} -p {threads} -o {output.rev} 2>> {log.err}
-        computeMatrixOperations rbind -m {output.fw} {output.rev} -o {output.matrix} 2>> {log.err}
+        computeMatrix {params.args} -R {params.fw_ref} -S {input.fw} -p {threads} -o {output.fw} 
+        computeMatrix {params.args} -R {params.rev_ref} -S {input.rev} -p {threads} -o {output.rev} 
+        computeMatrixOperations rbind -m {output.fw} {output.rev} -o {output.matrix} 
         
         """
 
@@ -112,7 +112,7 @@ rule merge_matrix_groups:
         """
         # concatenate files
         Rscript {params.script} "{input}" "{output.matemp}"
-        computeMatrixOperations relabel -m {output.matemp} -o {output.matrix} 2>> {log.err}
+        computeMatrixOperations relabel -m {output.matemp} -o {output.matrix} 
         """
 
 
