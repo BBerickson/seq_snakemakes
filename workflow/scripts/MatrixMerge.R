@@ -45,13 +45,21 @@ if(any(str_detect(mm,"ref point:TSS"))){
   gene_length <- max(sum(c(un5, un3)),10)
 }
 
-gl <- gl %>% 
+
+glr <- gl %>% 
   bed_cluster(max_dist = as.numeric(sep_bins))%>% 
   filter(!(duplicated(.id) | duplicated(.id, fromLast=TRUE))) %>% 
   filter(end-start >= as.numeric(gene_length)) %>% 
   mutate(score=rowMeans(across(contains(".x")))) %>% arrange(score) %>% 
   slice_tail(prop = 0.90) %>% select(-.id,-score) %>% bed_sort() 
-  
+if(nrow(glr)==0){
+  glr <- gl %>% 
+    bed_cluster(max_dist = as.numeric(sep_bins))%>% 
+    filter(!(duplicated(.id) | duplicated(.id, fromLast=TRUE))) %>% 
+    mutate(score=rowMeans(across(contains(".x")))) %>% arrange(score) %>% 
+    slice_tail(prop = 0.90) %>% select(-.id,-score) %>% bed_sort() 
+}  
+gl <- glr
 
 n <- length(infile) 
 # Calculate number of genes

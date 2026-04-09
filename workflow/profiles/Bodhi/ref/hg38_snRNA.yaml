@@ -4,7 +4,7 @@
 GENELIST:
     "snRNA"
 INDEX_PATH:
-    "/beevol/home/bentleyd/ref/hg38/"
+    "/beevol/home/bentleyd/ref/hg38/genome/"
 # bowtie2 index prefix
 INDEX_MAP:
   "hg38"
