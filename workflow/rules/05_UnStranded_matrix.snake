@@ -39,8 +39,10 @@ rule standared_marix_url:
     shell:
         """
         echo {params.url_out} {params.groupkey} {wildcards.newnam}_norm_{wildcards.suffix}_{SEQ_DATE} {params.color} >> {output[0]}
-        ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
+        ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ} && chmod a+rx ./public_html/{SEQ_DATE}_{PROJ}'
         scp {input[0]} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
+        ssh amc-sandbox 'chmod a+r ./public_html/{SEQ_DATE}_{PROJ}/*_matrix.gz'
+        
         """
         
 

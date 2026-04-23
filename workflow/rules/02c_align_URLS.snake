@@ -19,8 +19,9 @@ rule my_bowtie_url:
     shell:
         """
           echo "{params.url}" >> {output}
-          ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
-          scp {input.bam}* amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
+          ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ} && chmod a+rx ./public_html/{SEQ_DATE}_{PROJ}'
+          scp {input.bam} {input.bai} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
+          ssh amc-sandbox 'chmod a+r ./public_html/{SEQ_DATE}_{PROJ}/{wildcards.sample}_aligned_{wildcards.index}_{SEQ_DATE}.bam*'
           
         """
         

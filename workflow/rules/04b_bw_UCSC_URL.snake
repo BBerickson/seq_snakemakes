@@ -19,8 +19,9 @@ rule bamCoverageURL:
         """
         
         echo "track type=bigWig visibility=full name='{wildcards.newnam}_{SEQ_DATE}_{wildcards.suffix}' description='{wildcards.newnam}_{SEQ_DATE}_{wildcards.suffix}' color={params.color} bigDataUrl={params.url}" > {output.stats}
-        ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
+        ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ} && chmod a+rx ./public_html/{SEQ_DATE}_{PROJ}'
         scp {input.bigwig} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
+        ssh amc-sandbox 'chmod a+r ./public_html/{SEQ_DATE}_{PROJ}/{wildcards.newnam}_aligned_{wildcards.index}_{SEQ_DATE}_norm_{wildcards.suffix}.bw'
         
         """
 
