@@ -16,7 +16,7 @@ rule extract_umi:
         umi_pat  = CMD_PARAMS["umi_pattern"],
         orientation = ORIENTATION
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 1, 5)
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1, 2) # multiplier, min, max, unit=GB
     message:
         "Extracting UMIs for {wildcards.sample}"
     threads:
@@ -67,7 +67,7 @@ rule cutadapt:
         job_name = "{sample}_cutadapt",
         args     = CMD_PARAMS["cutadapt"]
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1, 2) # multiplier, min, max, unit=GB
     message:
         "Running cutadapt on {wildcards.sample}"
     threads:

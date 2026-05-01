@@ -1,4 +1,4 @@
-#===== Config file for hg38 and ensembl v113 genome  ===================
+#===== Config file for fHarAnt genome  ===================
 
 # Path to bowtie2 index ref files
 INDEX_PATH:

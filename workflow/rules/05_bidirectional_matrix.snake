@@ -1,5 +1,18 @@
 # ====== Rules for making standard 5 matrix files from non-stranded ref =================================
 
+def get_fw_ref(wildcards):
+    if wildcards.sense_asense == "sense":
+        return FW_PI_REF if wildcards.region == "PI" else FW_REF
+    else:
+        return REV_PI_REF if wildcards.region == "PI" else REV_REF
+
+def get_rev_ref(wildcards):
+    if wildcards.sense_asense == "sense":
+        return REV_PI_REF if wildcards.region == "PI" else REV_REF
+    else:
+        return FW_PI_REF if wildcards.region == "PI" else FW_REF
+        
+        
 # stranded sense matrix files
 rule my_5_bidirectonal_matrix:
     input:
@@ -11,8 +24,8 @@ rule my_5_bidirectonal_matrix:
     params:
         job_name = "{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_bi_matrix",
         args     = lambda wildcards: CMD_PARAMS[f"region{wildcards.region}"] + ("--blackListFileName " + config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else ""),
-        fw_ref   = lambda wildcards: FW_REF if wildcards.sense_asense == "sense" else REV_REF,
-        rev_ref  = lambda wildcards: REV_REF if wildcards.sense_asense == "sense" else FW_REF
+        fw_ref  = get_fw_ref,
+        rev_ref = get_rev_ref
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
     threads: 

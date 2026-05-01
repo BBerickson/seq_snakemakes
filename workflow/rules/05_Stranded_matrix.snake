@@ -1,6 +1,17 @@
 # ====== Rules for making standard matrix files =================================
 
+def get_fw_ref(wildcards):
+    if wildcards.sense_asense == "sense":
+        return FW_PI_REF if wildcards.region == "PI" else FW_REF
+    else:
+        return REV_PI_REF if wildcards.region == "PI" else REV_REF
 
+def get_rev_ref(wildcards):
+    if wildcards.sense_asense == "sense":
+        return REV_PI_REF if wildcards.region == "PI" else REV_REF
+    else:
+        return FW_PI_REF if wildcards.region == "PI" else FW_REF
+        
 # stranded sense matrix files
 rule create_strand_matrix:
     input:
@@ -16,8 +27,8 @@ rule create_strand_matrix:
             CMD_PARAMS[f"region{wildcards.region}"] + ("--blackListFileName " + config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else "") +
             (" --scale -1 " if wildcards.sense_asense == "anti" else "")
         ),
-        fw_ref   = lambda wildcards: FW_REF if wildcards.sense_asense == "sense" else REV_REF,
-        rev_ref  = lambda wildcards: REV_REF if wildcards.sense_asense == "sense" else FW_REF
+        fw_ref  = get_fw_ref,
+        rev_ref = get_rev_ref
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
     threads: 
@@ -49,10 +60,8 @@ rule standared_marix_url:
     shell:
         """
         echo {params.url_out} {params.groupkey} {wildcards.newnam}_norm_{wildcards.suffix}_{SEQ_DATE}_{wildcards.sense_asense} {params.color} >> {output[0]}
-        ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ} && chmod a+rx ./public_html/{SEQ_DATE}_{PROJ}'
+        ssh amc-sandbox 'mkdir -p ./public_html/{SEQ_DATE}_{PROJ}'
         scp {input[0]} amc-sandbox:./public_html/{SEQ_DATE}_{PROJ}
-        ssh amc-sandbox 'chmod a+r ./public_html/{SEQ_DATE}_{PROJ}/*_matrix.gz'
-        
         """
         
 # Combine URLs

@@ -25,4 +25,8 @@ FW_REF:
 REV_REF:
   "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_snRNA_neg.bed"
 PI_REF:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/PI.bed"
+  "/beevol/home/erickson/ref/hg38_p14/base_ref/matrix_ref/PI.bed"
+FW_PI_REF:
+  "/beevol/home/erickson/ref/hg38_p14/base_ref/matrix_ref/PI_pos.bed"
+REV_PI_REF:
+  "/beevol/home/erickson/ref/hg38_p14/base_ref/matrix_ref/PI_neg.bed"
