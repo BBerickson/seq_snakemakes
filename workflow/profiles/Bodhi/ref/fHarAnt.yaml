@@ -15,7 +15,7 @@ MASK:
 GTF:
   "/beevol/home/erickson/ref/Antarctic_spiny_plunderfish/ref_files/annotation.gtf"
 FA_SAMPLE:
-  "/beevol/home/erickson/ref/Antarctic_spiny_plunderfish/genome_builds/fHarAnt1.hap1.2.primary.final.fa"
+  "/beevol/home/erickson/ref/Antarctic_spiny_plunderfish/genome_builds/genome_primary.fa"
 MY_REF:
   "/beevol/home/erickson/ref/Antarctic_spiny_plunderfish/ref_files/fHarAnt_gene.bed"
 FW_REF:

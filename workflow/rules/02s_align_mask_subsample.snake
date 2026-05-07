@@ -22,7 +22,7 @@ rule align_mask:
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
     threads: 
-        12
+        8
     shell:
         """
         # Conditional masking
@@ -107,7 +107,7 @@ rule subsample_dedup:
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
     threads:
-        16
+        8
     shell:
         """
           # find the min read count, calcuate the fraction of the reads to keep, samtools subset 

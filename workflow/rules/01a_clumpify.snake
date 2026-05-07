@@ -10,6 +10,7 @@ rule clumpify:
         log = PROJ + "/clumpify/{sample}_clumpify.log"
     params:
         job_name = "{sample}_clumpify",
+        groups = lambda wc, resources: 2 if resources.memory > 100 else 1,
         args = lambda wildcards: CMD_PARAMS["clumpify"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
         is_paired = lambda wildcards: PAIREDMAP[wildcards.sample],
         input_r2 = lambda wildcards, input: input[1] if len(input) > 1 else ""
@@ -21,9 +22,9 @@ rule clumpify:
         """
         # Calculate 90% of allocated memory for clumpify
         REDUCED_MEM=$(( {resources.memory} * 9 / 10))
+        # Use 2 groups if memory exceeds 100G
         
         if [ -z "{params.args}" ]; then
-            # No clumpify args, just copy files
             cp {input[0]} {output.R1}
             if [ "{params.is_paired}" = "True" ]; then
                 cp {params.input_r2} {output.R2}
@@ -33,20 +34,17 @@ rule clumpify:
             echo "Reads In:  0,0" >> {output.log}
             echo "Duplicates Found:  0,0" >> {output.log}
         elif [ "{params.is_paired}" = "True" ]; then
-            # Paired-end processing
             clumpify.sh -Xmx${{REDUCED_MEM}}g \
-                groups=1 \
+                groups={params.groups} \
                 in1={input[0]} in2={params.input_r2} \
                 out1={output.R1} out2={output.R2} \
                 {params.args} 2>> {output.log}
         else
-            # Single-end processing
             clumpify.sh -Xmx${{REDUCED_MEM}}g \
-                groups=1 \
+                groups={params.groups} \
                 in={input[0]} \
                 out={output.R1} \
                 {params.args} 2>> {output.log}
-            # Create empty R2 to satisfy output declaration
             touch {output.R2}
         fi
         """

@@ -79,7 +79,7 @@ rule align_filter:
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 4, 10)
     threads: 
-        12
+        8
     shell:
         """
         # Use 80% of allocated memory for samtools, split across threads

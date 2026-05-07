@@ -20,7 +20,7 @@ rule align_filter_multimap:
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 0.5, 2)
     threads: 
-        12
+        8
     shell:
         """
         # Check if args2 is empty (after stripping whitespace)
@@ -86,7 +86,7 @@ rule align_filter_indexed:
         sortname = PROJ + "/{sample}_aligned_{index}.temp"
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 4, 10)
-    threads: 12
+    threads: 8
     shell:
         """
         # Use 80% of allocated memory for samtools, split across threads

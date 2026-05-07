@@ -2,31 +2,31 @@
 
 # Path to bowtie2 index ref files
 INDEX_PATH:
-  "/beevol/home/erickson/ref/Antarctic_spiny_plunderfish/genome_builds/"
+  "/beevol/home/bentleyd/ref/hg38/genome/"
 # bowtie2 index prefix
 INDEX_MAP:
-  "fHarAnt"
+  "hg38"
 # index.yaml prefix
 INDEXES:
-  "fHarAnt"
+  "hg38"
 # ref file locations
 MASK:
-  ""
+  "/beevol/home/erickson/ref/hg38_p14/base_ref/matrix_ref/merge_filter_RNAs.bed"
 GTF:
-  "/beevol/home/erickson/ref/Antarctic_spiny_plunderfish/ref_files/annotation.gtf"
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_chrfix_GRCh38.113.gtf"
 FA_SAMPLE:
-  "/beevol/home/erickson/ref/Antarctic_spiny_plunderfish/genome_builds/fHarAnt1.hap1.2.primary.final.fa"
+  "/beevol/home/bentleyd/ref/hg38/genome/Homo_sapiens.GRCh38.dna.primary_assembly.fa"
 MY_REF:
-  "/beevol/home/erickson/ref/Antarctic_spiny_plunderfish/ref_files/fHarAnt_gene.bed"
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38.bed"
 FW_REF:
-  "/beevol/home/erickson/ref/Antarctic_spiny_plunderfish/ref_files/fHarAnt_gene_pos.bed"
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_pos.bed"
 REV_REF:
-  "/beevol/home/erickson/ref/Antarctic_spiny_plunderfish/ref_files/fHarAnt_gene_neg.bed"
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_neg.bed"
 PI_REF:
-  ""
+  "/beevol/home/erickson/ref/hg38_p14/base_ref/matrix_ref/PI.bed"
 FW_PI_REF:
-  ""
+  "/beevol/home/erickson/ref/hg38_p14/base_ref/matrix_ref/PI_pos.bed"
 REV_PI_REF:
-  ""
+  "/beevol/home/erickson/ref/hg38_p14/base_ref/matrix_ref/PI_neg.bed"
 
 
