@@ -1,0 +1,32 @@
+#===== Config file for fHarAnt genome  ===================
+
+# Path to bowtie2 index ref files
+INDEX_PATH:
+  "/beevol/home/erickson/ref/Antarctic_spiny_plunderfish/genome_builds/star_idx/"
+# bowtie2 index prefix
+INDEX_MAP:
+  "fHarAnt"
+# index.yaml prefix
+INDEXES:
+  "fHarAnt"
+# ref file locations
+MASK:
+  ""
+GTF:
+  "/beevol/home/erickson/ref/Antarctic_spiny_plunderfish/ref_files/annotation.gtf"
+FA_SAMPLE:
+  "/beevol/home/erickson/ref/Antarctic_spiny_plunderfish/genome_builds/genome_primary.fa"
+MY_REF:
+  "/beevol/home/erickson/ref/Antarctic_spiny_plunderfish/ref_files/fHarAnt_gene.bed"
+FW_REF:
+  "/beevol/home/erickson/ref/Antarctic_spiny_plunderfish/ref_files/fHarAnt_gene_pos.bed"
+REV_REF:
+  "/beevol/home/erickson/ref/Antarctic_spiny_plunderfish/ref_files/fHarAnt_gene_neg.bed"
+PI_REF:
+  ""
+FW_PI_REF:
+  ""
+REV_PI_REF:
+  ""
+
+

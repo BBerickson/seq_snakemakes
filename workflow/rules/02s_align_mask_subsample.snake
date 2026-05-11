@@ -20,7 +20,7 @@ rule align_mask:
         mask     = lambda wildcards: config_indexes[wildcards.index].get("MASK"),
         sortname = PROJ + "/{sample}_aligned_{index}.temp"
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
+        memory   = lambda wildcards, input: memory_estimator(input, 5, 32)
     threads: 
         8
     shell:
@@ -105,7 +105,7 @@ rule subsample_dedup:
         samp     = "{sample}_{index}",
         scale    = lambda wildcards, input: _get_norm_fraction(wildcards, wildcards.index, input.counts)
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 0.5, 2)
+        memory   = lambda wildcards, input: memory_estimator(input, 5, 32)
     threads:
         8
     shell:

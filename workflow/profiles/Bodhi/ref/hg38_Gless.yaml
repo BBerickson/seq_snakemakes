@@ -26,7 +26,7 @@ REV_REF:
 PI_REF:
   "/beevol/home/erickson/ref/hg38_p14/G-less_NDRG1_insertion/PI.bed"
 FW_PI_REF:
-  "/beevol/home/erickson/ref/hg38_p14/base_ref/matrix_ref/PI_pos.bed"
+  "/beevol/home/erickson/ref/hg38_p14/G-less_NDRG1_insertion/PI_pos.bed"
 REV_PI_REF:
-  "/beevol/home/erickson/ref/hg38_p14/base_ref/matrix_ref/PI_neg.bed"
+  "/beevol/home/erickson/ref/hg38_p14/G-less_NDRG1_insertion/PI_neg.bed"
 
