@@ -148,6 +148,11 @@ NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS.get("bamCoverage
 
 BAM_PATH = _get_bampath(NORM)
 
+if NORM == "subsample":
+    SUF_SUB = "_subsample"
+else:                        
+    SUF_SUB = ""
+    
 COVARGS = _get_all_matrixtypes(REGIONS,NORMS,CMD_PARAMS,GENELIST)
 
 # Create the Cartesian product

@@ -140,6 +140,12 @@ COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
 
 # for optinal subsetting bam directory
 BAM_PATH = _get_bampath(NORM)
+
+if NORM == "subsample":
+    SUF_SUB = "_subsample"
+else:                        
+    SUF_SUB = ""
+    
 ALIGNER = "bowtie2"
 
 # Wildcard constraints
@@ -171,7 +177,7 @@ rule all:
         ],
         PROJ + "/report/" + PROJ + "_results.tsv",
         [] if config.get("skip_html_report") else [
-            expand(SEQ_DATE + "_" + PROJ + "_{index}_qc_analysis.html", index=INDEXES[0])
+            expand(SEQ_DATE + "_" + PROJ + "_{index}" + SUF_SUB + "_qc_analysis.html", index=INDEXES[0])
         ],
         
         # bamCoverage

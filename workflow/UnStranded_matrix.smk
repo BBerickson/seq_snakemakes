@@ -157,6 +157,11 @@ NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS.get("bamCoverage
 
 BAM_PATH = _get_bampath(NORM)
 
+if NORM == "subsample":
+    SUF_SUB = "_subsample"
+else:                        
+    SUF_SUB = ""
+    
 COVARGS = _get_all_matrixtypes(REGIONS,CMD_PARAMS,GENELIST)
 GENELIST = config1.get("GENELIST") or "all"
 
@@ -219,7 +224,7 @@ rule all:
           
           # qc with heatmap, cluster, profile plots
           [] if config.get("skip_matrix_html_report") else [
-              expand(SEQ_DATE + "_" + PROJ + "_{index}_qc_plots_analysis.html", index=INDEXES[0])
+              expand(SEQ_DATE + "_" + PROJ + "_{index}" + SUF_SUB + "_qc_plots_analysis.html", index=INDEXES[0])
           ]
         ]
         

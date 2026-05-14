@@ -12,6 +12,7 @@ bbduk_sum  <- str_c(stats_dir, proj, "_bbduk.tsv")
 dedup_sum  <- str_c(stats_dir, proj, "_", index_map, "_UMI_dedup.tsv")
 bwt_sum    <- str_c(stats_dir, proj, "_aligned.tsv")
 fc_sum     <- str_c(report_dir, proj, "_featureCounts.tsv")
+sub_sum    <- str_c(report_dir, proj, "_subsample.tsv")
 
 # Sample names and groups
 qc_sams <- lapply(plot_grpss$SAMPLES[[1]], function(x) unlist(x)) 
@@ -289,6 +290,39 @@ if(length(pdfFile) > 0) {
   htmltools::tagList(embed_tags)
 }
 
+```
+
+
+```{r "Sub summary", fig.width = 16, fig.height = 10, results='asis', echo=FALSE}
+
+# Subsampling stats
+mets <- c("Sampled reads", "Reads removed")
+
+if(file.exists(sub_sum)){
+  cat("## Subsampling\n\n")
+  cat("Libraries were subsampled so that downstream analysis is performed using an equal number of unique reads for sample groups. The number of sampled reads is displayed on each bar.\n\n")
+
+sub_sum <- sub_sum %>%
+  read_tsv(col_names = c("grp", "sample", "metric", "value"),show_col_types = FALSE) %>%
+  pivot_wider(names_from = "metric", values_from = "value") %>%
+  mutate(`Reads removed` = `Filtered reads` - `Sampled reads`) %>%
+  pivot_longer(cols = -c(grp, sample), names_to = "metric") %>%
+  dplyr::filter(metric %in% mets)
+
+# Create bar graphs
+sub_sum %>%
+    create_qc_bars(
+      grp_df     = grp_key,
+      grp_lvls   = names(qc_sams),
+      sam_lvls   = NULL,
+      met_lvls   = rev(mets),
+      plot_cols  = theme_colors,
+      lab_metric = "Sampled reads",
+      n_rows     = 2
+    ) +
+    qc_theme 
+
+}
 ```
 
 

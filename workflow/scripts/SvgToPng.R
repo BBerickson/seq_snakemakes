@@ -54,7 +54,7 @@ subtext_label <- if (length(args) >= 4 && nzchar(trimws(args[4]))) {
 }
 
 # Validate subtext value if provided
-if (!is.null(subtext_label) && !tolower(subtext_label) %in% c("sense", "antisense")) {
+if (!is.null(subtext_label) && !tolower(subtext_label) %in% c("sense", "antisense", "anti")) {
   subtext_label <- NULL
 }
 

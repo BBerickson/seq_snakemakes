@@ -108,6 +108,10 @@ rule gathering_results:
             group = GRPS_UNIQ,
             index  = INDEXES
         ),
+        extra = [] if NORM != "subsample" else expand(
+                    PROJ + "/stats/" + PROJ + "_{index}_subsample_frac.tsv", 
+                    index=INDEXES[0]
+                ),
         FC_files = expand( PROJ + "/counts/{sample}_aligned_{index}_featureCounts.tsv",
             sample = SAMS_UNIQ,
             index  = INDEXES[0]
@@ -138,7 +142,7 @@ rule create_plots:
     input:
         PROJ + "/report/" + PROJ + "_results.tsv"
     output:
-        SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_qc_analysis.html"
+        SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + SUF_SUB + "_qc_analysis.html"
     params:
         job_name   = PROJ + "_qc_html"
     resources:
@@ -154,7 +158,7 @@ rule create_plots:
 
         Rscript $script \
             -i $Rmd \
-            -o $out \
+            -o {SUF_SUB}$out \
             -p {PROJ} \
             -m {INDEX_MAP} \
             -d {SEQ_DATE} \

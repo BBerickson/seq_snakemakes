@@ -93,12 +93,12 @@ if(!is_empty(list.files(path = mydirs, pattern = '.bam',recursive = T))){
         bind_rows(gg)
       
     }
-    sn <- gg %>% 
+    gg <- gg %>% 
       extract(sample, into  = c("sample", "index"),
               regex = paste0("^(.+?)_(", indexs, ")$")) %>% 
       dplyr::mutate(index = paste0("aligned_", index)) %>%
-      pivot_wider(names_from = "index",values_from = c("value")) %>% 
-      full_join(sn,.,by="sample")
+      pivot_wider(names_from = "index",values_from = c("value"))  
+    sn <- full_join(sn,gg,by="sample")
     
     subsample_files <- list.files(path = mydirs, pattern = '_subsample.txt',recursive = T)
     if(!is_empty(subsample_files)){
@@ -119,17 +119,50 @@ if(!is_empty(list.files(path = mydirs, pattern = '.bam',recursive = T))){
                               col_names = c("sample", "sub_group","read_fraction"),
                               show_col_types = FALSE) %>%
           full_join(subsample,.,by="sample") %>% 
-          dplyr::mutate(read_fraction=paste0(value,"(", round(read_fraction*100,2),"%)")) %>%
-          dplyr::select(-value) %>% 
+          dplyr::mutate(read_fraction=paste0(value,"(", round(read_fraction*100,2),"%)")) %>% 
           extract(sample, into  = c("sample", "index"),
                   regex = paste0("^(.+?)_(", indexs, ")$")) %>%  
           dplyr::mutate(index = paste0("subsampled_", index)) %>%
           pivot_wider(names_from = "index",values_from = c("read_fraction"))
-        sn <- full_join(sn,subsample,by="sample") %>% arrange(sub_group,new_name)
+        sn <- full_join(sn,subsample %>% dplyr::select(-value) ,by="sample") %>% arrange(sub_group,new_name)
       }
     }
-    
+    full_join(gg,subsample,by="sample") %>% select(sub_group,sample,'Filtered reads' =starts_with("aligned_"),'Sampled reads'=value) %>% 
+      pivot_longer(
+        cols = c(`Filtered reads`, `Sampled reads`),
+        names_to = "read_type",
+        values_to = "count"
+      ) %>% arrange(sub_group) %>% 
+      write_tsv(.,paste0(mydir,"/report/",mydir,"_subsample.tsv"),col_names = F)
   } else {
+    bam_count <- list.files(path = mydirb, pattern = '_count',recursive = T)
+    paste0(mydirb,"/",bam_count) -> bam_count
+    gg <- NULL
+    for(i in seq_along(bam_count)){
+      gg <- read_delim(bam_count[i],delim = " ",
+                       col_names = c("sample","type","Filtered reads"),
+                       show_col_types = FALSE) %>%
+        bind_rows(gg)
+      
+    }
+    gg <- gg %>% 
+      extract(sample, into  = c("sample", "index"),
+              regex = paste0("^(.+?)_(", indexs, ")$")) %>%
+      select(-type,-index) 
+    
+    subsample_files <- list.files(path = mydirs, pattern = '_subsample.txt',recursive = T)
+    if(!is_empty(subsample_files)){
+      subsample <- NULL
+      for(i in seq_along(subsample_files)){
+        subsample <- read_delim(paste0(mydirs,"/",subsample_files[i]),
+                                col_names = c("sample", "type","value"),
+                                delim = " ",
+                                show_col_types = FALSE) %>%
+          dplyr::select(-type) %>% 
+          bind_rows(subsample)
+      }
+    }  
+    
     subsample_files <- list.files(path = mydirs, pattern = '_subsample.txt',recursive = T)
     if(!is_empty(subsample_files)){
       subsample <- NULL
@@ -151,9 +184,16 @@ if(!is_empty(list.files(path = mydirs, pattern = '.bam',recursive = T))){
           dplyr::mutate(read_fraction=paste0(value,"(", round(read_fraction*100,2),"%)")) %>% 
           extract(sample, into  = c("sample", "index"),
                   regex = paste0("^(.+?)_(", indexs, ")$")) %>% 
-          dplyr::select(-value) %>% mutate(index=paste0("subsampled_", index)) %>% 
+          mutate(index=paste0("subsampled_", index)) %>% 
           pivot_wider(names_from = "index",values_from = "read_fraction")
-        sn <- full_join(sn,subsample,by="sample") %>% arrange(sub_group,sample)
+        sn <- full_join(sn,subsample %>% dplyr::select(-value), by="sample") %>% arrange(sub_group,sample)
+        full_join(gg,subsample,by="sample") %>% select(sub_group,sample,'Filtered reads','Sampled reads'=value) %>% 
+          pivot_longer(
+            cols = c(`Filtered reads`, `Sampled reads`),
+            names_to = "read_type",
+            values_to = "count"
+          ) %>% arrange(sub_group) %>% 
+          write_tsv(.,paste0(mydir,"/report/",mydir,"_subsample.tsv"),col_names = F)
       }
     }
   }

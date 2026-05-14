@@ -14,7 +14,7 @@ rule create_plots:
                index=INDEXES,
                suffix=DF_SAM_NORM['Suffix'].unique())
     output:
-        SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_qc_plots_analysis.html"
+        SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + SUF_SUB + "_qc_plots_analysis.html"
     params:
         job_name   = PROJ + "_qc_plots_html"
     resources:
@@ -30,7 +30,7 @@ rule create_plots:
 
         Rscript $script \
             -i $Rmd \
-            -o $out \
+            -o {SUF_SUB}$out \
             -p {PROJ} \
             -m {INDEX_MAP} \
             -d {SEQ_DATE} \
