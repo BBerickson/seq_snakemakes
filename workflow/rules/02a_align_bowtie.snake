@@ -17,37 +17,33 @@ rule bowtie:
         sortname = PROJ + "/{sample}.temp",
         is_paired = lambda wildcards: PAIREDMAP[wildcards.sample]
     resources:
-        memory = lambda wildcards, input: memory_estimator(input, 3, 18)
-    threads: 
+        memory = lambda wildcards, input: memory_estimator(input, 10, 18)
+    threads:
         12
     shell:
         """
-        sort_threads=8
+        
+        sort_threads=4
         mem_per_thread=$(( {resources.memory} * 1024 * 60 / 100 / $sort_threads ))
         
         if [ "{params.is_paired}" = "True" ]; then
-            # Paired-end alignment
-            bowtie2 \
-                -p {threads} \
-                -x {params.idx} \
-                -1 {input.R1} -2 {input.R2} \
-                {params.args} \
-                2> {output.stats} \
-                | samtools sort - -T {params.sortname} -@ $sort_threads -m "${{mem_per_thread}}M" -O bam \
-                > {output.bam}
+            reads="-1 {input.R1} -2 {input.R2}"
         else
-            # Single-end alignment
-            bowtie2 \
-                -p {threads} \
-                -x {params.idx} \
-                -U {input.R1} \
-                {params.args} \
-                2> {output.stats} \
-                | samtools sort - -T {params.sortname} -@ $sort_threads -m "${{mem_per_thread}}M" -O bam \
-                > {output.bam}
+            reads="-U {input.R1}"
         fi
-        
-        # Index the BAM file
+    
+        bowtie2 \
+            -p {threads} \
+            -x {params.idx} \
+            $reads \
+            {params.args} \
+            2> {output.stats} \
+            | samtools sort - \
+                -T {params.sortname} \
+                -@ $sort_threads \
+                -m "${{mem_per_thread}}M" \
+                -o {output.bam}
+    
         samtools index -@ $sort_threads {output.bam}
         """
 

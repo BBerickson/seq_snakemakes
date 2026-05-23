@@ -113,16 +113,6 @@ for key in NORMMAP:
     NORMMAP[key] = [(index, norm, f'scalefactor_{INDEXES_LAST[0]}' if suffix.lower() == 'scalefactor' else suffix) 
                     for index, norm, suffix in NORMMAP[key]]
 
-# Combine into a list of records with expanded NormMap
-SAM_NORM = []
-for key in SAMPIN:
-    sam_value = SAMPIN[key][0]
-    for index, norm, suffix in NORMMAP[key]:
-        SAM_NORM.append([sam_value, key, index, norm, suffix])
-
-# Create DataFrame
-DF_SAM_NORM = pd.DataFrame(SAM_NORM, columns=['Sample', 'Newnam', 'Index', 'Norm', 'Suffix'])
-
 # unpack samples and groups
 SAMS = [[y, x] for y in SAMPLES for x in SAMPLES[y]]
 NAMS = [x[0] for x in SAMS] # newnames
@@ -132,9 +122,6 @@ GRPS = [x[0] for x in GRPS] # groups
 NAMS_UNIQ = list(dict.fromkeys(NAMS))
 GRPS_UNIQ = list(dict.fromkeys(GRPS))
 SAMS_UNIQ = list(dict.fromkeys(SAMS))
-
-# Print summary of samples and groups
-print(DF_SAM_NORM.to_string(index=False))
 
 # Wildcard constraints
 WILDCARD_REGEX = r"[a-zA-Z0-9_\-]+" # Matches alphanumeric characters, underscores, and hyphens
@@ -179,8 +166,6 @@ for key in SAMPIN:
 
 # Create DataFrame
 DF_SAM_NORM = pd.DataFrame(SAM_NORM, columns=['Sample', 'Newnam', 'Index', 'Norm', 'Suffix'])
-print(DF_SAM_NORM.to_string(index=False))
-
 # Merge on 'Newnam' and 'Index'
 DF_SAM_NORM = REGIONS_COVARGS.merge(DF_SAM_NORM, on=['Newnam'], how='left')
 

@@ -19,7 +19,7 @@ SINGULARITY_PREFIX="/beevol/home/${USER}/.singularity_cache"
 mkdir -p logs
 
 # Configuration
-DATASET="ChIPseq"  # Set your dataset name here
+DATASET="BW"  # Set your dataset name here
 MATRIXSET="UnStranded" # set the type here
 
 PROFILE="workflow/profiles/Bodhi"
@@ -27,11 +27,11 @@ LSF_CONFIG="workflow/profiles/Bodhi/Bodhi_config.yaml"
 SSH_KEY_DIR="${HOME}/.ssh"
 SAMPLES_FILE="${DATASET}_samples.yaml"
 MATRIX_FILE="${MATRIXSET}_matrix.yaml"
-MATRIX_SNAKE="${MATRIXSET}_matrix.smk"
+MATRIX_SNAKE="BW_${MATRIXSET}_matrix.smk"
 
 snakemake \
     --profile ${PROFILE} \
-    --snakefile workflow/${MATRIX_SNAKE} ${LSF_CONFIG} \
+    --snakefile workflow/${MATRIX_SNAKE} \
     --configfile ${SAMPLES_FILE} ${LSF_CONFIG} ${MATRIX_FILE} \
     --singularity-prefix "${SINGULARITY_PREFIX}" \
     --config SSH_KEY_DIR="${SSH_KEY_DIR}"

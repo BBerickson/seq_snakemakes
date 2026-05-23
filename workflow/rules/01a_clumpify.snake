@@ -10,19 +10,18 @@ rule clumpify:
         log = PROJ + "/clumpify/{sample}_clumpify.log"
     params:
         job_name = "{sample}_clumpify",
-        groups = lambda wc, resources: 2 if resources.memory > 100 else 1,
+        groups = lambda wc, resources: max(1, min(16, resources.memory // 16)),
         args = lambda wildcards: CMD_PARAMS["clumpify"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
         is_paired = lambda wildcards: PAIREDMAP[wildcards.sample],
         input_r2 = lambda wildcards, input: input[1] if len(input) > 1 else ""
     resources:
-        memory = lambda wildcards, input: memory_estimator(input, 12, 15) # multiplier, min, max=250, unit=GB
+        memory = lambda wildcards, input: memory_estimator(input, 12, 16) # multiplier, min, max=250, unit=GB
     threads:
         1
     shell:
         """
         # Calculate 90% of allocated memory for clumpify
         REDUCED_MEM=$(( {resources.memory} * 9 / 10))
-        # Use 2 groups if memory exceeds 100G
         
         if [ -z "{params.args}" ]; then
             cp {input[0]} {output.R1}

@@ -32,6 +32,7 @@ configfile: str(GENOME_CONFIG)
 
 raw_indexes = config['INDEXES']
 INDEXES_FIRST = [raw_indexes] if isinstance(raw_indexes, str) else [raw_indexes[0]]
+INDEXES_LAST = [raw_indexes] if isinstance(raw_indexes, str) else [raw_indexes[-1]]
 
 # Paths to additional config files
 if config.get("GENELIST"):
@@ -52,8 +53,13 @@ with open(GENOME_CONFIG1) as f:
 # ------------------------------------------------------------------------------
 
 # Docker container
-singularity:
-    config["CONTAINER"] 
+SINGULARITY = config.get("CONTAINER", "")
+# Check if we should use Singularity
+USE_SINGULARITY = bool(SINGULARITY and SINGULARITY.strip())
+# Set container if using Singularity
+if USE_SINGULARITY:
+    singularity:
+        config["CONTAINER"] 
     
 # From main config
 PROJ         = config.get("PROJ")
@@ -98,18 +104,12 @@ for sample, norm_list in NORMMAP.items():
         for index, norm_value in norm_list
     ]
     NORMMAP[sample] = updated_list
+
+# add scalefactor index info
+for key in NORMMAP:
+    NORMMAP[key] = [(index, norm, f'scalefactor_{INDEXES_LAST[0]}' if suffix.lower() == 'scalefactor' else suffix) 
+                    for index, norm, suffix in NORMMAP[key]]
     
-# Combine into a list of records with expanded NormMap
-SAM_NORM = []
-for key in SAMPIN:
-    sam_value = SAMPIN[key][0]
-    for index, norm, suffix in NORMMAP[key]:
-        SAM_NORM.append([sam_value, key, index, norm, suffix])
-
-# Create DataFrame
-DF_SAM_NORM = pd.DataFrame(SAM_NORM, columns=['Sample', 'Newnam', 'Index', 'Norm', 'Suffix'])
-
-
 # unpack samples and groups
 SAMS = [[y, x] for y in SAMPLES for x in SAMPLES[y]]
 NAMS = [x[0] for x in SAMS] # newnames
@@ -121,15 +121,7 @@ GRPS_UNIQ = list(dict.fromkeys(GRPS))
 SAMS_UNIQ = list(dict.fromkeys(SAMS))
 
 # Print summary of samples and groups
-print("SAMPLES (%s): %s\n" % (len(SAMPLES), SAMPLES))
-print("GROUPS (%s): %s\n" % (len(GROUPS), GROUPS))
-print("SAMPIN (%s): %s\n" % (len(SAMPIN), SAMPIN))
-print("SAMS_UNIQ (%s): %s\n" % (len(SAMS_UNIQ), SAMS_UNIQ))
-print("NAMS_UNIQ (%s): %s\n" % (len(NAMS_UNIQ), NAMS_UNIQ))
-print("GRPS_UNIQ (%s): %s\n" % (len(GRPS_UNIQ), GRPS_UNIQ))
 print("NORMMAP (%s): %s\n" % (len(NORMMAP), NORMMAP))
-print("PAIREDMAP (%s): %s\n" % (len(PAIREDMAP), PAIREDMAP))
-print(DF_SAM_NORM.to_string(index=False))
 
 # Wildcard constraints
 WILDCARD_REGEX = r"[a-zA-Z0-9_\-]+" # Matches alphanumeric characters, underscores, and hyphens
@@ -141,7 +133,8 @@ wildcard_constraints:
     index  = WILDCARD_REGEX,
     suffix = WILDCARD_REGEX,
     covarg = r"[a-zA-Z0-9_.-]+",
-    region = "543|5|3|PI|EI"
+    region = "543|5|3|PI|EI",
+    sense_asense = r"(sense|anti|)"  # Allow empty, "sense", or "anti"
 
 HEATMAP_REGIONS = ["543","5","5L","3"]
 
@@ -156,15 +149,26 @@ if NORM == "subsample":
 else:                        
     SUF_SUB = ""
     
-COVARGS = _get_all_matrixtypes(REGIONS,NORMS,CMD_PARAMS,GENELIST)
+COVARGS = _get_all_matrixtypes(REGIONS,CMD_PARAMS,GENELIST)
+GENELIST = config1.get("GENELIST") or "all"
 
 # Create the Cartesian product
 product = [(s, i, v) for s in SAMS_UNIQ for i, v in zip(REGIONS, COVARGS)]
 
 # Convert to DataFrame
 REGIONS_COVARGS = pd.DataFrame(product, columns=['Newnam', 'Region', 'Value'])
+SAM_NORM = []
+for key in SAMPIN:
+    sam_value = SAMPIN[key][0]
+    for index, norm, suffix in NORMMAP[key]:
+        SAM_NORM.append([sam_value, key, index, norm, suffix])
 
-print(REGIONS_COVARGS)
+# Create DataFrame
+DF_SAM_NORM = pd.DataFrame(SAM_NORM, columns=['Sample', 'Newnam', 'Index', 'Norm', 'Suffix'])
+# Merge on 'Newnam' and 'Index'
+DF_SAM_NORM = REGIONS_COVARGS.merge(DF_SAM_NORM, on=['Newnam'], how='left')
+
+print(DF_SAM_NORM.to_string(index=False))
 
 # Final output files
 rule all:
