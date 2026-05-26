@@ -19,15 +19,16 @@ rule star_twopass:
         out      = PROJ + "/bams/{sample}_",
         read_cmd = "--readFilesCommand gunzip -c" if config.get("compress_temp", True) else ""
     resources:
-        memory = lambda wildcards, input: memory_estimator([input.R1, input.R2], 3, 40, 250)
+        memory = lambda wildcards, input: memory_estimator([input.R1, input.R2], 10, 40, 250)
     message:
         "Running STAR alignment with two-pass mode"
     threads: 
         16
     shell:
         """
-        # Use 80% of allocated memory for samtools, split across threads
-        mem_per_thread=$(( {resources.memory} * 1024 * 80 / 100 / {threads} ))
+        # Use 60% of allocated memory for samtools, split across threads
+        sort_threads=4
+        mem_per_thread=$(( {resources.memory} * 1024 * 60 / 100 / $sort_threads ))
         
         STAR \
           --genomeDir {INDEX_PATH} \
@@ -42,11 +43,11 @@ rule star_twopass:
         
         samtools sort {params.bam_unsorted} \
             -T {params.out}tmp \
-            -@ {threads} \
+            -@ $sort_threads \
             -m "${{mem_per_thread}}M" \
             -o {output.bam}
             
-        samtools index -@ {threads} {output.bam}
+        samtools index -@ $sort_threads {output.bam}
         
         rm {params.bam_unsorted}
         """

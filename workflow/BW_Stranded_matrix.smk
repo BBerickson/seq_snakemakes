@@ -143,7 +143,7 @@ wildcard_constraints:
 
 HEATMAP_REGIONS = ["543","5","5L","3"]
 
-COLS_DICT = _get_colors(SAMS_UNIQ, COLORS)
+COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
 
 NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS.get("bamCoverageBL", False),ORIENTATION)
 
@@ -158,10 +158,11 @@ COVARGS = _get_all_matrixtypes(REGIONS,CMD_PARAMS,GENELIST)
 GENELIST = config1.get("GENELIST") or "all"
 
 # Create the Cartesian product
-product = [(s, i, v, sa) for s in SAMS_UNIQ for i, v in zip(REGIONS, COVARGS) for sa in SENSE_ASENSE]
+product = [(s, i, v, sa) for s in NAMS_UNIQ for i, v in zip(REGIONS, COVARGS) for sa in SENSE_ASENSE]
 
 # Convert to DataFrame
 REGIONS_COVARGS = pd.DataFrame(product, columns=['Newnam', 'Region', 'Value', 'Sense_Asense'])
+# Combine into a list of records with expanded NormMap
 SAM_NORM = []
 for key in SAMPIN:
     sam_value = SAMPIN[key][0]
@@ -174,6 +175,7 @@ DF_SAM_NORM = pd.DataFrame(SAM_NORM, columns=['Sample', 'Newnam', 'Index', 'Norm
 DF_SAM_NORM = REGIONS_COVARGS.merge(DF_SAM_NORM, on=['Newnam'], how='left')
 
 print(DF_SAM_NORM.to_string(index=False))
+
 
 # Final output files
 rule all:
