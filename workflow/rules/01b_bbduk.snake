@@ -15,7 +15,7 @@ rule bbduk:
         bar = lambda wildcards: _bbduk_adapter_param(BARCODES),
         is_paired = lambda wildcards: PAIREDMAP[wildcards.sample]
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 4)
     threads:
         12
     shell:

@@ -30,7 +30,7 @@ rule create_strand_matrix:
         fw_ref  = get_fw_ref,
         rev_ref = get_rev_ref
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 2)
     threads: 
         12
     shell:

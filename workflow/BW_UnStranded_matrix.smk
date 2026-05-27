@@ -67,6 +67,7 @@ RAW_DATA     = config.get("RAW_DATA")
 ALL_SAMPLES  = config.get("SAMPLES")
 SEQ_DATE     = config.get("SEQ_DATE")
 INDEX_PATH   = config.get("INDEX_PATH")
+CHROM_SIZES    = config.get("CHROM_SIZES")
 NORM         = config.get("NORM")
 CMD_PARAMS   = config.get("CMD_PARAMS")
 COLORS       = config.get("COLORS")
@@ -113,7 +114,7 @@ NAMS = [x[0] for x in SAMS] # newnames
 SAMS = [x[1] for x in SAMS] # samples
 GRPS = [[y, x] for y in GROUPS for x in GROUPS[y]]
 GRPS = [x[0] for x in GRPS] # groups
-NAMS_UNIQ = list(dict.fromkeys(SAMS))
+NAMS_UNIQ = list(dict.fromkeys(NAMS))
 GRPS_UNIQ = list(dict.fromkeys(GRPS))
 SAMS_UNIQ = list(dict.fromkeys(SAMS))
 
@@ -164,7 +165,7 @@ for key in SAMPIN:
 DF_SAM_NORM = pd.DataFrame(SAM_NORM, columns=['Sample', 'Newnam', 'Index', 'Norm', 'Suffix'])
 # Merge on 'Newnam' and 'Index'
 DF_SAM_NORM = REGIONS_COVARGS.merge(DF_SAM_NORM, on=['Newnam'], how='left')
-
+DF_SAM_NORM['Newnam'] = DF_SAM_NORM['Sample']
 print(DF_SAM_NORM.to_string(index=False))
 
 # Final output files
@@ -178,37 +179,30 @@ rule all:
             index=DF_SAM_NORM['Index'],
             suffix=DF_SAM_NORM['Suffix']
         ),
-        
-        # matrix file
+
+        # matrix files
         expand(
-              PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}.bw",
-              zip,
-              newnam=DF_SAM_NORM['Newnam'],
-              index=DF_SAM_NORM['Index'],
-              suffix=DF_SAM_NORM['Suffix']
-          ),
-          
-          # matrix files
-          expand(
-              PROJ + "/matrix/{region}/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_matrix.gz",
-              zip, 
-              region=DF_SAM_NORM['Region'], 
-              newnam=DF_SAM_NORM['Newnam'],
-              index=DF_SAM_NORM['Index'], 
-              covarg=DF_SAM_NORM['Value'], 
-              suffix=DF_SAM_NORM['Suffix']
-          ),
-          
-          # matrix url file for amc-sandbox
-          [] if config.get("skip_matrix_url") else [
+            PROJ + "/matrix/{region}/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_matrix.gz",
+            zip,
+            region=DF_SAM_NORM['Region'],
+            newnam=DF_SAM_NORM['Newnam'],
+            index=DF_SAM_NORM['Index'],
+            covarg=DF_SAM_NORM['Value'],
+            suffix=DF_SAM_NORM['Suffix']
+        ),
+
+        # matrix url file for amc-sandbox
+        [] if config.get("skip_matrix_url") else [
             expand(
                 PROJ + "/URLS/{region}_aligned_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_matrix.url.txt",
-                zip, 
-                region=DF_SAM_NORM['Region'], 
-                index=DF_SAM_NORM['Index'], 
-                covarg=DF_SAM_NORM['Value'], 
+                zip,
+                region=DF_SAM_NORM['Region'],
+                index=DF_SAM_NORM['Index'],
+                covarg=DF_SAM_NORM['Value'],
                 suffix=DF_SAM_NORM['Suffix']
             )
+        ]
+
 
 # BW with deeptools bamCoverage
 include: "rules/04_get_BW_UnStranded.snake"

@@ -17,7 +17,7 @@ rule bowtie:
         sortname = PROJ + "/{sample}.temp",
         is_paired = lambda wildcards: PAIREDMAP[wildcards.sample]
     resources:
-        memory = lambda wildcards, input: memory_estimator(input, 10, 18)
+        memory = lambda wildcards, input: memory_estimator(input, 10, 16)
     threads:
         12
     shell:

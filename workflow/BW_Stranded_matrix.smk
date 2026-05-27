@@ -69,6 +69,7 @@ ALL_SAMPLES  = config.get("SAMPLES")
 SEQ_DATE     = config.get("SEQ_DATE")
 INDEX_PATH   = config.get("INDEX_PATH")
 INDEX_MAP    = config.get("INDEX_MAP")
+CHROM_SIZES    = config.get("CHROM_SIZES")
 CMD_PARAMS   = config.get("CMD_PARAMS")
 COLORS       = config.get("COLORS")
 NORM         = config.get("NORM")
@@ -121,7 +122,7 @@ NAMS = [x[0] for x in SAMS] # newnames
 SAMS = [x[1] for x in SAMS] # samples
 GRPS = [[y, x] for y in GROUPS for x in GROUPS[y]]
 GRPS = [x[0] for x in GRPS] # groups
-NAMS_UNIQ = list(dict.fromkeys(SAMS))
+NAMS_UNIQ = list(dict.fromkeys(NAMS))
 GRPS_UNIQ = list(dict.fromkeys(GRPS))
 SAMS_UNIQ = list(dict.fromkeys(SAMS))
 
@@ -143,7 +144,7 @@ wildcard_constraints:
 
 HEATMAP_REGIONS = ["543","5","5L","3"]
 
-COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
+COLS_DICT = _get_colors(SAMS_UNIQ, COLORS)
 
 NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS.get("bamCoverageBL", False),ORIENTATION)
 
@@ -173,7 +174,7 @@ for key in SAMPIN:
 DF_SAM_NORM = pd.DataFrame(SAM_NORM, columns=['Sample', 'Newnam', 'Index', 'Norm', 'Suffix'])
 # Merge on 'Newnam' and 'Index'
 DF_SAM_NORM = REGIONS_COVARGS.merge(DF_SAM_NORM, on=['Newnam'], how='left')
-
+DF_SAM_NORM['Newnam'] = DF_SAM_NORM['Sample']
 print(DF_SAM_NORM.to_string(index=False))
 
 

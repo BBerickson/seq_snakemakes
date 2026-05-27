@@ -9,14 +9,20 @@ rule get_bw:
         bw = PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE +"_norm_{suffix}.bw"
     params:
         job_name = "{newnam}_aligned_{index}_norm_{suffix}_getbw",
+        tmp_bw     = PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}.bdg",
+        chrom_sizes = CHROM_SIZES
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     threads: 
         1
     shell:
         """
-          cp {input[0]} {output[0]}
+        bigWigToBedGraph {input[0]} {params.tmp_bw}
+        awk '{{$4 = ($4 < 0 ? -$4 : $4); print}}' OFS="\t" {params.tmp_bw} > {params.tmp_bw}.abs
+        grep -Fwf <(cut -f1 {params.chrom_sizes}) {params.tmp_bw}.abs > {params.tmp_fw}.filtered
+        bedGraphToBigWig {params.tmp_bw}.filtered {params.chrom_sizes} {output.bw}
         
+        rm {params.tmp_bw} {params.tmp_bw}.abs {params.tmp_bw}.filtered 
         """
 
         

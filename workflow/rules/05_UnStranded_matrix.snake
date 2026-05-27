@@ -11,7 +11,7 @@ rule standared_matrix:
         args = lambda wildcards: CMD_PARAMS[f"region{wildcards.region}"] + ("--blackListFileName " + config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else ""),
         my_ref = lambda wildcards: PI_REF if wildcards.region == "PI" else MY_REF
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 2, 5)
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 2)
     threads: 
         12
     shell:

@@ -15,7 +15,7 @@ rule clumpify:
         is_paired = lambda wildcards: PAIREDMAP[wildcards.sample],
         input_r2 = lambda wildcards, input: input[1] if len(input) > 1 else ""
     resources:
-        memory = lambda wildcards, input: memory_estimator(input, 12, 16) # multiplier, min, max=250, unit=GB
+        memory = lambda wildcards, input: memory_estimator(input, 12, 10, 250) # multiplier, min, max=250, unit=GB
     threads:
         1
     shell:

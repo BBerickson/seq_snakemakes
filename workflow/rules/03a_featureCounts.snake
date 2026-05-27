@@ -15,7 +15,7 @@ rule featureCounts_sample:
         tsv      = PROJ + "/counts/{sample}_aligned_{index}_featureCounts_enrich.tsv",
         ftfile   = lambda wildcards: config_indexes[wildcards.index].get("GTF")
     resources:
-        memory = lambda wildcards, input: memory_estimator(input, 0.5, 4)
+        memory = lambda wildcards, input: memory_estimator(input, 0.5, 1)
     threads:
         12
     shell:

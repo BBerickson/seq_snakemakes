@@ -249,12 +249,15 @@ def _find_bws(sample, dirs):
 # sample name the expectation is that all bigwigs in the list will have the same suffix
 def _get_bw_sfx(bws):
     sfx = set()
-
     for bw in bws:
         if re.search(r"_fw\.bw$", bw):
             sfx.add("_fw.bw")
+        elif re.search(r"_rev\.bw$", bw):
+            sfx.add("_fw.bw")   # normalize to fw so _get_full_bw_sfxs works
         elif re.search(r"_pos\.bw$", bw):
             sfx.add("_pos.bw")
+        elif re.search(r"_neg\.bw$", bw):
+            sfx.add("_pos.bw")  # normalize to pos so _get_full_bw_sfxs works
         else:
             sfx.add(".bw")
     
@@ -270,16 +273,16 @@ def _get_full_bw_sfxs(sfx, paired=True):
 # Get the fastq file for both reads for the provided sample name
 def _get_bws(sample, dirs, link_dir, paired=True):
     bw_paths = _find_bws(sample, dirs)
-    sfx = _get_bw_sfx(bw_paths)
-    sfxs = _get_full_bw_sfxs(sfx,paired)
+    sfx      = _get_bw_sfx(bw_paths)
+    sfxs     = _get_full_bw_sfxs(sfx, paired)
 
-    # Find matching fastqs and create symlinks 
     bws = []
     for full_sfx in sfxs:
-        bw_pat = ".*/" + sample + ".*" + full_sfx
+        escaped_sfx = re.escape(full_sfx)   # escapes the dot: _pos\.bw
+        escaped_smp = re.escape(sample)     # escapes dashes:  NF_AvitagRpb1WT_1\-RPB1\-r1
+        bw_pat = ".*/" + escaped_smp + "[^/]*" + escaped_sfx + "$"
         bw = [f for f in bw_paths if re.match(bw_pat, f)]
-    
-        # Check for duplicate paths
+
         if not bw:
             sys.exit("ERROR: no bigwigs found for " + sample + ".")
         if len(bw) > 1:

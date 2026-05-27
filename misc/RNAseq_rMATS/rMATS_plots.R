@@ -12,9 +12,9 @@ library(RColorBrewer)
 library(gridExtra)
 source("workflow/scripts/rMATS_funs.R")
 
-min_count <- 2 # min_count × number of replicates total reads needed to pass filter
+min_count <- 2 # >= min_count average reads per replicate (inclusion + skipping) in at least one condition.
 max_FDR <- 0.05 # Standard 5% significance threshold for FDR adjusted pValue
-max_IncDifference <- 0.2 # PSI change threshold
+max_IncDifference <- 0.05 # PSI change threshold
 comps <- c("SE","RI", "MXE","A5SS","A3SS") # splicing types to loop over
 
 ##### bar plots #####
@@ -42,7 +42,7 @@ ggplot(db, aes(x = type, y = signed_count, fill = category)) +
   labs(x = "PSI Type", y = bquote(Delta~"PSI count:"~"[" * .(gsub(":", " - ", tc)) * "]"), 
        fill = str_split_fixed(tc,":",2)[1],
        title = str_replace(tc,":"," vs "),
-       subtitle = paste0("min_count = ",min_count, ", max_FDR = ",max_FDR, ", IncDifference = ",max_IncDifference)) +
+       subtitle = paste0("min ave reads/rep = ",min_count, ", max_FDR = ",max_FDR, ", IncDifference = ",max_IncDifference)) +
   theme_minimal() + 
   theme(axis.text.x = element_text(size = 14, face = "bold"),
         axis.text.y = element_text(size = 10, face = "bold"),

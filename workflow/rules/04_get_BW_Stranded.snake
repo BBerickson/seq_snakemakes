@@ -6,19 +6,31 @@ rule get_bw:
     input:
         lambda wildcards: _get_bws(wildcards.newnam, RAW_DATA, BW_DIR, paired=True)
     output:
-        fw  = PROJ   + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_fw.bw",
-        rev = PROJ   + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_rev.bw"
+        fw  = PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_fw.bw",
+        rev = PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_rev.bw"
     params:
-        job_name = "{newnam}_aligned_{index}_norm_{suffix}_getbw",
+        job_name   = "{newnam}_aligned_{index}_norm_{suffix}_getbw",
+        tmp_fw     = PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_fw.bdg",
+        tmp_rev    = PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_rev.bdg",
+        chrom_sizes = CHROM_SIZES
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
-    threads: 
+        memory = lambda wildcards, input: memory_estimator(input, 1, 1)
+    threads:
         1
     shell:
         """
-          cp {input[0]} {output[0]}
-          cp {input[1]} {output[1]}
-        
+        bigWigToBedGraph {input[0]} {params.tmp_fw}
+        awk '{{$4 = ($4 < 0 ? -$4 : $4); print}}' OFS="\t" {params.tmp_fw} > {params.tmp_fw}.abs
+        grep -Fwf <(cut -f1 {params.chrom_sizes}) {params.tmp_fw}.abs > {params.tmp_fw}.filtered
+        bedGraphToBigWig {params.tmp_fw}.filtered {params.chrom_sizes} {output.fw}
+
+        bigWigToBedGraph {input[1]} {params.tmp_rev}
+        awk '{{$4 = ($4 < 0 ? -$4 : $4); print}}' OFS="\t" {params.tmp_rev} > {params.tmp_rev}.abs
+        grep -Fwf <(cut -f1 {params.chrom_sizes}) {params.tmp_rev}.abs > {params.tmp_rev}.filtered
+        bedGraphToBigWig {params.tmp_rev}.filtered {params.chrom_sizes} {output.rev}
+
+        rm {params.tmp_fw} {params.tmp_fw}.abs {params.tmp_fw}.filtered \
+           {params.tmp_rev} {params.tmp_rev}.abs {params.tmp_rev}.filtered
         """
 
         

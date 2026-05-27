@@ -24,7 +24,7 @@ rule bamCoverage:
         argsr    = _get_bamCov_strand("reverse", ORIENTATION),
         sam_norm = SAM_NORM  # Pass the original data
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input.bam, 0.2, 5)
+        memory   = lambda wildcards, input: memory_estimator(input.bam, 0.2, 2)
     threads: 
         12
     shell:
