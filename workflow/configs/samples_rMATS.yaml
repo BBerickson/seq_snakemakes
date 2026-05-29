@@ -36,7 +36,16 @@ GROUPS_COMP:
 # R1R2 use --libType fr-secondstrand
 CMD_PARAMS:
     rmats:         " -t paired --readLength 150 --libType fr-firststrand "
-
+    min_count:          "20"
+    max_FDR:            "0.05"
+    max_IncDifference:  "0.05"
+    
+SPLICE_TYPES:
+  - SE
+  - RI
+  - MXE
+  - A5SS
+  - A3SS    
     
 # optional arguments:
 # -t {paired,single}    readtype, single or paired.

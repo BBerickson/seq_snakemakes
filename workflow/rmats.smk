@@ -109,6 +109,10 @@ rule all:
         expand(
           PROJ + "/rmats/{compgroups}/SE.MATS.JC.txt",
             compgroups = GRPS_UNIQ
+        ),
+        expand(
+          PROJ + "{compgroups}_summary_plots.pdf",
+            compgroups = GRPS_UNIQ
         )
 
 

@@ -59,5 +59,40 @@ rule fastq_rmats:
         rm -rf {params.outdirtmp}
         """
                     
+# filter and make bar plots and lists                    
+rule rmats_plot:
+    input:
+        jc = expand(
+            PROJ + "/rmats/{compgroups}/{splice_type}.MATS.JC.txt",
+            compgroups = GRPS_UNIQ,
+            splice_type = config["SPLICE_TYPES"]
+        )
+    output:
+        pdf = PROJ + "{compgroups}_summary_plots.pdf" 
+    params:
+        job_name        = "{compgroups}_rmats_plot",
+        proj            = PROJ,
+        tc              = "{compgroups}",
+        min_count       = CMD_PARAMS["min_count"],
+        max_fdr         = CMD_PARAMS["max_FDR"],
+        max_incdiff     = CMD_PARAMS["max_IncDifference"],
+        splice_type     = " ".join(config["SPLICE_TYPES"]),
+        script          = "workflow/scripts/rMATS_plots.R"
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
+    threads: 
+        1
+    shell:
+        """
+        Rscript {params.script} \
+            "{params.proj}" \
+            "{params.tc}" \
+            "{params.min_count}" \
+            "{params.max_fdr}" \
+            "{params.max_incdiff}" \
+            "{params.splice_type}" \
+            "{output.pdf}" 
+            
+        """                    
                     
                     

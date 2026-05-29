@@ -12,7 +12,7 @@ library(RColorBrewer)
 library(gridExtra)
 source("workflow/scripts/rMATS_funs.R")
 
-min_count <- 2 # >= min_count average reads per replicate (inclusion + skipping) in at least one condition.
+min_count <- 10 # >= min_count average reads per replicate (inclusion + skipping) in at least one condition.
 max_FDR <- 0.05 # Standard 5% significance threshold for FDR adjusted pValue
 max_IncDifference <- 0.05 # PSI change threshold
 comps <- c("SE","RI", "MXE","A5SS","A3SS") # splicing types to loop over
@@ -38,7 +38,7 @@ ggplot(db, aes(x = type, y = signed_count, fill = category)) +
   geom_bar(stat = "identity", position = "identity") +
   scale_fill_brewer(palette = "Paired") +
   geom_hline(yintercept = 0, color = "black", linetype = "dashed") +
-  geom_text(aes(label = abs(count)), vjust = ifelse(db$count > 0, -0.2, 1.5), size = 5) +
+  geom_text(aes(label = abs(signed_count)), vjust = ifelse(db$signed_count >= 0, -0.2, 1.2), size = 5) +
   labs(x = "PSI Type", y = bquote(Delta~"PSI count:"~"[" * .(gsub(":", " - ", tc)) * "]"), 
        fill = str_split_fixed(tc,":",2)[1],
        title = str_replace(tc,":"," vs "),

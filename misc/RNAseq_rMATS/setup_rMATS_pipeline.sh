@@ -78,6 +78,7 @@ rsync -a "$EXTRACT_DIR/workflow/submit_scripts/$SUBMIT_GLOB" . 2>/dev/null
 rsync -a "$EXTRACT_DIR/misc/RNAseq_rMATS" workflow/
 cp workflow/RNAseq_rMATS/rMATS_plots.R .
 cp workflow/RNAseq_rMATS/run_sashimi_loop.sh .
+cp workflow/RNAseq_rMATS/rMATS_ReadMe.txt .
 
 # Cleanup
 rm -rf "$TEMP_DIR"

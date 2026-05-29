@@ -18,6 +18,8 @@ RAW_DATA:
 # * The specified genome must have a config file present in pipelines/ref
 GENOME:
     "hg38"
+CHROM_SIZES:
+    "/beevol/home/erickson/ref/hg38_p14/base_ref/chrom.size"
      
 # The sample names must match the beginning of a fastq file in one of the
 # directories listed under RAW_DATA. If the sample name
@@ -49,12 +51,8 @@ SAMPLES:
             ARMC5_OK_Xrn2_MT_R2: 
               - "ARMC5_OK_Xrn2_MT_R2_hg38_241218_norm_chrM_BL"
               
-##### Norm if starting from bam files else just uses to rename bw ###
-# Norm applyed to sample bw and matix files,
-# with "RPKM","CPM","BPM","RPGC" 
-# Or with scaleFactor from count file i.e. "chrM", 
-# refBed use file name without .bed "tRNA"
-# Or "subsample" : make bw and matix files from sub-sampled bam files (paired groups)
+##### If starting from bigwig or bam files NORM uses to rename bigwig ###
+# "RPKM","CPM","chrM", "subsample" 
 NORM:
   "none"
 
@@ -70,7 +68,7 @@ ORIENTATION:
 # can only to be "543", "5", "3", "PI", or "EI" 
 REGIONS:
   - "5"
-# valid options = "sense", "anti" # only needed if stranded
+# valid options = "sense", "anti" # only used for stranded
 SENSE_ASENSE: 
   - "sense"
   - "anti" 

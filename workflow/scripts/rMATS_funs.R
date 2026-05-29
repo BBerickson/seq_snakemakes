@@ -24,8 +24,8 @@
 
 library(tidyverse)
 
-# Counting total numbers from rMATS output
-sigcounts <- function(PROJ, tc, type = "SE", min_count = 2, max_FDR = 0.05, max_IncDifference = 0.2, savefiles=FALSE){
+# Average read filter per treatment on rMATS output, 
+sigcounts <- function(PROJ, tc, type = "SE", min_count = 10, max_FDR = 0.05, max_IncDifference = 0.05, savefiles=FALSE){
   psis <- read_tsv(paste0(PROJ,"/rmats/",tc,'/',type,'.MATS.JC.txt'),show_col_types = FALSE) 
   
   out_length_1 <- length(str_split(psis[1,"IJC_SAMPLE_1"],",")[[1]])
@@ -116,8 +116,8 @@ sigcounts <- function(PROJ, tc, type = "SE", min_count = 2, max_FDR = 0.05, max_
   )
 }
 
-# rMATS outputs
-sigoutputs <- function(PROJ,tc, PSI_up = TRUE, type = "SE", min_count = 2, max_FDR = 0.05, max_IncDifference = 0.2, savefiles=FALSE){
+# rMATS outputs, min_counts on all samples version
+sigcounts_all <- function(PROJ, tc, type = "SE", min_count = 10, max_FDR = 0.05, max_IncDifference = 0.05, savefiles=FALSE){
   psis <- read_tsv(paste0(PROJ,"/rmats/",tc,'/',type,'.MATS.JC.txt'),show_col_types = FALSE) 
   
   out_length_1 <- length(str_split(psis[1,"IJC_SAMPLE_1"],",")[[1]])
@@ -182,28 +182,34 @@ sigoutputs <- function(PROJ,tc, PSI_up = TRUE, type = "SE", min_count = 2, max_F
     less <- "prefer_exon2"
     more <- "prefer_exon1"
   }
+  
   if(savefiles){
     psis.sensitive1 %>%  write_tsv(.,paste0(PROJ,"/rmats/",tc,'_',less,'_min_count',min_count,'.MATS.JC.filter.txt'),col_names = T)
     psis.sensitive2 %>%  write_tsv(.,paste0(PROJ,"/rmats/",tc,'_',more,'_min_count',min_count,'.MATS.JC.filter.txt'),col_names = T)
   }
   
-  if(PSI_up){
-    return(
-      psis.sensitive2
+  # Return a tibble with the desired structure
+  total_events <- nrow(psis)
+  filtered_events <- sum(nrow(psis.sensitive2), nrow(psis.sensitive1))
+  percent_passed <- round((filtered_events / total_events) * 100, 2)
+  
+  return(
+    tibble(
+      sample = tc,
+      count = c(nrow(psis.sensitive2), nrow(psis.sensitive1)),
+      type = type,
+      category = c(more, less),
+      direction = c("more", "less"),
+      total_events = total_events,
+      filtered_events = filtered_events,
+      percent_passed = percent_passed
     )
-  }else{
-    return(
-      psis.sensitive1
-    )
-  }
-  
-  
-  
+  )
 }
 
 # make gene lists for ggsashimi
 
-makeSashimi <- function(PROJ, tc, type="SE", num_output = 20, min_count = 2, max_FDR=0.05, max_IncDifference = 0.2, gene_Symbol = NULL){
+makeSashimi <- function(PROJ, tc, type="SE", num_output = 20, min_count = 10, max_FDR=0.05, max_IncDifference = 0.01, gene_Symbol = NULL){
   if(type == "SE"){
     less <- "more_skipping" # IncLevelDifference < -threshold
     more <- "more_inclusion"  # IncLevelDifference > threshold

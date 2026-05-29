@@ -110,19 +110,19 @@ COLORS:
 # Novaseq      dupedist=12000
 CMD_PARAMS:
     clumpify:      
-      paired: " lowcomplexity=t overwrite=t dedupe=t dupedist=12000 optical=f subs=0 " # PE settings
-      single: " lowcomplexity=t overwrite=t dedupe=t dupedist=40 optical=f subs=0 " #  SE settings
+      paired: " lowcomplexity=f overwrite=t dedupe=t optical=t dupedist=12000 subs=0 " # PE settings
+      single: " lowcomplexity=f overwrite=t dedupe=t optical=t dupedist=40 subs=0 " #  SE settings
     bbduk:      
-      paired: " overwrite=t ftm=5 minlen=50 ktrim=r k=23 hdist=1 mink=11 tpe tbo ecco=t " # PE settings
+      paired: " overwrite=t ftm=5 minlen=50 ktrim=r k=23 hdist=1 mink=11 tpe tbo ecco=f " # PE settings
       single: " overwrite=t ftm=5 minlen=20 ktrim=r k=23 hdist=1 mink=11 " # SE settings
     hisat2:      
       paired: " --add-chrname --no-softclip --no-mixed --no-discordant "
       single: " --add-chrname --no-softclip "
-    star:      
-      paired:  " --limitSjdbInsertNsj 2000000 --outSAMattributes NH HI AS nM MD --alignSJoverhangMin 10 --outMultimapperOrder Random "
-      single:  " --limitSjdbInsertNsj 2000000 --outSAMattributes NH HI AS nM MD --alignSJoverhangMin 10 --outMultimapperOrder Random "
+    star: # settings good for rMATS     
+      paired:  " --limitSjdbInsertNsj 2000000 --outSAMattributes NH HI AS NM MD XS --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outMultimapperOrder Random --outSAMstrandField intronMotif "
+      single:  " --limitSjdbInsertNsj 2000000 --outSAMattributes NH HI AS NM MD XS --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outMultimapperOrder Random --outSAMstrandField intronMotif "
     multimap:     ""  # " -k 1 " # all but -k n multi-mapper from will be randomly filtered out.
-    samtools:      " -bF4q1 "
+    samtools:      " -b -F 4 -F 256 "
     bamCoverage:   " --binSize 10 --skipNonCoveredRegions "
     scalingFactors:         "" # " BED-file --BED /beevol/home/erickson/ref/hg38_p14/PolIII/polIII_fitered_slop200.bed " or " bins --binSize 100 "
     fragment_size: 
