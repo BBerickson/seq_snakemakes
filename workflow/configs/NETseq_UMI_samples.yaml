@@ -115,8 +115,13 @@ CMD_PARAMS:
 USER:
   "User7"
 
-# "subsample" or "" ... make bw and matix files from sub-sampled or normal bam files 
-# scaleFactor within a group for bed file or bins, used: "scalefactor"
+# Norm sample bw and matix files,
+# with "RPKM","CPM","BPM","RPGC" (spike-in will be CPM)
+# Or with scaleFactor from count file i.e. "chrM", 
+# if input with spike in is paired up: "OR"
+# scaleFactor within a group for bed file or bins, used: "scalefactor" 
+#     first aligned index used to norm second aligned index
+# Or "subsample" : make bw and matix files from sub-sampled bam files (paired groups)
 NORM:
   "CPM"
   

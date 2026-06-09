@@ -62,22 +62,21 @@ def _get_norm_fraction(wildcards, index_type, filename):
                 break
     return float(num)
         
-# Find all fastqs matching sample name in provided directories
-def _find_fqs(sample, dirs):
-    fq_pat   = ".*" + sample + r".+\.(fastq|fq)\.gz$"
-    fq_paths = []
-    
-    for dir in dirs:
-        all_files = glob.glob(os.path.abspath(os.path.join(dir, "*.gz")))
-        paths     = [f for f in all_files if re.match(fq_pat, f)]
-    
-        for path in paths:
-            fq_paths.append(path)
+# Find all files matching sample name in provided directories
+def _find_files(sample, dirs, ext, label=None, glob_ext=None):
+    label    = label or ext
+    pattern  = ".*" + sample + r".+\." + ext + "$"
+    glob_ext = glob_ext or ext.split(r"\.")[-1].split(")")[-1]
+    paths    = []
 
-    if not fq_paths:
-        sys.exit("ERROR: no fastqs found for " + fq_pat + ".")
+    for d in dirs:
+        all_files = glob.glob(os.path.abspath(os.path.join(d, f"*.{glob_ext}")))
+        paths.extend(f for f in all_files if re.match(pattern, f))
 
-    return fq_paths
+    if not paths:
+        sys.exit(f"ERROR: no {label} found for {pattern}.")
+
+    return paths
 
 # Determine the suffix (e.g. fastq.gz) for a list of fastqs matching a single
 # sample name the expectation is that all fastqs in the list will have the same suffix
@@ -125,7 +124,7 @@ def _get_full_fq_sfxs(sfx, paired=True):
 # Get the fastq file for both reads for the provided sample name
 def _get_fqs(sample, dirs, link_dir, full_name = False, paired=True):
 
-    fq_paths = _find_fqs(sample, dirs)
+    fq_paths = _find_files(sample, dirs, ext=r"(fastq|fq)\.gz", label="fastqs")
     
     sfx = _get_fq_sfx(fq_paths)
 
@@ -229,21 +228,6 @@ def process_samples(all_samples, index_list, norm, orientations):
     return SAMPLES, SAMPIN, GROUPS, NORMMAP, PAIREDMAP
 
 
-  
-# Find all bigwigs matching sample name in provided directories
-def _find_bws(sample, dirs):
-    bw_pat   = ".*" + sample + r".+\.bw$"
-    bw_paths = []
-    
-    for dir in dirs:
-        all_files = glob.glob(os.path.abspath(os.path.join(dir, "*.bw")))
-        paths     = [f for f in all_files if re.match(bw_pat, f)]
-        bw_paths.extend(paths)
-
-    if not bw_paths:
-        sys.exit("ERROR: no bigwigs found for " + sample + ".")
-
-    return bw_paths
 
 # Determine the suffix (e.g. fw/rev pos/neg) for a list of bigwigs matching a single
 # sample name the expectation is that all bigwigs in the list will have the same suffix
@@ -270,9 +254,9 @@ def _get_full_bw_sfxs(sfx, paired=True):
     return [sfx]
 
 
-# Get the fastq file for both reads for the provided sample name
+# Get all the bigwigs file for the provided sample name
 def _get_bws(sample, dirs, link_dir, paired=True):
-    bw_paths = _find_bws(sample, dirs)
+    bw_paths = _find_files(sample, dirs, ext=r"bw", label="bigwigs")
     sfx      = _get_bw_sfx(bw_paths)
     sfxs     = _get_full_bw_sfxs(sfx, paired)
 
@@ -303,6 +287,32 @@ def _get_bws(sample, dirs, link_dir, paired=True):
         bws.append(bw_lnk)
     
     return bws
+
+# Get all the bam file for the provided sample name
+def _get_bams(sample, dirs):
+    """
+    Returns [bam_path, bai_path] for a sample, ensuring exactly one of each exists.
+    """
+    def _find_one(paths, sfx):
+        escaped_sfx = re.escape(sfx)
+        escaped_smp = re.escape(sample)
+        pat     = ".*/" + escaped_smp + "[^/]*" + escaped_sfx + "$"
+        matches = [f for f in paths if re.match(pat, f)]
+
+        if not matches:
+            sys.exit(f"ERROR: no {sfx} file found for {sample}.")
+        if len(matches) > 1:
+            sys.exit(f"ERROR: multiple {sfx} files found for {sample}: {', '.join(matches)}.")
+
+        return matches[0]
+
+    # Search for both .bam and .bai files in one glob pass
+    all_paths = _find_files(sample, dirs, ext=r"ba[mi]", label="bam/bai", glob_ext="ba?")
+
+    bam = _find_one(all_paths, ".bam")
+    bai = _find_one(all_paths, ".bai")
+
+    return [bam, bai]
   
 # build color sample name dictonary
 def _get_colors(sample_key, color):
@@ -482,28 +492,25 @@ def _get_featCount(orientation, gtf_file=None):
     if orientation != "R2" and orientation != "R1":
         results += " -p -C --countReadPairs"
     
-    # set format flag based on file extension
-    format_flag = ""
-    feature_type = "gene"  # default
-    
     if gtf_file:
         if gtf_file.endswith(('.gtf', '.gtf.gz')):
-            format_flag = " -F GTF"
+            results += " -F GTF"
             
-            # Validate if 'gene' feature type exists, fallback to 'transcript'
-            if not _validate_gtf_feature_type(gtf_file, "gene"):
-                if _validate_gtf_feature_type(gtf_file, "transcript"):
-                    feature_type = "transcript"
-                    print(f"Warning: 'gene' feature type not found in {gtf_file}, using 'transcript' instead")
-                else:
-                    print(f"Warning: Neither 'gene' nor 'transcript' feature types found in {gtf_file}, using 'gene' as default")
-                    
+            has_gene       = _validate_gtf_feature_type(gtf_file, "gene")
+            has_transcript = _validate_gtf_feature_type(gtf_file, "transcript")
+            
+            if has_gene:
+                results += " --extraAttributes 'gene_name,gene_biotype' -t gene -O"
+            elif has_transcript:
+                print(f"Warning: 'gene' not found in {gtf_file}, using 'transcript'")
+                results += " --extraAttributes 'gene_name,gene_biotype' -t transcript -O"
+            else:
+                print(f"Warning: Neither 'gene' nor 'transcript' found in {gtf_file}, skipping -t and --extraAttributes")
+                results += " -O"
+
         elif gtf_file.endswith(('.saf', '.saf.gz')):
-            format_flag = " -F SAF"
-            # SAF format doesn't use -t parameter, so keep gene as default
-       
-    # Options for GTF file
-    results += f"{format_flag} --extraAttributes 'gene_name,gene_biotype' -t {feature_type} -O"
+            results += " -F SAF -O"
+    
     return results
 
 

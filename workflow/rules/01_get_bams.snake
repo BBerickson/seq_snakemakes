@@ -1,0 +1,27 @@
+# ====== Rules for getting bw files =================================
+
+
+# stranded bw files
+rule get_bw:
+    input:
+        lambda wildcards: _get_bams(wildcards.sample, RAW_DATA)
+    output:
+        bam = PROJ + "/{sample}_" + INDEX_MAP + ".bam",
+        bai = PROJ + "/{sample}_" + INDEX_MAP + ".bam.bai"
+    params:
+        job_name = "{sample}__{index}_getbam",
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
+    log:
+        out = PROJ + "/logs/{sample}__{index}_getbam.out",
+        err = PROJ + "/logs/{sample}__{index}_getbam.err"
+    threads: 
+        1
+    shell:
+        """
+          cp {input[0]} {output[0]}
+          cp {input[1]} {output[1]}
+        
+        """
+
+        

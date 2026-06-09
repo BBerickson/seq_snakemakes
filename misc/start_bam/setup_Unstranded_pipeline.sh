@@ -20,17 +20,19 @@ if [ $# -eq 0 ]; then
     show_usage
 fi
 
-CONFIG_FILE="BW_samples.yaml"
+SMK_FILE="bam_UnStranded.smk"
+CONFIG_FILE="Bam_UnStranded_samples.yaml"
+MTX_CONFIG_FILE="UnStranded_matrix.yaml"
 
 PIPELINE_TYPE="$1"
 
 case "$PIPELINE_TYPE" in
     Bodhi)
-        SUBMIT_GLOB="run_BW_bodhi.sh"
+        SUBMIT_GLOB="run_bam_UnStranded_bodhi.sh"
         PROFILES="Bodhi"
         ;;
     Alpine)
-        SUBMIT_GLOB="run_BW_alpine.sh"
+        SUBMIT_GLOB="run_bam_UnStranded_alpine.sh"
         PROFILES="Alpine"
         ;;
     *)
@@ -66,12 +68,14 @@ EXTRACT_DIR="$TEMP_DIR/$REPO-$BRANCH"
 mkdir -p workflow/{profiles,ref,rules,Rmds,scripts}
 
 # Copy pipeline-specific files
-rsync -a "$EXTRACT_DIR/misc/bw_to_matrix/ReadMe.txt" .
+rsync -a "$EXTRACT_DIR/misc/start_bam/ReadMe.txt" .
+rsync -a "$EXTRACT_DIR/workflow/$SMK_FILE" workflow/
 if [ ! -f "$CONFIG_FILE" ]; then
     rsync -a "$EXTRACT_DIR/workflow/configs/$CONFIG_FILE" .
 fi
 rsync -a "$EXTRACT_DIR/workflow/"*_matrix.smk workflow/
-rsync -a "$EXTRACT_DIR/workflow/configs/"*_matrix.yaml .
+rsync -a "$EXTRACT_DIR/workflow/configs/$MTX_CONFIG_FILE" .
+rsync -a "$EXTRACT_DIR/workflow/configs/"*_matrix.yaml workflow/
 
 rsync -a "$EXTRACT_DIR/workflow/submit_scripts/$SUBMIT_GLOB" . 2>/dev/null
 
@@ -91,6 +95,7 @@ echo ""
 echo "✓ $PIPELINE_TYPE pipeline setup complete!"
 echo ""
 echo "Files created:"
+echo "  - workflow/$SMK_FILE"
 echo "  - $CONFIG_FILE"
 echo "  - workflow/rules/"
 echo "  - workflow/ref/"
@@ -100,6 +105,6 @@ echo "  - workflow/scripts/"
 echo ""
 echo "Next steps:"
 echo "  1. Edit $CONFIG_FILE with your sample information"
-echo "  2. Edit and run the submit script"
+echo "  2. Run the submit script"
 
 

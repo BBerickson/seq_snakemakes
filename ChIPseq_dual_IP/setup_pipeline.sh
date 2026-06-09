@@ -9,7 +9,7 @@ show_usage() {
     echo "Usage: $0 <profile_type>"
     echo ""
     echo "Available profiles:"
-    echo "  Bodhi      - LSF"
+    echo "  Bodhi      - SLURM"
     echo "  Alpine     - SLURM"
     echo ""
     echo "Example: $0 Bodhi"

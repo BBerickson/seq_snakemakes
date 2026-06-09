@@ -10,7 +10,7 @@ rule clumpify:
         log = PROJ + "/clumpify/{sample}_clumpify.log"
     params:
         job_name = "{sample}_clumpify",
-        groups = lambda wc, resources: max(1, min(16, resources.memory // 16)),
+        groups = lambda wc, resources: max(1, min(16, resources.memory // 12)),
         args = lambda wildcards: CMD_PARAMS["clumpify"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
         is_paired = lambda wildcards: PAIREDMAP[wildcards.sample],
         input_r2 = lambda wildcards, input: input[1] if len(input) > 1 else ""
