@@ -172,6 +172,13 @@ for key in SAMPIN:
 DF_SAM_NORM = pd.DataFrame(SAM_NORM, columns=['Sample', 'Newnam', 'Index', 'Norm', 'Suffix'])
 # Merge on 'Newnam' and 'Index'
 DF_SAM_NORM = REGIONS_COVARGS.merge(DF_SAM_NORM, on=['Newnam'], how='left')
+# PI matix files don't get normalized 
+mask = DF_SAM_NORM["Region"] == "PI"
+DF_SAM_NORM.loc[mask, "Suffix"] = [
+    suffix.replace(norm, "none", 1)
+    for suffix, norm in zip(DF_SAM_NORM.loc[mask, "Suffix"], DF_SAM_NORM.loc[mask, "Norm"])
+]
+DF_SAM_NORM.loc[mask, "Norm"] = "none"
 
 print(DF_SAM_NORM.to_string(index=False))
 

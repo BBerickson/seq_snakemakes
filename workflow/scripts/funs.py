@@ -375,8 +375,7 @@ def _get_norm_scale(sample, norm_type, index_sample, norm_files):
 def _get_norm(df, newnam, suffix, index, norm_files):
     row = df[
         (df['Newnam'] == newnam) &
-        (df['Index'] == index) &
-        (df['Suffix'] == suffix)
+        (df['Index'] == index) 
     ]
     
     sample = row.iloc[0]['Sample']

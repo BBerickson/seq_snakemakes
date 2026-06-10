@@ -6,8 +6,8 @@ rule get_bw:
     input:
         lambda wildcards: _get_bams(wildcards.sample, RAW_DATA)
     output:
-        bam = PROJ + "/{sample}_" + INDEX_MAP + ".bam",
-        bai = PROJ + "/{sample}_" + INDEX_MAP + ".bam.bai"
+        bam = temp(PROJ + "/{sample}_" + INDEX_MAP + ".bam"),
+        bai = temp(PROJ + "/{sample}_" + INDEX_MAP + ".bam.bai")
     params:
         job_name = "{sample}_" + INDEX_MAP + "_getbam",
     resources:
