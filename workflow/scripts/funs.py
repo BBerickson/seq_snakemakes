@@ -63,22 +63,16 @@ def _get_norm_fraction(wildcards, index_type, filename):
     return float(num)
         
 # Find all files matching sample name in provided directories
-def _find_files(sample, dirs, ext, label=None, glob_ext=None, allow_suffix=False):
-    label       = label or ext
-    escaped_smp = re.escape(sample)
-    stem_pat    = escaped_smp + (r"[^/]*" if allow_suffix else "")
-    pattern     = ".+/" + stem_pat + r"\." + ext + "$"
-    glob_ext    = glob_ext or ext.split(r"\.")[-1].split(")")[-1]
-    paths       = []
-
+def _find_files(sample, dirs, glob_exts, label=None):
+    if isinstance(glob_exts, str):
+        glob_exts = [glob_exts]
+    paths = []
     for d in dirs:
         d = os.path.abspath(os.path.expanduser(d))
-        all_files = glob.glob(os.path.abspath(os.path.join(d, f"*.{glob_ext}")))
-        paths.extend(f for f in all_files if re.match(pattern, f))
-
+        for g in glob_exts:
+            paths.extend(glob.glob(os.path.join(d, f"{sample}*.{g}")))
     if not paths:
-        sys.exit(f"ERROR: no {label} found for {pattern}.")
-
+        sys.exit(f"ERROR: no {label} found for {sample} in {dirs}.")
     return paths
 
 # Determine the suffix (e.g. fastq.gz) for a list of fastqs matching a single
@@ -127,7 +121,7 @@ def _get_full_fq_sfxs(sfx, paired=True):
 # Get the fastq file for both reads for the provided sample name
 def _get_fqs(sample, dirs, link_dir, full_name = False, paired=True):
 
-    fq_paths = _find_files(sample, dirs, ext=r"(fastq|fq)\.gz", label="fastqs")
+    fq_paths = _find_files(sample, dirs, glob_exts=["fastq.gz", "fq.gz"], label="fastqs")
     
     sfx = _get_fq_sfx(fq_paths)
 
@@ -259,7 +253,7 @@ def _get_full_bw_sfxs(sfx, paired=True):
 
 # Get all the bigwigs file for the provided sample name
 def _get_bws(sample, dirs, link_dir, paired=True):
-    bw_paths = _find_files(sample, dirs, ext=r"bw", label="bigwigs")
+    bw_paths = _find_files(sample, dirs, glob_exts="bw", label="bigwigs")
     sfx      = _get_bw_sfx(bw_paths)
     sfxs     = _get_full_bw_sfxs(sfx, paired)
 
@@ -307,8 +301,8 @@ def _get_bams(sample, dirs, allow_suffix=False):
 
         return matches[0]
 
-    bam_paths = _find_files(sample, dirs, ext=r"bam",     label="bams", allow_suffix=allow_suffix)
-    bai_paths = _find_files(sample, dirs, ext=r"bam\.bai", label="bais", allow_suffix=allow_suffix)
+    bam_paths = _find_files(sample, dirs, glob_exts="bam",     label="bams")
+    bai_paths = _find_files(sample, dirs, glob_exts="bai",     label="bais")
     all_paths = bam_paths + bai_paths
 
     return [_find_one(all_paths, ".bam"), _find_one(all_paths, ".bam.bai")]
