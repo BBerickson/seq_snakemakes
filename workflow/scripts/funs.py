@@ -63,13 +63,16 @@ def _get_norm_fraction(wildcards, index_type, filename):
     return float(num)
         
 # Find all files matching sample name in provided directories
-def _find_files(sample, dirs, ext, label=None, glob_ext=None):
-    label    = label or ext
-    pattern  = ".*" + sample + r".+\." + ext + "$"
-    glob_ext = glob_ext or ext.split(r"\.")[-1].split(")")[-1]
-    paths    = []
+def _find_files(sample, dirs, ext, label=None, glob_ext=None, allow_suffix=False):
+    label       = label or ext
+    escaped_smp = re.escape(sample)
+    stem_pat    = escaped_smp + (r"[^/]*" if allow_suffix else "")
+    pattern     = ".+/" + stem_pat + r"\." + ext + "$"
+    glob_ext    = glob_ext or ext.split(r"\.")[-1].split(")")[-1]
+    paths       = []
 
     for d in dirs:
+        d = os.path.abspath(os.path.expanduser(d))
         all_files = glob.glob(os.path.abspath(os.path.join(d, f"*.{glob_ext}")))
         paths.extend(f for f in all_files if re.match(pattern, f))
 
@@ -289,15 +292,13 @@ def _get_bws(sample, dirs, link_dir, paired=True):
     return bws
 
 # Get all the bam file for the provided sample name
-def _get_bams(sample, dirs):
-    """
-    Returns [bam_path, bai_path] for a sample, ensuring exactly one of each exists.
-    """
+def _get_bams(sample, dirs, allow_suffix=False):
     def _find_one(paths, sfx):
         escaped_sfx = re.escape(sfx)
         escaped_smp = re.escape(sample)
-        pat     = ".*/" + escaped_smp + "[^/]*" + escaped_sfx + "$"
-        matches = [f for f in paths if re.match(pat, f)]
+        stem_pat    = escaped_smp + (r"[^/]*" if allow_suffix else "")
+        pat         = ".+/" + stem_pat + escaped_sfx + "$"
+        matches     = [f for f in paths if re.match(pat, f)]
 
         if not matches:
             sys.exit(f"ERROR: no {sfx} file found for {sample}.")
@@ -306,13 +307,11 @@ def _get_bams(sample, dirs):
 
         return matches[0]
 
-    # Search for both .bam and .bai files in one glob pass
-    all_paths = _find_files(sample, dirs, ext=r"ba[mi]", label="bam/bai", glob_ext="ba?")
+    bam_paths = _find_files(sample, dirs, ext=r"bam",     label="bams", allow_suffix=allow_suffix)
+    bai_paths = _find_files(sample, dirs, ext=r"bam\.bai", label="bais", allow_suffix=allow_suffix)
+    all_paths = bam_paths + bai_paths
 
-    bam = _find_one(all_paths, ".bam")
-    bai = _find_one(all_paths, ".bai")
-
-    return [bam, bai]
+    return [_find_one(all_paths, ".bam"), _find_one(all_paths, ".bam.bai")]
   
 # build color sample name dictonary
 def _get_colors(sample_key, color):

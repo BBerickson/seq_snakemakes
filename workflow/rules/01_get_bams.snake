@@ -9,12 +9,12 @@ rule get_bw:
         bam = PROJ + "/{sample}_" + INDEX_MAP + ".bam",
         bai = PROJ + "/{sample}_" + INDEX_MAP + ".bam.bai"
     params:
-        job_name = "{sample}__{index}_getbam",
+        job_name = "{sample}_" + INDEX_MAP + "_getbam",
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     log:
-        out = PROJ + "/logs/{sample}__{index}_getbam.out",
-        err = PROJ + "/logs/{sample}__{index}_getbam.err"
+        out = PROJ + "/logs/{sample}_" + INDEX_MAP + "_getbam.out",
+        err = PROJ + "/logs/{sample}_" + INDEX_MAP + "_getbam.err"
     threads: 
         1
     shell:
@@ -25,3 +25,25 @@ rule get_bw:
         """
 
         
+rule dummy_results:
+    input:
+        expand(
+            PROJ + "/{sample}_" + INDEX_MAP + ".bam",
+            sample = SAMS_UNIQ
+        )
+    output:
+        check_point = PROJ + "/report/" + PROJ + "_results.tsv"
+    params:
+        job_name = "dummy_results",
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
+    log:
+        out = PROJ + "/logs/dummy_results.out",
+        err = PROJ + "/logs/dummy_results.err"
+    threads: 
+        1
+    shell:
+        """
+          touch {output.check_point}
+        
+        """

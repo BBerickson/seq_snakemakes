@@ -146,8 +146,14 @@ rule all:
         # get bam files
         expand(
             PROJ + "/{sample}_" + INDEX_MAP + ".bam",
-            sample=SAMS_UNIQ
+            sample = SAMS_UNIQ
         ),
+        expand(
+            PROJ + "/{sample}_" + INDEX_MAP + ".bam.bai",
+            sample = SAMS_UNIQ
+        ),
+        # Make dummy file
+        PROJ + "/report/" + PROJ + "_results.tsv",
         
         # bam URL
         [] if config.get("skip_bam_urls") else [
@@ -158,6 +164,7 @@ rule all:
         #expand(PROJ + "/URLS/" + PROJ + "_{index}_subsample_bam_URL.txt", index=INDEXES),
         
         # stats
+        expand( PROJ + "/stats/{sample}_summary_featureCounts.tsv", sample = SAMS_UNIQ),
         expand(PROJ + "/stats/" + PROJ + "_{index}_fragment_results.tsv", index=INDEXES),
         expand(PROJ + "/report/" + PROJ + "_{index}_fragmentSize.pdf", index=INDEXES),
         
