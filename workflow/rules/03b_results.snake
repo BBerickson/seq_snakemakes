@@ -142,27 +142,24 @@ rule create_plots:
     input:
         PROJ + "/report/" + PROJ + "_results.tsv"
     output:
-        SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + SUF_SUB + "_qc_analysis.html"
+        report  = SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + SUF_SUB + "_qc_analysis.html",
+        config  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + SUF_SUB + "_config.yaml"),
+        result  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + SUF_SUB + "_clean_results.tsv")
     params:
-        job_name   = PROJ + "_qc_html"
+        job_name  = PROJ + "_qc_html",
+        out_file  = SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + SUF_SUB + "_qc_analysis",
+        script  = "workflow/scripts/multiqc_config.R",
+        seqdate = SEQ_DATE,
+        mydir   = PROJ
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     threads:
         1
     shell:
         """
-        touch .here
-        Rmd=workflow/Rmds/analysis.Rmd
-        script=workflow/Rmds/knit_rmd.R
-        out="_qc_analysis"
-
-        Rscript $script \
-            -i $Rmd \
-            -o {SUF_SUB}$out \
-            -p {PROJ} \
-            -m {INDEX_MAP} \
-            -d {SEQ_DATE} \
-            -x {INDEXES[0]} \
-            -s {SAMPLES_FILE} 
+        Rscript {params.script} "{input}" "{params.mydir}" "{params.seqdate}" "{output.result}" "{output.config}"
+        multiqc {params.mydir} --config {output.config} --force --filename {params.out_file}
+        rm -r {params.out_file}_data
+        
         """
      

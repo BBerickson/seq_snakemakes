@@ -14,7 +14,7 @@ MASK:
 GTF:
   "/beevol/home/erickson/ref/misc/e_coli/GCF_000005845.2_ASM584v2_genomic.gtf"
 FA_SAMPLE:
-  "/beevol/home/erickson/ref/misc/e_coli/e_coli_k12.v2.fa"
+  "/beevol/home/erickson/ref/misc/e_coli/GCF_000005845.2_ASM584v2_genomic.fna"
 MY_REF:
   ""
 FW_REF:

@@ -85,8 +85,8 @@ COLORS:
 # Novaseq      dupedist=12000
 CMD_PARAMS:
     clumpify:      
-      paired: " overwrite=t dedupe=t dupedist=12000 optical=f " # PE settings
-      single: " overwrite=t dedupe=t dupedist=40 optical=f " #  SE settings
+      paired: " overwrite=t dedupe=t dupedist=12000 optical=t " # PE settings
+      single: " overwrite=t dedupe=t dupedist=40 optical=t " #  SE settings
     bbduk:      
       paired: " overwrite=t ftm=5 minlen=50 ktrim=r k=23 hdist=1 mink=11 tpe tbo ecco=t " # PE settings
       single: " overwrite=t ftm=5 minlen=20 ktrim=r k=23 hdist=1 mink=11 " # SE settings

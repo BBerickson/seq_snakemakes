@@ -124,7 +124,8 @@ USER:
 NORM:
   "CPM"
   
-# set orentation of fastq files, can list one for each file   
+# set orentation of fastq files, can list one for each file
+# it will only align read1, read2 is only ever used for pre processing
 ORIENTATION:
     "R1R2" # R2R1
 

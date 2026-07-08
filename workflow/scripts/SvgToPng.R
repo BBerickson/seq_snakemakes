@@ -30,9 +30,9 @@ CAP_WIDTH_ATTR <- 5        # Cap value for attributed lines
 
 # Padding and output
 PADDING_MULTIPLIER <- 20   # Multiplier for padding calculation
-PNG_WIDTH <- 800           # Base width for the output PNG
-PNG_HEIGHT_BASE <- 1500    # Base height for the output PNG
-PNG_HEIGHT_MULTIPLIER <- 300 # Multiplier for calculating additional PNG height
+PNG_WIDTH <- 500           # Base width for the output PNG
+PNG_HEIGHT_BASE <- 500    # Base height for the output PNG
+PNG_HEIGHT_MULTIPLIER <- 100 # Multiplier for calculating additional PNG height
 
 # Subtext annotation
 SUBTEXT_FONT_SIZE <- 20    # Font size (px) for the subtext label

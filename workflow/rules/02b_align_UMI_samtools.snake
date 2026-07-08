@@ -15,7 +15,7 @@ rule dedup_UMI:
         sortname = PROJ + "/{sample}.temp",
         args     = CMD_PARAMS["umi_tools"]
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 3, 10)
+        memory   = lambda wildcards, input: memory_estimator(input, 5, 10)
     threads:
         4
     shell:
