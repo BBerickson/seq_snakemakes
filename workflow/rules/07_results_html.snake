@@ -2,7 +2,7 @@
 
 rule create_plots:
     input:
-        PROJ + "/report/" + PROJ + "_results.tsv",
+        PROJ + "/report/" + PROJ + "_" + INDEXES[0] + "_results.tsv",
         expand(PROJ + "/report/" + PROJ + "_{genelist}_{region}_{index}_norm_{suffix}_heatmap.pdf",
                genelist=GENELIST,
                region=[r for r in REGIONS if r in HEATMAP_REGIONS], 

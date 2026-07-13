@@ -18,7 +18,7 @@ rule gathering_results:
             index  = INDEXES[0]
         )
     output:
-        PROJ + "/report/" + PROJ + "_results.tsv"
+        PROJ + "/report/" + PROJ + "_" + INDEXES[0] + "_results.tsv"
     params:
         job_name = "results",
         indexmap = INDEX_MAP,
@@ -41,7 +41,7 @@ rule gathering_results:
   
 rule create_plots:
     input:
-        PROJ + "/report/" + PROJ + "_results.tsv"
+        PROJ + "/report/" + PROJ + "_" + INDEXES[0] + "_results.tsv"
     output:
         report  = SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + SUF_SUB + "_qc_analysis.html",
         config  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + SUF_SUB + "_config.yaml"),

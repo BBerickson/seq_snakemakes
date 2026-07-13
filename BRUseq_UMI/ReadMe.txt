@@ -46,4 +46,4 @@ bash setup_pipeline.sh Bodhi
 
 7. Final Report
 
-7a Rmarkdown — Create comprehensive HTML summary report
+7a MultiQC — Create comprehensive HTML summary report

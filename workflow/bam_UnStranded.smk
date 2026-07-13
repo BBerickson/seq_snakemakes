@@ -155,7 +155,7 @@ rule all:
             sample = SAMS_UNIQ
         ),
         # Make dummy file
-        PROJ + "/report/" + PROJ + "_results.tsv",
+        expand(PROJ + "/report/" + PROJ + "_{index}_results.tsv", index=INDEXES[0]),
         
         # bam URL
         [] if config.get("skip_bam_urls") else [

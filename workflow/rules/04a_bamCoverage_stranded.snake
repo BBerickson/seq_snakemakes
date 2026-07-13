@@ -9,7 +9,7 @@ rule bamCoverage:
             sample = SAMPLES[wildcards.newnam],
             index = [wildcards.index]
         ),
-        check_point = PROJ + "/report/" + PROJ + "_results.tsv",
+        check_point = PROJ + "/report/" + PROJ + "_" + INDEXES[0] + "_results.tsv",
         norm_files = lambda wildcards: [
             PROJ + "/stats/" + sample + "_summary_featureCounts.tsv" 
             for sample in SAMPLES[wildcards.newnam]
