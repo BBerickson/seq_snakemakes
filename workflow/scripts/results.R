@@ -148,7 +148,8 @@ if(!is_empty(list.files(path = mydirs, pattern = '.bam',recursive = T))){
     gg <- gg %>% 
       extract(sample, into  = c("sample", "index"),
               regex = paste0("^(.+?)_(", indexs, ")$")) %>%
-      select(-type,-index) 
+      select(-type,-index) %>% 
+      dplyr::filter(!is.na(sample))
     
     subsample_files <- list.files(path = mydirs, pattern = '_subsample.txt',recursive = T)
     if(!is_empty(subsample_files)){
@@ -185,7 +186,8 @@ if(!is_empty(list.files(path = mydirs, pattern = '.bam',recursive = T))){
           extract(sample, into  = c("sample", "index"),
                   regex = paste0("^(.+?)_(", indexs, ")$")) %>% 
           mutate(index=paste0("subsampled_", index)) %>% 
-          pivot_wider(names_from = "index",values_from = "read_fraction")
+          pivot_wider(names_from = "index",values_from = "read_fraction") %>% 
+          dplyr::filter(!is.na(sample))
         sn <- full_join(sn,subsample %>% dplyr::select(-value), by="sample") %>% arrange(sub_group,sample)
         full_join(gg,subsample,by="sample") %>% select(sub_group,sample,'Filtered reads','Sampled reads'=value) %>% 
           pivot_longer(
@@ -246,14 +248,12 @@ if(!is_empty(FC_files)){
   
 }
 
-frag_files <- list.files(path = mydirf, pattern = "_fragment_results.tsv")
+frag_files <- list.files(path = mydirf, pattern = paste0(index_map,"_fragment_results.tsv"))
 
 # fragment size
 if(!is_empty(frag_files)){
   frag_files <- c(paste0(mydirf,"/",frag_files))
-  frag <- frag_files %>%
-    map(~read_tsv(.x, show_col_types = FALSE)) %>%
-    reduce(full_join, by = "sample")
+  frag <- read_tsv(frag_files, show_col_types = FALSE)
   
   sn <- full_join(sn,frag,by="sample") 
 }

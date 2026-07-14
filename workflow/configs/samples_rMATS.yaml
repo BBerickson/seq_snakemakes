@@ -32,13 +32,13 @@ GROUPS_COMP:
    - "RTF1_MT:RTF1_WT"
 
 # program options
-# R2R1 use --libType fr-firststrand
-# R1R2 use --libType fr-secondstrand
+# R2R1 use --libType fr-firststrand and --strand MATE2_SENSE for sashimi
+# R1R2 use --libType fr-secondstrand and --strand MATE1_SENSE for sashimi
 CMD_PARAMS:
     rmats:         " -t paired --readLength 150 --libType fr-firststrand "
     min_count:          "20"
     max_FDR:            "0.05"
-    max_IncDifference:  "0.05"
+    max_IncDifference:  "0.1"
     
 SPLICE_TYPES:
   - SE
@@ -46,7 +46,12 @@ SPLICE_TYPES:
   - MXE
   - A5SS
   - A3SS    
-    
+
+SASHIMI_PARAMS:
+  num_plots: "8"
+  args:      " --strand MATE2_SENSE -M 10 -O 3 --fix-y-scale --shrink --alpha 0.25  --base-size=20 --height 3 --ann-height 4 --width 18 --out-resolution 100 "
+  
+      
 # optional arguments:
 # -t {paired,single}    readtype, single or paired.
 # --libType {fr-unstranded,fr-firststrand,fr-secondstrand}
@@ -59,5 +64,4 @@ SPLICE_TYPES:
   # According to the salmon library format fr-firststrand is ISR and fr-secondstrand is ISF
 # --readLength READLENGTH
   # The length of each read.
-
 

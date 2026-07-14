@@ -20,7 +20,7 @@ tc="treatment:control" # same as GROUPS_COMP: in samples_rAMTS.yaml
 PROJ="180629_SY351" # same as PROJ: in samples.yaml
 
 while IFS=$'\t' read -r col1 col2; do
-    python /beevol/home/erickson/ggsashimi/ggsashimi_BE.py \
+    python workflow/scripts/ggsashimi_Claude.py \
         -b $PROJ/rmats/$tc\_bams.tsv  \
         -c $col1 \
         -g $gtf \
@@ -37,7 +37,7 @@ while IFS=$'\t' read -r col1 col2; do
 done < $PROJ/rmats/$tc\_$updown\_pos.txt
 
 while IFS=$'\t' read -r col1 col2; do
-    python /beevol/home/erickson/ggsashimi/ggsashimi_BE.py \
+    python workflow/scripts/ggsashimi_Claude.py \
         -b $PROJ/rmats/$tc\_bams.tsv  \
         -c $col1 \
         -g $gtf \
@@ -54,7 +54,7 @@ while IFS=$'\t' read -r col1 col2; do
 done < $PROJ/rmats/$tc\_$updown\_neg.txt
 
 
-Rscript /beevol/home/erickson/Ben_pipelines/R_scripts/pngToPDF.R $updown $tc\_$updown.pdf
+Rscript workflow/scripts/pngToPDF.R $updown $tc\_$updown.pdf
 rm -r $updown
 
 #### tab in bams.tsv can be a bit sensitive ###

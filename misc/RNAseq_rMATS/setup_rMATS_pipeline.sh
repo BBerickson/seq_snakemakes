@@ -64,7 +64,7 @@ fi
 EXTRACT_DIR="$TEMP_DIR/$REPO-$BRANCH"
 
 # Create directory structure
-mkdir -p workflow/{profiles,ref,rules,Rmds,scripts,RNAseq_rMATS}
+mkdir -p workflow/{profiles,ref,rules,scripts,RNAseq_rMATS}
 
 # Copy pipeline-specific files
 rsync -a "$EXTRACT_DIR/workflow/$SMK_FILE" workflow/

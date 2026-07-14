@@ -68,7 +68,7 @@ fi
 EXTRACT_DIR="$TEMP_DIR/$REPO-$BRANCH"
 
 # Create directory structure
-mkdir -p workflow/{profiles,ref,rules,Rmds,scripts}
+mkdir -p workflow/{profiles,ref,rules,scripts}
 
 # Copy pipeline-specific files
 rsync -a "$EXTRACT_DIR/RNAseq/ReadMe.txt" .
@@ -88,7 +88,6 @@ rsync -a "$EXTRACT_DIR/workflow/submit_scripts/$SUBMIT_GLOB2" . 2>/dev/null
 rsync -a "$EXTRACT_DIR/workflow/rules" workflow/
 rsync -a "$EXTRACT_DIR/workflow/configs/ref" workflow/
 rsync -a "$EXTRACT_DIR/workflow/profiles/$PROFILES" workflow/profiles/
-rsync -a "$EXTRACT_DIR/workflow/Rmds" workflow/
 rsync -a "$EXTRACT_DIR/workflow/scripts" workflow/
 
 # Copy profile files

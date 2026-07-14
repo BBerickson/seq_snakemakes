@@ -11,7 +11,7 @@ rule gathering_bams_groups:
         PROJ + "/rmats/{compgroups}_palette.txt"
     params:
         job_name = "{compgroups}_rmats_bams_groups",
-        project  = PROJ + "/" + BAM_PATH,
+        project = PROJ + "/" + BAM_PATH,
         mygroup  = "{compgroups}",
         mycols   = lambda w: " ".join(f"{k}={v}" for k, v in COLS_DICT.items()),
         mysamps  = SAM_GRPS,
@@ -28,25 +28,29 @@ rule gathering_bams_groups:
         """
   
 
-# Align trimmed reads with star rmats
-rule fastq_rmats:
+# run rmats
+rule run_rmats:
     input:
         S1 = PROJ + "/rmats/{compgroups}_S1.txt",
         S2 = PROJ + "/rmats/{compgroups}_S2.txt"
     output:
-        SE = PROJ + "/rmats/{compgroups}/SE.MATS.JC.txt"
+        SE   = PROJ + "/rmats/{compgroups}/SE.MATS.JC.txt",
+        MXE  = PROJ + "/rmats/{compgroups}/MXE.MATS.JC.txt",
+        A3SS = PROJ + "/rmats/{compgroups}/A3SS.MATS.JC.txt",
+        A5SS = PROJ + "/rmats/{compgroups}/A5SS.MATS.JC.txt",
+        RI   = PROJ + "/rmats/{compgroups}/RI.MATS.JC.txt"
     params:
-        job_name  = "{compgroups}_fastq_rmats",
+        job_name  = "{compgroups}_rmats",
         outdir    = PROJ + "/rmats/{compgroups}",
         outdirtmp = PROJ + "/rmats/{compgroups}/tmp",
         gtf       = GTF,
         args      = CMD_PARAMS["rmats"]
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 10, 30) # multiplier, min, max, unit=GB
-    threads: 
-        12
+        memory = lambda wildcards, input: memory_estimator(input, 10, 30)
+    threads: 12
     shell:
         """
+        rm -rf {params.outdirtmp}
         mkdir -p {params.outdirtmp}
         
         rmats.py --b1 {input.S1} --b2 {input.S2} \
@@ -59,7 +63,7 @@ rule fastq_rmats:
         rm -rf {params.outdirtmp}
         """
                     
-# filter and make bar plots and lists                    
+# filter and make bar plots, gene lists and sashimi plots                    
 rule rmats_plot:
     input:
         jc = expand(
@@ -68,7 +72,11 @@ rule rmats_plot:
             splice_type = config["SPLICE_TYPES"]
         )
     output:
-        pdf = PROJ + "{compgroups}_summary_plots.pdf" 
+        pdf = PROJ + "_{compgroups}_summary_plots.pdf",
+        inpos = PROJ + "/rmats/{compgroups}_more_inclusion_pos.txt",
+        inneg = PROJ + "/rmats/{compgroups}_more_inclusion_neg.txt",
+        skpos = PROJ + "/rmats/{compgroups}_more_skipping_pos.txt",
+        skneg = PROJ + "/rmats/{compgroups}_more_skipping_neg.txt"
     params:
         job_name        = "{compgroups}_rmats_plot",
         proj            = PROJ,
@@ -77,9 +85,10 @@ rule rmats_plot:
         max_fdr         = CMD_PARAMS["max_FDR"],
         max_incdiff     = CMD_PARAMS["max_IncDifference"],
         splice_type     = " ".join(config["SPLICE_TYPES"]),
-        script          = "workflow/scripts/rMATS_plots.R"
+        script          = "workflow/scripts/rMATS_plots.R",
+        num_plots       = SASHIMI_PARAMS["num_plots"]
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1, 20) # multiplier, min, max, unit=GB
     threads: 
         1
     shell:
@@ -91,8 +100,73 @@ rule rmats_plot:
             "{params.max_fdr}" \
             "{params.max_incdiff}" \
             "{params.splice_type}" \
+            "{params.num_plots}" \
             "{output.pdf}" 
             
-        """                    
-                    
-                    
+        """
+        
+# Generate sashimi plots as PNGs
+rule rmats_sashimi:
+    input:
+        jc = expand(
+            PROJ + "/rmats/{{compgroups}}/{splice_type}.MATS.JC.txt",
+            splice_type = config["SPLICE_TYPES"]
+        ),
+        pos = PROJ + "/rmats/{compgroups}_{direction}_pos.txt",
+        neg = PROJ + "/rmats/{compgroups}_{direction}_neg.txt",
+        bams = PROJ + "/rmats/{compgroups}_bams.tsv",
+        palette = PROJ + "/rmats/{compgroups}_palette.txt"
+    output:
+        directory("rMATS_sashimi_{compgroups}_{direction}_pngs")
+    params:
+        job_name        = "{compgroups}_{direction}_rmats_sashimi",
+        gtf          = GTF,
+        sashimi_args = SASHIMI_PARAMS["args"]
+    resources:
+        memory = lambda wildcards, input: memory_estimator(input, 1, 1, 20)
+    threads: 1
+    shell:
+        """
+        mkdir -p {output}
+    
+        while IFS=$'\t' read -r col1 col2; do
+            python workflow/scripts/ggsashimi_Claude.py \
+                -b {input.bams} \
+                -c $col1 \
+                -g {params.gtf} \
+                -P {input.palette} \
+                -o {output}/$col2 \
+                -C 3 {params.sashimi_args} \
+                --out-strand plus \
+                --out-format png || echo "WARNING: ggsashimi failed for $col1 $col2, skipping"
+        done < {input.pos}
+    
+        while IFS=$'\t' read -r col1 col2; do
+            python workflow/scripts/ggsashimi_Claude.py \
+                -b {input.bams} \
+                -c $col1 \
+                -g {params.gtf} \
+                -P {input.palette} \
+                -o {output}/$col2 \
+                -C 3 {params.sashimi_args} \
+                --out-strand minus \
+                --out-format png || echo "WARNING: ggsashimi failed for $col1 $col2, skipping"
+        done < {input.neg}
+        """
+
+rule rmats_png_to_pdf:
+    input:
+        "rMATS_sashimi_{compgroups}_{direction}_pngs"
+    output:
+        PROJ + "_{compgroups}_{direction}.pdf"
+    params:
+        job_name = "{compgroups}_{direction}_sashimi_pdf",
+        script     = "workflow/scripts/pngToPDF.R",
+        chunk_size = 4,
+        title      = "{compgroups} {direction}"
+    resources:
+        memory = lambda wildcards, input: memory_estimator(input, 10, 4, 200)
+    shell:
+        "Rscript {params.script} {input} {params.chunk_size} '{params.title}' {output}"        
+        
+

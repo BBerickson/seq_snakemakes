@@ -1,41 +1,53 @@
 #!/usr/bin/env Rscript
-
 library("png")
 library("grid")
 library("gridExtra")
-args = commandArgs(trailingOnly=TRUE)
-# Read input and parameters from Snakemake
-pngFiles <- strsplit(args[1], " ")[[1]]
-chunkSize <- as.numeric(args[2])
-title_text <- args[3]  # Add title as 4th argument
-outfile <- args[4]
 
+args <- commandArgs(trailingOnly = TRUE)
 
-nsize <- length(pngFiles)
-# Determine the number of columns for the grid layout
-mycols <- ifelse(chunkSize == 1, 1, 2)
+# Args: 1=input (dir or space-separated files), 2=chunkSize, 3=title, 4=outfile
+input_arg  <- args[1]
+chunkSize  <- as.numeric(args[2])
+title_text <- args[3]
+outfile    <- args[4]
 
-# Open the PDF device
-pdf(outfile)
-
-# Loop through the chunks and create the grid layout
-for(i in seq(1, nsize, by = chunkSize)){  
-  # Read the PNG files for the current chunk
-  rl <- lapply(pngFiles[i:min(nsize, (i + chunkSize - 1))], png::readPNG)
-  # Convert the PNG files to raster grobs
-  gl <- lapply(rl, grid::rasterGrob)
-  
-  # Create title grob
-  title_grob <- textGrob(title_text, gp = gpar(fontsize = 12, fontface = "bold"))
-  
-  # Arrange with title at top
-  gridExtra::grid.arrange(title_grob, 
-                          arrangeGrob(grobs = gl, ncol = mycols), 
-                          ncol = 1, heights = c(1, 10))
+# Resolve input — directory glob or explicit file list
+if (dir.exists(input_arg)) {
+  message("Input is a directory, globbing PNGs...")
+  pngFiles <- sort(list.files(input_arg, pattern = "\\.png$", full.names = TRUE))
+} else {
+  message("Input is a file list...")
+  pngFiles <- strsplit(input_arg, " ")[[1]]
 }
 
-# Close the PDF device
+# Validate
+if (length(pngFiles) == 0) stop("No PNG files found in: ", input_arg)
+
+nsize  <- length(pngFiles)
+mycols <- ifelse(chunkSize == 1, 1, 2)
+
+message("Processing ", nsize, " PNGs into: ", outfile)
+
+pdf(outfile)
+
+for (i in seq(1, nsize, by = chunkSize)) {
+  chunk <- pngFiles[i:min(nsize, (i + chunkSize - 1))]
+  
+  rl <- lapply(chunk, png::readPNG)
+  gl <- lapply(rl, grid::rasterGrob)
+  
+  title_grob <- grid::textGrob(
+    title_text,
+    gp = grid::gpar(fontsize = 12, fontface = "bold")
+  )
+  
+  gridExtra::grid.arrange(
+    title_grob,
+    gridExtra::arrangeGrob(grobs = gl, ncol = mycols, padding = grid::unit(5, "mm")),
+    ncol    = 1,
+    heights = c(1, 10)
+  )
+}
+
 dev.off()
-
-
-
+message("Done.")

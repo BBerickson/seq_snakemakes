@@ -53,16 +53,17 @@ with open(GENOME_CONFIG1) as f:
 # Assign parameters from configs
 # ------------------------------------------------------------------------------
 
-PROJ         = config.get("PROJ")
-RAW_DATA     = config.get("RAW_DATA")
-ALL_SAMPLES  = config.get("SAMPLESrmat")
-SEQ_DATE     = config.get("SEQ_DATE")
-GROUPS_COMP  = config.get("GROUPS_COMP")
-CMD_PARAMS   = config.get("CMD_PARAMS")
-COLORS       = config.get("COLORS")
-NORM         = config.get("NORM")
-ORIENTATION  = config.get("ORIENTATION")
-USER         = config.get("USER")
+PROJ           = config.get("PROJ")
+RAW_DATA       = config.get("RAW_DATA")
+ALL_SAMPLES    = config.get("SAMPLESrmat")
+SEQ_DATE       = config.get("SEQ_DATE")
+GROUPS_COMP    = config.get("GROUPS_COMP")
+CMD_PARAMS     = config.get("CMD_PARAMS")
+SASHIMI_PARAMS = config.get("SASHIMI_PARAMS")
+COLORS         = config.get("COLORS")
+NORM           = config.get("NORM")
+ORIENTATION    = config.get("ORIENTATION")
+USER           = config.get("USER")
 
 # From additional configs
 GTF          = config1.get("GTF")
@@ -91,6 +92,7 @@ GRP_REGEX = r"[a-zA-Z0-9_\-,]+"
 wildcard_constraints:
     sample  = r"[a-zA-Z0-9_\-]+",
     group   = GRP_REGEX,
+    direction = "more_inclusion|more_skipping"
 
 BAM_PATH = _get_bampath(NORM)
 
@@ -111,8 +113,13 @@ rule all:
             compgroups = GRPS_UNIQ
         ),
         expand(
-          PROJ + "{compgroups}_summary_plots.pdf",
+          PROJ + "_{compgroups}_summary_plots.pdf",
             compgroups = GRPS_UNIQ
+        ),
+        expand(
+            PROJ + "_{compgroups}_{direction}.pdf",
+            compgroups = GRPS_UNIQ,
+            direction  = ["more_inclusion", "more_skipping"]
         )
 
 
