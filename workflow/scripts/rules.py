@@ -4,8 +4,14 @@ import os
 import re
 
 def _cutadapt_summary(input, output):
+    import glob
+    # Derive the directory from the first input file
+    cutadapt_dir = os.path.dirname(input[0])
+    # Glob all stats files in that directory
+    all_files = sorted(glob.glob(os.path.join(cutadapt_dir, "*_cutadapt_stats.txt")))
+    
     with open(output, "w") as out:
-        for file in input:
+        for file in all_files:
             name = os.path.basename(file)
             name = re.sub("_cutadapt_stats.txt", "", name)
 
@@ -32,6 +38,11 @@ def _clumpify_summary(input, output, pairedmap):
         except:
             print("Could not convert pairedmap from string to dict")
             return
+    import glob
+    # Derive the directory from the first input file
+    clumpify_dir = os.path.dirname(input[0])
+    # Glob all stats files in that directory
+    all_files = sorted(glob.glob(os.path.join(clumpify_dir, "*_clumpify.log")))
     
     with open(output, "w") as out:
         for file in input:
@@ -50,6 +61,12 @@ def _clumpify_summary(input, output, pairedmap):
                     out.write("%s\t%s\t%s\n" % (name, met, num_final))
 
 def _bbduk_summary(input, output):
+    import glob
+    # Derive the directory from the first input file
+    bbduk_dir = os.path.dirname(input[0])
+    # Glob all stats files in that directory
+    all_files = sorted(glob.glob(os.path.join(bbduk_dir, "*_bbduk.log")))
+    
     with open(output, "w") as out:
         for file in input:
             name = os.path.basename(file)

@@ -4,7 +4,7 @@
 rule gathering_results:
     input:
         cutadapt = PROJ + "/stats/" + PROJ + "_cutadapt.tsv",
-        aligned  = PROJ + "/stats/" + PROJ + "_aligned.tsv",
+        aligned  = PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_aligned.tsv",
         dedup    = PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_UMI_dedup.tsv",
         fc_file  = expand( PROJ + "/stats/{sample}_summary_featureCounts.tsv",
             sample = SAMS_UNIQ
@@ -51,14 +51,15 @@ rule create_plots:
         out_file  = SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + SUF_SUB + "_qc_analysis",
         script  = "workflow/scripts/multiqc_config.R",
         seqdate = SEQ_DATE,
-        mydir   = PROJ
+        mydir   = PROJ,
+        index   = INDEXES[0]
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     threads:
         1
     shell:
         """
-        Rscript {params.script} "{input}" "{params.mydir}" "{params.seqdate}" "{output.result}" "{output.config}"
+        Rscript {params.script} "{input}" "{params.mydir}" "{params.seqdate}" "{params.index}" "{output.result}" "{output.config}"
         multiqc {params.mydir} --config {output.config} --force --filename {params.out_file}
         rm -r {params.out_file}_data
         

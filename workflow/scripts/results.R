@@ -56,7 +56,7 @@ if(str_detect(dedup_file,"clumpify")){
     spread(type,value) %>% 
     dplyr::mutate(Unique_UMI_reads=paste0(Number_of_reads_out,"(",paste0(round(Number_of_reads_out/Input_Reads*100,1),"%"),")")) %>% 
     dplyr::select(sample,Unique_UMI_reads)
-  pre_alignment <- full_join(dedup1,dedup2,by="sample")
+  pre_alignment <- full_join(dedup1,dedup2,by="sample") 
 }
 
 # alignment
@@ -68,10 +68,11 @@ aligner <- read_tsv(aligner_file,col_names = c("index", "sample","type","alignme
               names_glue = "{index}_alignment_rate")
 
 # gather results
-sn <- full_join(sn,pre_alignment,by="sample") %>%
-  full_join(.,aligner,by="sample") %>% 
+sn <- left_join(sn,pre_alignment,by="sample") %>%
+  left_join(.,aligner,by="sample") %>% 
   arrange(new_name) %>% 
-  mutate(new_name=if_else(is.na(new_name),sample,new_name))
+  mutate(new_name=if_else(is.na(new_name),sample,new_name)) %>% 
+  select(where(~!all(is.na(.))))
 
 # optional sub-sampling w/wo masking
 mydirs <- paste0(mydir,"/bams_sub")
@@ -98,7 +99,7 @@ if(!is_empty(list.files(path = mydirs, pattern = '.bam',recursive = T))){
               regex = paste0("^(.+?)_(", indexs, ")$")) %>% 
       dplyr::mutate(index = paste0("aligned_", index)) %>%
       pivot_wider(names_from = "index",values_from = c("value"))  
-    sn <- full_join(sn,gg,by="sample")
+    sn <- left_join(sn,gg,by="sample") %>% select(where(~!all(is.na(.))))
     
     subsample_files <- list.files(path = mydirs, pattern = '_subsample.txt',recursive = T)
     if(!is_empty(subsample_files)){
@@ -124,10 +125,13 @@ if(!is_empty(list.files(path = mydirs, pattern = '.bam',recursive = T))){
                   regex = paste0("^(.+?)_(", indexs, ")$")) %>%  
           dplyr::mutate(index = paste0("subsampled_", index)) %>%
           pivot_wider(names_from = "index",values_from = c("read_fraction"))
-        sn <- full_join(sn,subsample %>% dplyr::select(-value) ,by="sample") %>% arrange(sub_group,new_name)
+        sn <- left_join(sn,subsample %>% dplyr::select(-value) ,by="sample") %>% 
+          select(where(~!all(is.na(.)))) %>% 
+          arrange(sub_group,new_name)
       }
     }
-    full_join(gg,subsample,by="sample") %>% select(sub_group,sample,'Filtered reads' =starts_with("aligned_"),'Sampled reads'=value) %>% 
+    full_join(gg,subsample,by="sample") %>% 
+      select(sub_group,sample,'Filtered reads' =starts_with("aligned_"),'Sampled reads'=value) %>% 
       pivot_longer(
         cols = c(`Filtered reads`, `Sampled reads`),
         names_to = "read_type",
@@ -188,7 +192,8 @@ if(!is_empty(list.files(path = mydirs, pattern = '.bam',recursive = T))){
           mutate(index=paste0("subsampled_", index)) %>% 
           pivot_wider(names_from = "index",values_from = "read_fraction") %>% 
           dplyr::filter(!is.na(sample))
-        sn <- full_join(sn,subsample %>% dplyr::select(-value), by="sample") %>% arrange(sub_group,sample)
+        sn <- left_join(sn,subsample %>% dplyr::select(-value), by="sample") %>% 
+          select(where(~!all(is.na(.)))) %>% arrange(sub_group,sample)
         full_join(gg,subsample,by="sample") %>% select(sub_group,sample,'Filtered reads','Sampled reads'=value) %>% 
           pivot_longer(
             cols = c(`Filtered reads`, `Sampled reads`),
@@ -218,7 +223,7 @@ if(!is_empty(FC_sum_files)){
   FC <- FC %>% distinct(type,sample,.keep_all =T) %>% spread(type,value) %>% 
     dplyr::select(sample, distinct(FC,type)$type) 
   
-  sn <- full_join(sn,FC,by="sample") 
+  sn <- left_join(sn,FC,by="sample") %>% select(where(~!all(is.na(.))))
   
 }
 
@@ -248,14 +253,16 @@ if(!is_empty(FC_files)){
   
 }
 
-frag_files <- list.files(path = mydirf, pattern = paste0(index_map,"_fragment_results.tsv"))
+frag_files <- list.files(path = mydirf, pattern = "_fragment_results.tsv")
 
 # fragment size
 if(!is_empty(frag_files)){
   frag_files <- c(paste0(mydirf,"/",frag_files))
-  frag <- read_tsv(frag_files, show_col_types = FALSE)
+  frag <- frag_files %>%
+    map(~read_tsv(.x, show_col_types = FALSE)) %>%
+    purrr::reduce(full_join, by = "sample")
   
-  sn <- full_join(sn,frag,by="sample") 
+  sn <- left_join(sn,frag,by="sample") %>% select(where(~!all(is.na(.))))
 }
 
 write_tsv(sn, outfile)

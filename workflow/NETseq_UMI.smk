@@ -161,7 +161,8 @@ ALIGNER = "bowtie2"
 rule all:
     input:
         # process summary files
-        expand("{proj}/stats/{proj}_{step}.tsv", proj=PROJ, step=["fastqc", "cutadapt", "aligned"]),
+        expand("{proj}/stats/{proj}_{step}.tsv", proj=PROJ, step=["fastqc", "cutadapt"]),
+        PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_aligned.tsv",
         
         # bam URL
         [] if config.get("skip_bam_urls") else [

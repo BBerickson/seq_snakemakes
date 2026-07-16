@@ -5,8 +5,9 @@ args <- commandArgs(trailingOnly = TRUE)
 input_tsv   <- strsplit(args[1], " ")[[1]][1] # results.tsv
 myproj      <- args[2] # PROJ
 seq_date    <- args[3] # SEQ_DATE
-output_tsv  <- args[4] # "report.tsv"
-output_yaml <- args[5] # "multiqc_config.yaml"
+index       <- args[4] # INDEXS[0]
+output_tsv  <- args[5] # "report.tsv"
+output_yaml <- args[6] # "multiqc_config.yaml"
 
 suppressPackageStartupMessages({
   library(tidyverse)
@@ -61,7 +62,7 @@ for (col in names(df)) {
 }
 
 # ---- IMAGE SECTION ORDERING & TITLES ----
-image_files <- list.files(pattern = "_mqc.png", recursive = TRUE, include.dirs = FALSE) %>%
+image_files <- list.files(pattern = paste0("_aligned_",index, "__.*\\.png"), recursive = TRUE, include.dirs = FALSE) %>%
   basename()
 
 prefix <- stringr::str_extract(image_files, "^(543|5L|5|3)")

@@ -21,7 +21,7 @@ rule create_heatmap_plots:
             PROJ + "/heatmap/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_heatmap.svg"
         ),
         heatmap = (
-            PROJ + "/heatmap/{region}_{group}_aligned_{index}__{covarg}_norm_{suffix}_{sense_asense}_heatmap_mqc.png"
+            PROJ + "/heatmap/{region}_{group}_aligned_{index}__{covarg}_norm_{suffix}_{sense_asense}_heatmap.png"
         )
     params:
         job_name = PROJ + "/heatmap/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_heatmap",
@@ -49,7 +49,7 @@ rule create_heatmap_plots:
 rule heatmap_pdf:
     input:
         lambda wildcards: sorted(list(set([
-        PROJ + f"/heatmap/{row['Region']}_{group}_aligned_{row['Index']}__{row['Value']}_norm_{row['Suffix']}_{sense_asense}_heatmap_mqc.png"
+        PROJ + f"/heatmap/{row['Region']}_{group}_aligned_{row['Index']}__{row['Value']}_norm_{row['Suffix']}_{sense_asense}_heatmap.png"
         for _, row in DF_SAM_NORM.iterrows()
         for group in GROUPS.keys()
         for sense_asense in SENSE_ASENSE

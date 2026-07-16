@@ -163,7 +163,8 @@ wildcard_constraints:
 rule all:
     input:
         # process summary files
-        expand("{proj}/stats/{proj}_{step}.tsv", proj=PROJ, step=["fastqc", "clumpify", "bbduk", "aligned"]),
+        expand("{proj}/stats/{proj}_{step}.tsv", proj=PROJ, step=["fastqc", "clumpify", "bbduk"]),
+        PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_aligned.tsv",
         
         # bam URL
         [] if config.get("skip_bam_urls") else [

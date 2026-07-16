@@ -107,7 +107,7 @@ rule bowtie_summary1:
             sample = SAMS_UNIQ
         )
     output:
-        PROJ + "/stats/" + INDEX_MAP + "_aligned.tsv"
+        temp(PROJ + "/stats/" + INDEX_MAP + "_aligned.tsv")
     params:
         job_name = INDEX_MAP + "_bowtie_summary",
         index = INDEX_MAP
@@ -135,7 +135,7 @@ rule bowtie_summary2:
             sample = SAMS_UNIQ
         )
     output:
-        PROJ + "/stats/" + INDEX_SECOND + "_aligned.tsv"
+        temp(PROJ + "/stats/" + INDEX_SECOND + "_aligned.tsv")
     params:
         job_name = INDEX_SECOND + "_bowtie_summary",
         index = INDEX_SECOND
@@ -160,9 +160,9 @@ rule bowtie_summary:
         PROJ + "/stats/" + INDEX_MAP + "_aligned.tsv",
         PROJ + "/stats/" + INDEX_SECOND + "_aligned.tsv"
     output:
-        PROJ + "/stats/" + PROJ + "_aligned.tsv"
+        PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_aligned.tsv"
     params:
-        job_name = PROJ + "_bowtie_summary"
+        job_name = INDEX_MAP + "_bowtie_summary"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     threads:

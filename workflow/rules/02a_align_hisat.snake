@@ -56,9 +56,9 @@ rule hisatPE_summary:
             sample = SAMS_UNIQ
         )
     output:
-        PROJ + "/stats/" + PROJ + "_aligned.tsv"
+        PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_aligned.tsv"
     params:
-        job_name = "hisatPE_summary",
+        job_name = INDEX_MAP + "_hisatPE_summary",
         index = INDEX_MAP
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB

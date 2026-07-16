@@ -99,7 +99,7 @@ rule gathering_results:
     input:
         clump   = PROJ + "/stats/" + PROJ + "_clumpify.tsv",
         bbduk   = PROJ + "/stats/" + PROJ + "_bbduk.tsv",
-        aligned = PROJ + "/stats/" + PROJ + "_aligned.tsv",
+        aligned = PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_aligned.tsv",
         fc_file = expand( PROJ + "/stats/{sample}_summary_featureCounts.tsv",
             sample = SAMS_UNIQ
         ),

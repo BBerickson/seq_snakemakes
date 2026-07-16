@@ -17,14 +17,15 @@ rule create_plots:
         out_file  = SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + SUF_SUB + "_qc_plots_analysis",
         script  = "workflow/scripts/multiqc_config.R",
         seqdate = SEQ_DATE,
-        mydir   = PROJ
+        mydir   = PROJ,
+        index   = INDEXES[0]
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 2, 4) # multiplier, min, max, unit=GB
     threads:
         1
     shell:
         """
-        Rscript {params.script} "{input}" "{params.mydir}" "{params.seqdate}" "{output.result}" "{output.config}"
+        Rscript {params.script} "{input}" "{params.mydir}" "{params.seqdate}" "{params.index}" "{output.result}" "{output.config}"
         multiqc {params.mydir} --config {output.config} --force --filename {params.out_file}
         rm -r {params.out_file}_data
         """
