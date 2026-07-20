@@ -55,6 +55,7 @@ SAMPLES:
             INT6KO_pp1-PNUTS-H66K_pDox_CTD: 
                 - "INT6KO_pp1-PNUTS-H66K_pDox_polIII_CTD"
                 
+        INT6KO_pp1-PNUTS-Ser5:
             INT6KO_pp1-PNUTS-WT_pDox_Ser5: 
                 - "INT6KO_pp1-PNUTS-WT_pDox_polIII_Ser5"
                 
@@ -70,7 +71,8 @@ SAMPLES:
 #     first aligned index used to norm second aligned index
 # Or "subsample" : make bw and matix files from sub-sampled bam files (paired groups)
 NORM:
-  "scalefactor"
+  - "scalefactor"
+  - "CPM"
 
 
   # set RGB colors for bw urls and table files, 

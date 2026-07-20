@@ -142,22 +142,23 @@ rule create_plots:
     input:
         PROJ + "/report/" + PROJ + "_" + INDEXES[0] + "_results.tsv"
     output:
-        report  = SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + SUF_SUB + "_qc_analysis.html",
-        config  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + SUF_SUB + "_config.yaml"),
-        result  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + SUF_SUB + "_clean_results.tsv")
+        report  = SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_qc_analysis.html",
+        config  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_config.yaml"),
+        result  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_clean_results.tsv")
     params:
         job_name  = PROJ + "_qc_html",
-        out_file  = SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + SUF_SUB + "_qc_analysis",
+        out_file  = SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_qc_analysis",
         script  = "workflow/scripts/multiqc_config.R",
         seqdate = SEQ_DATE,
-        mydir   = PROJ
+        mydir   = PROJ,
+        index   = INDEXES[0]
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     threads:
         1
     shell:
         """
-        Rscript {params.script} "{input}" "{params.mydir}" "{params.seqdate}" "{output.result}" "{output.config}"
+        Rscript {params.script} "{input}" "{params.mydir}" "{params.seqdate}" "{params.index}" "{output.result}" "{output.config}"
         multiqc {params.mydir} --config {output.config} --force --filename {params.out_file}
         rm -r {params.out_file}_data
         

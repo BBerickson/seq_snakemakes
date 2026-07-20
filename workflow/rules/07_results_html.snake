@@ -9,12 +9,12 @@ rule create_plots:
                index=INDEXES,
                suffix=DF_SAM_NORM['Suffix'].unique())
     output:
-        report  = SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + SUF_SUB + "_qc_plots_analysis.html",
-        config  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + SUF_SUB + "_config.yaml"),
-        result  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + SUF_SUB + "_clean_results.tsv")
+        report  = SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_qc_plots_analysis.html",
+        config  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_config.yaml"),
+        result  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_clean_results.tsv")
     params:
         job_name   = PROJ + "_qc_plots_html",
-        out_file  = SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + SUF_SUB + "_qc_plots_analysis",
+        out_file  = SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_qc_plots_analysis",
         script  = "workflow/scripts/multiqc_config.R",
         seqdate = SEQ_DATE,
         mydir   = PROJ,

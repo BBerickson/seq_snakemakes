@@ -94,13 +94,6 @@ wildcard_constraints:
     group   = GRP_REGEX,
     direction = "more_inclusion|more_skipping"
 
-BAM_PATH = _get_bampath(NORM)
-
-if NORM == "subsample":
-    SUF_SUB = "_subsample"
-else:                        
-    SUF_SUB = ""
-    
 COLS_DICT = _get_colors(SAMS_UNIQ, COLORS)
 print("COLS_DICT (%s): %s\n" % (len(COLS_DICT), COLS_DICT))
 

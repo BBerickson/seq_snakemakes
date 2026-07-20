@@ -75,7 +75,7 @@ image_files <- image_files[order(ord)]
 # Now derive section_ids and clean_titles from the REORDERED image_files
 section_ids <- tools::file_path_sans_ext(image_files)
 clean_titles <- section_ids %>%
-  stringr::str_replace_all("_heatmap_mqc$", "") %>%
+  stringr::str_replace_all("_heatmap$", "") %>%
   stringr::str_replace_all("__.*?bin", "") %>%
   stringr::str_replace_all("^5L", "5") %>%
   stringr::str_replace_all("_", " ") %>%

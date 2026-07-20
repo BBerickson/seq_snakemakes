@@ -13,9 +13,6 @@ from pathlib import Path
 # Include custom Python functions
 include: workflow.source_path("scripts/funs.py")
 
-# path of samples file
-SAMPLES_FILE = workflow.configfiles[0] if workflow.configfiles else "samples.yaml"
-
 # ------------------------------------------------------------------------------
 # Load main genome config
 # ------------------------------------------------------------------------------
@@ -103,10 +100,11 @@ SAM_NORM = []
 for key in SAMPIN:
     sam_value = SAMPIN[key][0]
     for index, norm, suffix in NORMMAP[key]:
-        SAM_NORM.append([sam_value, key, index, norm, suffix])
+        bam_dir = "bams_sub" if norm == "subsample" else "bams"
+        SAM_NORM.append([sam_value, key, index, norm, suffix, bam_dir])
 
 # Create DataFrame
-DF_SAM_NORM = pd.DataFrame(SAM_NORM, columns=['Sample', 'Newnam', 'Index', 'Norm', 'Suffix'])
+DF_SAM_NORM = pd.DataFrame(SAM_NORM, columns=['Sample', 'Newnam', 'Index', 'Norm', 'Suffix', 'Bam_dir'])
 
 # unpack samples and groups
 SAMS = [[y, x] for y in SAMPIN for x in SAMPIN[y]]
@@ -128,14 +126,6 @@ FASTQS = sum(FASTQS, [])
 # color dictionary 
 COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
 
-# for optinal subsetting bam directory
-BAM_PATH = _get_bampath(NORM)
-
-if NORM == "subsample":
-    SUF_SUB = "_subsample"
-else:                        
-    SUF_SUB = ""
-    
 ALIGNER = "bowtie2"
 
 # Wildcard constraints
@@ -168,7 +158,7 @@ rule all:
         ],
         expand(PROJ + "/report/" + PROJ + "_{index}_results.tsv", index=INDEXES[0]),
         [] if config.get("skip_html_report") else [
-            expand(SEQ_DATE + "_" + PROJ + "_{index}" + SUF_SUB + "_qc_analysis.html", index=INDEXES[0])
+            expand(SEQ_DATE + "_" + PROJ + "_{index}" + "_qc_analysis.html", index=INDEXES[0])
         ],
         
         # bamCoverage

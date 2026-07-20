@@ -39,13 +39,13 @@ CHROM_SIZES:
 
 SAMPLES:
     SECTION-1:
-        SAMPLING-GROUP-1:
+        ARMC5-1:
             ARMC5_OK_Xrn2_WT_R1: 
               - "ARMC5_OK_Xrn2_WT_R1_hg38_241218_norm_chrM_BL"
             ARMC5_OK_Xrn2_MT_R1: 
               - "ARMC5_OK_Xrn2_MT_R1_hg38_241218_norm_chrM_BL"
 
-        SAMPLING-GROUP-2:
+        ARMC5-2:
             ARMC5_OK_Xrn2_WT_R2: 
               - "ARMC5_OK_Xrn2_WT_R2_hg38_241218_norm_chrM_BL"
             ARMC5_OK_Xrn2_MT_R2: 
@@ -54,7 +54,7 @@ SAMPLES:
 ##### If starting from bigwig or bam files NORM uses to rename bigwig ###
 # "RPKM","CPM","chrM", "subsample" 
 NORM:
-  "none"
+  - "none"
 
 # amc-sandbox User #
 USER:

@@ -48,14 +48,14 @@ GENOME:
 
 SAMPLES:
     SECTION-1:
-        SAMPLE-INPUT-PAIR-1:
+        PNUTS-CTD:
             PP1-PNUTS-H66K_mdox_CTD: 
                 - "H66K_mdox_CTD"
                 
             PP1-PNUTS-H66K_pdox_CTD: 
                 - "H66K_pdox_CTD"
             
-        SAMPLE-INPUT-PAIR-2:
+        PNUTS-H3k9me2:
             PP1-PNUTS-H66K_mdox_H3k9me2: 
                 - "H66KmdoxH3k9me2"
                 
@@ -70,7 +70,7 @@ SAMPLES:
 # scaleFactor within a group for bed file or bins, used: "scalefactor"
 # Or "subsample" : make bw and matix files from sub-sampled bam files (paired groups)
 NORM:
-  "CPM"
+  - "CPM"
 
 
   # set RGB colors for bw urls and table files, 

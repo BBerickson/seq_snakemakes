@@ -48,11 +48,11 @@ GENOME:
 
 SAMPLES:
     SECTION-1:
-        SAMPLING-GROUP-1:
+        8WG16-rep1:
             8WG16_rep1: 
               - "SRR1544602_8WG16_rep1"
 
-        SAMPLING-GROUP-2:
+        8WG16-rep2:
             CM603_DMSO: 
               - "SRR1736059_anti_Ser5-P_CM603_DMSO"
             8WG16_rep2: 
@@ -114,7 +114,8 @@ USER:
 # scaleFactor within a group for bed file or bins, used: "scalefactor"
 # Or "subsample" : make bw and matix files from sub-sampled bam files (paired groups)
 NORM:
-  "subsample" 
+  - "subsample" 
+  - "CPM"
 # set orentation of fastq files, can list one for each file    
 ORIENTATION:
     "R1" # R1, R2, 

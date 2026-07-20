@@ -173,7 +173,7 @@ def process_samples(all_samples, index_list, norm, orientations):
     SAMPLES = {}    # {sample_name: [fastq]}
     SAMPIN = {}     # {sample_name: [fastq, input_file]}
     GROUPS = {}     # {pair_name: [fastq]}
-    NORMMAP = {}    # {sample_name: [(index1, norm), (index2, 'cpm'), ...]}
+    NORMMAP = {}    # {sample_name: [(index1, norm1), (index1, norm2), ..., (index2, 'CPM'), ...]}
     PAIREDMAP = {}  # {sample_name: True/False}
 
     # Flatten all sample names
@@ -197,6 +197,12 @@ def process_samples(all_samples, index_list, norm, orientations):
         for sample_name in all_sample_names
     }
 
+    # First index paired with each norm, remaining indexes get CPM
+    index_norm_pairs = (
+        [(index_list[0], n) for n in norm] +
+        [(idx, "CPM") for idx in index_list[1:]]
+    )
+
     for section, pairs in all_samples.items():
         for pair_name, samples in pairs.items():
             for sample_name, values in samples.items():
@@ -205,16 +211,12 @@ def process_samples(all_samples, index_list, norm, orientations):
 
                 # Populate SAMPLES
                 SAMPLES.setdefault(sample_name, []).append(fastq)
-
                 # Populate SAMPIN
                 SAMPIN[sample_name] = [fastq, input_file] if input_file else [fastq]
-
                 # Populate GROUPS
                 GROUPS.setdefault(pair_name, []).append(fastq)
-
                 # Populate NORMMAP
-                norm_values = [norm] + ["CPM"] * (len(index_list) - 1)
-                NORMMAP[sample_name] = list(zip(index_list, norm_values))
+                NORMMAP[sample_name] = index_norm_pairs
 
                 # Determine orientation and pairing
                 orientation = sample_to_orientation[sample_name]
@@ -555,14 +557,6 @@ def _get_all_matrixtypes(regions, matrix_args, genelist):
         results.append(result)
     
   return results  # Return all results
-
-# controls and sets output if subsample normalzation is set
-def _get_bampath(bampath):
-    if bampath == "subsample":
-        word = "bams_sub"
-    else:
-        word = "bams"
-    return word
 
 ## RGB conversion helpers
 #

@@ -48,7 +48,7 @@ GENOME:
 
 SAMPLES:
     SECTION-1:
-        SAMPLING-GROUP-1:
+        RPB1-E1126G:
             RPB1_E1126G_R1: 
               - "B10E1126G1"
             RPB1_E1126G_R2: 
@@ -56,7 +56,7 @@ SAMPLES:
             RPB1_E1126G_R3: 
               - "B10E1126G3"
 
-        SAMPLING-GROUP-2:
+        RPB1-WT:
             RPB1_WT_R1: 
               - "B10Rpb1WT2"
             RPB1_WT_R2: 
@@ -64,7 +64,7 @@ SAMPLES:
             RPB1_WT_R3: 
               - "B10Rpb1WT4"
 
-        SAMPLING-GROUP-3:
+        RPB1-R749H:
             RPB1_R749H_R1: 
               - "B10C4R749H1"
             RPB1_R749H_R2: 
@@ -79,7 +79,7 @@ SAMPLES:
 # scaleFactor within a group for bed file or bins, used: "scalefactor"
 # Or "subsample" : make bw and matix files from sub-sampled bam files (paired groups)
 NORM:
-  "CPM"
+  - "CPM"
 
   
  # set RGB colors for bw urls and table files, 

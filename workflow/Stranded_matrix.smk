@@ -13,9 +13,6 @@ from pathlib import Path
 # Include custom Python functions
 include: workflow.source_path("scripts/funs.py")
 
-# path of samples file
-SAMPLES_FILE = workflow.configfiles[0] if workflow.configfiles else "samples.yaml"
-
 # ------------------------------------------------------------------------------
 # Load main genome config
 # ------------------------------------------------------------------------------
@@ -144,15 +141,6 @@ HEATMAP_REGIONS = ["543","5","5L","3"]
 
 COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
 
-NORMS = _get_normtype(CMD_PARAMS["bamCoverage"],NORM,CMD_PARAMS.get("bamCoverageBL", False),ORIENTATION)
-
-BAM_PATH = _get_bampath(NORM)
-
-if NORM == "subsample":
-    SUF_SUB = "_subsample"
-else:                        
-    SUF_SUB = ""
-    
 COVARGS = _get_all_matrixtypes(REGIONS,CMD_PARAMS,GENELIST)
 GENELIST = config1.get("GENELIST") or "all"
 
@@ -166,10 +154,11 @@ SAM_NORM = []
 for key in SAMPIN:
     sam_value = SAMPIN[key][0]
     for index, norm, suffix in NORMMAP[key]:
-        SAM_NORM.append([sam_value, key, index, norm, suffix])
+        bam_dir = "bams_sub" if norm == "subsample" else "bams"
+        SAM_NORM.append([sam_value, key, index, norm, suffix, bam_dir])
 
 # Create DataFrame
-DF_SAM_NORM = pd.DataFrame(SAM_NORM, columns=['Sample', 'Newnam', 'Index', 'Norm', 'Suffix'])
+DF_SAM_NORM = pd.DataFrame(SAM_NORM, columns=['Sample', 'Newnam', 'Index', 'Norm', 'Suffix', 'Bam_dir'])
 # Merge on 'Newnam' and 'Index'
 DF_SAM_NORM = REGIONS_COVARGS.merge(DF_SAM_NORM, on=['Newnam'], how='left')
 # PI matix files don't get normalized 
@@ -229,7 +218,7 @@ rule all:
           
           # qc with heatmap, cluster, profile plots
           [] if config.get("skip_matrix_html_report") else [
-              expand(SEQ_DATE + "_" + PROJ + "_{index}" + SUF_SUB + "_qc_plots_analysis.html", index=INDEXES[0])
+              expand(SEQ_DATE + "_" + PROJ + "_{index}" + "_qc_plots_analysis.html", index=INDEXES[0])
           ]
         ]
 

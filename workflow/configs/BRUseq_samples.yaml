@@ -48,17 +48,17 @@ GENOME:
 
 SAMPLES:
     SECTION-1:
-        SAMPLING-GROUP-1:
+        RTF1_WT:
             RTF1_WT_pDox_DRB_0: 
               - "293flpIN_RTF1_WT_DRB_t0"
             RTF1_WT_pDox_DRB_15: 
               - "293flpIN_RTF1_WT_DRB_t15"
 
-        SAMPLING-GROUP-2:
+        RTF1_MT:
             RTF1_MT_pDox_DRB_0: 
               - "293flpIN_RTF1_MT_DRB_t0"
-            RTF1_WT_pDox_DRB_15: 
-              - "293flpIN_RTF1_WT_DRB_t15"
+            RTF1_MT_pDox_DRB_15: 
+              - "293flpIN_RTF1_MT_DRB_t15"
       
 
 # Norm sample bw and matix files, spike-in is CPM      
@@ -68,7 +68,8 @@ SAMPLES:
 # scaleFactor within a group for bed file or bins, used: "scalefactor"
 # Or "subsample" : make bw and matix files from sub-sampled bam files (paired groups)
 NORM:
-  "chrM"
+  - "chrM"
+  - "CPM"
   
 # sandbox User #
 USER:
