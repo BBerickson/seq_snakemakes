@@ -202,7 +202,6 @@ include: "rules/02s_align_mask_subsample.snake"
 include: "rules/03a_featureCounts.snake"
 include: "rules/03a_fragmentSize.snake"
 include: "rules/03b_results_UMI.snake"
-include: "rules/03b_PCAplot.snake"
 # BW with deeptools bamCoverage
 include: "rules/04a_bamCoverage_stranded.snake"
 include: "rules/04b_bw_UCSC_URL_stranded.snake"
