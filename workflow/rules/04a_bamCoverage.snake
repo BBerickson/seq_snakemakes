@@ -4,7 +4,12 @@
 rule bamCoverage:
     input:
         bam = lambda wildcards: expand(
-            PROJ + "/" + BAM_PATH + "/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
+            PROJ + "/{bam_dir}/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
+            bam_dir = DF_SAM_NORM.loc[
+                (DF_SAM_NORM['Newnam'] == wildcards.newnam) &
+                (DF_SAM_NORM['Index'] == wildcards.index),
+                'Bam_dir'
+            ].iloc[0],
             sample = SAMPLES[wildcards.newnam],
             index = [wildcards.index]
         ),
