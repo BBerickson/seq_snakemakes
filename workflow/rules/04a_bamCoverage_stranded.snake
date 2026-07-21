@@ -40,7 +40,7 @@ sys.path.append('workflow/scripts')
 from funs import _get_norm
 
 # Recreate the dataframe from the passed data
-df_sam_norm = pd.DataFrame({params.sam_norm!r}, columns=['Sample', 'Newnam', 'Index', 'Norm', 'Suffix'])
+df_sam_norm = pd.DataFrame({params.sam_norm!r}, columns=['Sample', 'Newnam', 'Index', 'Norm', 'Suffix', 'Bam_dir'])
 scale = _get_norm(df_sam_norm, '{wildcards.newnam}', '{wildcards.suffix}', '{wildcards.index}', {input.norm_files!r})
 print(scale)
 ")

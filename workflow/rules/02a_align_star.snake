@@ -19,7 +19,7 @@ rule star_twopass:
         out      = PROJ + "/bams/{sample}_",
         read_cmd = "--readFilesCommand gunzip -c" if config.get("compress_temp", True) else ""
     resources:
-        memory = lambda wildcards, input: memory_estimator([input.R1, input.R2], 10, 25, 250) # input, multiplyer, min, max
+        memory = lambda wildcards, input: memory_estimator([input.R1, input.R2], 20, 25, 250) # input, multiplyer, min, max
     message:
         "Running STAR alignment with two-pass mode"
     threads: 
