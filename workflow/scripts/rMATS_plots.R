@@ -11,8 +11,9 @@ tc <- args[2] # "treatment:control" same as GROUPS_COMP: in samples_rAMTS.yaml
 min_count <- as.numeric(args[3]) # >= min_count average reads per replicate (inclusion + skipping) in at least one condition.
 max_FDR <- as.numeric(args[4]) # Standard 5% significance threshold for FDR adjusted pValue
 max_IncDifference <- as.numeric(args[5]) # PSI change threshold
-comps <- comps <- unlist(str_split(args[6], "\\s+")) # c("SE","RI", "MXE","A5SS","A3SS") # splicing types to loop over
-pdf_out <- args[7]
+comps <- unlist(str_split(args[6], "\\s+")) # c("SE","RI", "MXE","A5SS","A3SS") # splicing types to loop over
+num_plots <- as.numeric(args[7])
+pdf_out <- args[8]
 
 sigcounts <- function(PROJ, tc, type = "SE", min_count = 20, max_FDR = 0.05, max_IncDifference = 0.05, savefiles=TRUE){
   psis <- read_tsv(paste0(PROJ,"/rmats/",tc,'/',type,'.MATS.JC.txt'),show_col_types = FALSE) 
@@ -79,6 +80,46 @@ sigcounts <- function(PROJ, tc, type = "SE", min_count = 20, max_FDR = 0.05, max
   } else if(type == "MXE"){
     less <- "prefer_exon2"
     more <- "prefer_exon1"
+  }
+  
+  if(type == "SE"){
+    se.sensitive <- psis.sensitive1 %>%
+      group_by(`ID...1`) %>% 
+      mutate(my_count = rowSums(across(ends_with("counts")))) %>%
+      arrange(IncLevelDifference,desc(my_count),FDR) %>% 
+      group_by(geneSymbol) %>% 
+      mutate(upstreamES=min(upstreamES),downstreamEE=max(downstreamEE)) %>% 
+      ungroup() %>% 
+      distinct(upstreamES,downstreamEE,.keep_all = T) %>% 
+      slice_head(., n=num_plots)
+    
+    se.sensitive <- se.sensitive %>%
+      #Get rid of columns we aren't really going to use.
+      select("geneSymbol","chr","upstreamES","downstreamEE","FDR", "strand") %>%
+      mutate(name=paste0(chr,":",upstreamES,"-",downstreamEE)) %>% 
+      mutate(geneSymbol=if_else(is.na(geneSymbol),name,paste0(geneSymbol,"-",name)))
+    
+    se.sensitive %>% filter(strand == "+") %>% select(name,geneSymbol) %>% write_tsv(.,paste0(PROJ,"/rmats/",tc,"_",less,"_pos.txt"),col_names = F)
+    se.sensitive %>% filter(strand == "-") %>% select(name,geneSymbol) %>% write_tsv(.,paste0(PROJ,"/rmats/",tc,"_",less,"_neg.txt"),col_names = F)
+    
+    se.sensitive <- psis.sensitive2 %>%
+      group_by(`ID...1`) %>% 
+      mutate(my_count = rowSums(across(ends_with("counts")))) %>%
+      arrange(IncLevelDifference,desc(my_count),FDR) %>% 
+      group_by(geneSymbol) %>% 
+      mutate(upstreamES=min(upstreamES),downstreamEE=max(downstreamEE)) %>% 
+      ungroup() %>% 
+      distinct(upstreamES,downstreamEE,.keep_all = T) %>% 
+      slice_head(., n=num_plots)
+    
+    se.sensitive <- se.sensitive %>%
+      #Get rid of columns we aren't really going to use.
+      select("geneSymbol","chr","upstreamES","downstreamEE","FDR", "strand") %>%
+      mutate(name=paste0(chr,":",upstreamES,"-",downstreamEE)) %>% 
+      mutate(geneSymbol=if_else(is.na(geneSymbol),name,paste0(geneSymbol,"-",name)))
+    
+    se.sensitive %>% filter(strand == "+") %>% select(name,geneSymbol) %>% write_tsv(.,paste0(PROJ,"/rmats/",tc,"_",more,"_pos.txt"),col_names = F)
+    se.sensitive %>% filter(strand == "-") %>% select(name,geneSymbol) %>% write_tsv(.,paste0(PROJ,"/rmats/",tc,"_",more,"_neg.txt"),col_names = F)
   }
   
   if(savefiles){
