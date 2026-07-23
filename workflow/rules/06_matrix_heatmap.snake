@@ -29,7 +29,12 @@ rule create_heatmap_plots:
         setcol   = lambda wildcards: _rgb2hexplus2(SAMPLES, wildcards.group, COLS_DICT) if wildcards.sense_asense == "anti" else _rgb2hexplus(SAMPLES, wildcards.group, COLS_DICT),
         script   = "workflow/scripts/SvgToPng.R",
         texty    = "2",
-        s_as     = "{sense_asense}"
+        s_as     = "{sense_asense}",
+        my_ref   = lambda wildcards: (
+        os.path.splitext(os.path.basename(PI_REF))[0]
+        if wildcards.region == "PI"
+        else os.path.splitext(os.path.basename(MY_REF))[0]
+        )
     resources:
         memory = lambda wildcards, input: memory_estimator(input, 2, 1) # multiplier, min, max, unit=GB
     threads: 1
@@ -39,7 +44,7 @@ rule create_heatmap_plots:
         
         plotHeatmap -m {input} \
             --heatmapWidth 15 --heatmapHeight 30 \
-            {params.args} \
+            {params.args} --regionsLabel {params.my_ref} \
             --colorList ${{colors}} \
             -out {output.tempplot} 
         

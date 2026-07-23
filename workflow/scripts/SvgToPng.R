@@ -81,6 +81,18 @@ for(i in seq_along(my_files)){
       plot_center_x <- NA
     }
     
+    ## ---- PRE-CALCULATE PADDING FOR TEXT POSITIONING ----
+    padding_px <- PADDING_MULTIPLIER * my_size
+    # Get viewBox dimensions needed for outside-plot positioning
+    viewbox_match_pre <- str_match(as.character(doc), 'viewBox="([^"]*)"')
+    if (!is.na(viewbox_match_pre[1,1])) {
+      viewbox_values_pre <- as.numeric(strsplit(viewbox_match_pre[1,2], "\\s+")[[1]])
+      new_x <- viewbox_values_pre[1] - padding_px
+    } else {
+      width_match_pre <- str_extract(as.character(doc), 'width="([^"]*)"')
+      new_x <- -padding_px
+    }
+    
     ## ---- TEXT ----
     # Scale all text sizes
     doc_clean <- xml_ns_strip(doc)
@@ -99,10 +111,12 @@ for(i in seq_along(my_files)){
         is_x_axis_label <- TRUE
       }
       
-      # Check if the text is a Y-axis label by its text-anchor
+      # Check if the text is a Y-axis label by its text-anchor OR rotate(-90) transform
       is_y_axis_label <- FALSE
       text_anchor <- xml_attr(t, "text-anchor")
-      if (!is.na(text_anchor) && text_anchor == "end") {
+      t_transform <- xml_attr(t, "transform")
+      if ((!is.na(text_anchor) && text_anchor == "end") ||
+          (!is.na(t_transform) && grepl("rotate\\(-90", t_transform))) {
         is_y_axis_label <- TRUE
       }
       
@@ -153,8 +167,14 @@ for(i in seq_along(my_files)){
           if (!is.na(y_orig)) {
             # Apply different shifts based on label type
             if (is_y_axis_label) {
-              # No shift for Y-axis labels (they have text-anchor="end")
               new_y <- y_orig
+              if (!is.na(t_transform) && grepl("rotate\\(-90", t_transform)) {
+                x_orig <- as.numeric(xml_attr(t, "x"))
+                # Place it to the left of the plot, clear of any axes
+                new_x_pos <- new_x + (padding_px * 0.7)
+                xml_set_attr(t, "x", as.character(new_x_pos))
+                xml_set_attr(t, "transform", paste0("rotate(-90 ", new_x_pos, " ", new_y, ")"))
+              }
             } else if (is_x_axis_label) {
               # Apply full shift for X-axis labels
               new_y <- y_orig + y_shift + X_AXIS_SHIFT
@@ -197,6 +217,12 @@ for(i in seq_along(my_files)){
           xml_set_attr(t, "style", new_style)
         }
       }
+    }
+    
+    ## ---- REMOVE LEGEND ----
+    legend_nodes <- xml_find_all(doc_clean, ".//*[@id='legend_1']")
+    for (ln in legend_nodes) {
+      xml_remove(ln)
     }
     
     ## ---- LINES ----

@@ -171,6 +171,14 @@ rule all:
             index=DF_SAM_NORM['Index'],
             suffix=DF_SAM_NORM['Suffix']
         ),
+        
+        # bamCoverage URL for amc-sandbox
+          [] if config.get("skip_bw_urls") else [
+              expand(
+                PROJ + "/URLS/" + PROJ + "_{index}_" + SEQ_DATE + "_norm_{suffix}_bw_URL.txt",
+                zip, index=DF_SAM_NORM['Index'], suffix=DF_SAM_NORM['Suffix']
+              )
+          ],
 
         # matrix files
         expand(
@@ -198,6 +206,7 @@ rule all:
 
 # BW with deeptools bamCoverage
 include: "rules/04_get_BW_UnStranded.snake"
+include: "rules/04b_bw_UCSC_URL.snake"
 # make matrix files
 include: "rules/05_UnStranded_matrix.snake"
 

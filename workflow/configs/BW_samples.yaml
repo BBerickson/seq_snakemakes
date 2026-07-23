@@ -61,7 +61,7 @@ USER:
   "User7"
 # set orentation of fastq files, can list one for each file       
 ORIENTATION:
-    "R2R1" # R1R2, R1
+    "Unstranded" # Unstranded, R2R1, R1R2, R1, 
 
 # which matrix type(s) to make
 # deeptools options set in Stranded_matrix.yaml
@@ -103,4 +103,8 @@ COLORS:
   - "227,26,28"   # - Red
   - "253,191,111" # - Light orange/peach
   - "202,178,214" # - Light purple/lavender
+    
+# Save data on amc-sandbox and make URLS
+skip_bw_urls: true
+skip_matrix_url: false
     

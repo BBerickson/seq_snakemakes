@@ -16,7 +16,8 @@ rule bamCoverage:
         norm_files = lambda wildcards: [
             PROJ + "/stats/" + sample + "_summary_featureCounts.tsv" 
             for sample in SAMPLES[wildcards.newnam]
-        ]
+        ],
+        check_point = PROJ + "/report/" + PROJ + "_" + INDEXES[0] + "_results.tsv"
     output:
         bigwig = PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}.bw"
     params:

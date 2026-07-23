@@ -20,7 +20,7 @@ mkdir -p logs
 
 # Configuration
 DATASET="BW"  # Set your dataset name here
-MATRIXSET="UnStranded" # set the type here
+MATRIXSET="UnStranded" # set the type here, UnStranded, Stranded, bidirectional
 
 PROFILE="workflow/profiles/Bodhi"
 LSF_CONFIG="workflow/profiles/Bodhi/Bodhi_config.yaml"
