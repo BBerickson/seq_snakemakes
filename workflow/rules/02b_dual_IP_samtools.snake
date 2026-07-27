@@ -12,6 +12,7 @@ rule align_filter_multimap:
         counts = PROJ + "/bams/{sample}_{index}_count_multimap.txt"
     params:
         job_name = "{sample}_multimap_filter",
+        cmd      = PROJ + "/pipeline/filter_multimap.cmd",
         samp = "{sample}_{index}",
         args = CMD_PARAMS["samtools"],
         args2 = CMD_PARAMS["multimap"],
@@ -32,6 +33,11 @@ rule align_filter_multimap:
             samtools view {params.args} {input.bam} > {output.bam}
             samtools index -@ {threads} {output.bam}
             echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
+            if [ ! -s {params.cmd} ]; then
+                samtools --version 2>&1 | head -1 >> {params.cmd}
+                echo "samtools view {params.args} <sample.bam> <sample_filter.bam>" >> {params.cmd}
+                echo "samtools index <sample_filter.bam>" >> {params.cmd}
+            fi
         else
             # Apply multimap filtering
             
@@ -44,9 +50,16 @@ rule align_filter_multimap:
                 | samtools fixmate -r - {output.bamt}
                 
                 # Paired-end filtering
-                samtools view -F 1804 -f 2 -u {output.bamt} \
-                  | samtools sort - -T {params.sortname} -@ {threads} -O bam \
-                  > {output.bam}
+              samtools view -F 1804 -f 2 -u {output.bamt} \
+                | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+                > {output.bam}
+                  
+              if [ ! -s {params.cmd} ]; then
+                samtools --version 2>&1 | head -1 >> {params.cmd}
+                echo "samtools view {params.args} -u <sample.bam> | samtools sort -n -T <sample.temp> | samtools view -h - | multimappers2.py {params.args2} --paired-end | samtools fixmate -r - <sample_temp.bam>" >> {params.cmd}
+                echo "samtools view -F 1804 -f 2 -u <sample_temp.bam> | samtools sort - -T <sample.temp> -O bam <sample_filter.bam> " >> {params.cmd}
+                echo "samtools index <sample_filter.bam>" >> {params.cmd}
+              fi
             else
                 # Single-end filtering
             
@@ -59,6 +72,13 @@ rule align_filter_multimap:
                 samtools view -F 1804 -u {output.bamt} \
                   | samtools sort - -T {params.sortname} -@ {threads} -O bam \
                   > {output.bam}
+                  
+                if [ ! -s {params.cmd} ]; then
+                  samtools --version 2>&1 | head -1 >> {params.cmd}
+                  echo "samtools view {params.args} -u <sample.bam> | samtools sort -n -T <sample.temp> | samtools view -h - | multimappers2.py {params.args2} | samtools fixmate -r - <sample_temp.bam>" >> {params.cmd}
+                  echo "samtools view -F 1804 -u <sample_temp.bam> | samtools sort - -T <sample.temp> -O bam <sample_filter.bam> " >> {params.cmd}
+                  echo "samtools index <sample_filter.bam>" >> {params.cmd}
+                fi
             fi
             
             # Index and count reads
@@ -79,6 +99,7 @@ rule align_filter_indexed:
         counts = PROJ + "/bams/{sample}_aligned_{index}_count.txt"
     params:
         job_name = "{sample}_align_filter_{index}",
+        cmd      = PROJ + "/pipeline/index_filter.cmd",
         idx      = lambda wildcards: INDEX_PATH + wildcards.index + ".txt",
         samp     = "{sample}_{index}",
         args     = CMD_PARAMS["samtools"],
@@ -109,6 +130,12 @@ rule align_filter_indexed:
         echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
         
         rm -f {params.sortname}.unsorted.bam
+        if [ ! -s {params.cmd} ]; then
+            samtools --version 2>&1 | head -1 >> {params.cmd}
+            echo "samtools view <sample_filter.bam> {params.idx} | sed 's/spike_*//g' | samtools view -bT {params.fa} - > <sample_unsorted_filter.bam>" >> {params.cmd}
+            echo "samtools sort <sample_unsorted_filter.bam> -T <sample_unsorted_filter.temp> -O bam <sample_index_filter.bam>" >> {params.cmd}
+            echo "samtools index <sample_index_filter.bam>" >> {params.cmd}
+        fi
         
         """
 

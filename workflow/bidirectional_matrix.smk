@@ -73,6 +73,7 @@ USER         = config.get("USER")
 # From additional configs
 raw_indexes = config1['INDEXES']
 INDEXES     = [raw_indexes] if isinstance(raw_indexes, str) else [raw_indexes[0]]
+MY_REF      = config1.get("MY_REF")
 FW_REF      = config1.get("FW_REF")
 REV_REF     = config1.get("REV_REF")
 FW_PI_REF   = config1.get("FW_PI_REF")

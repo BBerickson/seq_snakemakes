@@ -14,6 +14,7 @@ rule bowtie_first_pass:
         unaligned_R2 = temp(PROJ + "/unaligned/{sample}_unaligned_R2_001.fastq.gz")
     params:
         job_name = INDEX_MAP + "_{sample}_bowtie",
+        cmd      = PROJ + "/pipeline/bowtie.cmd",
         idx      = INDEX_PATH + INDEX_MAP,
         args     = lambda wildcards: CMD_PARAMS["bowtie2"]["first"],
         sortname = PROJ + "/{sample}.temp." + INDEX_MAP,
@@ -45,6 +46,14 @@ rule bowtie_first_pass:
         
         # Index the BAM file
         samtools index -@ {threads} {output.bam}
+            
+        if [ ! -s {params.cmd} ]; then
+            bowtie2 --version 2>&1 | grep "version" | head -1 | sed 's|.*/||' >> {params.cmd}
+            echo "bowtie2 -x {params.idx} -1 <sample_trim_R1.fastq.gz> -2 <sample_trim_R2.fastq.gz> {params.args} --un-conc-gz <sample_unaligned.fastq.gz> -S <sample.sam>" >> {params.cmd}
+            samtools --version 2>&1 | head -1 >> {params.cmd}
+            echo "samtools sort <sample.sam> -T <sample.temp> -O bam -o <sample.bam>" >> {params.cmd}
+            echo "samtools index <sample.bam>" >> {params.cmd}
+        fi
         """
 
 # Align trimmed reads with bowtie2 R1 or R2
@@ -60,6 +69,7 @@ rule bowtie_second_pass:
         stats = PROJ + "/bams/{sample}_" + INDEX_SECOND + "_bowtie_stats.txt"
     params:
         job_name = INDEX_SECOND + "_{sample}_bowtie",
+        cmd      = PROJ + "/pipeline/bowtie.cmd",
         idx      = INDEX_PATH2 + INDEX_SECOND,
         args     = lambda wildcards: CMD_PARAMS["bowtie2"]["second"],
         sortname = PROJ + "/{sample}.temp." + INDEX_SECOND,
@@ -79,6 +89,14 @@ rule bowtie_second_pass:
               {params.args} \
               -S {params.sortname}.sam \
               2> {output.stats}
+            
+          if [ ! -s {params.cmd} ]; then
+              bowtie2 --version 2>&1 | grep "version" | head -1 | sed 's|.*/||' >> {params.cmd}
+              echo "bowtie2 -x {params.idx} -1 <sample_unaligned_R1.fastq.gz> -2 <sample_unaligned_R2.fastq.gz> {params.args} -S <sample.sam>" >> {params.cmd}
+              samtools --version 2>&1 | head -1 >> {params.cmd}
+              echo "samtools sort <sample.sam> -T <sample.temp> -O bam -o <sample.bam>" >> {params.cmd}
+              echo "samtools index <sample.bam>" >> {params.cmd}
+          fi
         else
           bowtie2 \
               -p {threads} \
@@ -87,6 +105,15 @@ rule bowtie_second_pass:
               {params.args} \
               -S {params.sortname}.sam \
               2> {output.stats}
+              
+            
+          if [ ! -s {params.cmd} ]; then
+              bowtie2 --version 2>&1 | grep "version" | head -1 | sed 's|.*/||' >> {params.cmd}
+              echo "bowtie2 -x {params.idx} -1 <sample_trim_R1.fastq.gz> -2 <sample_trim_R2.fastq.gz> {params.args} -S <sample.sam>" >> {params.cmd}
+              samtools --version 2>&1 | head -1 >> {params.cmd}
+              echo "samtools sort <sample.sam> -T <sample.temp> -O bam -o <sample.bam>" >> {params.cmd}
+              echo "samtools index <sample.bam>" >> {params.cmd}
+          fi
         fi
         
         samtools sort {params.sortname}.sam -T {params.sortname} -@ {threads} -O bam -o {output.bam}

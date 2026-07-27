@@ -23,6 +23,7 @@ rule my_5_bidirectonal_matrix:
         rev      = PROJ + "/matrix/{region}/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_neg_matrix.gz"
     params:
         job_name = "{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_bi_matrix",
+        cmd      = PROJ + "/pipeline/computeMatrix.cmd",
         args     = lambda wildcards: CMD_PARAMS[f"region{wildcards.region}"] + ("--blackListFileName " + config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else ""),
         fw_ref  = get_fw_ref,
         rev_ref = get_rev_ref
@@ -34,6 +35,12 @@ rule my_5_bidirectonal_matrix:
         """
         computeMatrix {params.args} -R {params.fw_ref} -S {input.fw} -p {threads} -o {output.fw}
         computeMatrix {params.args} -R {params.rev_ref} -S {input.rev} -p {threads} -o {output.rev}
+          
+        if [ ! -s {params.cmd} ]; then
+            computeMatrix --version >> {params.cmd}
+            echo "computeMatrix {params.args} -R {params.fw_ref} -S <sample_fw.bw> -o <sample_pos_matrix.gz>">> {params.cmd}
+            echo "computeMatrix {params.args} -R {params.rev_ref} -S <sample_rev.bw> -o <sample_neg_matrix.gz>">> {params.cmd}
+        fi
         
         """
 

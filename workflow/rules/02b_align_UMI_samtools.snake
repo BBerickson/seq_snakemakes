@@ -11,6 +11,7 @@ rule dedup_UMI:
         stats  = PROJ + "/bams/{sample}_" + INDEX_MAP + "_UMI_dedup_stats.txt"
     params:
         job_name = "{sample}_dedup",
+        cmd      = PROJ + "/pipeline/dedup_UMI.cmd",
         samp     = "{sample}_" + INDEX_MAP,
         sortname = PROJ + "/{sample}.temp",
         args     = CMD_PARAMS["umi_tools"]
@@ -27,7 +28,12 @@ rule dedup_UMI:
             -L {output.stats}
         
         samtools index -@ {threads} {output.bamt}
-        
+        if [ ! -s {params.cmd} ]; then
+            pip show umi_tools | grep -E "^(Name|Version)" >> {params.cmd}
+            echo "umi_tools dedup -I <sample.bam> -S <sample_temp.bam> -L <sampleUMI_dedup_stats.txt>" >> {params.cmd}
+            samtools --version 2>&1 | head -1 >> {params.cmd}
+            echo "samtools index <sample_temp.bam>" >> {params.cmd}
+        fi
         """
 
 # Create duplication summary
@@ -71,6 +77,7 @@ rule align_filter:
         bamit  = temp(PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + "_temp2.bam.bai")
     params:
         job_name = "{sample}_aligned_{index}_align_filter",
+        cmd      = PROJ + "/pipeline/index_filter.cmd",
         idx      = lambda wildcards: INDEX_PATH + wildcards.index + ".txt",
         samp     = "{sample}_{index}",
         args     = CMD_PARAMS["samtools"],
@@ -96,6 +103,13 @@ rule align_filter:
         
         samtools index -@ {threads} {output.bam}
         echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
+        if [ ! -s {params.cmd} ]; then
+            samtools --version 2>&1 | head -1 >> {params.cmd}
+            echo "samtools view <sample_temp.bam> {params.args} > <sample_temp2.bam>" >> {params.cmd}
+            echo "samtools index <sample_temp2.bam>" >> {params.cmd}
+            echo "samtools view <sample_temp2.bam> {params.idx} | sed 's/spike_*//g' | samtools view -bT {params.fa2} - | samtools sort - -T <sample_unsorted_filter.temp> -O bam <sample_index_filter.bam>" >> {params.cmd}
+            echo "samtools index <sample_index_filter.bam>" >> {params.cmd}
+        fi
         
         """
 

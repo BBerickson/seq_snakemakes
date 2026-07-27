@@ -24,6 +24,7 @@ rule bamCoverage:
         rev     =   PROJ   + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}_rev.bw"
     params:
         job_name = "{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage",
+        cmd      = PROJ + "/pipeline/bamCoverage.cmd",
         args = CMD_PARAMS["bamCoverage"] + ("--blackListFileName " + config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else ""),
         argsf    = _get_bamCov_strand("forward", ORIENTATION),
         argsr    = _get_bamCov_strand("reverse", ORIENTATION),
@@ -65,5 +66,11 @@ print(scale)
           $SCALE \
           -p {threads} \
           --filterRNAstrand {params.argsr}
+          
+        if [ ! -s {params.cmd} ]; then
+            bamCoverage --version >> {params.cmd}
+            echo "bamCoverage -b <sample_index_filter.bam> -of bigwig -o <sample_fw.bw> {params.args} $SCALE --filterRNAstrand {params.argsf}">> {params.cmd}
+            echo "bamCoverage -b <sample_index_filter.bam> -of bigwig -o <sample_rev.bw> {params.args} $SCALE --filterRNAstrand {params.argsr}">> {params.cmd}
+        fi
         """
 

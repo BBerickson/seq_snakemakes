@@ -60,6 +60,7 @@ rule subsample_dedup:
         stats = PROJ + "/bams_sub/{sample}_aligned_{index}_subsample.txt"
     params:
         job_name = "subsample_{sample}_aligned_{index}",
+        cmd      = PROJ + "/pipeline/subsample.cmd",
         samp     = "{sample}_{index}",
         scale    = lambda wildcards, input: _get_norm_fraction(wildcards, wildcards.index, input.counts)
     resources:
@@ -74,6 +75,11 @@ rule subsample_dedup:
           samtools index -@ {threads} {output.bam}
         
           echo "{params.samp} Sampled_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" >> {output.stats}
+          if [ ! -s {params.cmd} ]; then
+              samtools --version 2>&1 | head -1 >> {params.cmd}
+              echo "samtools view -s {params.scale} -b <sample_index_filter.bam> > <sample_subsample.bam>" >> {params.cmd}
+              echo "samtools index <sample_subsample.bam>" >> {params.cmd}
+          fi
         """
 
                     

@@ -13,6 +13,7 @@ rule extract_umi:
         log = PROJ + "/logs/{sample}_extract_umi.out"
     params:
         job_name = "{sample}_umi_extract",
+        cmd      = PROJ + "/pipeline/extract_umi.cmd",
         umi_pat  = CMD_PARAMS["umi_pattern"],
         orientation = ORIENTATION
     resources:
@@ -28,6 +29,9 @@ rule extract_umi:
             ln -sf {input[0]} {output.R1}
             ln -sf {input[1]} {output.R2}
             touch {output.log}
+            if [ ! -s {params.cmd} ]; then
+                echo "umi_tools extract step skipped" >> {params.cmd}
+            fi
         elif [ "{params.orientation}" = "R1" ]; then
             # Extract UMIs from R1
             umi_tools extract \
@@ -39,6 +43,11 @@ rule extract_umi:
               -L {output.log} \
               | gzip \
               > {output.R2}
+            
+            if [ ! -s {params.cmd} ]; then
+                pip show umi_tools | grep -E "^(Name|Version)" >> {params.cmd}
+                echo "umi_tools extract -I <sample_R2.fastq.gz> --extract-method=string --bc-pattern={params.umi_pat} --read2-in=<sample_R1.fastq.gz> --read2-out=<sample_umi_R1.fastq.gz> | gzip > <sample_umi_R2.fastq.gz>" >> {params.cmd}
+            fi
         else
             # Extract UMIs from R2
             umi_tools extract \
@@ -50,6 +59,11 @@ rule extract_umi:
               -L {output.log} \
               | gzip \
               > {output.R1}
+            
+            if [ ! -s {params.cmd} ]; then
+                pip show umi_tools | grep -E "^(Name|Version)" >> {params.cmd}
+                echo "umi_tools extract -I <sample_R1.fastq.gz> --extract-method=string --bc-pattern={params.umi_pat} --read2-in=<sample_R2.fastq.gz> --read2-out=<sample_umi_R2.fastq.gz> | gzip > <sample_umi_R1.fastq.gz>" >> {params.cmd}
+            fi
         fi
         """
 
@@ -65,6 +79,7 @@ rule cutadapt:
         stats = PROJ + "/cutadapt/{sample}_cutadapt_stats.txt"
     params:
         job_name = "{sample}_cutadapt",
+        cmd      = PROJ + "/pipeline/cutadapt.cmd",
         args     = CMD_PARAMS["cutadapt"]
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1, 2) # multiplier, min, max, unit=GB
@@ -79,6 +94,9 @@ rule cutadapt:
             ln -sf {input.R1} {output.R1}
             ln -sf {input.R2} {output.R2}
             touch {output.stats}
+            if [ ! -s {params.cmd} ]; then
+                echo "cutadapt step skipped" >> {params.cmd}
+            fi
         else
             # Run cutadapt with provided arguments
             python3 -m cutadapt \
@@ -89,6 +107,11 @@ rule cutadapt:
               {input.R1} \
               {input.R2} \
               > {output.stats}
+            
+            if [ ! -s {params.cmd} ]; then
+                echo "cutadapt $(cutadapt --version)" >> {params.cmd}
+                echo "cutadapt {params.args} -o <sample_trim_R1.fastq.gz> -p <sample_trim_R2.fastq.gz> <sample_umi_R1.fastq.gz> <sample_umi_R2.fastq.gz>" >> {params.cmd}
+            fi
         fi
         """
 

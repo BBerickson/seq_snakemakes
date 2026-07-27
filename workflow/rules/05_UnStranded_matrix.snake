@@ -8,6 +8,7 @@ rule standared_matrix:
         matrix = PROJ + "/matrix/{region}/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_matrix.gz"
     params:
         job_name = "{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_matrix",
+        cmd      = PROJ + "/pipeline/computeMatrix.cmd",
         args = lambda wildcards: CMD_PARAMS[f"region{wildcards.region}"] + ("--blackListFileName " + config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else ""),
         my_ref = lambda wildcards: PI_REF if wildcards.region == "PI" else MY_REF
     resources:
@@ -18,6 +19,11 @@ rule standared_matrix:
         """
         # deeptools
         computeMatrix {params.args} -R {params.my_ref} -S {input.bw} -p {threads} -o {output.matrix} 
+          
+        if [ ! -s {params.cmd} ]; then
+            computeMatrix --version >> {params.cmd}
+            echo "computeMatrix {params.args} -R {params.my_ref} -S <sample.bw> -o <sample_matrix.gz>">> {params.cmd}
+        fi
         """
 
 # make url's and scp to sandbox

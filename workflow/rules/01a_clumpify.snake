@@ -10,6 +10,7 @@ rule clumpify:
         log = PROJ + "/clumpify/{sample}_clumpify.log"
     params:
         job_name = "{sample}_clumpify",
+        cmd      = PROJ + "/pipeline/clumpify.cmd",
         groups = lambda wc, resources: max(1, min(16, resources.memory // 12)),
         args = lambda wildcards: CMD_PARAMS["clumpify"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
         is_paired = lambda wildcards: PAIREDMAP[wildcards.sample],
@@ -32,12 +33,20 @@ rule clumpify:
             fi
             echo "Reads In:  0,0" >> {output.log}
             echo "Duplicates Found:  0,0" >> {output.log}
+            if [ ! -s {params.cmd} ]; then
+                echo "clumpify dedup filter step skipped" >> {params.cmd}
+            fi
         elif [ "{params.is_paired}" = "True" ]; then
             clumpify.sh -Xmx${{REDUCED_MEM}}g \
                 groups={params.groups} \
                 in1={input[0]} in2={params.input_r2} \
                 out1={output.R1} out2={output.R2} \
                 {params.args} 2>> {output.log}
+            
+            if [ ! -s {params.cmd} ]; then
+                clumpify.sh --version 2>&1 | grep "BBTools version" >> {params.cmd}
+                echo "clumpify.sh groups={params.groups} {params.args} in1=<sample_R1.fastq.gz> in2=<sample_R2.fastq.gz> out1=<sample_dedup_R1.fastq.gz> out2=<sample_dedup_R2.fastq.gz>" >> {params.cmd}
+            fi
         else
             clumpify.sh -Xmx${{REDUCED_MEM}}g \
                 groups={params.groups} \
@@ -45,6 +54,11 @@ rule clumpify:
                 out={output.R1} \
                 {params.args} 2>> {output.log}
             touch {output.R2}
+            
+            if [ ! -s {params.cmd} ]; then
+                clumpify.sh --version 2>&1 | grep "BBTools version" >> {params.cmd}
+                echo "clumpify.sh groups={params.groups} {params.args} in=<sample_R1.fastq.gz> out=<sample_dedup_R1.fastq.gz>" >> {params.cmd}
+            fi
         fi
         """
 

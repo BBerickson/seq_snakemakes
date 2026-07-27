@@ -10,6 +10,8 @@ rule featureCounts_sample:
         tsv = PROJ + "/counts/{sample}_aligned_{index}_featureCounts.tsv"
     params:
         job_name = "{sample}_aligned_{index}_featureCounts",
+        cmd      = PROJ + "/pipeline/featureCounts.cmd",
+        cmd2      = PROJ + "/pipeline/featureCounts_enrich.cmd",
         args     = lambda wildcards: _get_featCount(ORIENTATION, config_indexes[wildcards.index].get("GTF")),
         args2    = config["CMD_PARAMS"].get("featureCounts", ""),
         tsv      = PROJ + "/counts/{sample}_aligned_{index}_featureCounts_enrich.tsv",
@@ -25,7 +27,7 @@ rule featureCounts_sample:
         
         # Check if BAM file is empty (0 reads)
         if [ "$read_count" -eq 0 ]; then
-            echo "BAM file is empty (0 reads), creating empty featureCounts output"
+            
             # Create empty featureCounts output file
             echo -e "# Program:featureCounts v2.0.1; Command line arguments: (empty BAM file)" > {output.tsv}
             echo -e "ID\tChr\tStart\tEnd\tStrand\tLength\tgene_name\tGeneid\t{input.bam}" >> {output.tsv}
@@ -45,6 +47,10 @@ rule featureCounts_sample:
             echo -e "Unassigned_NoFeatures\t0" >> {output.tsv}.summary
             echo -e "Unassigned_Overlapping_Length\t0" >> {output.tsv}.summary
             echo -e "Unassigned_Ambiguity\t0" >> {output.tsv}.summary
+            if [ ! -s {params.cmd} ]; then
+                featureCounts -v >> {params.cmd}
+                echo "BAM file is empty (0 reads), creating empty featureCounts output" >> {params.cmd}
+            fi
         else
             echo "BAM file contains $read_count reads, running featureCounts"
             
@@ -57,6 +63,10 @@ rule featureCounts_sample:
                   -o {params.tsv} \
                   -T {threads} \
                   {input.bam}
+                if [ ! -s {params.cmd2} ]; then
+                    featureCounts -v >> {params.cmd2}
+                    echo "featureCounts {params.args} {params.args2} -a {params.ftfile} -o <sample_featureCounts_enrich.tsv> <sample_index_filter.bam>" >> {params.cmd2}
+                fi
             fi
             
             # Run main featureCounts
@@ -66,6 +76,10 @@ rule featureCounts_sample:
                 -o {output.tsv} \
                 -T {threads} \
                 {input.bam}
+                if [ ! -s {params.cmd} ]; then
+                    featureCounts -v >> {params.cmd}
+                    echo "featureCounts {params.args} -a {params.ftfile} -o <sample_featureCounts_enrich.tsv> <sample_index_filter.bam>" >> {params.cmd}
+                fi
         fi
         """
         

@@ -13,6 +13,7 @@ rule star_twopass:
         final = PROJ + "/bams/{sample}_Log.final.out"
     params:
         job_name = "{sample}_star_twopass",
+        cmd      = PROJ + "/pipeline/star_twopass.cmd",
         gtf      = config_indexes[INDEXES[0]].get("GTF"),
         bam_unsorted = PROJ + "/bams/{sample}_Aligned.out.bam",
         args     = lambda wildcards: CMD_PARAMS["star"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
@@ -50,6 +51,14 @@ rule star_twopass:
         samtools index -@ $sort_threads {output.bam}
         
         rm {params.bam_unsorted}
+            
+        if [ ! -s {params.cmd} ]; then
+            echo "STAR $(STAR --version)" >> {params.cmd}
+            echo "STAR --genomeDir {INDEX_PATH} --readFilesIn <sample_trim_R1.fastq.gz> <sample_trim_R2.fastq.gz> --outFileNamePrefix <sample_> --sjdbGTFfile {params.gtf} {params.args} --twopassMode Basic" >> {params.cmd}
+            samtools --version 2>&1 | head -1 >> {params.cmd}
+            echo "samtools sort <sample_Aligned.out.bam> -T <sample.temp> -o <sample.bam>" >> {params.cmd}
+            echo "samtools index <sample.bam>" >> {params.cmd}
+        fi
         """
 
         
