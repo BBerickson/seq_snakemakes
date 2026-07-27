@@ -143,6 +143,7 @@ rule create_plots:
         PROJ + "/report/" + PROJ + "_" + INDEXES[0] + "_results.tsv"
     output:
         report  = SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_qc_analysis.html",
+        reportc = PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "pipeline_methods.txt",
         config  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_config.yaml"),
         result  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_clean_results.tsv")
     params:
@@ -158,6 +159,9 @@ rule create_plots:
         1
     shell:
         """
+        echo "Pipeline run: $(date '+%Y-%m-%d %H:%M:%S')" >> {output.reportc}
+        echo "" >> {output.reportc}
+        ls -tr {input} | xargs cat >> {output.reportc}
         Rscript {params.script} "{input}" "{params.mydir}" "{params.seqdate}" "{params.index}" "{output.result}" "{output.config}"
         multiqc {params.mydir} --config {output.config} --force --filename {params.out_file}
         rm -r {params.out_file}_data

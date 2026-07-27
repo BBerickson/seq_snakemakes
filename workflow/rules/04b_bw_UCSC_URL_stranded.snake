@@ -35,7 +35,7 @@ rule bamCoverage_summary:
         lambda wildcards: sorted([
             PROJ + f"/bw/{newnam}_aligned_{index}_{SEQ_DATE}_norm_{suffix}_bamCoverage_stats.txt"
             for newnam, index, suffix in zip(DF_SAM_NORM['Newnam'], DF_SAM_NORM['Index'], DF_SAM_NORM['Suffix'])
-            if index == wildcards.index
+            if index == wildcards.index and suffix == wildcards.suffix
         ])
     output:
         PROJ + "/URLS/" + PROJ + "_{index}_" + SEQ_DATE + "_norm_{suffix}_bw_URL.txt"
