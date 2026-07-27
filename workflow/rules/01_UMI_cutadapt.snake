@@ -14,6 +14,7 @@ rule extract_umi:
     params:
         job_name = "{sample}_umi_extract",
         cmd      = PROJ + "/pipeline/extract_umi.cmd",
+        cmdd     = PROJ + "/pipeline",
         umi_pat  = CMD_PARAMS["umi_pattern"],
         orientation = ORIENTATION
     resources:
@@ -24,6 +25,7 @@ rule extract_umi:
         1
     shell:
         """
+        mkdir -p '{params.cmdd}'
         if [ -z "{params.umi_pat}" ]; then
             # If no UMI pattern, create symlinks
             ln -sf {input[0]} {output.R1}
@@ -80,6 +82,7 @@ rule cutadapt:
     params:
         job_name = "{sample}_cutadapt",
         cmd      = PROJ + "/pipeline/cutadapt.cmd",
+        cmdd     = PROJ + "/pipeline",
         args     = CMD_PARAMS["cutadapt"]
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1, 2) # multiplier, min, max, unit=GB
@@ -89,6 +92,7 @@ rule cutadapt:
         6
     shell:
         """
+        mkdir -p '{params.cmdd}'
         if [ -z "{params.args}" ]; then
             # No cutadapt args, create symlinks to original files
             ln -sf {input.R1} {output.R1}

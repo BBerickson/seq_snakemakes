@@ -12,6 +12,7 @@ rule bbduk:
     params:
         job_name = "{sample}_bbduk",
         cmd      = PROJ + "/pipeline/bbduk.cmd",
+        cmdd     = PROJ + "/pipeline",
         args = lambda wildcards: CMD_PARAMS["bbduk"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
         bar = lambda wildcards: _bbduk_adapter_param(BARCODES),
         is_paired = lambda wildcards: PAIREDMAP[wildcards.sample]
@@ -21,6 +22,7 @@ rule bbduk:
         12
     shell:
         """
+        mkdir -p '{params.cmdd}'
         if [ -z "{params.args}" ]; then
             # No bbduk args, just copy files
             cp {input.R1} {output.R1}

@@ -21,6 +21,7 @@ rule dedup_UMI:
         4
     shell:
         """
+        mkdir -p '{params.cmd}'
         umi_tools dedup \
             {params.args} \
             -I {input.bam} \
@@ -78,6 +79,7 @@ rule align_filter:
     params:
         job_name = "{sample}_aligned_{index}_align_filter",
         cmd      = PROJ + "/pipeline/index_filter.cmd",
+        cmdd     = PROJ + "/pipeline",
         idx      = lambda wildcards: INDEX_PATH + wildcards.index + ".txt",
         samp     = "{sample}_{index}",
         args     = CMD_PARAMS["samtools"],
@@ -89,6 +91,7 @@ rule align_filter:
         8
     shell:
         """
+        mkdir -p '{params.cmdd}'
         # Use 80% of allocated memory for samtools, split across threads
         mem_per_thread=$(( {resources.memory} * 1024 * 80 / 100 / {threads} ))
         

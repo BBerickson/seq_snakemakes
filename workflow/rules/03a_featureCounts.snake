@@ -12,6 +12,7 @@ rule featureCounts_sample:
         job_name = "{sample}_aligned_{index}_featureCounts",
         cmd      = PROJ + "/pipeline/featureCounts.cmd",
         cmd2      = PROJ + "/pipeline/featureCounts_enrich.cmd",
+        cmdd     = PROJ + "/pipeline",
         args     = lambda wildcards: _get_featCount(ORIENTATION, config_indexes[wildcards.index].get("GTF")),
         args2    = config["CMD_PARAMS"].get("featureCounts", ""),
         tsv      = PROJ + "/counts/{sample}_aligned_{index}_featureCounts_enrich.tsv",
@@ -22,6 +23,7 @@ rule featureCounts_sample:
         12
     shell:
         """
+        mkdir -p '{params.cmdd}'
         # Extract read count from the counts file
         read_count=$(awk '{{print $3}}' {input.counts})
         

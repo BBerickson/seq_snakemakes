@@ -26,6 +26,7 @@ rule create_heatmap_plots:
     params:
         job_name = PROJ + "/heatmap/{region}_{group}_aligned_{index}_temp_{covarg}_norm_{suffix}_{sense_asense}_heatmap",
         cmd      = PROJ + "/pipeline/heatmap.cmd",
+        cmdd     = PROJ + "/pipeline",
         args     = CMD_PARAMS["heatmap"],
         setcol   = lambda wildcards: _rgb2hexplus2(SAMPLES, wildcards.group, COLS_DICT) if wildcards.sense_asense == "anti" else _rgb2hexplus(SAMPLES, wildcards.group, COLS_DICT),
         script   = "workflow/scripts/SvgToPng.R",
@@ -41,6 +42,7 @@ rule create_heatmap_plots:
     threads: 1
     shell:
         """
+        mkdir -p '{params.cmdd}'
         colors=("{params.setcol}") 
         
         plotHeatmap -m {input} \

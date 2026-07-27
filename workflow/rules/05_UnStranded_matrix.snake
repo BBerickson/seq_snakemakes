@@ -9,6 +9,7 @@ rule standared_matrix:
     params:
         job_name = "{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_matrix",
         cmd      = PROJ + "/pipeline/computeMatrix.cmd",
+        cmdd     = PROJ + "/pipeline",
         args = lambda wildcards: CMD_PARAMS[f"region{wildcards.region}"] + ("--blackListFileName " + config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else ""),
         my_ref = lambda wildcards: PI_REF if wildcards.region == "PI" else MY_REF
     resources:
@@ -17,6 +18,7 @@ rule standared_matrix:
         12
     shell:
         """
+        mkdir -p '{params.cmdd}'
         # deeptools
         computeMatrix {params.args} -R {params.my_ref} -S {input.bw} -p {threads} -o {output.matrix} 
           

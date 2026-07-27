@@ -13,6 +13,7 @@ rule hisatPE:
     params:
         job_name  = "{sample}_hisatPE",
         cmd      = PROJ + "/pipeline/hisatPE.cmd",
+        cmdd     = PROJ + "/pipeline",
         idx       = INDEX_PATH + INDEX_MAP,
         args      = lambda wildcards: CMD_PARAMS["hisat2"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
         sortname  = PROJ + "/{sample}.temp",
@@ -22,6 +23,7 @@ rule hisatPE:
     threads: 12
     shell:
         """
+        mkdir -p '{params.cmdd}'
         sort_threads=4
         mem_per_thread=$(( {resources.memory} * 1024 * 60 / 100 / $sort_threads ))
         

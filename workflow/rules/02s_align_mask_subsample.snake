@@ -26,6 +26,7 @@ rule align_mask:
         8
     shell:
         """
+        mkdir -p '{params.cmd}'
         # Conditional masking
         if [ -n "{params.mask}" ] && [ "{params.mask}" != "None" ]; then
             samtools view -L {params.mask} {input.bam} -U {output.bamt} > {output.bait}
@@ -117,6 +118,7 @@ rule subsample_dedup:
     params:
         job_name = "subsample_dedup_{sample}_aligned_{index}",
         cmd      = PROJ + "/pipeline/subsample.cmd",
+        cmdd     = PROJ + "/pipeline",
         samp     = "{sample}_{index}",
         scale    = lambda wildcards, input: _get_norm_fraction(wildcards, wildcards.index, input.counts)
     resources:
@@ -125,6 +127,7 @@ rule subsample_dedup:
         8
     shell:
         """
+          mkdir -p '{params.cmdd}'
           # find the min read count, calcuate the fraction of the reads to keep, samtools subset 
           samtools view -@ {threads} -s {params.scale} -b {input.bam} > {output.bam}
           

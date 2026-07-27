@@ -13,6 +13,7 @@ rule align_filter_multimap:
     params:
         job_name = "{sample}_multimap_filter",
         cmd      = PROJ + "/pipeline/filter_multimap.cmd",
+        cmdd     = PROJ + "/pipeline",
         samp = "{sample}_{index}",
         args = CMD_PARAMS["samtools"],
         args2 = CMD_PARAMS["multimap"],
@@ -24,6 +25,7 @@ rule align_filter_multimap:
         8
     shell:
         """
+        mkdir -p '{params.cmdd}'
         # Check if args2 is empty (after stripping whitespace)
         args2_trimmed=$(echo "{params.args2}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
         
@@ -100,6 +102,7 @@ rule align_filter_indexed:
     params:
         job_name = "{sample}_align_filter_{index}",
         cmd      = PROJ + "/pipeline/index_filter.cmd",
+        cmdd     = PROJ + "/pipeline",
         idx      = lambda wildcards: INDEX_PATH + wildcards.index + ".txt",
         samp     = "{sample}_{index}",
         args     = CMD_PARAMS["samtools"],
@@ -110,6 +113,7 @@ rule align_filter_indexed:
     threads: 8
     shell:
         """
+        mkdir -p '{params.cmdd}'
         # Use 80% of allocated memory for samtools, split across threads
         mem_per_thread=$(( {resources.memory} * 1024 * 80 / 100 / {threads} ))
         

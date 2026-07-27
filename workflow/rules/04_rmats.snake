@@ -42,6 +42,7 @@ rule run_rmats:
     params:
         job_name  = "{compgroups}_rmats",
         cmd      = PROJ + "/pipeline/rmats.cmd",
+        cmdd     = PROJ + "/pipeline",
         outdir    = PROJ + "/rmats/{compgroups}",
         outdirtmp = PROJ + "/rmats/{compgroups}/tmp",
         gtf       = GTF,
@@ -51,6 +52,7 @@ rule run_rmats:
     threads: 12
     shell:
         """
+        mkdir -p '{params.cmdd}'
         rm -rf {params.outdirtmp}
         mkdir -p {params.outdirtmp}
         

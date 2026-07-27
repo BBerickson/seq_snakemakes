@@ -11,6 +11,7 @@ rule fastqc:
     params:
         job_name = "{fastq}_fastqc",
         cmd      = PROJ + "/pipeline/fastqc.cmd",
+        cmdd     = PROJ + "/pipeline",
         out      = PROJ + "/fastqc"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 0.1, 2)
@@ -19,6 +20,7 @@ rule fastqc:
     shell:
         """
         mkdir -p '{params.out}'
+        mkdir -p '{params.cmdd}'
 
         fastqc \
             -t {threads} \

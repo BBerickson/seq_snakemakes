@@ -13,6 +13,7 @@ rule bowtie:
     params:
         job_name = "{sample}_bowtie",
         cmd      = PROJ + "/pipeline/bowtie.cmd",
+        cmdd     = PROJ + "/pipeline",
         idx      = INDEX_PATH + INDEX_MAP,
         args     = lambda wildcards: CMD_PARAMS["bowtie2"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
         sortname = PROJ + "/{sample}.temp",
@@ -23,6 +24,7 @@ rule bowtie:
         12
     shell:
         """
+        mkdir -p '{params.cmdd}'
         
         sort_threads=4
         mem_per_thread=$(( {resources.memory} * 1024 * 60 / 100 / $sort_threads ))

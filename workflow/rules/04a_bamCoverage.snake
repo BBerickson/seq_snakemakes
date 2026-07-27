@@ -23,6 +23,7 @@ rule bamCoverage:
     params:
         job_name = "{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage",
         cmd      = PROJ + "/pipeline/bamCoverage.cmd",
+        cmdd     = PROJ + "/pipeline",
         args = CMD_PARAMS["bamCoverage"] + ("--blackListFileName " + config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else ""),
         sam_norm = SAM_NORM  # Pass the original data
     resources:
@@ -30,6 +31,7 @@ rule bamCoverage:
     threads: 8
     shell:
         """
+        mkdir -p '{params.cmdd}'
         SCALE=$(python -c "
 import sys
 import pandas as pd

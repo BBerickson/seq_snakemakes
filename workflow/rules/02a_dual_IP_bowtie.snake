@@ -15,6 +15,7 @@ rule bowtie_first_pass:
     params:
         job_name = INDEX_MAP + "_{sample}_bowtie",
         cmd      = PROJ + "/pipeline/bowtie.cmd",
+        cmdd     = PROJ + "/pipeline",
         idx      = INDEX_PATH + INDEX_MAP,
         args     = lambda wildcards: CMD_PARAMS["bowtie2"]["first"],
         sortname = PROJ + "/{sample}.temp." + INDEX_MAP,
@@ -27,6 +28,7 @@ rule bowtie_first_pass:
         12
     shell:
         """
+        mkdir -p '{params.cmdd}'
         # Paired-end alignment
         bowtie2 \
             -p {threads} \
@@ -70,6 +72,7 @@ rule bowtie_second_pass:
     params:
         job_name = INDEX_SECOND + "_{sample}_bowtie",
         cmd      = PROJ + "/pipeline/bowtie.cmd",
+        cmdd     = PROJ + "/pipeline",
         idx      = INDEX_PATH2 + INDEX_SECOND,
         args     = lambda wildcards: CMD_PARAMS["bowtie2"]["second"],
         sortname = PROJ + "/{sample}.temp." + INDEX_SECOND,
@@ -80,6 +83,7 @@ rule bowtie_second_pass:
         12
     shell:
         """
+        mkdir -p '{params.cmdd}'
         # Paired-end alignment
         if [ "{params.unaligned}" = "True" ]; then
             bowtie2 \
