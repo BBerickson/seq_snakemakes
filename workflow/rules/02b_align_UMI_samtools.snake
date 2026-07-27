@@ -12,6 +12,7 @@ rule dedup_UMI:
     params:
         job_name = "{sample}_dedup",
         cmd      = PROJ + "/pipeline/dedup_UMI.cmd",
+        cmdd     = PROJ + "/pipeline",
         samp     = "{sample}_" + INDEX_MAP,
         sortname = PROJ + "/{sample}.temp",
         args     = CMD_PARAMS["umi_tools"]
@@ -21,7 +22,7 @@ rule dedup_UMI:
         4
     shell:
         """
-        mkdir -p '{params.cmd}'
+        mkdir -p '{params.cmdd}'
         umi_tools dedup \
             {params.args} \
             -I {input.bam} \

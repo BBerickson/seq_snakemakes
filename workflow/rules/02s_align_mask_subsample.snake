@@ -15,6 +15,7 @@ rule align_mask:
     params:
         job_name = "{sample}_aligned_{index}_align_filter_mask",
         cmd      = PROJ + "/pipeline/filter_mask.cmd",
+        cmdd     = PROJ + "/pipeline",
         idx      = lambda wildcards: INDEX_PATH + wildcards.index + ".txt",
         samp     = "{sample}_{index}",
         fa2      = lambda wildcards: config_indexes[wildcards.index].get("FA_SAMPLE"),
@@ -26,7 +27,7 @@ rule align_mask:
         8
     shell:
         """
-        mkdir -p '{params.cmd}'
+        mkdir -p '{params.cmdd}'
         # Conditional masking
         if [ -n "{params.mask}" ] && [ "{params.mask}" != "None" ]; then
             samtools view -L {params.mask} {input.bam} -U {output.bamt} > {output.bait}
