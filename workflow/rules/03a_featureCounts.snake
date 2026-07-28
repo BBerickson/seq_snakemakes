@@ -66,7 +66,7 @@ rule featureCounts_sample:
                   -T {threads} \
                   {input.bam}
                 if [ ! -s {params.cmd2} ]; then
-                    featureCounts -v >> {params.cmd2}
+                    featureCounts -v 2>&1 >> {params.cmd2}
                     echo "featureCounts {params.args} {params.args2} -a {params.ftfile} -o <sample_featureCounts_enrich.tsv> <sample_index_filter.bam>" >> {params.cmd2}
                 fi
             fi
@@ -79,7 +79,7 @@ rule featureCounts_sample:
                 -T {threads} \
                 {input.bam}
                 if [ ! -s {params.cmd} ]; then
-                    featureCounts -v >> {params.cmd}
+                    featureCounts -v 2>&1 >> {params.cmd}
                     echo "featureCounts {params.args} -a {params.ftfile} -o <sample_featureCounts_enrich.tsv> <sample_index_filter.bam>" >> {params.cmd}
                 fi
         fi

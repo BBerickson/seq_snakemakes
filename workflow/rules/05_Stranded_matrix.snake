@@ -46,7 +46,7 @@ rule create_strand_matrix:
             computeMatrix --version >> {params.cmd}
             echo "computeMatrix {params.args} -R {params.fw_ref} -S <sample_fw.bw> -o <sample_pos_temp_matrix.gz>">> {params.cmd}
             echo "computeMatrix {params.args} -R {params.rev_ref} -S <sample_rev.bw> -o <sample_neg_temp_matrix.gz>">> {params.cmd}
-            echo "computeMatrixOperations rbind -m <sample_fw.bw> <sample_rev.bw> -o <sample_neg_{sense_asense}_matrix.gz>">> {params.cmd}
+            echo "computeMatrixOperations rbind -m <sample_fw.bw> <sample_rev.bw> -o <sample_neg_{wildcards.sense_asense}_matrix.gz>">> {params.cmd}
         fi
         
         """
