@@ -15,6 +15,7 @@ rule create_plots:
         result  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_clean_results.tsv")
     params:
         job_name   = PROJ + "_qc_plots_html",
+        cmdd     = PROJ + "/pipeline",
         out_file  = SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_qc_plots_analysis",
         script  = "workflow/scripts/multiqc_config.R",
         seqdate = SEQ_DATE,
@@ -28,7 +29,7 @@ rule create_plots:
         """
         echo "Pipeline run: $(date '+%Y-%m-%d %H:%M:%S')" >> {output.reportc}
         echo "" >> {output.reportc}
-        ls -tr {input} | xargs cat >> {output.reportc}
+        ls -tr {params.cmdd} | xargs cat >> {output.reportc}
         Rscript {params.script} "{input}" "{params.mydir}" "{params.seqdate}" "{params.index}" "{output.result}" "{output.config}"
         multiqc {params.mydir} --config {output.config} --force --filename {params.out_file}
         rm -r {params.out_file}_data
