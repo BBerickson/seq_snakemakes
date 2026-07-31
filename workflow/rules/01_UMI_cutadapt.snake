@@ -13,7 +13,7 @@ rule extract_umi:
         log = PROJ + "/logs/{sample}_extract_umi.out"
     params:
         job_name = "{sample}_umi_extract",
-        cmd      = PROJ + "/pipeline/extract_umi.cmd",
+        cmd      = PROJ + "/pipeline/02_extract_umi.cmd",
         cmdd     = PROJ + "/pipeline",
         umi_pat  = CMD_PARAMS["umi_pattern"],
         orientation = ORIENTATION
@@ -49,6 +49,7 @@ rule extract_umi:
             if [ ! -s {params.cmd} ]; then
                 pip show umi_tools | grep -E "^(Name|Version)" >> {params.cmd}
                 echo "umi_tools extract -I <sample_R2.fastq.gz> --extract-method=string --bc-pattern={params.umi_pat} --read2-in=<sample_R1.fastq.gz> --read2-out=<sample_umi_R1.fastq.gz> | gzip > <sample_umi_R2.fastq.gz>" >> {params.cmd}
+                echo "" >> {params.cmd}
             fi
         else
             # Extract UMIs from R2
@@ -65,6 +66,7 @@ rule extract_umi:
             if [ ! -s {params.cmd} ]; then
                 pip show umi_tools | grep -E "^(Name|Version)" >> {params.cmd}
                 echo "umi_tools extract -I <sample_R1.fastq.gz> --extract-method=string --bc-pattern={params.umi_pat} --read2-in=<sample_R2.fastq.gz> --read2-out=<sample_umi_R2.fastq.gz> | gzip > <sample_umi_R1.fastq.gz>" >> {params.cmd}
+                echo "" >> {params.cmd}
             fi
         fi
         """
@@ -81,7 +83,7 @@ rule cutadapt:
         stats = PROJ + "/cutadapt/{sample}_cutadapt_stats.txt"
     params:
         job_name = "{sample}_cutadapt",
-        cmd      = PROJ + "/pipeline/cutadapt.cmd",
+        cmd      = PROJ + "/pipeline/03_cutadapt.cmd",
         cmdd     = PROJ + "/pipeline",
         args     = CMD_PARAMS["cutadapt"]
     resources:
@@ -115,6 +117,7 @@ rule cutadapt:
             if [ ! -s {params.cmd} ]; then
                 echo "cutadapt $(cutadapt --version)" >> {params.cmd}
                 echo "cutadapt {params.args} -o <sample_trim_R1.fastq.gz> -p <sample_trim_R2.fastq.gz> <sample_umi_R1.fastq.gz> <sample_umi_R2.fastq.gz>" >> {params.cmd}
+                echo "" >> {params.cmd}
             fi
         fi
         """

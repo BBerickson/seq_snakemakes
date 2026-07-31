@@ -12,7 +12,7 @@ rule hisatPE:
         stats = PROJ + "/bams/{sample}_" + INDEX_MAP + "_hisat_stats.txt"
     params:
         job_name  = "{sample}_hisatPE",
-        cmd      = PROJ + "/pipeline/hisatPE.cmd",
+        cmd      = PROJ + "/pipeline/04_hisatPE.cmd",
         cmdd     = PROJ + "/pipeline",
         idx       = INDEX_PATH + INDEX_MAP,
         args      = lambda wildcards: CMD_PARAMS["hisat2"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
@@ -52,6 +52,7 @@ rule hisatPE:
             samtools --version 2>&1 | head -1 >> {params.cmd}
             echo "hisat2 -x {params.idx} $myreads {params.args} | samtools sort - -T <sample.temp> -O bam <sample.bam>" >> {params.cmd}
             echo "samtools index <sample.bam>" >> {params.cmd}
+            echo "" >> {params.cmd}
         fi
         """
 

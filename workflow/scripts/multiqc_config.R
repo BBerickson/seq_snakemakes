@@ -147,6 +147,33 @@ for (i in seq_along(section_ids)) {
   )
 }
 
+# ---- METHODS TEXT ----
+methods_file <- file.path(myproj, "report", paste0(seq_date, "_", myproj, "_pipeline_methods.txt"))
+
+if (file.exists(methods_file)) {
+  methods_lines <- readLines(methods_file)
+  methods_html  <- paste0(
+    "<pre style='font-size:12px; white-space:pre-wrap;'>",
+    paste(methods_lines, collapse = "\n"),
+    "</pre>"
+  )
+} else {
+  methods_html <- "<p>Methods file not found.</p>"
+}
+
+sp_list[["pipeline_methods"]] <- list(fn = basename(methods_file))
+
+custom_data_list[["pipeline_methods"]] <- list(
+  id           = "pipeline_methods",
+  section_name = "Pipeline Methods",
+  description  = "Tool versions and commands used in this pipeline run.",
+  plot_type    = "html",
+  data         = methods_html
+)
+
+section_order_dict[["custom_content/pipeline_methods"]] <- list(order = 1L)
+
+
 # ---- FULL MULTIQC CONFIG ----
 multiqc_config <- list(
   # This wildcard setup forces custom_content to load first, 
@@ -167,6 +194,7 @@ multiqc_config <- list(
   subtitle = seq_date,
   intro_text = "MultiQC reports summarise analysis results.",
   
+  skip_versions_section = TRUE,
   skip_generalstats = TRUE,
   ignore_images = FALSE,
   intro_text = FALSE, 

@@ -123,7 +123,7 @@ USER:
 # Or "subsample" : make bw and matix files from sub-sampled bam files (paired groups)
 NORM:
   - "CPM"
-  - "subsaample"
+  - "subsample"
   
 # set orentation of fastq files, can list one for each file
 # it will only align read1, read2 is only ever used for pre processing

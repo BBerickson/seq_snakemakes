@@ -3,4 +3,4 @@ __default__:
   account: normal
   partition: normal
   qos: normal
-  time: "24:00:00"
+  time: "8:00:00"

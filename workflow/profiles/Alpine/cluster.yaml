@@ -1,6 +1,6 @@
 # profiles/Alpine/cluster.yaml
 __default__:
   account: amc-general
-  partition: amilan
-  qos: normal
-  time: "24:00:00"
+  partition: acpu
+  qos: cpu-normal
+  time: "12:00:00"

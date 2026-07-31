@@ -13,7 +13,7 @@ rule star_twopass:
         final = PROJ + "/bams/{sample}_Log.final.out"
     params:
         job_name = "{sample}_star_twopass",
-        cmd      = PROJ + "/pipeline/star_twopass.cmd",
+        cmd      = PROJ + "/pipeline/04_star_twopass.cmd",
         cmdd     = PROJ + "/pipeline",
         gtf      = config_indexes[INDEXES[0]].get("GTF"),
         bam_unsorted = PROJ + "/bams/{sample}_Aligned.out.bam",
@@ -60,6 +60,7 @@ rule star_twopass:
             samtools --version 2>&1 | head -1 >> {params.cmd}
             echo "samtools sort <sample_Aligned.out.bam> -T <sample.temp> -o <sample.bam>" >> {params.cmd}
             echo "samtools index <sample.bam>" >> {params.cmd}
+            echo "" >> {params.cmd}
         fi
         """
 

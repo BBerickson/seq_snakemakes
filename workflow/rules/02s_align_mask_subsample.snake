@@ -14,7 +14,7 @@ rule align_mask:
         bait   = temp(PROJ + "/bams_mask/{sample}_aligned_{index}_temp2_mask.bam")
     params:
         job_name = "{sample}_aligned_{index}_align_filter_mask",
-        cmd      = PROJ + "/pipeline/filter_mask.cmd",
+        cmd      = PROJ + "/pipeline/07_filter_mask.cmd",
         cmdd     = PROJ + "/pipeline",
         idx      = lambda wildcards: INDEX_PATH + wildcards.index + ".txt",
         samp     = "{sample}_{index}",
@@ -37,6 +37,7 @@ rule align_mask:
                 echo "samtools view -L {params.mask} <sample_index_filter.bam> -U <sample_mask.bam> > <sample_temp2.bam>" >> {params.cmd}
                 echo "samtools sort <sample_mask.bam> -T <sample_mask.temp> -O bam <sample_index_filter_mask.bam>" >> {params.cmd}
                 echo "samtools index <sample_index_filter_mask.bam>" >> {params.cmd}
+                echo "" >> {params.cmd}
             fi
         else
             # No mask: copy all reads to bamt, empty file to bait
@@ -47,6 +48,7 @@ rule align_mask:
                 samtools --version 2>&1 | head -1 >> {params.cmd}
                 echo "samtools sort <sample_index_filter.bam> -T <sample_index_filter.temp> -O bam <sample_index_filter_sort.bam>" >> {params.cmd}
                 echo "samtools index <sample_index_filter_sort.bam>" >> {params.cmd}
+                echo "" >> {params.cmd}
             fi
 
         fi
@@ -118,7 +120,7 @@ rule subsample_dedup:
         stats = PROJ + "/bams_sub/{sample}_aligned_{index}_subsample.txt"
     params:
         job_name = "subsample_dedup_{sample}_aligned_{index}",
-        cmd      = PROJ + "/pipeline/subsample.cmd",
+        cmd      = PROJ + "/pipeline/08_subsample.cmd",
         cmdd     = PROJ + "/pipeline",
         samp     = "{sample}_{index}",
         scale    = lambda wildcards, input: _get_norm_fraction(wildcards, wildcards.index, input.counts)
@@ -139,6 +141,7 @@ rule subsample_dedup:
               samtools --version 2>&1 | head -1 >> {params.cmd}
               echo "samtools view -s {params.scale} -b <sample_index_filter_mask.bam> > <sample_mask_subsample.bam>" >> {params.cmd}
               echo "samtools index <sample_mask_subsample.bam>" >> {params.cmd}
+              echo "" >> {params.cmd}
           fi
         """
 

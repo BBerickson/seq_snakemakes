@@ -41,7 +41,7 @@ rule run_rmats:
         RI   = PROJ + "/rmats/{compgroups}/RI.MATS.JC.txt"
     params:
         job_name  = "{compgroups}_rmats",
-        cmd      = PROJ + "/pipeline/rmats.cmd",
+        cmd      = PROJ + "/pipeline/10_rmats.cmd",
         cmdd     = PROJ + "/pipeline",
         outdir    = PROJ + "/rmats/{compgroups}",
         outdirtmp = PROJ + "/rmats/{compgroups}/tmp",
@@ -67,6 +67,7 @@ rule run_rmats:
         if [ ! -s {params.cmd} ]; then
             echo "rmats.py --version" >> {params.cmd}
             echo "rmats.py --b1 <bam_list_1.txt> --b2 <bam_list_2.txt> --gtf {params.gtf}" --od <outdir> --tmp <outdirtmp> {params.args} ">> {params.cmd}
+            echo "" >> {params.cmd}
         fi
         """
                     

@@ -143,7 +143,7 @@ rule create_plots:
         PROJ + "/report/" + PROJ + "_" + INDEXES[0] + "_results.tsv"
     output:
         report  = SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_qc_analysis.html",
-        reportc = PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "pipeline_methods.txt",
+        reportc = PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_pipeline_methods.txt",
         config  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_config.yaml"),
         result  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_clean_results.tsv")
     params:

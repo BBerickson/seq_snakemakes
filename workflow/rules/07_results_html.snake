@@ -10,7 +10,7 @@ rule create_plots:
                suffix=DF_SAM_NORM['Suffix'].unique())
     output:
         report  = SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_qc_plots_analysis.html",
-        reportc = PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "pipeline_methods.txt",
+        reportc = PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_pipeline_methods.txt",
         config  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_config.yaml"),
         result  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_clean_results.tsv")
     params:

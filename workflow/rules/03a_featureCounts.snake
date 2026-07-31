@@ -11,7 +11,7 @@ rule featureCounts_sample:
     params:
         job_name = "{sample}_aligned_{index}_featureCounts",
         cmd      = PROJ + "/pipeline/featureCounts.cmd",
-        cmd2      = PROJ + "/pipeline/featureCounts_enrich.cmd",
+        cmd2      = PROJ + "/pipeline/09_featureCounts_enrich.cmd",
         cmdd     = PROJ + "/pipeline",
         args     = lambda wildcards: _get_featCount(ORIENTATION, config_indexes[wildcards.index].get("GTF")),
         args2    = config["CMD_PARAMS"].get("featureCounts", ""),
@@ -52,6 +52,7 @@ rule featureCounts_sample:
             if [ ! -s {params.cmd} ]; then
                 featureCounts -v >> {params.cmd}
                 echo "BAM file is empty (0 reads), creating empty featureCounts output" >> {params.cmd}
+                echo "" >> {params.cmd}
             fi
         else
             echo "BAM file contains $read_count reads, running featureCounts"
@@ -68,6 +69,7 @@ rule featureCounts_sample:
                 if [ ! -s {params.cmd2} ]; then
                     featureCounts -v 2>&1 >> {params.cmd2}
                     echo "featureCounts {params.args} {params.args2} -a {params.ftfile} -o <sample_featureCounts_enrich.tsv> <sample_index_filter.bam>" >> {params.cmd2}
+                    echo "" >> {params.cmd2}
                 fi
             fi
             
@@ -81,6 +83,7 @@ rule featureCounts_sample:
                 if [ ! -s {params.cmd} ]; then
                     featureCounts -v 2>&1 >> {params.cmd}
                     echo "featureCounts {params.args} -a {params.ftfile} -o <sample_featureCounts_enrich.tsv> <sample_index_filter.bam>" >> {params.cmd}
+                    echo "" >> {params.cmd}
                 fi
         fi
         """

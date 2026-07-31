@@ -10,7 +10,7 @@ rule fastqc:
         html = PROJ + "/fastqc/{fastq}_fastqc.html"
     params:
         job_name = "{fastq}_fastqc",
-        cmd      = PROJ + "/pipeline/fastqc.cmd",
+        cmd      = PROJ + "/pipeline/01_fastqc.cmd",
         cmdd     = PROJ + "/pipeline",
         out      = PROJ + "/fastqc"
     resources:
@@ -38,6 +38,7 @@ rule fastqc:
         if [ ! -s {params.cmd} ]; then
             fastqc --version >> {params.cmd}
             echo "fastqc -f fastq -o <output_dir> <sample.fastq.gz>" >> {params.cmd}
+            echo "" >> {params.cmd}
         fi
     
         """

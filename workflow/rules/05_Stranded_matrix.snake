@@ -23,7 +23,7 @@ rule create_strand_matrix:
         rev    = temp(PROJ + "/matrix/{newnam}_aligned_{index}_temp2_{region}_{covarg}_norm_{suffix}_{sense_asense}_matrix.gz")
     params:
         job_name = "{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_{sense_asense}_matrix",
-        cmd      = PROJ + "/pipeline/computeMatrix.cmd",
+        cmd      = PROJ + "/pipeline/12_computeMatrix_stranded.cmd",
         cmdd     = PROJ + "/pipeline",
         args = lambda wildcards: (
             CMD_PARAMS[f"region{wildcards.region}"] + ("--blackListFileName " + config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else "") +
@@ -47,6 +47,7 @@ rule create_strand_matrix:
             echo "computeMatrix {params.args} -R {params.fw_ref} -S <sample_fw.bw> -o <sample_pos_temp_matrix.gz>">> {params.cmd}
             echo "computeMatrix {params.args} -R {params.rev_ref} -S <sample_rev.bw> -o <sample_neg_temp_matrix.gz>">> {params.cmd}
             echo "computeMatrixOperations rbind -m <sample_fw.bw> <sample_rev.bw> -o <sample_neg_{wildcards.sense_asense}_matrix.gz>">> {params.cmd}
+            echo "" >> {params.cmd}
         fi
         
         """

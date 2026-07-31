@@ -10,7 +10,7 @@ rule clumpify:
         log = PROJ + "/clumpify/{sample}_clumpify.log"
     params:
         job_name = "{sample}_clumpify",
-        cmd      = PROJ + "/pipeline/clumpify.cmd",
+        cmd      = PROJ + "/pipeline/02_clumpify.cmd",
         cmdd     = PROJ + "/pipeline",
         groups = lambda wc, resources: max(1, min(16, resources.memory // 12)),
         args = lambda wildcards: CMD_PARAMS["clumpify"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
@@ -48,6 +48,7 @@ rule clumpify:
             if [ ! -s {params.cmd} ]; then
                 clumpify.sh --version 2>&1 | grep "BBTools version" >> {params.cmd}
                 echo "clumpify.sh groups={params.groups} {params.args} in1=<sample_R1.fastq.gz> in2=<sample_R2.fastq.gz> out1=<sample_dedup_R1.fastq.gz> out2=<sample_dedup_R2.fastq.gz>" >> {params.cmd}
+                echo "" >> {params.cmd}
             fi
         else
             clumpify.sh -Xmx${{REDUCED_MEM}}g \
@@ -60,6 +61,7 @@ rule clumpify:
             if [ ! -s {params.cmd} ]; then
                 clumpify.sh --version 2>&1 | grep "BBTools version" >> {params.cmd}
                 echo "clumpify.sh groups={params.groups} {params.args} in=<sample_R1.fastq.gz> out=<sample_dedup_R1.fastq.gz>" >> {params.cmd}
+                echo "" >> {params.cmd}
             fi
         fi
         """

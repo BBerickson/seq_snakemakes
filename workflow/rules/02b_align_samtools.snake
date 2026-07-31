@@ -12,7 +12,7 @@ rule align_filter_multimap:
         counts = PROJ + "/bams/{sample}_" + INDEX_MAP + "_count_multimap.txt"
     params:
         job_name = "{sample}_multimap_filter",
-        cmd      = PROJ + "/pipeline/filter_multimap.cmd",
+        cmd      = PROJ + "/pipeline/05_filter_multimap.cmd",
         cmdd     = PROJ + "/pipeline",
         samp = "{sample}_" + INDEX_MAP,
         args = CMD_PARAMS["samtools"],
@@ -39,6 +39,7 @@ rule align_filter_multimap:
                 samtools --version 2>&1 | head -1 >> {params.cmd}
                 echo "samtools view {params.args} <sample.bam> <sample_filter.bam>" >> {params.cmd}
                 echo "samtools index <sample_filter.bam>" >> {params.cmd}
+                echo "" >> {params.cmd}
             fi
         else
             # Apply multimap filtering
@@ -61,6 +62,7 @@ rule align_filter_multimap:
                 echo "samtools view {params.args} -u <sample.bam> | samtools sort -n -T <sample.temp> | samtools view -h - | multimappers2.py {params.args2} --paired-end | samtools fixmate -r - <sample_temp.bam>" >> {params.cmd}
                 echo "samtools view -F 1804 -f 2 -u <sample_temp.bam> | samtools sort - -T <sample.temp> -O bam <sample_filter.bam> " >> {params.cmd}
                 echo "samtools index <sample_filter.bam>" >> {params.cmd}
+                echo "" >> {params.cmd}
               fi
             else
                 # Single-end filtering
@@ -80,6 +82,7 @@ rule align_filter_multimap:
                 echo "samtools view {params.args} -u <sample.bam> | samtools sort -n -T <sample.temp> | samtools view -h - | multimappers2.py {params.args2} | samtools fixmate -r - <sample_temp.bam>" >> {params.cmd}
                 echo "samtools view -F 1804 -u <sample_temp.bam> | samtools sort - -T <sample.temp> -O bam <sample_filter.bam> " >> {params.cmd}
                 echo "samtools index <sample_filter.bam>" >> {params.cmd}
+                echo "" >> {params.cmd}
               fi
             fi
             
@@ -102,7 +105,7 @@ rule align_filter_indexed:
         counts = PROJ + "/bams/{sample}_aligned_{index}_count.txt"
     params:
         job_name = "{sample}_align_filter_{index}",
-        cmd      = PROJ + "/pipeline/index_filter.cmd",
+        cmd      = PROJ + "/pipeline/06_index_filter.cmd",
         cmdd     = PROJ + "/pipeline",
         idx      = lambda wildcards: INDEX_PATH + wildcards.index + ".txt",
         samp     = "{sample}_{index}",
@@ -140,5 +143,6 @@ rule align_filter_indexed:
             echo "samtools view <sample_filter.bam> {params.idx} | sed 's/spike_*//g' | samtools view -bT {params.fa} - > <sample_unsorted_filter.bam>" >> {params.cmd}
             echo "samtools sort <sample_unsorted_filter.bam> -T <sample_unsorted_filter.temp> -O bam <sample_index_filter.bam>" >> {params.cmd}
             echo "samtools index <sample_index_filter.bam>" >> {params.cmd}
+            echo "" >> {params.cmd}
         fi
         """

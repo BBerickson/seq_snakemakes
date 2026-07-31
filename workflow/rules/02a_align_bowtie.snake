@@ -12,7 +12,7 @@ rule bowtie:
         stats = PROJ + "/bams/{sample}_" + INDEX_MAP + "_bowtie_stats.txt"
     params:
         job_name = "{sample}_bowtie",
-        cmd      = PROJ + "/pipeline/bowtie.cmd",
+        cmd      = PROJ + "/pipeline/04_bowtie.cmd",
         cmdd     = PROJ + "/pipeline",
         idx      = INDEX_PATH + INDEX_MAP,
         args     = lambda wildcards: CMD_PARAMS["bowtie2"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
@@ -56,6 +56,7 @@ rule bowtie:
             samtools --version 2>&1 | head -1 >> {params.cmd}
             echo "bowtie2 -x {params.idx} $myreads {params.args} | samtools sort - -T <sample.temp> -o <sample.bam>" >> {params.cmd}
             echo "samtools index <sample.bam>" >> {params.cmd}
+            echo "" >> {params.cmd}
         fi
         """
 

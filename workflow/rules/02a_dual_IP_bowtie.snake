@@ -14,7 +14,7 @@ rule bowtie_first_pass:
         unaligned_R2 = temp(PROJ + "/unaligned/{sample}_unaligned_R2_001.fastq.gz")
     params:
         job_name = INDEX_MAP + "_{sample}_bowtie",
-        cmd      = PROJ + "/pipeline/bowtie.cmd",
+        cmd      = PROJ + "/pipeline/04a_bowtie.cmd",
         cmdd     = PROJ + "/pipeline",
         idx      = INDEX_PATH + INDEX_MAP,
         args     = lambda wildcards: CMD_PARAMS["bowtie2"]["first"],
@@ -55,6 +55,7 @@ rule bowtie_first_pass:
             samtools --version 2>&1 | head -1 >> {params.cmd}
             echo "samtools sort <sample.sam> -T <sample.temp> -O bam -o <sample.bam>" >> {params.cmd}
             echo "samtools index <sample.bam>" >> {params.cmd}
+            echo "" >> {params.cmd}
         fi
         """
 
@@ -71,7 +72,7 @@ rule bowtie_second_pass:
         stats = PROJ + "/bams/{sample}_" + INDEX_SECOND + "_bowtie_stats.txt"
     params:
         job_name = INDEX_SECOND + "_{sample}_bowtie",
-        cmd      = PROJ + "/pipeline/bowtie.cmd",
+        cmd      = PROJ + "/pipeline/04b_bowtie.cmd",
         cmdd     = PROJ + "/pipeline",
         idx      = INDEX_PATH2 + INDEX_SECOND,
         args     = lambda wildcards: CMD_PARAMS["bowtie2"]["second"],
@@ -100,6 +101,7 @@ rule bowtie_second_pass:
               samtools --version 2>&1 | head -1 >> {params.cmd}
               echo "samtools sort <sample.sam> -T <sample.temp> -O bam -o <sample.bam>" >> {params.cmd}
               echo "samtools index <sample.bam>" >> {params.cmd}
+              echo "" >> {params.cmd}
           fi
         else
           bowtie2 \
@@ -117,6 +119,7 @@ rule bowtie_second_pass:
               samtools --version 2>&1 | head -1 >> {params.cmd}
               echo "samtools sort <sample.sam> -T <sample.temp> -O bam -o <sample.bam>" >> {params.cmd}
               echo "samtools index <sample.bam>" >> {params.cmd}
+              echo "" >> {params.cmd}
           fi
         fi
         

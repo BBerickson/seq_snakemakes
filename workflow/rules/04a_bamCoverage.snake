@@ -22,7 +22,7 @@ rule bamCoverage:
         bigwig = PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}.bw"
     params:
         job_name = "{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage",
-        cmd      = PROJ + "/pipeline/bamCoverage.cmd",
+        cmd      = PROJ + "/pipeline/11_bamCoverage.cmd",
         cmdd     = PROJ + "/pipeline",
         args = CMD_PARAMS["bamCoverage"] + ("--blackListFileName " + config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else ""),
         sam_norm = SAM_NORM  # Pass the original data
@@ -55,6 +55,7 @@ print(scale)
         if [ ! -s {params.cmd} ]; then
             bamCoverage --version >> {params.cmd}
             echo "bamCoverage -b <sample_index_filter.bam> -of bigwig -o <sample.bw> {params.args} $SCALE">> {params.cmd}
+            echo "" >> {params.cmd}
         fi
         """
         
