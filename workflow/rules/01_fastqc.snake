@@ -21,26 +21,27 @@ rule fastqc:
         """
         mkdir -p '{params.out}'
         mkdir -p '{params.cmdd}'
-
         fastqc \
             -t {threads} \
             -f fastq \
             -o '{params.out}' \
             '{input}'
-
         nm='{wildcards.fastq}'
         nm="${{nm%.*}}"
         nm="${{nm%.*}}"
-
         mv "{params.out}/${{nm}}_fastqc.zip"  '{output.zip}'
         mv "{params.out}/${{nm}}_fastqc.html" '{output.html}'
-        
-        if [ ! -s {params.cmd} ]; then
-            fastqc --version >> {params.cmd}
-            echo "fastqc -f fastq -o <output_dir> <sample.fastq.gz>" >> {params.cmd}
-            echo "" >> {params.cmd}
-        fi
-    
+
+        python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_once(
+    "{params.cmd}",
+    version_cmd="fastqc --version",
+    echo_cmd="fastqc -f fastq -o <output_dir> <sample.fastq.gz>"
+)
+EOF
         """
 
 

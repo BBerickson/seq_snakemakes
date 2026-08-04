@@ -67,6 +67,6 @@ rule create_plots:
         Rscript {params.script} "{input}" "{params.mydir}" "{params.seqdate}" "{params.index}" "{output.result}" "{output.config}"
         multiqc {params.mydir} --config {output.config} --force --filename {params.out_file}
         rm -r {params.out_file}_data
-        
+        rm -f {PROJ}/pipeline/*.lock
         """
      

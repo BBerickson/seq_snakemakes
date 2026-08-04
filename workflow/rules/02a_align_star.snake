@@ -27,42 +27,45 @@ rule star_twopass:
     threads: 
         16
     shell:
-        """
-        mkdir -p '{params.cmdd}'
-        # Use 60% of allocated memory for samtools, split across threads
-        sort_threads=4
-        mem_per_thread=$(( {resources.memory} * 1024 * 60 / 100 / $sort_threads ))
-        
-        STAR \
-          --genomeDir {INDEX_PATH} \
-          --runThreadN {threads} \
-          --readFilesIn {input.R1} {input.R2} \
-          --outSAMtype BAM Unsorted \
-          {params.read_cmd} \
-          --outFileNamePrefix {params.out} \
-          --sjdbGTFfile {params.gtf} \
-          {params.args} \
-          --twopassMode Basic
-        
-        samtools sort {params.bam_unsorted} \
-            -T {params.out}tmp \
-            -@ $sort_threads \
-            -m "${{mem_per_thread}}M" \
-            -o {output.bam}
-            
-        samtools index -@ $sort_threads {output.bam}
-        
-        rm {params.bam_unsorted}
-            
-        if [ ! -s {params.cmd} ]; then
-            echo "STAR $(STAR --version)" >> {params.cmd}
-            echo "STAR --genomeDir {INDEX_PATH} --readFilesIn <sample_trim_R1.fastq.gz> <sample_trim_R2.fastq.gz> --outFileNamePrefix <sample_> --sjdbGTFfile {params.gtf} {params.args} --twopassMode Basic" >> {params.cmd}
-            samtools --version 2>&1 | head -1 >> {params.cmd}
-            echo "samtools sort <sample_Aligned.out.bam> -T <sample.temp> -o <sample.bam>" >> {params.cmd}
-            echo "samtools index <sample.bam>" >> {params.cmd}
-            echo "" >> {params.cmd}
-        fi
-        """
+      """
+      mkdir -p '{params.cmdd}'
+      sort_threads=4
+      mem_per_thread=$(( {resources.memory} * 1024 * 60 / 100 / $sort_threads ))
+  
+      STAR \
+        --genomeDir {INDEX_PATH} \
+        --runThreadN {threads} \
+        --readFilesIn {input.R1} {input.R2} \
+        --outSAMtype BAM Unsorted \
+        {params.read_cmd} \
+        --outFileNamePrefix {params.out} \
+        --sjdbGTFfile {params.gtf} \
+        {params.args} \
+        --twopassMode Basic
+  
+      samtools sort {params.bam_unsorted} \
+          -T {params.out}tmp \
+          -@ $sort_threads \
+          -m "${{mem_per_thread}}M" \
+          -o {output.bam}
+  
+      samtools index -@ $sort_threads {output.bam}
+  
+      rm {params.bam_unsorted}
+  
+      STAR_VERSION="STAR $(STAR --version)"
+      python - << 'EOF'
+import sys, os
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_once(
+    "{params.cmd}",
+    version_string=os.environ.get("STAR_VERSION"),
+    extra_version_cmds=["samtools --version 2>&1 | head -1"],
+    echo_cmd="STAR --genomeDir <index> --readFilesIn <sample_trim_R1.fastq.gz> <sample_trim_R2.fastq.gz> --outSAMtype BAM Unsorted {params.read_cmd} --outFileNamePrefix <sample_> --sjdbGTFfile {params.gtf} {params.args} --twopassMode Basic\\nsamtools sort <sample_Aligned.out.bam> -T <sample.temp> -o <sample.bam>\\nsamtools index <sample.bam>"
+)
+EOF
+      """
 
         
 

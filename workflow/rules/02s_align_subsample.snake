@@ -69,20 +69,23 @@ rule subsample_dedup:
     threads:
         8
     shell:
-        """
-          mkdir -p '{params.cmdd}'
-          # find the min read count, calcuate the fraction of the reads to keep, samtools subset 
-          samtools view -@ {threads} -s {params.scale} -b {input.bam} > {output.bam}
-          
-          samtools index -@ {threads} {output.bam}
-        
-          echo "{params.samp} Sampled_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" >> {output.stats}
-          if [ ! -s {params.cmd} ]; then
-              samtools --version 2>&1 | head -1 >> {params.cmd}
-              echo "samtools view -s {params.scale} -b <sample_index_filter.bam> > <sample_subsample.bam>" >> {params.cmd}
-              echo "samtools index <sample_subsample.bam>" >> {params.cmd}
-              echo "" >> {params.cmd}
-          fi
-        """
+      """
+      mkdir -p '{params.cmdd}'
+  
+      samtools view -@ {threads} -s {params.scale} -b {input.bam} > {output.bam}
+      samtools index -@ {threads} {output.bam}
+      echo "{params.samp} Sampled_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" >> {output.stats}
+  
+      python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_once(
+    "{params.cmd}",
+    version_cmd="samtools --version 2>&1 | head -1",
+    echo_cmd="samtools view -s {params.scale} -b <sample_filter.bam> > <sample_subsample.bam>\\nsamtools index <sample_subsample.bam>"
+)
+EOF
+      """
 
                     

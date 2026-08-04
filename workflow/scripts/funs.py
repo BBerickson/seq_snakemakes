@@ -8,6 +8,7 @@ import pandas as pd
 import itertools
 from itertools import cycle
 import subprocess
+import fcntl
 
 # estimates the amount of memory based on file size
 def get_file_size_gb(filepath):
@@ -611,4 +612,84 @@ def _rgb2hexplus2(samples,group,cols_dict):
     return " ".join(hex_colors)
 
 
+# dubble lock 
+def write_cmd_once(cmd_file, version_cmd=None, echo_cmd=None, version_string=None, extra_version_cmds=None):
+    """Write version and command to cmd_file once, with file locking.
+    
+    Args:
+        cmd_file:           path to the .cmd file
+        version_cmd:        shell command to get primary tool version
+        echo_cmd:           command string to write to .cmd file
+        version_string:     pre-built version string (overrides version_cmd)
+        extra_version_cmds: list of additional shell commands to capture
+                            versions of secondary tools (e.g. samtools after STAR)
+    """
+    if os.path.exists(cmd_file) and os.path.getsize(cmd_file) > 0:
+        return
 
+    lock_file = cmd_file + ".lock"
+    with open(lock_file, 'w') as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            if not os.path.exists(cmd_file) or os.path.getsize(cmd_file) == 0:
+                with open(cmd_file, 'a') as f:
+                    # primary version
+                    if version_string:
+                        f.write(version_string.strip() + "\n")
+                    elif version_cmd:
+                        result = subprocess.run(
+                            version_cmd, shell=True, capture_output=True, text=True
+                        )
+                        version_out = result.stdout.strip() or result.stderr.strip()
+                        f.write(version_out + "\n")
+                    # secondary versions
+                    if extra_version_cmds:
+                        for cmd in extra_version_cmds:
+                            result = subprocess.run(
+                                cmd, shell=True, capture_output=True, text=True
+                            )
+                            version_out = result.stdout.strip() or result.stderr.strip()
+                            f.write(version_out + "\n")
+                    f.write(echo_cmd + "\n\n")
+        except BlockingIOError:
+            pass
+
+
+def write_cmd_tagged(cmd_file, tag, version_cmd=None, echo_cmd=None, version_string=None, extra_version_cmds=None):
+    """Write entry to cmd_file if tag not already present, with file locking.
+    
+    Args:
+        cmd_file:           path to the .cmd file
+        tag:                unique string to check for — skips write if already present
+        version_cmd:        shell command to get primary tool version
+        echo_cmd:           command string to write to .cmd file
+        version_string:     pre-built version string (overrides version_cmd)
+        extra_version_cmds: list of additional shell commands to capture
+                            versions of secondary tools
+    """
+    lock_file = cmd_file + ".lock"
+    with open(lock_file, 'w') as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            existing = open(cmd_file).read() if os.path.exists(cmd_file) else ""
+            if tag not in existing:
+                with open(cmd_file, 'a') as f:
+                    if os.path.getsize(cmd_file) == 0:
+                        if version_string:
+                            f.write(version_string.strip() + "\n")
+                        elif version_cmd:
+                            result = subprocess.run(
+                                version_cmd, shell=True, capture_output=True, text=True
+                            )
+                            version_out = result.stdout.strip() or result.stderr.strip()
+                            f.write(version_out + "\n")
+                        if extra_version_cmds:
+                            for cmd in extra_version_cmds:
+                                result = subprocess.run(
+                                    cmd, shell=True, capture_output=True, text=True
+                                )
+                                version_out = result.stdout.strip() or result.stderr.strip()
+                                f.write(version_out + "\n")
+                    f.write(echo_cmd + "\n\n")
+        except BlockingIOError:
+            pass  # another process got the lock first, skip

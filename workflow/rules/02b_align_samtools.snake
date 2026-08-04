@@ -24,74 +24,74 @@ rule align_filter_multimap:
     threads: 
         8
     shell:
-        """
-        mkdir -p '{params.cmdd}'
-        # Check if args2 is empty (after stripping whitespace)
-        args2_trimmed=$(echo "{params.args2}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-        
-        if [ -z "$args2_trimmed" ]; then
-            # No multimap filtering needed
-            touch {output.bamt}
-            samtools view {params.args} {input.bam} > {output.bam}
-            samtools index -@ {threads} {output.bam}
-            echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
-            if [ ! -s {params.cmd} ]; then
-                samtools --version 2>&1 | head -1 >> {params.cmd}
-                echo "samtools view {params.args} <sample.bam> <sample_filter.bam>" >> {params.cmd}
-                echo "samtools index <sample_filter.bam>" >> {params.cmd}
-                echo "" >> {params.cmd}
-            fi
-        else
-            # Apply multimap filtering
-            
-            if [ "{params.is_paired}" = "True" ]; then
-            
+      """
+      mkdir -p '{params.cmdd}'
+      args2_trimmed=$(echo "{params.args2}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+  
+      if [ -z "$args2_trimmed" ]; then
+          touch {output.bamt}
+          samtools view {params.args} {input.bam} > {output.bam}
+          samtools index -@ {threads} {output.bam}
+          echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
+          python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="samtools view no multimap filter",
+    version_cmd="samtools --version 2>&1 | head -1",
+    echo_cmd="samtools view {params.args} <sample.bam> > <sample_filter.bam>\\nsamtools index <sample_filter.bam>"
+)
+EOF
+      else
+          if [ "{params.is_paired}" = "True" ]; then
               samtools view {params.args} -u {input.bam} \
                 | samtools sort -n -T {params.sortname} -@ {threads} \
                 | samtools view -h - \
                 | python pipelines/multimappers2.py {params.args2} --paired-end \
                 | samtools fixmate -r - {output.bamt}
-                
-              # Paired-end filtering
               samtools view -F 1804 -f 2 -u {output.bamt} \
                 | samtools sort - -T {params.sortname} -@ {threads} -O bam \
                 > {output.bam}
-                  
-              if [ ! -s {params.cmd} ]; then
-                samtools --version 2>&1 | head -1 >> {params.cmd}
-                echo "samtools view {params.args} -u <sample.bam> | samtools sort -n -T <sample.temp> | samtools view -h - | multimappers2.py {params.args2} --paired-end | samtools fixmate -r - <sample_temp.bam>" >> {params.cmd}
-                echo "samtools view -F 1804 -f 2 -u <sample_temp.bam> | samtools sort - -T <sample.temp> -O bam <sample_filter.bam> " >> {params.cmd}
-                echo "samtools index <sample_filter.bam>" >> {params.cmd}
-                echo "" >> {params.cmd}
-              fi
-            else
-                # Single-end filtering
-            
-                samtools view {params.args} -u {input.bam} \
-                  | samtools sort -n -T {params.sortname} -@ {threads} \
-                  | samtools view -h - \
-                  | python pipelines/multimappers2.py {params.args2} \
-                  | samtools fixmate -r - {output.bamt}
-                
-                samtools view -F 1804 -u {output.bamt} \
-                  | samtools sort - -T {params.sortname} -@ {threads} -O bam \
-                  > {output.bam}
-                  
-              if [ ! -s {params.cmd} ]; then
-                samtools --version 2>&1 | head -1 >> {params.cmd}
-                echo "samtools view {params.args} -u <sample.bam> | samtools sort -n -T <sample.temp> | samtools view -h - | multimappers2.py {params.args2} | samtools fixmate -r - <sample_temp.bam>" >> {params.cmd}
-                echo "samtools view -F 1804 -u <sample_temp.bam> | samtools sort - -T <sample.temp> -O bam <sample_filter.bam> " >> {params.cmd}
-                echo "samtools index <sample_filter.bam>" >> {params.cmd}
-                echo "" >> {params.cmd}
-              fi
-            fi
-            
-            # Index and count reads
-            samtools index -@ {threads} {output.bam}
-            echo "{params.samp} Multimap_Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
-            
-        fi
-        """
+              samtools index -@ {threads} {output.bam}
+              echo "{params.samp} Multimap_Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
+              python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="multimappers2 PE",
+    version_cmd="samtools --version 2>&1 | head -1",
+    echo_cmd="samtools view {params.args} -u <sample.bam> | samtools sort -n -T <sample.temp> | samtools view -h - | multimappers2.py {params.args2} --paired-end | samtools fixmate -r - <sample_temp.bam>\\nsamtools view -F 1804 -f 2 -u <sample_temp.bam> | samtools sort - -T <sample.temp> -O bam > <sample_filter.bam>\\nsamtools index <sample_filter.bam>"
+)
+EOF
+          else
+              samtools view {params.args} -u {input.bam} \
+                | samtools sort -n -T {params.sortname} -@ {threads} \
+                | samtools view -h - \
+                | python pipelines/multimappers2.py {params.args2} \
+                | samtools fixmate -r - {output.bamt}
+              samtools view -F 1804 -u {output.bamt} \
+                | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+                > {output.bam}
+              samtools index -@ {threads} {output.bam}
+              echo "{params.samp} Multimap_Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
+              python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="multimappers2 SE",
+    version_cmd="samtools --version 2>&1 | head -1",
+    echo_cmd="samtools view {params.args} -u <sample.bam> | samtools sort -n -T <sample.temp> | samtools view -h - | multimappers2.py {params.args2} | samtools fixmate -r - <sample_temp.bam>\\nsamtools view -F 1804 -u <sample_temp.bam> | samtools sort - -T <sample.temp> -O bam > <sample_filter.bam>\\nsamtools index <sample_filter.bam>"
+)
+EOF
+          fi
+      fi
+      """
     
         
 # filter aligned reads
@@ -116,33 +116,36 @@ rule align_filter_indexed:
         memory = lambda wildcards, input: memory_estimator(input, 4, 8) # multiplier, min, max, unit=GB
     threads: 4
     shell:
-        """
-        mkdir -p '{params.cmdd}'
-        # Use 80% of allocated memory for samtools, split across threads
-        mem_per_thread=$(( {resources.memory} * 1024 * 80 / 100 / {threads} ))
-        
-        samtools view {input.bam} $(head -n1 {params.idx}) \
-        | sed 's/spike_*//g' \
-        | samtools view -bT {params.fa} - \
-        > {params.sortname}.unsorted.bam
-        
-        samtools sort {params.sortname}.unsorted.bam \
-            -T {params.sortname} \
-            -@ {threads} \
-            -m "${{mem_per_thread}}M" \
-            -O bam \
-            -o {output.bam}
-        
-        samtools index -@ {threads} {output.bam}
-        
-        echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
-        
-        rm -f {params.sortname}.unsorted.bam
-        if [ ! -s {params.cmd} ]; then
-            samtools --version 2>&1 | head -1 >> {params.cmd}
-            echo "samtools view <sample_filter.bam> {params.idx} | sed 's/spike_*//g' | samtools view -bT {params.fa} - > <sample_unsorted_filter.bam>" >> {params.cmd}
-            echo "samtools sort <sample_unsorted_filter.bam> -T <sample_unsorted_filter.temp> -O bam <sample_index_filter.bam>" >> {params.cmd}
-            echo "samtools index <sample_index_filter.bam>" >> {params.cmd}
-            echo "" >> {params.cmd}
-        fi
-        """
+      """
+      mkdir -p '{params.cmdd}'
+      mem_per_thread=$(( {resources.memory} * 1024 * 80 / 100 / {threads} ))
+  
+      samtools view {input.bam} $(head -n1 {params.idx}) \
+      | sed 's/spike_*//g' \
+      | samtools view -bT {params.fa} - \
+      > {params.sortname}.unsorted.bam
+  
+      samtools sort {params.sortname}.unsorted.bam \
+          -T {params.sortname} \
+          -@ {threads} \
+          -m "${{mem_per_thread}}M" \
+          -O bam \
+          -o {output.bam}
+  
+      samtools index -@ {threads} {output.bam}
+  
+      echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
+  
+      rm -f {params.sortname}.unsorted.bam
+  
+      python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_once(
+    "{params.cmd}",
+    version_cmd="samtools --version 2>&1 | head -1",
+    echo_cmd="samtools view <sample_filter.bam> <spike_contig> | sed 's/spike_*//g' | samtools view -bT <genome.fa> - > <sample_unsorted.bam>\\nsamtools sort <sample_unsorted.bam> -T <sample.temp> -O bam -o <sample_index_filter.bam>\\nsamtools index <sample_index_filter.bam>"
+)
+EOF
+      """

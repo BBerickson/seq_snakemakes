@@ -21,23 +21,28 @@ rule dedup_UMI:
     threads:
         4
     shell:
-        """
-        mkdir -p '{params.cmdd}'
-        umi_tools dedup \
-            {params.args} \
-            -I {input.bam} \
-            -S {output.bamt} \
-            -L {output.stats}
-        
-        samtools index -@ {threads} {output.bamt}
-        if [ ! -s {params.cmd} ]; then
-            pip show umi_tools | grep -E "^(Name|Version)" >> {params.cmd}
-            echo "umi_tools dedup -I <sample.bam> -S <sample_temp.bam> -L <sampleUMI_dedup_stats.txt>" >> {params.cmd}
-            samtools --version 2>&1 | head -1 >> {params.cmd}
-            echo "samtools index <sample_temp.bam>" >> {params.cmd}
-            echo "" >> {params.cmd}
-        fi
-        """
+      """
+      mkdir -p '{params.cmdd}'
+      umi_tools dedup \
+          {params.args} \
+          -I {input.bam} \
+          -S {output.bamt} \
+          -L {output.stats}
+  
+      samtools index -@ {threads} {output.bamt}
+  
+      python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_once(
+    "{params.cmd}",
+    version_cmd="pip show umi_tools | grep -E '^(Name|Version)'",
+    extra_version_cmds=["samtools --version 2>&1 | head -1"],
+    echo_cmd="umi_tools dedup {params.args} -I <sample.bam> -S <sample_dedup.bam> -L <sample_dedup_stats.txt>\\nsamtools index <sample_dedup.bam>"
+)
+EOF
+      """
 
 # Create duplication summary
 rule dedup_summary:
@@ -92,32 +97,32 @@ rule align_filter:
     threads: 
         8
     shell:
-        """
-        mkdir -p '{params.cmdd}'
-        # Use 80% of allocated memory for samtools, split across threads
-        mem_per_thread=$(( {resources.memory} * 1024 * 80 / 100 / {threads} ))
-        
-        # filter
-        samtools view {params.args} {input.bam} > {output.bamt}
-        samtools index -@ {threads} {output.bamt}
-        
-        samtools view {output.bamt} $(head -n1 {params.idx}) \
-        | sed 's/spike_*//g' | samtools view -bT {params.fa2} - \
-        | samtools sort - -T {params.sortname} -@ {threads} -m "${{mem_per_thread}}M" -O bam \
-        > {output.bam}
-        
-        samtools index -@ {threads} {output.bam}
-        echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
-        if [ ! -s {params.cmd} ]; then
-            samtools --version 2>&1 | head -1 >> {params.cmd}
-            echo "samtools view <sample_temp.bam> {params.args} > <sample_temp2.bam>" >> {params.cmd}
-            echo "samtools index <sample_temp2.bam>" >> {params.cmd}
-            echo "samtools view <sample_temp2.bam> {params.idx} | sed 's/spike_*//g' | samtools view -bT {params.fa2} - | samtools sort - -T <sample_unsorted_filter.temp> -O bam <sample_index_filter.bam>" >> {params.cmd}
-            echo "samtools index <sample_index_filter.bam>" >> {params.cmd}
-            echo "" >> {params.cmd}
-        fi
-        
-        """
+      """
+      mkdir -p '{params.cmdd}'
+      mem_per_thread=$(( {resources.memory} * 1024 * 80 / 100 / {threads} ))
+  
+      samtools view {params.args} {input.bam} > {output.bamt}
+      samtools index -@ {threads} {output.bamt}
+  
+      samtools view {output.bamt} $(head -n1 {params.idx}) \
+      | sed 's/spike_*//g' | samtools view -bT {params.fa2} - \
+      | samtools sort - -T {params.sortname} -@ {threads} -m "${{mem_per_thread}}M" -O bam \
+      > {output.bam}
+  
+      samtools index -@ {threads} {output.bam}
+      echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
+  
+      python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_once(
+    "{params.cmd}",
+    version_cmd="samtools --version 2>&1 | head -1",
+    echo_cmd="samtools view {params.args} <sample.bam> > <sample_temp.bam>\\nsamtools index <sample_temp.bam>\\nsamtools view <sample_temp.bam> <spike_contig> | sed 's/spike_*//g' | samtools view -bT <genome.fa> - | samtools sort - -T <sample.temp> -O bam > <sample_index_filter.bam>\\nsamtools index <sample_index_filter.bam>"
+)
+EOF
+      """
 
 
                     

@@ -26,39 +26,42 @@ rule align_mask:
     threads: 
         8
     shell:
-        """
-        mkdir -p '{params.cmdd}'
-        # Conditional masking
-        if [ -n "{params.mask}" ] && [ "{params.mask}" != "None" ]; then
-            samtools view -L {params.mask} {input.bam} -U {output.bamt} > {output.bait}
-            
-            if [ ! -s {params.cmd} ]; then
-                samtools --version 2>&1 | head -1 >> {params.cmd}
-                echo "samtools view -L {params.mask} <sample_index_filter.bam> -U <sample_mask.bam> > <sample_temp2.bam>" >> {params.cmd}
-                echo "samtools sort <sample_mask.bam> -T <sample_mask.temp> -O bam <sample_index_filter_mask.bam>" >> {params.cmd}
-                echo "samtools index <sample_index_filter_mask.bam>" >> {params.cmd}
-                echo "" >> {params.cmd}
-            fi
-        else
-            # No mask: copy all reads to bamt, empty file to bait
-            cp {input.bam} {output.bamt}
-            touch {output.bait}  # Create empty file
-            
-            if [ ! -s {params.cmd} ]; then
-                samtools --version 2>&1 | head -1 >> {params.cmd}
-                echo "samtools sort <sample_index_filter.bam> -T <sample_index_filter.temp> -O bam <sample_index_filter_sort.bam>" >> {params.cmd}
-                echo "samtools index <sample_index_filter_sort.bam>" >> {params.cmd}
-                echo "" >> {params.cmd}
-            fi
-
-        fi
-        # sort
-        samtools sort {output.bamt} -T {params.sortname} -@ {threads} -O bam > {output.bam}
-        
-        samtools index -@ {threads} {output.bam}
-        echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
-        
-        """
+      """
+      mkdir -p '{params.cmdd}'
+  
+      if [ -n "{params.mask}" ] && [ "{params.mask}" != "None" ]; then
+          samtools view -L {params.mask} {input.bam} -U {output.bamt} > {output.bait}
+          python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="samtools view mask applied",
+    version_cmd="samtools --version 2>&1 | head -1",
+    echo_cmd="samtools view -L <mask.bed> <sample_filter.bam> -U <sample_mask.bam> > <sample_bait.bam>\\nsamtools sort <sample_mask.bam> -T <sample.temp> -O bam > <sample_index_filter_mask.bam>\\nsamtools index <sample_index_filter_mask.bam>"
+)
+EOF
+      else
+          cp {input.bam} {output.bamt}
+          touch {output.bait}
+          python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="samtools view no mask",
+    version_cmd="samtools --version 2>&1 | head -1",
+    echo_cmd="samtools sort <sample_filter.bam> -T <sample.temp> -O bam > <sample_index_filter_sort.bam>\\nsamtools index <sample_index_filter_sort.bam>"
+)
+EOF
+      fi
+  
+      samtools sort {output.bamt} -T {params.sortname} -@ {threads} -O bam > {output.bam}
+      samtools index -@ {threads} {output.bam}
+      echo "{params.samp} Filtered_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" > {output.counts}
+      """
         
 # calculating subsample numbers for group
 rule calculating_subsample_group:
@@ -129,21 +132,24 @@ rule subsample_dedup:
     threads:
         8
     shell:
-        """
-          mkdir -p '{params.cmdd}'
-          # find the min read count, calcuate the fraction of the reads to keep, samtools subset 
-          samtools view -@ {threads} -s {params.scale} -b {input.bam} > {output.bam}
-          
-          samtools index -@ {threads} {output.bam}
-        
-          echo "{params.samp} Sampled_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" >> {output.stats}
-          if [ ! -s {params.cmd} ]; then
-              samtools --version 2>&1 | head -1 >> {params.cmd}
-              echo "samtools view -s {params.scale} -b <sample_index_filter_mask.bam> > <sample_mask_subsample.bam>" >> {params.cmd}
-              echo "samtools index <sample_mask_subsample.bam>" >> {params.cmd}
-              echo "" >> {params.cmd}
-          fi
-        """
+      """
+      mkdir -p '{params.cmdd}'
+  
+      samtools view -@ {threads} -s {params.scale} -b {input.bam} > {output.bam}
+      samtools index -@ {threads} {output.bam}
+      echo "{params.samp} Sampled_reads $(samtools idxstats {output.bam} | awk '{{s+=$3}} END {{print s}}')" >> {output.stats}
+  
+      python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_once(
+    "{params.cmd}",
+    version_cmd="samtools --version 2>&1 | head -1",
+    echo_cmd="samtools view -s {params.scale} -b <sample_filter_mask.bam> > <sample_subsample.bam>\\nsamtools index <sample_subsample.bam>"
+)
+EOF
+      """
 
 # Create subsample_whole summary
 rule subsample_summary:

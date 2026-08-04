@@ -3,11 +3,13 @@
 rule create_plots:
     input:
         PROJ + "/report/" + PROJ + "_" + INDEXES[0] + "_results.tsv",
-        expand(PROJ + "/report/" + PROJ + "_{genelist}_{region}_{index}_norm_{suffix}_heatmap.pdf",
-               genelist=GENELIST,
-               region=[r for r in REGIONS if r in HEATMAP_REGIONS], 
-               index=INDEXES,
-               suffix=DF_SAM_NORM['Suffix'].unique())
+        sorted(list(set([
+            PROJ + f"/heatmap/{row['Region']}_{group}_aligned_{row['Index']}__{row['Value']}_norm_{row['Suffix']}_{sense_asense}_heatmap.png"
+            for _, row in DF_SAM_NORM.iterrows()
+            for group in GROUPS.keys()
+            for sense_asense in SENSE_ASENSE
+            if str(row['Region']) in HEATMAP_REGIONS  # Explicit whitelist
+        ])))
     output:
         report  = SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_qc_plots_analysis.html",
         reportc = PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_pipeline_methods.txt",
@@ -33,5 +35,10 @@ rule create_plots:
         Rscript {params.script} "{input}" "{params.mydir}" "{params.seqdate}" "{params.index}" "{output.result}" "{output.config}"
         multiqc {params.mydir} --config {output.config} --force --filename {params.out_file}
         rm -r {params.out_file}_data
+        rm -f {PROJ}/pipeline/*.lock
+
+        ARCHIVE_DIR="{params.mydir}/report/$(date '+%Y%m%d_%H%M%S')"
+        mkdir -p "$ARCHIVE_DIR"
+        cp "{output.report}" "{output.reportc}" "$ARCHIVE_DIR"/
         """
         

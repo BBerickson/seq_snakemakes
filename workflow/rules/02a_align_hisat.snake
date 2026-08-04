@@ -22,39 +22,58 @@ rule hisatPE:
         memory = lambda wildcards, input: memory_estimator(input, 5, 32, 250) # files, multiplyer, min, max
     threads: 12
     shell:
-        """
-        mkdir -p '{params.cmdd}'
-        sort_threads=4
-        mem_per_thread=$(( {resources.memory} * 1024 * 60 / 100 / $sort_threads ))
-        
-        if [ "{params.is_paired}" = "True" ]; then
-            reads="-1 {input.R1} -2 {input.R2}"
-            myreads="-1 <sample_trim_R1.fastq.gz> -2 <sample_trim_R2.fastq.gz>"
-        else
-            reads="-U {input.R1}"
-            myreads="-U <sample_trim_R1.fastq.gz>"
-        fi
-        
-        hisat2 \
-            -p {threads} \
-            -x {params.idx} \
-            $reads \
-            {params.args} \
-            2> {output.stats} \
-            | samtools sort - -T {params.sortname} -@ $sort_threads -m "${{mem_per_thread}}M" -O bam \
-            > {output.bam}
-
-        
-        samtools index -@ $sort_threads {output.bam}
-            
-        if [ ! -s {params.cmd} ]; then
-            hisat2 --version 2>&1 | grep "version" | head -1 | sed 's|.*/||' >> {params.cmd}
-            samtools --version 2>&1 | head -1 >> {params.cmd}
-            echo "hisat2 -x {params.idx} $myreads {params.args} | samtools sort - -T <sample.temp> -O bam <sample.bam>" >> {params.cmd}
-            echo "samtools index <sample.bam>" >> {params.cmd}
-            echo "" >> {params.cmd}
-        fi
-        """
+      """
+      mkdir -p '{params.cmdd}'
+      sort_threads=4
+      mem_per_thread=$(( {resources.memory} * 1024 * 60 / 100 / $sort_threads ))
+  
+      if [ "{params.is_paired}" = "True" ]; then
+          reads="-1 {input.R1} -2 {input.R2}"
+          myreads="-1 <sample_trim_R1.fastq.gz> -2 <sample_trim_R2.fastq.gz>"
+      else
+          reads="-U {input.R1}"
+          myreads="-U <sample_trim_R1.fastq.gz>"
+      fi
+  
+      hisat2 \
+          -p {threads} \
+          -x {params.idx} \
+          $reads \
+          {params.args} \
+          2> {output.stats} \
+          | samtools sort - -T {params.sortname} -@ $sort_threads -m "${{mem_per_thread}}M" -O bam \
+          > {output.bam}
+  
+      samtools index -@ $sort_threads {output.bam}
+  
+      if [ "{params.is_paired}" = "True" ]; then
+          python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="hisat2 PE",
+    version_cmd="hisat2 --version 2>&1 | grep 'version' | head -1 | sed 's|.*/||'",
+    extra_version_cmds=["samtools --version 2>&1 | head -1"],
+    echo_cmd="hisat2 -x <index> -1 <sample_trim_R1.fastq.gz> -2 <sample_trim_R2.fastq.gz> {params.args} | samtools sort - -T <sample.temp> -O bam > <sample.bam>\\nsamtools index <sample.bam>"
+)
+EOF
+      else
+          python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="hisat2 SE",
+    version_cmd="hisat2 --version 2>&1 | grep 'version' | head -1 | sed 's|.*/||'",
+    extra_version_cmds=["samtools --version 2>&1 | head -1"],
+    echo_cmd="hisat2 -x <index> -U <sample_trim_R1.fastq.gz> {params.args} | samtools sort - -T <sample.temp> -O bam > <sample.bam>\\nsamtools index <sample.bam>"
+)
+EOF
+      fi
+      """
 
     
 

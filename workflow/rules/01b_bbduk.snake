@@ -21,48 +21,61 @@ rule bbduk:
     threads:
         12
     shell:
-        """
-        mkdir -p '{params.cmdd}'
-        if [ -z "{params.args}" ]; then
-            # No bbduk args, just copy files
-            cp {input.R1} {output.R1}
-            if [ "{params.is_paired}" = "True" ]; then
-                cp {input.R2} {output.R2}
-            else
-                touch {output.R2}
-            fi
-            printf "Total Removed:\t0 reads (0.00%%)\t0 bases (0.00%%)\n" > {output.log}
-            if [ ! -s {params.cmd} ]; then
-                echo "bbduk trimming step skipped" >> {params.cmd}
-            fi
-        elif [ "{params.is_paired}" = "True" ]; then
-            # Paired-end processing
-            bbduk.sh -Xmx{resources.memory}g threads={threads} \
-                in1={input.R1} in2={input.R2} \
-                out1={output.R1} out2={output.R2} \
-                {params.bar} {params.args} 2>> {output.log}
-            
-            if [ ! -s {params.cmd} ]; then
-                bbduk.sh --version 2>&1 | grep "BBTools version" >> {params.cmd}
-                echo "bbduk.sh {params.bar} {params.args} in1=<sample_dedup_R1.fastq.gz> in2=<sample_dedup_R2.fastq.gz> out1=<sample_trim_R1.fastq.gz> out2=<sample_trim_R2.fastq.gz>" >> {params.cmd}
-                echo "" >> {params.cmd}
-            fi
-        else
-            # Single-end processing
-            bbduk.sh -Xmx{resources.memory}g threads={threads} \
-                in={input.R1} \
-                out={output.R1} \
-                {params.bar} {params.args} 2>> {output.log}
-            # Create empty R2 to satisfy output declaration
-            touch {output.R2}
-            
-            if [ ! -s {params.cmd} ]; then
-                bbduk.sh --version 2>&1 | grep "BBTools version" >> {params.cmd}
-                echo "bbduk.sh {params.bar} {params.args} in=<sample_dedup_R1.fastq.gz> out=<sample_trim_R1.fastq.gz>" >> {params.cmd}
-                echo "" >> {params.cmd}
-            fi
-        fi
-        """
+      """
+      mkdir -p '{params.cmdd}'
+      if [ -z "{params.args}" ]; then
+          cp {input.R1} {output.R1}
+          if [ "{params.is_paired}" = "True" ]; then
+              cp {input.R2} {output.R2}
+          else
+              touch {output.R2}
+          fi
+          printf "Total Removed:\t0 reads (0.00%%)\t0 bases (0.00%%)\n" > {output.log}
+          python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="bbduk: step skipped",
+    echo_cmd="bbduk: step skipped"
+)
+EOF
+      elif [ "{params.is_paired}" = "True" ]; then
+          bbduk.sh -Xmx{resources.memory}g threads={threads} \
+              in1={input.R1} in2={input.R2} \
+              out1={output.R1} out2={output.R2} \
+              {params.bar} {params.args} 2>> {output.log}
+          python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="in1=<sample_dedup_R1",
+    version_cmd="bbduk.sh --version 2>&1 | grep 'BBTools version'",
+    echo_cmd="bbduk.sh {params.bar} {params.args} in1=<sample_dedup_R1.fastq.gz> in2=<sample_dedup_R2.fastq.gz> out1=<sample_trim_R1.fastq.gz> out2=<sample_trim_R2.fastq.gz>"
+)
+EOF
+      else
+          bbduk.sh -Xmx{resources.memory}g threads={threads} \
+              in={input.R1} \
+              out={output.R1} \
+              {params.bar} {params.args} 2>> {output.log}
+          touch {output.R2}
+          python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="in=<sample_dedup_R1",
+    version_cmd="bbduk.sh --version 2>&1 | grep 'BBTools version'",
+    echo_cmd="bbduk.sh {params.bar} {params.args} in=<sample_dedup_R1.fastq.gz> out=<sample_trim_R1.fastq.gz>"
+)
+EOF
+      fi
+      """
 
         
   

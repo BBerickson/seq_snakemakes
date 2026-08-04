@@ -17,16 +17,21 @@ rule standared_matrix:
     threads: 
         12
     shell:
-        """
-        mkdir -p '{params.cmdd}'
-        # deeptools
-        computeMatrix {params.args} -R {params.my_ref} -S {input.bw} -p {threads} -o {output.matrix} 
-          
-        if [ ! -s {params.cmd} ]; then
-            computeMatrix --version >> {params.cmd}
-            echo "computeMatrix {params.args} -R {params.my_ref} -S <sample.bw> -o <sample_matrix.gz>">> {params.cmd}
-        fi
-        """
+      """
+      mkdir -p '{params.cmdd}'
+      computeMatrix {params.args} -R {params.my_ref} -S {input.bw} -p {threads} -o {output.matrix}
+  
+      python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_once(
+    "{params.cmd}",
+    version_cmd="computeMatrix --version 2>&1 | head -1",
+    echo_cmd="computeMatrix {params.args} -R <regions.bed> -S <sample.bw> -p <threads> -o <sample_matrix.gz>"
+)
+EOF
+      """
 
 # make url's and scp to sandbox
 rule standared_marix_url:

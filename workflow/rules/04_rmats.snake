@@ -51,25 +51,31 @@ rule run_rmats:
         memory = lambda wildcards, input: memory_estimator(input, 10, 30)
     threads: 12
     shell:
-        """
-        mkdir -p '{params.cmdd}'
-        rm -rf {params.outdirtmp}
-        mkdir -p {params.outdirtmp}
-        
-        rmats.py --b1 {input.S1} --b2 {input.S2} \
-        --gtf {params.gtf} \
-        --od {params.outdir} \
-        --tmp {params.outdirtmp} \
-        --nthread {threads} \
-        {params.args}
-        
-        rm -rf {params.outdirtmp}
-        if [ ! -s {params.cmd} ]; then
-            echo "rmats.py --version" >> {params.cmd}
-            echo "rmats.py --b1 <bam_list_1.txt> --b2 <bam_list_2.txt> --gtf {params.gtf}" --od <outdir> --tmp <outdirtmp> {params.args} ">> {params.cmd}
-            echo "" >> {params.cmd}
-        fi
-        """
+      """
+      mkdir -p '{params.cmdd}'
+      rm -rf {params.outdirtmp}
+      mkdir -p {params.outdirtmp}
+  
+      rmats.py --b1 {input.S1} --b2 {input.S2} \
+      --gtf {params.gtf} \
+      --od {params.outdir} \
+      --tmp {params.outdirtmp} \
+      --nthread {threads} \
+      {params.args}
+  
+      rm -rf {params.outdirtmp}
+  
+      python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_once(
+    "{params.cmd}",
+    version_cmd="rmats.py --version 2>&1 | head -1",
+    echo_cmd="rmats.py --b1 <bam_list_1.txt> --b2 <bam_list_2.txt> --gtf <annotation.gtf> --od <outdir> --tmp <outdirtmp> --nthread <threads> {params.args}"
+)
+EOF
+      """
                     
 # filter and make bar plots, gene lists and sashimi plots                    
 rule rmats_plot:

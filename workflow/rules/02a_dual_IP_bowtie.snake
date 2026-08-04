@@ -27,37 +27,38 @@ rule bowtie_first_pass:
     threads: 
         12
     shell:
-        """
-        mkdir -p '{params.cmdd}'
-        # Paired-end alignment
-        bowtie2 \
-            -p {threads} \
-            -x {params.idx} \
-            -1 {input.R1} -2 {input.R2} \
-            {params.args} \
-            --un-conc-gz {params.unaligned_base} \
-            -S {params.sortname}.sam \
-            2> {output.stats}
-            
-        samtools sort {params.sortname}.sam -T {params.sortname} -@ {threads} -O bam -o {output.bam}
-        rm {params.sortname}.sam
-            
-        # Rename unaligned files to match Snakemake outputs
-        mv {params.unaligned_1} {output.unaligned_R1}
-        mv {params.unaligned_2} {output.unaligned_R2}
-        
-        # Index the BAM file
-        samtools index -@ {threads} {output.bam}
-            
-        if [ ! -s {params.cmd} ]; then
-            bowtie2 --version 2>&1 | grep "version" | head -1 | sed 's|.*/||' >> {params.cmd}
-            echo "bowtie2 -x {params.idx} -1 <sample_trim_R1.fastq.gz> -2 <sample_trim_R2.fastq.gz> {params.args} --un-conc-gz <sample_unaligned.fastq.gz> -S <sample.sam>" >> {params.cmd}
-            samtools --version 2>&1 | head -1 >> {params.cmd}
-            echo "samtools sort <sample.sam> -T <sample.temp> -O bam -o <sample.bam>" >> {params.cmd}
-            echo "samtools index <sample.bam>" >> {params.cmd}
-            echo "" >> {params.cmd}
-        fi
-        """
+      """
+      mkdir -p '{params.cmdd}'
+  
+      bowtie2 \
+          -p {threads} \
+          -x {params.idx} \
+          -1 {input.R1} -2 {input.R2} \
+          {params.args} \
+          --un-conc-gz {params.unaligned_base} \
+          -S {params.sortname}.sam \
+          2> {output.stats}
+  
+      samtools sort {params.sortname}.sam -T {params.sortname} -@ {threads} -O bam -o {output.bam}
+      rm {params.sortname}.sam
+  
+      mv {params.unaligned_1} {output.unaligned_R1}
+      mv {params.unaligned_2} {output.unaligned_R2}
+  
+      samtools index -@ {threads} {output.bam}
+  
+      python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_once(
+    "{params.cmd}",
+    version_cmd="bowtie2 --version 2>&1 | grep 'version' | head -1 | sed 's|.*/||'",
+    extra_version_cmds=["samtools --version 2>&1 | head -1"],
+    echo_cmd="bowtie2 -x <index> -1 <sample_trim_R1.fastq.gz> -2 <sample_trim_R2.fastq.gz> {params.args} --un-conc-gz <sample_unaligned.fastq.gz> -S <sample.sam>\\nsamtools sort <sample.sam> -T <sample.temp> -O bam -o <sample.bam>\\nsamtools index <sample.bam>"
+)
+EOF
+      """
 
 # Align trimmed reads with bowtie2 R1 or R2
 rule bowtie_second_pass:
@@ -83,52 +84,55 @@ rule bowtie_second_pass:
     threads: 
         12
     shell:
-        """
-        mkdir -p '{params.cmdd}'
-        # Paired-end alignment
-        if [ "{params.unaligned}" = "True" ]; then
-            bowtie2 \
-              -p {threads} \
-              -x {params.idx} \
-              -1 {input.U1} -2 {input.U2} \
-              {params.args} \
-              -S {params.sortname}.sam \
-              2> {output.stats}
-            
-          if [ ! -s {params.cmd} ]; then
-              bowtie2 --version 2>&1 | grep "version" | head -1 | sed 's|.*/||' >> {params.cmd}
-              echo "bowtie2 -x {params.idx} -1 <sample_unaligned_R1.fastq.gz> -2 <sample_unaligned_R2.fastq.gz> {params.args} -S <sample.sam>" >> {params.cmd}
-              samtools --version 2>&1 | head -1 >> {params.cmd}
-              echo "samtools sort <sample.sam> -T <sample.temp> -O bam -o <sample.bam>" >> {params.cmd}
-              echo "samtools index <sample.bam>" >> {params.cmd}
-              echo "" >> {params.cmd}
-          fi
-        else
+      """
+      mkdir -p '{params.cmdd}'
+  
+      if [ "{params.unaligned}" = "True" ]; then
           bowtie2 \
-              -p {threads} \
-              -x {params.idx} \
-              -1 {input.R1} -2 {input.R2} \
-              {params.args} \
-              -S {params.sortname}.sam \
-              2> {output.stats}
-              
-            
-          if [ ! -s {params.cmd} ]; then
-              bowtie2 --version 2>&1 | grep "version" | head -1 | sed 's|.*/||' >> {params.cmd}
-              echo "bowtie2 -x {params.idx} -1 <sample_trim_R1.fastq.gz> -2 <sample_trim_R2.fastq.gz> {params.args} -S <sample.sam>" >> {params.cmd}
-              samtools --version 2>&1 | head -1 >> {params.cmd}
-              echo "samtools sort <sample.sam> -T <sample.temp> -O bam -o <sample.bam>" >> {params.cmd}
-              echo "samtools index <sample.bam>" >> {params.cmd}
-              echo "" >> {params.cmd}
-          fi
-        fi
-        
-        samtools sort {params.sortname}.sam -T {params.sortname} -@ {threads} -O bam -o {output.bam}
-        rm {params.sortname}.sam
-        
-        # Index the BAM file
-        samtools index -@ {threads} {output.bam}
-        """
+            -p {threads} \
+            -x {params.idx} \
+            -1 {input.U1} -2 {input.U2} \
+            {params.args} \
+            -S {params.sortname}.sam \
+            2> {output.stats}
+          python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="bowtie2 unaligned input",
+    version_cmd="bowtie2 --version 2>&1 | grep 'version' | head -1 | sed 's|.*/||'",
+    extra_version_cmds=["samtools --version 2>&1 | head -1"],
+    echo_cmd="bowtie2 -x <index> -1 <sample_unaligned_R1.fastq.gz> -2 <sample_unaligned_R2.fastq.gz> {params.args} -S <sample.sam>\\nsamtools sort <sample.sam> -T <sample.temp> -O bam -o <sample.bam>\\nsamtools index <sample.bam>"
+)
+EOF
+      else
+          bowtie2 \
+            -p {threads} \
+            -x {params.idx} \
+            -1 {input.R1} -2 {input.R2} \
+            {params.args} \
+            -S {params.sortname}.sam \
+            2> {output.stats}
+          python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="bowtie2 trimmed input",
+    version_cmd="bowtie2 --version 2>&1 | grep 'version' | head -1 | sed 's|.*/||'",
+    extra_version_cmds=["samtools --version 2>&1 | head -1"],
+    echo_cmd="bowtie2 -x <index> -1 <sample_trim_R1.fastq.gz> -2 <sample_trim_R2.fastq.gz> {params.args} -S <sample.sam>\\nsamtools sort <sample.sam> -T <sample.temp> -O bam -o <sample.bam>\\nsamtools index <sample.bam>"
+)
+EOF
+      fi
+  
+      samtools sort {params.sortname}.sam -T {params.sortname} -@ {threads} -O bam -o {output.bam}
+      rm {params.sortname}.sam
+      samtools index -@ {threads} {output.bam}
+      """
 
 # ====== Rules for aligning reads summary =================================
 

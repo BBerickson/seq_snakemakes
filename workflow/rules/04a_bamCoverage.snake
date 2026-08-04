@@ -30,33 +30,38 @@ rule bamCoverage:
         memory = lambda wildcards, input: memory_estimator(input.bam, 0.2, 5)
     threads: 8
     shell:
-        """
-        mkdir -p '{params.cmdd}'
-        SCALE=$(python -c "
+      """
+      mkdir -p '{params.cmdd}'
+      SCALE=$(python -c "
 import sys
 import pandas as pd
 sys.path.append('workflow/scripts')
 from funs import _get_norm
-
-# Recreate the dataframe from the passed data
 df_sam_norm = pd.DataFrame({params.sam_norm!r}, columns=['Sample', 'Newnam', 'Index', 'Norm', 'Suffix', 'Bam_dir'])
 scale = _get_norm(df_sam_norm, '{wildcards.newnam}', '{wildcards.suffix}', '{wildcards.index}', {input.norm_files!r})
 print(scale)
 ")
-        
-        bamCoverage \
-          -b {input.bam[0]} \
-          -of bigwig \
-          -o {output.bigwig} \
-          {params.args} \
-          $SCALE \
-          -p {threads}
-          
-        if [ ! -s {params.cmd} ]; then
-            bamCoverage --version >> {params.cmd}
-            echo "bamCoverage -b <sample_index_filter.bam> -of bigwig -o <sample.bw> {params.args} $SCALE">> {params.cmd}
-            echo "" >> {params.cmd}
-        fi
-        """
+
+      bamCoverage \
+        -b {input.bam[0]} \
+        -of bigwig \
+        -o {output.bigwig} \
+        {params.args} \
+        $SCALE \
+        -p {threads}
+  
+      BAMCOVERAGE_VERSION=$(bamCoverage --version)
+      python - << 'EOF'
+import sys, os
+sys.path.insert(0, "workflow/scripts/")
+import funs
+scale = os.environ.get("SCALE", "<scale_factor>")
+funs.write_cmd_once(
+    "{params.cmd}",
+    version_string=os.environ.get("BAMCOVERAGE_VERSION"),
+    echo_cmd=f"bamCoverage -b <sample.bam> -of bigwig -o <sample.bw> {params.args} {{scale}} -p <threads>"
+)
+EOF
+      """
         
 

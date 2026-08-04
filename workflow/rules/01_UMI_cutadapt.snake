@@ -24,52 +24,66 @@ rule extract_umi:
     threads:
         1
     shell:
-        """
-        mkdir -p '{params.cmdd}'
-        if [ -z "{params.umi_pat}" ]; then
-            # If no UMI pattern, create symlinks
-            ln -sf {input[0]} {output.R1}
-            ln -sf {input[1]} {output.R2}
-            touch {output.log}
-            if [ ! -s {params.cmd} ]; then
-                echo "umi_tools extract step skipped" >> {params.cmd}
-            fi
-        elif [ "{params.orientation}" = "R1" ]; then
-            # Extract UMIs from R1
-            umi_tools extract \
-              -I {input[1]} \
-              --extract-method=string \
-              --bc-pattern={params.umi_pat} \
-              --read2-in={input[0]} \
-              --read2-out={output.R1} \
-              -L {output.log} \
-              | gzip \
-              > {output.R2}
-            
-            if [ ! -s {params.cmd} ]; then
-                pip show umi_tools | grep -E "^(Name|Version)" >> {params.cmd}
-                echo "umi_tools extract -I <sample_R2.fastq.gz> --extract-method=string --bc-pattern={params.umi_pat} --read2-in=<sample_R1.fastq.gz> --read2-out=<sample_umi_R1.fastq.gz> | gzip > <sample_umi_R2.fastq.gz>" >> {params.cmd}
-                echo "" >> {params.cmd}
-            fi
-        else
-            # Extract UMIs from R2
-            umi_tools extract \
-              -I {input[0]} \
-              --extract-method=string \
-              --bc-pattern={params.umi_pat} \
-              --read2-in={input[1]} \
-              --read2-out={output.R2} \
-              -L {output.log} \
-              | gzip \
-              > {output.R1}
-            
-            if [ ! -s {params.cmd} ]; then
-                pip show umi_tools | grep -E "^(Name|Version)" >> {params.cmd}
-                echo "umi_tools extract -I <sample_R1.fastq.gz> --extract-method=string --bc-pattern={params.umi_pat} --read2-in=<sample_R2.fastq.gz> --read2-out=<sample_umi_R2.fastq.gz> | gzip > <sample_umi_R1.fastq.gz>" >> {params.cmd}
-                echo "" >> {params.cmd}
-            fi
-        fi
-        """
+      """
+      mkdir -p '{params.cmdd}'
+      if [ -z "{params.umi_pat}" ]; then
+          ln -sf {input[0]} {output.R1}
+          ln -sf {input[1]} {output.R2}
+          touch {output.log}
+          python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="umi_tools extract: step skipped",
+    echo_cmd="umi_tools extract: step skipped, symlinks created"
+)
+EOF
+      elif [ "{params.orientation}" = "R1" ]; then
+          umi_tools extract \
+            -I {input[1]} \
+            --extract-method=string \
+            --bc-pattern={params.umi_pat} \
+            --read2-in={input[0]} \
+            --read2-out={output.R1} \
+            -L {output.log} \
+            | gzip \
+            > {output.R2}
+          python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="--read2-in=<sample_R1",
+    version_cmd="pip show umi_tools | grep -E '^(Name|Version)'",
+    echo_cmd="umi_tools extract -I <sample_R2.fastq.gz> --extract-method=string --bc-pattern={params.umi_pat} --read2-in=<sample_R1.fastq.gz> --read2-out=<sample_umi_R1.fastq.gz> | gzip > <sample_umi_R2.fastq.gz>"
+)
+EOF
+      else
+          umi_tools extract \
+            -I {input[0]} \
+            --extract-method=string \
+            --bc-pattern={params.umi_pat} \
+            --read2-in={input[1]} \
+            --read2-out={output.R2} \
+            -L {output.log} \
+            | gzip \
+            > {output.R1}
+          python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="--read2-in=<sample_R2",
+    version_cmd="pip show umi_tools | grep -E '^(Name|Version)'",
+    echo_cmd="umi_tools extract -I <sample_R1.fastq.gz> --extract-method=string --bc-pattern={params.umi_pat} --read2-in=<sample_R2.fastq.gz> --read2-out=<sample_umi_R2.fastq.gz> | gzip > <sample_umi_R1.fastq.gz>"
+)
+EOF
+      fi
+      """
 
 
 # Trim reads with cutadapt
@@ -96,15 +110,21 @@ rule cutadapt:
         """
         mkdir -p '{params.cmdd}'
         if [ -z "{params.args}" ]; then
-            # No cutadapt args, create symlinks to original files
             ln -sf {input.R1} {output.R1}
             ln -sf {input.R2} {output.R2}
             touch {output.stats}
-            if [ ! -s {params.cmd} ]; then
-                echo "cutadapt step skipped" >> {params.cmd}
-            fi
+            python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="cutadapt: step skipped",
+    echo_cmd="cutadapt: step skipped, symlinks created"
+)
+
+EOF
         else
-            # Run cutadapt with provided arguments
             python3 -m cutadapt \
               {params.args} \
               -j {threads} \
@@ -113,12 +133,18 @@ rule cutadapt:
               {input.R1} \
               {input.R2} \
               > {output.stats}
-            
-            if [ ! -s {params.cmd} ]; then
-                echo "cutadapt $(cutadapt --version)" >> {params.cmd}
-                echo "cutadapt {params.args} -o <sample_trim_R1.fastq.gz> -p <sample_trim_R2.fastq.gz> <sample_umi_R1.fastq.gz> <sample_umi_R2.fastq.gz>" >> {params.cmd}
-                echo "" >> {params.cmd}
-            fi
+            CUTADAPT_VERSION="cutadapt $(cutadapt --version)"
+            python - << 'EOF'
+import sys, os
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="cutadapt {params.args}",
+    version_string=os.environ.get("CUTADAPT_VERSION"),
+    echo_cmd="cutadapt {params.args} -o <sample_trim_R1.fastq.gz> -p <sample_trim_R2.fastq.gz> <sample_R1.fastq.gz> <sample_R2.fastq.gz>"
+)
+EOF
         fi
         """
 

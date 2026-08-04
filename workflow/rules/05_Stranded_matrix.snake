@@ -36,21 +36,23 @@ rule create_strand_matrix:
     threads: 
         12
     shell:
-        """
-        mkdir -p '{params.cmdd}'
-        computeMatrix {params.args} -R {params.fw_ref} -S {input.fw} -p {threads} -o {output.fw} 
-        computeMatrix {params.args} -R {params.rev_ref} -S {input.rev} -p {threads} -o {output.rev} 
-        computeMatrixOperations rbind -m {output.fw} {output.rev} -o {output.matrix} 
-          
-        if [ ! -s {params.cmd} ]; then
-            computeMatrix --version >> {params.cmd}
-            echo "computeMatrix {params.args} -R {params.fw_ref} -S <sample_fw.bw> -o <sample_pos_temp_matrix.gz>">> {params.cmd}
-            echo "computeMatrix {params.args} -R {params.rev_ref} -S <sample_rev.bw> -o <sample_neg_temp_matrix.gz>">> {params.cmd}
-            echo "computeMatrixOperations rbind -m <sample_fw.bw> <sample_rev.bw> -o <sample_neg_{wildcards.sense_asense}_matrix.gz>">> {params.cmd}
-            echo "" >> {params.cmd}
-        fi
-        
-        """
+      """
+      mkdir -p '{params.cmdd}'
+      computeMatrix {params.args} -R {params.fw_ref} -S {input.fw} -p {threads} -o {output.fw}
+      computeMatrix {params.args} -R {params.rev_ref} -S {input.rev} -p {threads} -o {output.rev}
+      computeMatrixOperations rbind -m {output.fw} {output.rev} -o {output.matrix}
+  
+      python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_once(
+    "{params.cmd}",
+    version_cmd="computeMatrix --version 2>&1 | head -1",
+    echo_cmd="computeMatrix {params.args} -R <fw_regions.bed> -S <sample_fw.bw> -p <threads> -o <sample_pos_temp_matrix.gz>\\ncomputeMatrix {params.args} -R <rev_regions.bed> -S <sample_rev.bw> -p <threads> -o <sample_neg_temp_matrix.gz>\\ncomputeMatrixOperations rbind -m <sample_pos_temp_matrix.gz> <sample_neg_temp_matrix.gz> -o <sample_{wildcards.sense_asense}_matrix.gz>"
+)
+EOF
+      """
 
 # make url's and scp to sandbox
 rule standared_marix_url:
