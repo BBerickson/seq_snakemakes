@@ -693,3 +693,59 @@ def write_cmd_tagged(cmd_file, tag, version_cmd=None, echo_cmd=None, version_str
                     f.write(echo_cmd + "\n\n")
         except BlockingIOError:
             pass  # another process got the lock first, skip
+
+
+def _is_suffix(short_lines, long_lines):
+    """True if short_lines is exactly the trailing lines of long_lines."""
+    if len(short_lines) > len(long_lines):
+        return False
+    return long_lines[-len(short_lines):] == short_lines
+
+
+def aggregate_cmds(cmdd, output_file):
+    """Concatenate every *.cmd file in cmdd into output_file, deduplicating
+    repeated blocks (paragraphs separated by a blank line).
+
+    write_cmd_once/write_cmd_tagged already guard against duplicate writes
+    within a single .cmd file via flock, but that locking is only effective
+    when the filesystem backing `cmdd` honors flock() (e.g. it can be
+    unreliable on some network/cluster filesystems when jobs race on the
+    same file). If that guard is ever defeated, the same block can end up
+    written more than once -- and not always identically: write_cmd_tagged
+    only writes its version line(s) when the file is still empty at write
+    time, so a losing racer that still passes the "tag not present" check
+    can append just the echo_cmd lines with no version prefix. That leaves
+    two blocks that aren't byte-identical (one has the version lines, one
+    doesn't) even though they're the same duplicate write. So dedup treats
+    a block as a duplicate whenever it's a trailing-line subset of another
+    block (or vice versa -- in which case the fuller one wins), not just on
+    exact text match.
+
+    Blocks are kept in first-seen order, sorted by filename first so output
+    order stays deterministic across runs.
+    """
+    kept = []
+    for fp in sorted(glob.glob(os.path.join(cmdd, "*.cmd"))):
+        with open(fp) as f:
+            content = f.read()
+        for block in content.split("\n\n"):
+            block = block.strip("\n")
+            if not block:
+                continue
+            lines = block.split("\n")
+
+            matched = False
+            for i, existing in enumerate(kept):
+                if _is_suffix(lines, existing):
+                    matched = True
+                    break
+                if _is_suffix(existing, lines):
+                    kept[i] = lines  # this occurrence is the fuller version
+                    matched = True
+                    break
+            if not matched:
+                kept.append(lines)
+
+    with open(output_file, "a") as f:
+        for lines in kept:
+            f.write("\n".join(lines) + "\n\n")

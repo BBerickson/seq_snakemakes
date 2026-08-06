@@ -191,23 +191,45 @@ multiqc_config <- list(
   decimalPoint_format = ".",
   
   title = myproj,
-  subtitle = seq_date,
-  intro_text = "MultiQC reports summarise analysis results.",
+  subtitle = as.character(seq_date),
+  intro_text = "",
   
   skip_versions_section = TRUE,
   skip_generalstats = TRUE,
   ignore_images = FALSE,
-  intro_text = FALSE, 
   
   sp = sp_list,
   custom_data = custom_data_list
 )
 
 # ---- WRITE OUTPUTS ----
-write_yaml(
-  multiqc_config, 
-  output_yaml, 
+yaml_text <- as.yaml(
+  multiqc_config,
   handlers = list(logical = verbatim_logical)
 )
+
+# Force `title`/`subtitle` to always be emitted as double-quoted YAML
+# strings. The yaml package leaves plain-looking scalars unquoted when it
+# doesn't think they're ambiguous -- but its notion of "ambiguous" doesn't
+# match MultiQC's PyYAML parser, which treats underscore-grouped digits
+# (e.g. a run name/date like "2024_01_15" or "240806_A00405") as an
+# integer literal when left unquoted. MultiQC then errors expecting a
+# string. Explicitly quoting here sidesteps that mismatch regardless of
+# what seq_date/myproj look like (plain digits, dashes, underscores, ...).
+quote_yaml_line <- function(lines, field, value) {
+  escaped <- gsub('(["\\\\])', '\\\\\\1', value)
+  ifelse(
+    grepl(paste0("^", field, ":"), lines),
+    paste0(field, ": \"", escaped, "\""),
+    lines
+  )
+}
+
+lines <- strsplit(yaml_text, "\n", fixed = TRUE)[[1]]
+lines <- quote_yaml_line(lines, "title", myproj)
+lines <- quote_yaml_line(lines, "subtitle", as.character(seq_date))
+yaml_text <- paste(lines, collapse = "\n")
+
+writeLines(yaml_text, output_yaml)
 
 write_tsv(df, output_tsv)

@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd ~/Ben_pipelines/snakemake_pipelines/workflow && grep -rn \"command\" scripts/multiqc_config.R | head -50)",
+      "Read(//beevol/home/erickson/Ben_pipelines/snakemake_pipelines/workflow/**)",
+      "Bash(cd ~/Ben_pipelines/snakemake_pipelines/workflow && sed -n '1,220p' scripts/multiqc_config.R)",
+      "Bash(cd ~/Ben_pipelines/snakemake_pipelines/workflow && grep -rn \"pipeline_methods\" . 2>/dev/null)",
+      "Bash(cd ~/Ben_pipelines/snakemake_pipelines/workflow && grep -rln \"methods\" . 2>/dev/null | grep -v \".git\")",
+      "Bash(cd ~/Ben_pipelines/snakemake_pipelines/workflow && grep -rn \"reportc\\\\|log_command\\\\|write_methods\\\\|>> .*methods\\\\|methods.txt\\\\|pipeline_methods\" rules/*.snake scripts/*.R scripts/*.py scripts/*.sh 2>/dev/null)",
+      "Bash(cd ~/Ben_pipelines/snakemake_pipelines/workflow && ls rules/ | sort)",
+      "Bash(cd ~/Ben_pipelines/snakemake_pipelines/workflow && grep -rn \"cmdd\\\\|CMD_DIR\\\\|cmd_dir\" rules/*.snake | head -100)"
+    ]
+  }
+}

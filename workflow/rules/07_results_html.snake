@@ -31,7 +31,12 @@ rule create_plots:
         """
         echo "Pipeline run: $(date '+%Y-%m-%d %H:%M:%S')" >> {output.reportc}
         echo "" >> {output.reportc}
-        cat {params.cmdd}/* >> {output.reportc} 2>/dev/null || true
+        python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.aggregate_cmds("{params.cmdd}", "{output.reportc}")
+EOF
         Rscript {params.script} "{input}" "{params.mydir}" "{params.seqdate}" "{params.index}" "{output.result}" "{output.config}"
         multiqc {params.mydir} --config {output.config} --force --filename {params.out_file}
         rm -r {params.out_file}_data
