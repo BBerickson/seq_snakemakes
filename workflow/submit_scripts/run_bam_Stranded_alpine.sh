@@ -6,23 +6,34 @@
 #SBATCH --time=24:00:00
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=4G
-#SBATCH --partition=normal 
-#SBATCH --qos=normal
+#SBATCH --partition=acpu
+#SBATCH --qos=cpu-normal
 
 set -o nounset -o pipefail -o errexit -x
 
-# Shared Singularity cache for all Snakemake projects
-SINGULARITY_PREFIX="/beevol/home/${USER}/.singularity_cache"
-
-# Create necessary directories
 mkdir -p logs
 
+module purge
+
+# Load modules
+module load python/3.10.2
+module load singularity/3.7.4
+module load miniforge
+
+conda activate rnaseq_env # snakemake
+
+export SINGULARITY_CACHEDIR="/projects/$USER/.singularity/cache"
+export SINGULARITY_TMPDIR="/projects/$USER/.singularity/tmp"
+mkdir -p $SINGULARITY_CACHEDIR
+mkdir -p $SINGULARITY_TMPDIR
+
 # Configuration
-PROFILE="workflow/profiles/Bodhi"
-LSF_CONFIG="workflow/profiles/Bodhi/Bodhi_config.yaml"
+PROFILE="workflow/profiles/Alpine"
+LSF_CONFIG="workflow/profiles/Alpine/Alpine_config.yaml"
 SSH_KEY_DIR="${HOME}/.ssh"
 SAMPLES_FILE="Bam_Stranded_samples.yaml"
 MATRIX_FILE="Stranded_matrix.yaml"
+SINGULARITY_PREFIX="/projects/${USER}/.snakemake/singularity"
 
 snakemake \
     --profile ${PROFILE} \
@@ -37,4 +48,3 @@ snakemake \
     --configfile ${SAMPLES_FILE} ${LSF_CONFIG} ${MATRIX_FILE} \
     --singularity-prefix "${SINGULARITY_PREFIX}" \
     --config SSH_KEY_DIR="${SSH_KEY_DIR}"
-

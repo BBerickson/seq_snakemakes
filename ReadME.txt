@@ -1,6 +1,6 @@
 # Process DNAseq and RNAseq, from raw data to bam to bigwig and deeptools matrix files
 
-This snakemake pipeline runs in a container and is set up to run on AMC Bodhi (LSF) and Bolder Alpine (SLURM)
+This snakemake pipeline runs in a container and is set up to run on AMC Bodhi (SLURM) and CU Boulder Alpine (SLURM). A legacy LSF profile for Bodhi is kept at workflow/profiles/Bodhi_LSF but is no longer used by the current setup/submit scripts.
 
 ## Features
 
@@ -38,8 +38,8 @@ This snakemake pipeline runs in a container and is set up to run on AMC Bodhi (L
   - unstranded | stranded pos neg files
   - optional cp to amc-sandbox and make URLs for UCSC browser
   
-5. deeptools matrix files 
-  a scale-regions: 543, reference-point: 5, 3, PI
+5. deeptools matrix files
+  a scale-regions: 543, PI, EI; reference-point: 5, 5L, 3
   b optional cp to amc-sandbox and make URLs for bentools
   
 6. Overview rmarkdown HTML QC report + plots

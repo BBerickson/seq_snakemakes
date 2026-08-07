@@ -5,7 +5,9 @@ wget https://raw.githubusercontent.com/BBerickson/seq_snakemakes/main/BRUseq/set
 bash setup_pipeline.sh Bodhi
 
 # edit BRUseq_samples.yaml with your sample information
-# run script by submitting to Bodhi (AMC) or Alpine (Boulder) 
+# also review/edit Stranded_matrix.yaml (computeMatrix/heatmap parameters, steps 5-7 below,
+#   run as a second snakemake workflow against workflow/Stranded_matrix.smk)
+# run script by submitting to Bodhi (AMC) or Alpine (Boulder)
 
 
 ### Pipeline Overview ###
@@ -19,15 +21,15 @@ bash setup_pipeline.sh Bodhi
 
 2a bowtie2 — Align samples to reference genome
 2b samtools — BAM filtering and sorting
-2c samtools (optional) — Subsample BAM for small RNA masking
+2c samtools (optional) — Mask reads over abundant/filtered RNA loci and subsample BAM for group-level normalization
 2d bam URLs (Bodhi option) — Copy BAM files to sandbox with URLs
 
 3. Feature Counting & Quality Metrics
 
-3a subReads featureCounts — Count protein-coding genes
+3a subReads featureCounts — Count reads over annotated genes (protein-coding/scalefactor breakdown applied later in the summary report)
 3b deepTools fragmentSize — Report read and insert size distributions
 3c Rscript — Collect logs into summary report table
-3d Rmarkdown (optional) — Generate HTML summary report
+3d MultiQC (optional) — Generate interim HTML summary report
 
 4. Coverage Track Generation
 
