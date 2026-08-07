@@ -39,7 +39,17 @@ CMD_PARAMS:
     min_count:          "20"
     max_FDR:            "0.05"
     max_IncDifference:  "0.1"
-    
+    # How min_count is applied across replicates when filtering significant events:
+    #   per_replicate (recommended) - EVERY replicate in BOTH conditions must
+    #       individually have >= min_count reads (inclusion + exclusion). Guards
+    #       against a single poorly-covered replicate skewing IncLevelDifference,
+    #       since that's computed from the per-replicate PSI values.
+    #   pooled - reads are summed across replicates per condition and compared to
+    #       min_count * n_replicates; passes if EITHER condition's pooled total
+    #       clears its threshold. More permissive, retains more events, but can
+    #       pass events where one replicate contributes ~0 reads.
+    filter_mode:        "per_replicate"
+
 SPLICE_TYPES:
   - SE
   - RI

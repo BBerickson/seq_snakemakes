@@ -8,48 +8,75 @@ library(gridExtra)
 
 PROJ <- args[1] # same as PROJ: in samples.yaml
 tc <- args[2] # "treatment:control" same as GROUPS_COMP: in samples_rAMTS.yaml
-min_count <- as.numeric(args[3]) # >= min_count average reads per replicate (inclusion + skipping) in at least one condition.
+min_count <- as.numeric(args[3]) # >= min_count reads (inclusion + skipping); scope depends on filter_mode below.
 max_FDR <- as.numeric(args[4]) # Standard 5% significance threshold for FDR adjusted pValue
 max_IncDifference <- as.numeric(args[5]) # PSI change threshold
 comps <- unlist(str_split(args[6], "\\s+")) # c("SE","RI", "MXE","A5SS","A3SS") # splicing types to loop over
 num_plots <- as.numeric(args[7])
-pdf_out <- args[8]
+filter_mode <- args[8] # "per_replicate" (every replicate in both conditions must clear min_count) or "pooled" (summed per condition, either condition clears a replicate-scaled min_count)
+pdf_out <- args[9]
 
-sigcounts <- function(PROJ, tc, type = "SE", min_count = 20, max_FDR = 0.05, max_IncDifference = 0.05, savefiles=TRUE){
-  psis <- read_tsv(paste0(PROJ,"/rmats/",tc,'/',type,'.MATS.JC.txt'),show_col_types = FALSE) 
-  
+# filter_mode controls how min_count is applied across replicates:
+#   "per_replicate" (recommended) - every individual replicate in BOTH conditions
+#       must have >= min_count reads (inclusion + exclusion). IncLevelDifference is
+#       the difference of per-replicate PSI means, so one poorly-covered replicate
+#       can skew that mean even when the condition's total read depth looks fine.
+#   "pooled" - reads are summed across all replicates within a condition and
+#       compared to a threshold scaled by replicate count (min_count * n_reps);
+#       an event passes if EITHER condition's pooled total clears its threshold.
+#       More permissive (retains more events) but can pass events where a single
+#       replicate contributes ~0 reads as long as its condition-mates compensate.
+sigcounts <- function(PROJ, tc, type = "SE", min_count = 20, max_FDR = 0.05, max_IncDifference = 0.05,
+                       filter_mode = c("per_replicate", "pooled"), savefiles=TRUE){
+  filter_mode <- match.arg(filter_mode)
+  psis <- read_tsv(paste0(PROJ,"/rmats/",tc,'/',type,'.MATS.JC.txt'),show_col_types = FALSE)
+
   out_length_1 <- length(str_split(psis[1,"IJC_SAMPLE_1"],",")[[1]])
   out_length_2 <- length(str_split(psis[1,"IJC_SAMPLE_2"],",")[[1]])
-  
-  # Calculate scaled thresholds based on number of replicates
-  min_count_condition1 <- min_count * out_length_1
-  min_count_condition2 <- min_count * out_length_2
-  
+
   psis <- psis %>%
     #Split the replicate read counts that are separated by commas into different columns
     separate(., col = IJC_SAMPLE_1, into = paste0('IJC_S1R', 1:out_length_1), sep = ',', remove = T, convert = T) %>%
     separate(., col = SJC_SAMPLE_1, into = paste0('SJC_S1R', 1:out_length_1), sep = ',', remove = T, convert = T) %>%
     separate(., col = IJC_SAMPLE_2, into = paste0('IJC_S2R', 1:out_length_2), sep = ',', remove = T, convert = T) %>%
     separate(., col = SJC_SAMPLE_2, into = paste0('SJC_S2R', 1:out_length_2), sep = ',', remove = T, convert = T)
-  
-  # Calculate total counts per condition and filter
-  # Sum IJC and SJC counts across all replicates for each condition
+
   ijc_s1_cols <- paste0('IJC_S1R', 1:out_length_1)
   sjc_s1_cols <- paste0('SJC_S1R', 1:out_length_1)
   ijc_s2_cols <- paste0('IJC_S2R', 1:out_length_2)
   sjc_s2_cols <- paste0('SJC_S2R', 1:out_length_2)
-  
-  psis.filtered <- psis %>%
-    rowwise() %>%
-    mutate(
-      # Total counts per condition (inclusion + exclusion)
-      S1_total_counts = sum(c_across(all_of(c(ijc_s1_cols, sjc_s1_cols))), na.rm = TRUE),
-      S2_total_counts = sum(c_across(all_of(c(ijc_s2_cols, sjc_s2_cols))), na.rm = TRUE)
-    ) %>%
-    ungroup() %>%
-    # Keep events where at least one condition passes the scaled threshold
-    filter(S1_total_counts >= min_count_condition1 | S2_total_counts >= min_count_condition2)
-  
+
+  if(filter_mode == "pooled"){
+    # Calculate scaled thresholds based on number of replicates
+    min_count_condition1 <- min_count * out_length_1
+    min_count_condition2 <- min_count * out_length_2
+
+    psis.filtered <- psis %>%
+      mutate(
+        # Total counts per condition (inclusion + exclusion), vectorized instead of rowwise()
+        S1_total_counts = rowSums(across(all_of(c(ijc_s1_cols, sjc_s1_cols))), na.rm = TRUE),
+        S2_total_counts = rowSums(across(all_of(c(ijc_s2_cols, sjc_s2_cols))), na.rm = TRUE)
+      ) %>%
+      # Keep events where at least one condition passes the scaled threshold
+      filter(S1_total_counts >= min_count_condition1 | S2_total_counts >= min_count_condition2)
+  } else {
+    # Per-replicate totals (inclusion + exclusion), computed for every replicate
+    # in both conditions, then keep events where EVERY replicate clears min_count.
+    s1_count_cols <- paste0("S1R", 1:out_length_1, "counts")
+    s2_count_cols <- paste0("S2R", 1:out_length_2, "counts")
+
+    psis.filtered <- psis
+    for (i in seq_len(out_length_1)) {
+      psis.filtered[[s1_count_cols[i]]] <- psis.filtered[[paste0("IJC_S1R", i)]] + psis.filtered[[paste0("SJC_S1R", i)]]
+    }
+    for (i in seq_len(out_length_2)) {
+      psis.filtered[[s2_count_cols[i]]] <- psis.filtered[[paste0("IJC_S2R", i)]] + psis.filtered[[paste0("SJC_S2R", i)]]
+    }
+
+    psis.filtered <- psis.filtered %>%
+      filter(if_all(all_of(c(s1_count_cols, s2_count_cols)), ~ .x >= min_count))
+  }
+
   # Defining sensitive exons #only those whose PSI decreases < max_IncDifference
   psis.sensitive1 <- dplyr::filter(psis.filtered, FDR < max_FDR,  IncLevelDifference < -max_IncDifference) 
   # Defining sensitive exons #only those whose PSI increase > max_IncDifference
@@ -149,7 +176,7 @@ sigcounts <- function(PROJ, tc, type = "SE", min_count = 20, max_FDR = 0.05, max
 ##### bar plots #####
 SE <- list()
 for(i in c(comps)){
-  SE[[i]] <- sigcounts(PROJ,tc,type = i,min_count, max_FDR, max_IncDifference) # set treatment:control folder name
+  SE[[i]] <- sigcounts(PROJ,tc,type = i,min_count, max_FDR, max_IncDifference, filter_mode = filter_mode) # set treatment:control folder name
 }
 
 # Combined and Define which categories are "less" and should be negative
@@ -171,7 +198,7 @@ p <- ggplot(db, aes(x = type, y = signed_count, fill = category)) +
   labs(x = "PSI Type", y = bquote(Delta~"PSI count:"~"[" * .(gsub(":", " - ", tc)) * "]"), 
        fill = str_split_fixed(tc,":",2)[1],
        title = str_replace(tc,":"," vs "),
-       subtitle = paste0("min ave reads/rep = ",min_count, ", max_FDR = ",max_FDR, ", IncDifference = ",max_IncDifference)) +
+       subtitle = paste0("min_count (",filter_mode,") = ",min_count, ", max_FDR = ",max_FDR, ", IncDifference = ",max_IncDifference)) +
   theme_minimal() + 
   theme(axis.text.x = element_text(size = 14, face = "bold"),
         axis.text.y = element_text(size = 10, face = "bold"),

@@ -21,9 +21,9 @@ FA_SAMPLE:
 MY_REF:
   "/beevol/home/erickson/ref/hg38/ref/hg38-tRNAs.bed"
 FW_REF:
-  "/beevol/home/erickson/ref/hg38/ref/hg38-tRNAs_pos.bed"
+  "/beevol/home/erickson/ref/hg38/ref/hg38-tRNAs_fw.bed"
 REV_REF:
-  "/beevol/home/erickson/ref/hg38/ref/hg38-tRNAs_neg.bed"
+  "/beevol/home/erickson/ref/hg38/ref/hg38-tRNAs_rev.bed"
 PI_REF:
   "/beevol/home/erickson/ref/hg38_p14/base_ref/matrix_ref/PI.bed"
 FW_PI_REF:

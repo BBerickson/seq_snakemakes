@@ -100,7 +100,8 @@ rule rmats_plot:
         max_incdiff     = CMD_PARAMS["max_IncDifference"],
         splice_type     = " ".join(config["SPLICE_TYPES"]),
         script          = "workflow/scripts/rMATS_plots.R",
-        num_plots       = SASHIMI_PARAMS["num_plots"]
+        num_plots       = SASHIMI_PARAMS["num_plots"],
+        filter_mode     = CMD_PARAMS.get("filter_mode", "per_replicate")
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1, 20) # multiplier, min, max, unit=GB
     threads: 
@@ -115,8 +116,9 @@ rule rmats_plot:
             "{params.max_incdiff}" \
             "{params.splice_type}" \
             "{params.num_plots}" \
-            "{output.pdf}" 
-            
+            "{params.filter_mode}" \
+            "{output.pdf}"
+
         """
         
 # Generate sashimi plots as PNGs

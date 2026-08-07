@@ -24,133 +24,72 @@
 
 library(tidyverse)
 
-# Average read filter per treatment on rMATS output, 
-sigcounts <- function(PROJ, tc, type = "SE", min_count = 10, max_FDR = 0.05, max_IncDifference = 0.05, savefiles=FALSE){
-  psis <- read_tsv(paste0(PROJ,"/rmats/",tc,'/',type,'.MATS.JC.txt'),show_col_types = FALSE) 
-  
+# Average read filter per treatment on rMATS output.
+#
+# filter_mode controls how min_count is applied across replicates:
+#   "per_replicate" (default, recommended) - every individual replicate in BOTH
+#       conditions must have >= min_count reads (inclusion + exclusion). This is
+#       the stricter check: IncLevelDifference is the difference of per-replicate
+#       PSI means, so one poorly-covered replicate can still skew that mean even
+#       when the condition's total read depth looks adequate. Equivalent to the
+#       old sigcounts_all().
+#   "pooled" - reads are summed across all replicates within a condition and
+#       compared to a threshold scaled by replicate count (min_count * n_reps);
+#       an event passes if EITHER condition's pooled total clears its threshold.
+#       More permissive (retains more events) but can pass events where a single
+#       replicate contributes ~0 reads as long as its condition-mates compensate.
+#       Equivalent to the old sigcounts().
+sigcounts <- function(PROJ, tc, type = "SE", min_count = 10, max_FDR = 0.05, max_IncDifference = 0.05,
+                       filter_mode = c("per_replicate", "pooled"), savefiles=FALSE){
+  filter_mode <- match.arg(filter_mode)
+  psis <- read_tsv(paste0(PROJ,"/rmats/",tc,'/',type,'.MATS.JC.txt'),show_col_types = FALSE)
+
   out_length_1 <- length(str_split(psis[1,"IJC_SAMPLE_1"],",")[[1]])
   out_length_2 <- length(str_split(psis[1,"IJC_SAMPLE_2"],",")[[1]])
-  
-  # Calculate scaled thresholds based on number of replicates
-  min_count_condition1 <- min_count * out_length_1
-  min_count_condition2 <- min_count * out_length_2
-  
+
   psis <- psis %>%
     #Split the replicate read counts that are separated by commas into different columns
     separate(., col = IJC_SAMPLE_1, into = paste0('IJC_S1R', 1:out_length_1), sep = ',', remove = T, convert = T) %>%
     separate(., col = SJC_SAMPLE_1, into = paste0('SJC_S1R', 1:out_length_1), sep = ',', remove = T, convert = T) %>%
     separate(., col = IJC_SAMPLE_2, into = paste0('IJC_S2R', 1:out_length_2), sep = ',', remove = T, convert = T) %>%
     separate(., col = SJC_SAMPLE_2, into = paste0('SJC_S2R', 1:out_length_2), sep = ',', remove = T, convert = T)
-  
-  # Calculate total counts per condition and filter
-  # Sum IJC and SJC counts across all replicates for each condition
+
   ijc_s1_cols <- paste0('IJC_S1R', 1:out_length_1)
   sjc_s1_cols <- paste0('SJC_S1R', 1:out_length_1)
   ijc_s2_cols <- paste0('IJC_S2R', 1:out_length_2)
   sjc_s2_cols <- paste0('SJC_S2R', 1:out_length_2)
-  
-  psis.filtered <- psis %>%
-    rowwise() %>%
-    mutate(
-      # Total counts per condition (inclusion + exclusion)
-      S1_total_counts = sum(c_across(all_of(c(ijc_s1_cols, sjc_s1_cols))), na.rm = TRUE),
-      S2_total_counts = sum(c_across(all_of(c(ijc_s2_cols, sjc_s2_cols))), na.rm = TRUE)
-    ) %>%
-    ungroup() %>%
-    # Keep events where at least one condition passes the scaled threshold
-    filter(S1_total_counts >= min_count_condition1 | S2_total_counts >= min_count_condition2)
-  
-  # Defining sensitive exons #only those whose PSI decreases < max_IncDifference
-  psis.sensitive1 <- dplyr::filter(psis.filtered, FDR < max_FDR,  IncLevelDifference < -max_IncDifference) 
-  # Defining sensitive exons #only those whose PSI increase > max_IncDifference
-  psis.sensitive2 <- dplyr::filter(psis.filtered, FDR < max_FDR,  IncLevelDifference > max_IncDifference) 
-  
-  # IncLevelDifference = (Condition 1 - Condition 2).
-  # IncLevelDifference > 0, explanation for the different PSI types :
-  # SE less exon skiping in condition 1
-  # MXE:
-  # + include exon1 skip exon 2
-  # - include exon2 skip exon 1
-  # A5SS more downstream
-  # A3SS more upstream
-  # RI retains intron
-  
-  if(type == "SE"){
-    less <- "more_skipping" # IncLevelDifference < -threshold
-    more <- "more_inclusion"  # IncLevelDifference > threshold
-  } else if(type == "RI"){
-    less <- "less_retained_introns"
-    more <- "more_retained_introns"
-  } else if(type == "A5SS"){
-    less <- "more_downstream_A5SS"
-    more <- "more_upstream_A5SS"
-  } else if(type == "A3SS"){
-    less <- "more_downstream_A3SS"
-    more <- "more_upstream_A3SS"
-  } else if(type == "MXE"){
-    less <- "prefer_exon2"
-    more <- "prefer_exon1"
-  }
-  
-  if(savefiles){
-    psis.sensitive1 %>%  write_tsv(.,paste0(PROJ,"/rmats/",tc,'_',less,'_min_count',min_count,'.MATS.JC.filter.txt'),col_names = T)
-    psis.sensitive2 %>%  write_tsv(.,paste0(PROJ,"/rmats/",tc,'_',more,'_min_count',min_count,'.MATS.JC.filter.txt'),col_names = T)
-  }
-  
-  # Return a tibble with the desired structure
-  total_events <- nrow(psis)
-  filtered_events <- sum(nrow(psis.sensitive2), nrow(psis.sensitive1))
-  percent_passed <- round((filtered_events / total_events) * 100, 2)
-  
-  return(
-    tibble(
-      sample = tc,
-      count = c(nrow(psis.sensitive2), nrow(psis.sensitive1)),
-      type = type,
-      category = c(more, less),
-      direction = c("more", "less"),
-      total_events = total_events,
-      filtered_events = filtered_events,
-      percent_passed = percent_passed
-    )
-  )
-}
 
-# rMATS outputs, min_counts on all samples version
-sigcounts_all <- function(PROJ, tc, type = "SE", min_count = 10, max_FDR = 0.05, max_IncDifference = 0.05, savefiles=FALSE){
-  psis <- read_tsv(paste0(PROJ,"/rmats/",tc,'/',type,'.MATS.JC.txt'),show_col_types = FALSE) 
-  
-  out_length_1 <- length(str_split(psis[1,"IJC_SAMPLE_1"],",")[[1]])
-  out_length_2 <- length(str_split(psis[1,"IJC_SAMPLE_2"],",")[[1]])
-  
-  sumofcol <- function(df, col1,col2, colnum) {
-    mutate(df, !!{{colnum}} := !! {{col1}} + !! {{col2}})
+  if(filter_mode == "pooled"){
+    # Calculate scaled thresholds based on number of replicates
+    min_count_condition1 <- min_count * out_length_1
+    min_count_condition2 <- min_count * out_length_2
+
+    psis.filtered <- psis %>%
+      mutate(
+        # Total counts per condition (inclusion + exclusion), vectorized instead of rowwise()
+        S1_total_counts = rowSums(across(all_of(c(ijc_s1_cols, sjc_s1_cols))), na.rm = TRUE),
+        S2_total_counts = rowSums(across(all_of(c(ijc_s2_cols, sjc_s2_cols))), na.rm = TRUE)
+      ) %>%
+      # Keep events where at least one condition passes the scaled threshold
+      filter(S1_total_counts >= min_count_condition1 | S2_total_counts >= min_count_condition2)
+  } else {
+    # Per-replicate totals (inclusion + exclusion), computed for every replicate
+    # in both conditions, then keep events where EVERY replicate clears min_count.
+    s1_count_cols <- paste0("S1R", 1:out_length_1, "counts")
+    s2_count_cols <- paste0("S2R", 1:out_length_2, "counts")
+
+    psis.filtered <- psis
+    for (i in seq_len(out_length_1)) {
+      psis.filtered[[s1_count_cols[i]]] <- psis.filtered[[paste0("IJC_S1R", i)]] + psis.filtered[[paste0("SJC_S1R", i)]]
+    }
+    for (i in seq_len(out_length_2)) {
+      psis.filtered[[s2_count_cols[i]]] <- psis.filtered[[paste0("IJC_S2R", i)]] + psis.filtered[[paste0("SJC_S2R", i)]]
+    }
+
+    psis.filtered <- psis.filtered %>%
+      filter(if_all(all_of(c(s1_count_cols, s2_count_cols)), ~ .x >= min_count))
   }
-  
-  psis <- psis %>%
-    #Split the replicate read counts that are separated by commas into different columns
-    separate(., col = IJC_SAMPLE_1, into = paste0('IJC_S1R', 1:out_length_1), sep = ',', remove = T, convert = T) %>%
-    separate(., col = SJC_SAMPLE_1, into = paste0('SJC_S1R', 1:out_length_1), sep = ',', remove = T, convert = T) %>%
-    separate(., col = IJC_SAMPLE_2, into = paste0('IJC_S2R', 1:out_length_2), sep = ',', remove = T, convert = T) %>%
-    separate(., col = SJC_SAMPLE_2, into = paste0('SJC_S2R', 1:out_length_2), sep = ',', remove = T, convert = T)
-  
-  # Now sum to get reads in each condition for each event and filter.
-  # adding the counts in each sample of inclusion and exclusion 
-  psis.filtered <- psis
-  for(i in 1:out_length_1){
-    psis.filtered <- sumofcol(psis.filtered,
-                              as.name(paste0("IJC_S1R",i)),as.name(paste0("SJC_S1R",i)),
-                              as.name(paste0("S1R",i,"counts"))) %>%
-      dplyr::filter(.,!!as.name(paste0("S1R",i,"counts")) >= min_count)
-  }
-  for(i in 1:out_length_2){
-    psis.filtered <- sumofcol(psis.filtered,
-                              as.name(paste0("IJC_S2R",i)),as.name(paste0("SJC_S2R",i)),
-                              as.name(paste0("S2R",i,"counts"))) %>% 
-      dplyr::filter(.,!!as.name(paste0("S2R",i,"counts")) >= min_count)
-    
-  }
-  
+
   # Defining sensitive exons #only those whose PSI decreases < max_IncDifference
   psis.sensitive1 <- dplyr::filter(psis.filtered, FDR < max_FDR,  IncLevelDifference < -max_IncDifference) 
   # Defining sensitive exons #only those whose PSI increase > max_IncDifference

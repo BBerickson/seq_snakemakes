@@ -12,15 +12,25 @@ library(RColorBrewer)
 library(gridExtra)
 source("workflow/scripts/rMATS_funs.R")
 
-min_count <- 10 # >= min_count average reads per replicate (inclusion + skipping) in at least one condition.
+min_count <- 10 # >= min_count reads (inclusion + skipping); scope depends on filter_mode below.
 max_FDR <- 0.05 # Standard 5% significance threshold for FDR adjusted pValue
 max_IncDifference <- 0.05 # PSI change threshold
 comps <- c("SE","RI", "MXE","A5SS","A3SS") # splicing types to loop over
 
+# How min_count is applied across replicates (see sigcounts() in rMATS_funs.R):
+#   "per_replicate" (recommended) - EVERY replicate in BOTH conditions must
+#       individually have >= min_count reads. Guards against a single
+#       poorly-covered replicate skewing IncLevelDifference, since that's
+#       computed from the per-replicate PSI values.
+#   "pooled" - reads summed across replicates per condition, compared to
+#       min_count * n_replicates; passes if EITHER condition's pooled total
+#       clears its threshold. More permissive, retains more events.
+filter_mode <- "per_replicate"
+
 ##### bar plots #####
 SE <- list()
 for(i in c(comps)){
-  SE[[i]] <- sigcounts(PROJ,tc,type = i,min_count, max_FDR, max_IncDifference, savefiles=FALSE) # set treatment:control folder name
+  SE[[i]] <- sigcounts(PROJ,tc,type = i,min_count, max_FDR, max_IncDifference, filter_mode = filter_mode, savefiles=FALSE) # set treatment:control folder name
 }
 
 # Combined and Define which categories are "less" and should be negative
@@ -42,7 +52,7 @@ ggplot(db, aes(x = type, y = signed_count, fill = category)) +
   labs(x = "PSI Type", y = bquote(Delta~"PSI count:"~"[" * .(gsub(":", " - ", tc)) * "]"), 
        fill = str_split_fixed(tc,":",2)[1],
        title = str_replace(tc,":"," vs "),
-       subtitle = paste0("min ave reads/rep = ",min_count, ", max_FDR = ",max_FDR, ", IncDifference = ",max_IncDifference)) +
+       subtitle = paste0("min_count (",filter_mode,") = ",min_count, ", max_FDR = ",max_FDR, ", IncDifference = ",max_IncDifference)) +
   theme_minimal() + 
   theme(axis.text.x = element_text(size = 14, face = "bold"),
         axis.text.y = element_text(size = 10, face = "bold"),
@@ -87,6 +97,6 @@ grid.arrange(table_plot)
 #### sashimi ####
 
 # make gene lists for ggsashimi, num_output will give that many for up and down deltaPSI
-makeSashimi(PROJ,tc, min_count, max_FDR, max_IncDifference, num_output = 12) 
+makeSashimi(PROJ, tc, min_count = min_count, max_FDR = max_FDR, max_IncDifference = max_IncDifference, num_output = 12)
 ## optional usage, will make 1 file for each item 
 # makeSashimi(PROJ,tc, gene_Symbol = c("MADD","KLHL9")) 
