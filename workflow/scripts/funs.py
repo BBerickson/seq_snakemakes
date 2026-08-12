@@ -374,26 +374,35 @@ def _get_norm_scale(sample, norm_type, index_sample, norm_files):
         raise RuntimeError(error_msg)
 
 
-# grab normalization options for bamCoverage for each sample 
+# grab normalization options for bamCoverage for each sample
 def _get_norm(df, newnam, suffix, index, norm_files):
     row = df[
         (df['Newnam'] == newnam) &
-        (df['Index'] == index) 
+        (df['Index'] == index) &
+        (df['Suffix'] == suffix)
     ]
-    
+
     sample = row.iloc[0]['Sample']
     norm = row.iloc[0]['Norm']
-    
+
     # For scalefactor, if duel IP or spikein get the corresponding row to extract its Index
     if norm.lower() == 'scalefactor':
-        cpm_rows = df[
-            (df['Newnam'] == newnam) &
-            (df['Norm'] == 'CPM')
-        ]
-        if cpm_rows.empty:
-            index_val = row.iloc[0]['Index']
+        if suffix.lower().startswith('scalefactor_'):
+            # Suffix was built upstream (see ChIPseq_dual_IP.smk) as
+            # f'scalefactor_{second_index}' -- use that index directly instead
+            # of guessing via a CPM-row lookup, which can pick the wrong index
+            # when the primary index ALSO has its own CPM entry configured
+            # alongside scalefactor.
+            index_val = suffix.split('_', 1)[1]
         else:
-            index_val = cpm_rows.iloc[0]['Index']
+            cpm_rows = df[
+                (df['Newnam'] == newnam) &
+                (df['Norm'] == 'CPM')
+            ]
+            if cpm_rows.empty:
+                index_val = row.iloc[0]['Index']
+            else:
+                index_val = cpm_rows.iloc[0]['Index']
     else:
         index_val = row.iloc[0]['Index']
         

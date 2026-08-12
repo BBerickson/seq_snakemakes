@@ -29,6 +29,7 @@ rule create_strand_matrix:
             CMD_PARAMS[f"region{wildcards.region}"] + ("--blackListFileName " + config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else "") +
             (" --scale -1 " if wildcards.sense_asense == "anti" else "")
         ),
+        mask_path = config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else "",
         fw_ref  = get_fw_ref,
         rev_ref = get_rev_ref
     resources:
@@ -43,13 +44,16 @@ rule create_strand_matrix:
       computeMatrixOperations rbind -m {output.fw} {output.rev} -o {output.matrix}
   
       python - << 'EOF'
-import sys
+import sys, os
 sys.path.insert(0, "workflow/scripts/")
 import funs
+_args = "{params.args}"
+_mask = "{params.mask_path}"
+args_display = _args.replace(_mask, os.path.basename(_mask)) if _mask else _args
 funs.write_cmd_once(
     "{params.cmd}",
     version_cmd="computeMatrix --version 2>&1 | head -1",
-    echo_cmd="computeMatrix {params.args} -R <fw_regions.bed> -S <sample_fw.bw> -p <threads> -o <sample_pos_temp_matrix.gz>\\ncomputeMatrix {params.args} -R <rev_regions.bed> -S <sample_rev.bw> -p <threads> -o <sample_neg_temp_matrix.gz>\\ncomputeMatrixOperations rbind -m <sample_pos_temp_matrix.gz> <sample_neg_temp_matrix.gz> -o <sample_{wildcards.sense_asense}_matrix.gz>"
+    echo_cmd=f"computeMatrix {{args_display}} -R <fw_regions.bed> -S <sample_fw.bw> -p <threads> -o <sample_pos_temp_matrix.gz>\\ncomputeMatrix {{args_display}} -R <rev_regions.bed> -S <sample_rev.bw> -p <threads> -o <sample_neg_temp_matrix.gz>\\ncomputeMatrixOperations rbind -m <sample_pos_temp_matrix.gz> <sample_neg_temp_matrix.gz> -o <sample_{wildcards.sense_asense}_matrix.gz>"
 )
 EOF
       """

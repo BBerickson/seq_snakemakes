@@ -119,7 +119,7 @@ import funs
 funs.write_cmd_once(
     "{params.cmd}",
     version_cmd="samtools --version 2>&1 | head -1",
-    echo_cmd="samtools view {params.args} <sample.bam> > <sample_temp.bam>\\nsamtools index <sample_temp.bam>\\nsamtools view <sample_temp.bam> <spike_contig> | sed 's/spike_*//g' | samtools view -bT <genome.fa> - | samtools sort - -T <sample.temp> -O bam > <sample_index_filter.bam>\\nsamtools index <sample_index_filter.bam>"
+    echo_cmd="samtools view {params.args} <sample.bam> > <sample_temp.bam>\\nsamtools index <sample_temp.bam>\\nsamtools view <sample_temp.bam> <spike_contig> | samtools view -bT <genome.fa> - | samtools sort - -T <sample.temp> -O bam > <sample_index_filter.bam>\\nsamtools index <sample_index_filter.bam>"
 )
 EOF
       """

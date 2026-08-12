@@ -26,6 +26,7 @@ rule my_5_bidirectonal_matrix:
         cmd      = PROJ + "/pipeline/12_computeMatrix_bi.cmd",
         cmdd     = PROJ + "/pipeline",
         args     = lambda wildcards: CMD_PARAMS[f"region{wildcards.region}"] + ("--blackListFileName " + config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else ""),
+        mask_path = config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else "",
         fw_ref  = get_fw_ref,
         rev_ref = get_rev_ref
     resources:
@@ -39,13 +40,16 @@ rule my_5_bidirectonal_matrix:
       computeMatrix {params.args} -R {params.rev_ref} -S {input.rev} -p {threads} -o {output.rev}
   
       python - << 'EOF'
-import sys
+import sys, os
 sys.path.insert(0, "workflow/scripts/")
 import funs
+_args = "{params.args}"
+_mask = "{params.mask_path}"
+args_display = _args.replace(_mask, os.path.basename(_mask)) if _mask else _args
 funs.write_cmd_once(
     "{params.cmd}",
     version_cmd="computeMatrix --version 2>&1 | head -1",
-    echo_cmd="computeMatrix {params.args} -R <fw_regions.bed> -S <sample_fw.bw> -p <threads> -o <sample_pos_matrix.gz>\\ncomputeMatrix {params.args} -R <rev_regions.bed> -S <sample_rev.bw> -p <threads> -o <sample_neg_matrix.gz>"
+    echo_cmd=f"computeMatrix {{args_display}} -R <fw_regions.bed> -S <sample_fw.bw> -p <threads> -o <sample_pos_matrix.gz>\\ncomputeMatrix {{args_display}} -R <rev_regions.bed> -S <sample_rev.bw> -p <threads> -o <sample_neg_matrix.gz>"
 )
 EOF
       """

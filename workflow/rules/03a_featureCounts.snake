@@ -50,7 +50,7 @@ import funs
 funs.write_cmd_tagged(
     "{params.cmd}",
     tag="featureCounts empty BAM",
-    version_cmd="featureCounts -v 2>&1 | head -1",
+    version_cmd="featureCounts -v 2>&1 | head -n2 | tail -n1",
     echo_cmd="featureCounts: BAM file empty (0 reads), dummy output created"
 )
 EOF
@@ -71,7 +71,7 @@ sys.path.insert(0, "workflow/scripts/")
 import funs
 funs.write_cmd_once(
     "{params.cmd2}",
-    version_cmd="featureCounts -v 2>&1 | head -1",
+    version_cmd="featureCounts -v 2>&1 | head -n2 | tail -n1",
     echo_cmd="featureCounts {params.args} {params.args2} -a <annotation.gtf> -T <threads> -o <sample_featureCounts_enrich.tsv> <sample.bam>"
 )
 EOF
@@ -90,7 +90,7 @@ import funs
 funs.write_cmd_tagged(
     "{params.cmd}",
     tag="featureCounts active",
-    version_cmd="featureCounts -v 2>&1 | head -1",
+    version_cmd="featureCounts -v 2>&1 | head -n2 | tail -n1",
     echo_cmd="featureCounts {params.args} -a <annotation.gtf> -T <threads> -o <sample_featureCounts.tsv> <sample.bam>"
 )
 EOF

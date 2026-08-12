@@ -133,7 +133,7 @@ EOF
               {input.R1} \
               {input.R2} \
               > {output.stats}
-            CUTADAPT_VERSION="cutadapt $(cutadapt --version)"
+            export CUTADAPT_VERSION="cutadapt $(cutadapt --version)"
             python - << 'EOF'
 import sys, os
 sys.path.insert(0, "workflow/scripts/")

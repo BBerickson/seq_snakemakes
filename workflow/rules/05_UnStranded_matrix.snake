@@ -11,6 +11,7 @@ rule standared_matrix:
         cmd      = PROJ + "/pipeline/12_computeMatrix.cmd",
         cmdd     = PROJ + "/pipeline",
         args = lambda wildcards: CMD_PARAMS[f"region{wildcards.region}"] + ("--blackListFileName " + config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else ""),
+        mask_path = config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else "",
         my_ref = lambda wildcards: PI_REF if wildcards.region == "PI" else MY_REF
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 2, 2)
@@ -22,13 +23,16 @@ rule standared_matrix:
       computeMatrix {params.args} -R {params.my_ref} -S {input.bw} -p {threads} -o {output.matrix}
   
       python - << 'EOF'
-import sys
+import sys, os
 sys.path.insert(0, "workflow/scripts/")
 import funs
+_args = "{params.args}"
+_mask = "{params.mask_path}"
+args_display = _args.replace(_mask, os.path.basename(_mask)) if _mask else _args
 funs.write_cmd_once(
     "{params.cmd}",
     version_cmd="computeMatrix --version 2>&1 | head -1",
-    echo_cmd="computeMatrix {params.args} -R <regions.bed> -S <sample.bw> -p <threads> -o <sample_matrix.gz>"
+    echo_cmd=f"computeMatrix {{args_display}} -R <regions.bed> -S <sample.bw> -p <threads> -o <sample_matrix.gz>"
 )
 EOF
       """

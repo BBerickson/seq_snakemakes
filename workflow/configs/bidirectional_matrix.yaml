@@ -5,6 +5,7 @@
 CMD_PARAMS:
     bamCoverageBL:    True # True or False, if True will use MASK file from ref.yaml
     region543:        " scale-regions --regionBodyLength 2000 --binSize 100 --unscaled5prime 0 --unscaled3prime 0 --upstream 1000 --downstream 1000 --missingDataAsZero --skipZeros -q "
+    region5L:         " reference-point --referencePoint TSS --binSize 100 --upstream 1000 --downstream 5000 --missingDataAsZero --skipZeros -q "
     region5:          " reference-point --referencePoint TSS --binSize 20 --upstream 1000 --downstream 1000 --missingDataAsZero --skipZeros -q "
     region3:          " reference-point --referencePoint TES --binSize 100 --upstream 1000 --downstream 1000 --missingDataAsZero --skipZeros -q "
     regionPI:         " scale-regions --regionBodyLength 330 --binSize 330 --unscaled5prime 0 --unscaled3prime 0 --upstream 330 --downstream 0 --missingDataAsZero --skipZeros -q "
