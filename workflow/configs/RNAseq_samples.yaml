@@ -146,6 +146,10 @@ BARCODES:
 ORIENTATION:
     "R2R1" # R1R2, R1
 
+# single (False) vs paired (True) end mapping, decoupled from ORIENTATION above
+PAIRED:
+    "True"
+
 # which matrix type(s) to make
 # deeptools options set in Stranded_matrix.yaml
 # can only to be "543", "5", "3", "PI", or "EI" 

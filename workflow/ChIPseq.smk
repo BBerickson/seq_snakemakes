@@ -70,6 +70,7 @@ CMD_PARAMS   = config.get("CMD_PARAMS")
 NORM         = config.get('NORM')
 COLORS       = config.get("COLORS")
 ORIENTATION  = config.get("ORIENTATION")
+PAIRED       = config.get("PAIRED")
 USER         = config.get("USER")
 
 # Directories for data and scripts
@@ -79,7 +80,7 @@ os.makedirs(FASTQ_DIR, exist_ok = True)
 
 # Simplify ALL_SAMPLES dictionary
 SAMPLES, SAMPIN, GROUPS, NORMMAP, PAIREDMAP = process_samples(
-    ALL_SAMPLES, INDEXES, NORM, ORIENTATION
+    ALL_SAMPLES, INDEXES, NORM, ORIENTATION, paired=PAIRED
 )
 
 # make file suffix from bamCoverage settings and NORM 

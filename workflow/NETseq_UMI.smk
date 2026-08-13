@@ -76,18 +76,11 @@ FASTQ_DIR = PROJ + "/fastqs"
 
 os.makedirs(FASTQ_DIR, exist_ok = True)
 
-def get_orientation(orientation):
-    if orientation == "R1R2":
-        return "R1"
-    elif orientation == "R2R1":
-        return "R2"
-    return orientation
-
-ORIENTATION = get_orientation(ORIENTATION)
+PAIRED = config.get("PAIRED", False)  # single-end alignment by protocol default
 
 # Simplify ALL_SAMPLES dictionary
 SAMPLES, SAMPIN, GROUPS, NORMMAP, PAIREDMAP = process_samples(
-    ALL_SAMPLES, INDEXES, NORM, ORIENTATION
+    ALL_SAMPLES, INDEXES, NORM, ORIENTATION, paired=PAIRED
 )
 
 # make file suffix from bamCoverage settings and NORM 

@@ -167,10 +167,19 @@ def _get_fqs(sample, dirs, link_dir, full_name = False, paired=True):
     
     return fastqs
 
+# coerce a bool or "True"/"False" string config value into a real bool
+def _coerce_bool(value):
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() == "true"
+    return bool(value)
+
 # Simplify ALL_SAMPLES dictionary
 # ALL_SAMPLES = {'SECTION-1':{'SAMPLING-GROUP-1':{newname1:[fastq1],newname2:[fastq2]}}} or {'SECTION-1':{'SAMPLING-GROUP-1':{newname1:[fastq1,input1],newname2:[fastq2,input2]}}}
 # collapse sections and combine subsampling groups
-def process_samples(all_samples, index_list, norm, orientations):
+# paired=None falls back to the old orientation-inferred pairing
+def process_samples(all_samples, index_list, norm, orientations, paired=None):
     SAMPLES = {}    # {sample_name: [fastq]}
     SAMPIN = {}     # {sample_name: [fastq, input_file]}
     GROUPS = {}     # {pair_name: [fastq]}
@@ -221,7 +230,10 @@ def process_samples(all_samples, index_list, norm, orientations):
 
                 # Determine orientation and pairing
                 orientation = sample_to_orientation[sample_name]
-                is_paired = orientation not in ["R1", "R2"]
+                if paired is None:
+                    is_paired = orientation not in ["R1", "R2"]
+                else:
+                    is_paired = _coerce_bool(paired)
                 PAIREDMAP[fastq] = is_paired
                 PAIREDMAP[input_file] = is_paired
 
@@ -483,7 +495,7 @@ def _validate_gtf_feature_type(gtf_file, feature_type):
     
     return False
 
-def _get_featCount(orientation, gtf_file=None):
+def _get_featCount(orientation, gtf_file=None, paired=None):
     # set options for read orientation
     if orientation == "R2R1" or orientation == "R2":
         results = "-s 2"
@@ -491,9 +503,13 @@ def _get_featCount(orientation, gtf_file=None):
         results = "-s 1"
     else:
         results = "-s 0"
-    
+
     # set paired end options
-    if orientation != "R2" and orientation != "R1":
+    if paired is None:
+        is_paired = orientation not in ["R1", "R2"]
+    else:
+        is_paired = _coerce_bool(paired)
+    if is_paired:
         results += " -p -C --countReadPairs"
     
     if gtf_file:

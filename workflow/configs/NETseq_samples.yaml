@@ -118,7 +118,11 @@ NORM:
   - "CPM"
 # set orentation of fastq files, can list one for each file    
 ORIENTATION:
-    "R1" # R1, R2, 
+    "R1" # R1, R2,
+
+# single (False) vs paired (True) end mapping, decoupled from ORIENTATION above
+PAIRED:
+    "False"
 
 # a fasta file with the universal adaptors or literal strings
 # "workflow/ref/truseq_i5i7.fa"

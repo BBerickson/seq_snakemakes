@@ -74,6 +74,7 @@ CMD_PARAMS   = config.get("CMD_PARAMS")
 COLORS       = config.get("COLORS")
 NORM         = config.get("NORM")
 ORIENTATION  = config.get("ORIENTATION")
+PAIRED       = config.get("PAIRED")
 SENSE_ASENSE = config.get("SENSE_ASENSE", [])
 REGIONS      = config.get("REGIONS")
 USER         = config.get("USER")
@@ -95,7 +96,7 @@ os.makedirs(BW_DIR, exist_ok = True)
 
 # Simplify ALL_SAMPLES dictionary
 SAMPLES, SAMPIN, GROUPS, NORMMAP, PAIREDMAP = process_samples(
-    ALL_SAMPLES, INDEXES, NORM, ORIENTATION
+    ALL_SAMPLES, INDEXES, NORM, ORIENTATION, paired=PAIRED
 )
 
 # make file suffix from bamCoverage settings and NORM 

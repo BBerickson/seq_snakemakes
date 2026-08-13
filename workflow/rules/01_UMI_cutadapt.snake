@@ -40,7 +40,7 @@ funs.write_cmd_tagged(
     echo_cmd="umi_tools extract: step skipped, symlinks created"
 )
 EOF
-      elif [ "{params.orientation}" = "R1" ]; then
+      elif [[ "{params.orientation}" == R1* ]]; then
           umi_tools extract \
             -I {input[1]} \
             --extract-method=string \

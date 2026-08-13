@@ -135,8 +135,12 @@ BARCODES:
     "workflow/ref/truseq_i5i7.fa"
 # set strand orentation of fastq files, can list one for each file         
 ORIENTATION:
-    "Unstranded" # if single end R1
-    
+    "Unstranded"
+
+# single (False) vs paired (True) end mapping, decoupled from ORIENTATION above
+PAIRED:
+    "True" # set False if single end
+
 # which matrix type(s) to make
 # deeptools options set in Stranded_matrix.yaml
 # can only to be "543", "5", "5L", "3", "PI", or "EI" 

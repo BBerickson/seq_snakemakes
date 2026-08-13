@@ -13,7 +13,7 @@ rule featureCounts_sample:
         cmd      = PROJ + "/pipeline/09_featureCounts.cmd",
         cmd2      = PROJ + "/pipeline/09_featureCounts_enrich.cmd",
         cmdd     = PROJ + "/pipeline",
-        args     = lambda wildcards: _get_featCount(ORIENTATION, config_indexes[wildcards.index].get("GTF")),
+        args     = lambda wildcards: _get_featCount(ORIENTATION, config_indexes[wildcards.index].get("GTF"), paired=PAIREDMAP[wildcards.sample]),
         args2    = config["CMD_PARAMS"].get("featureCounts", ""),
         tsv      = PROJ + "/counts/{sample}_aligned_{index}_featureCounts_enrich.tsv",
         ftfile   = lambda wildcards: config_indexes[wildcards.index].get("GTF")

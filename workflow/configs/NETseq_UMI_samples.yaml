@@ -130,6 +130,11 @@ NORM:
 ORIENTATION:
     "R1R2" # R2R1
 
+# single (False) vs paired (True) end mapping, decoupled from ORIENTATION above.
+# NETseq_UMI only ever aligns read1; read2 is used for UMI extraction only.
+PAIRED:
+    "False"
+
 # which matrix type(s) to make
 # deeptools options set in Stranded_matrix.yaml
 # can only to be "543", "5", "3", "PI", or "EI" 

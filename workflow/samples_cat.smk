@@ -53,7 +53,7 @@ def create_fastq_groups(sample_groups, raw_data, fastq_dir, paired):
         r2_files = []
         
         for sample in samples:
-            fastqs = _get_fqs(sample, raw_data, fastq_dir, paired)
+            fastqs = _get_fqs(sample, raw_data, fastq_dir, full_name=True, paired=_coerce_bool(paired))
             r1_files.append(fastqs[0])  # Always has R1
             if len(fastqs) > 1:  # Has R2
                 r2_files.append(fastqs[1])
