@@ -1,16 +1,12 @@
 # ====== Rules for making standard 5 matrix files from non-stranded ref =================================
 
+# no sense/antisense here -- transcription runs both directions at these loci,
+# so fw/rev are just the two genomic strands, always both computed
 def get_fw_ref(wildcards):
-    if wildcards.sense_asense == "sense":
-        return FW_PI_REF if wildcards.region == "PI" else FW_REF
-    else:
-        return REV_PI_REF if wildcards.region == "PI" else REV_REF
+    return FW_PI_REF if wildcards.region == "PI" else FW_REF
 
 def get_rev_ref(wildcards):
-    if wildcards.sense_asense == "sense":
-        return REV_PI_REF if wildcards.region == "PI" else REV_REF
-    else:
-        return FW_PI_REF if wildcards.region == "PI" else FW_REF
+    return REV_PI_REF if wildcards.region == "PI" else REV_REF
         
         
 # stranded sense matrix files

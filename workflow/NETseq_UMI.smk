@@ -76,7 +76,10 @@ FASTQ_DIR = PROJ + "/fastqs"
 
 os.makedirs(FASTQ_DIR, exist_ok = True)
 
-PAIRED = config.get("PAIRED", False)  # single-end alignment by protocol default
+# PAIRED = single- vs paired-end mapping only, not sequencing.
+# read2 is always fetched for UMI extraction regardless (see extract_umi
+# rule and FASTQS below); only read1 is ever aligned, so default False.
+PAIRED = config.get("PAIRED", False)
 
 # Simplify ALL_SAMPLES dictionary
 SAMPLES, SAMPIN, GROUPS, NORMMAP, PAIREDMAP = process_samples(

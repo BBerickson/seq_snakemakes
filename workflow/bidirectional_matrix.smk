@@ -1,4 +1,4 @@
-# ===== Snake file for processing mNET-seq data ================================
+# ===== Snake file for making bidirectional bigwig + matrix files ================
 
 # Configure shell for all rules
 shell.executable("/bin/bash")
@@ -53,40 +53,52 @@ with open(GENOME_CONFIG1) as f:
 # ------------------------------------------------------------------------------
 
 # Docker container
-singularity:
-    config["CONTAINER"] 
-    
+SINGULARITY = config.get("CONTAINER", "")
+# Check if we should use Singularity
+USE_SINGULARITY = bool(SINGULARITY and SINGULARITY.strip())
+# Set container if using Singularity
+if USE_SINGULARITY:
+    singularity:
+        config["CONTAINER"]
+
+# start_from_bw: fetch/symlink existing bigwigs instead of generating them from
+# BAMs via bamCoverage.
+START_FROM_BW = _coerce_bool(config.get("START_FROM_BW", False))
+
 # From main config
 PROJ         = config.get("PROJ")
 RAW_DATA     = config.get("RAW_DATA")
 ALL_SAMPLES  = config.get("SAMPLES")
 SEQ_DATE     = config.get("SEQ_DATE")
 INDEX_PATH   = config.get("INDEX_PATH")
+CHROM_SIZES  = config.get("CHROM_SIZES")
 CMD_PARAMS   = config.get("CMD_PARAMS")
 COLORS       = config.get("COLORS")
 NORM         = config.get("NORM")
 ORIENTATION  = config.get("ORIENTATION")
 PAIRED       = config.get("PAIRED")
-SENSE_ASENSE = config.get("SENSE_ASENSE")
 REGIONS      = config.get("REGIONS")
 USER         = config.get("USER")
 
 # From additional configs
 raw_indexes = config1['INDEXES']
 INDEXES     = [raw_indexes] if isinstance(raw_indexes, str) else [raw_indexes[0]]
-MY_REF      = config1.get("MY_REF")
 FW_REF      = config1.get("FW_REF")
 REV_REF     = config1.get("REV_REF")
 FW_PI_REF   = config1.get("FW_PI_REF")
 REV_PI_REF  = config1.get("REV_PI_REF")
 GENELIST    = config1.get("GENELIST") or ""
 
+if START_FROM_BW:
+    BW_DIR = PROJ + "/raw_bw"
+    os.makedirs(BW_DIR, exist_ok = True)
+
 # Simplify ALL_SAMPLES dictionary
 SAMPLES, SAMPIN, GROUPS, NORMMAP, PAIREDMAP = process_samples(
     ALL_SAMPLES, INDEXES, NORM, ORIENTATION, paired=PAIRED
 )
 
-# make file suffix from bamCoverage settings and NORM 
+# make file suffix from bamCoverage settings and NORM
 for sample, norm_list in NORMMAP.items():
     updated_list = [
         (index, norm_value, _get_normtype(
@@ -98,7 +110,12 @@ for sample, norm_list in NORMMAP.items():
         for index, norm_value in norm_list
     ]
     NORMMAP[sample] = updated_list
-    
+
+# add scalefactor index info
+for key in NORMMAP:
+    NORMMAP[key] = [(index, norm, f'scalefactor_{INDEXES_LAST[0]}' if suffix.lower() == 'scalefactor' else suffix)
+                    for index, norm, suffix in NORMMAP[key]]
+
 # unpack samples and groups
 SAMS = [[y, x] for y in SAMPLES for x in SAMPLES[y]]
 NAMS = [x[0] for x in SAMS] # newnames
@@ -148,7 +165,7 @@ for key in SAMPIN:
 DF_SAM_NORM = pd.DataFrame(SAM_NORM, columns=['Sample', 'Newnam', 'Index', 'Norm', 'Suffix', 'Bam_dir'])
 # Merge on 'Newnam' and 'Index'
 DF_SAM_NORM = REGIONS_COVARGS.merge(DF_SAM_NORM, on=['Newnam'], how='left')
-# PI matix files don't get normalized 
+# PI matix files don't get normalized
 mask = DF_SAM_NORM["Region"] == "PI"
 DF_SAM_NORM.loc[mask, "Suffix"] = [
     suffix.replace(norm, "none", 1)
@@ -177,23 +194,35 @@ rule all:
               index=DF_SAM_NORM['Index'],
               suffix=DF_SAM_NORM['Suffix']
           ),
-          
+
+          # bamCoverage URL for amc-sandbox (only relevant when generating
+          # bigwigs here; when they come from an already-completed alignment
+          # pipeline, its own run already made these URLs)
+          [] if (not START_FROM_BW) or config.get("skip_bw_urls") else [
+              expand(
+                  PROJ + "/URLS/" + PROJ + "_{index}_" + SEQ_DATE + "_norm_{suffix}_bw_URL.txt",
+                  zip, index=DF_SAM_NORM['Index'], suffix=DF_SAM_NORM['Suffix']
+              )
+          ],
+
           # matrix url file for amc-sandbox
           [] if config.get("skip_matrix_url") else [
             expand(
                 PROJ + "/URLS/{region}_aligned_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_bidirectonal_matrix.url.txt",
-                zip, 
-                region=DF_SAM_NORM['Region'], 
-                index=DF_SAM_NORM['Index'], 
-                covarg=DF_SAM_NORM['Value'], 
+                zip,
+                region=DF_SAM_NORM['Region'],
+                index=DF_SAM_NORM['Index'],
+                covarg=DF_SAM_NORM['Value'],
                 suffix=DF_SAM_NORM['Suffix']
             )
           ]
         ]
 
-# BW with deeptools bamCoverage
-include: "rules/04a_bamCoverage_stranded.snake"
+# bigwigs: generate from BAMs, or fetch existing ones
+if START_FROM_BW:
+    include: "rules/04_get_BW_Stranded.snake"
+    include: "rules/04b_bw_UCSC_URL_stranded.snake"
+else:
+    include: "rules/04a_bamCoverage_stranded.snake"
 # 5 sense matrix file
 include: "rules/05_bidirectional_matrix.snake"
-
-

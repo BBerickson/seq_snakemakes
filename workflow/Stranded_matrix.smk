@@ -1,4 +1,4 @@
-# ===== Snake file for processing mNET-seq data ================================
+# ===== Snake file for making stranded bigwig + matrix files =====================
 
 # Configure shell for all rules
 shell.executable("/bin/bash")
@@ -59,8 +59,13 @@ USE_SINGULARITY = bool(SINGULARITY and SINGULARITY.strip())
 # Set container if using Singularity
 if USE_SINGULARITY:
     singularity:
-        config["CONTAINER"] 
-    
+        config["CONTAINER"]
+
+# start_from_bw: fetch/symlink existing bigwigs instead of generating them from
+# BAMs via bamCoverage. Skips the final HTML QC report, since its results.tsv
+# comes from the alignment pipeline, which doesn't run in this mode.
+START_FROM_BW = _coerce_bool(config.get("START_FROM_BW", False))
+
 # From main config
 PROJ         = config.get("PROJ")
 RAW_DATA     = config.get("RAW_DATA")
@@ -68,6 +73,7 @@ ALL_SAMPLES  = config.get("SAMPLES")
 SEQ_DATE     = config.get("SEQ_DATE")
 INDEX_PATH   = config.get("INDEX_PATH")
 INDEX_MAP    = config.get("INDEX_MAP")
+CHROM_SIZES  = config.get("CHROM_SIZES")
 CMD_PARAMS   = config.get("CMD_PARAMS")
 COLORS       = config.get("COLORS")
 NORM         = config.get("NORM")
@@ -84,18 +90,23 @@ if not SENSE_ASENSE:
 raw_indexes = config1['INDEXES']
 INDEXES     = [raw_indexes] if isinstance(raw_indexes, str) else [raw_indexes[0]]
 MY_REF      = config1.get("MY_REF")
+PI_REF      = config1.get("PI_REF")
 FW_REF      = config1.get("FW_REF")
 REV_REF     = config1.get("REV_REF")
 FW_PI_REF   = config1.get("FW_PI_REF")
 REV_PI_REF  = config1.get("REV_PI_REF")
 GENELIST    = config1.get("GENELIST") or ""
 
+if START_FROM_BW:
+    BW_DIR = PROJ + "/raw_bw"
+    os.makedirs(BW_DIR, exist_ok = True)
+
 # Simplify ALL_SAMPLES dictionary
 SAMPLES, SAMPIN, GROUPS, NORMMAP, PAIREDMAP = process_samples(
     ALL_SAMPLES, INDEXES, NORM, ORIENTATION, paired=PAIRED
 )
 
-# make file suffix from bamCoverage settings and NORM 
+# make file suffix from bamCoverage settings and NORM
 for sample, norm_list in NORMMAP.items():
     updated_list = [
         (index, norm_value, _get_normtype(
@@ -110,9 +121,9 @@ for sample, norm_list in NORMMAP.items():
 
 # add scalefactor index info
 for key in NORMMAP:
-    NORMMAP[key] = [(index, norm, f'scalefactor_{INDEXES_LAST[0]}' if suffix.lower() == 'scalefactor' else suffix) 
+    NORMMAP[key] = [(index, norm, f'scalefactor_{INDEXES_LAST[0]}' if suffix.lower() == 'scalefactor' else suffix)
                     for index, norm, suffix in NORMMAP[key]]
-    
+
 # unpack samples and groups
 SAMS = [[y, x] for y in SAMPLES for x in SAMPLES[y]]
 NAMS = [x[0] for x in SAMS] # newnames
@@ -163,7 +174,7 @@ for key in SAMPIN:
 DF_SAM_NORM = pd.DataFrame(SAM_NORM, columns=['Sample', 'Newnam', 'Index', 'Norm', 'Suffix', 'Bam_dir'])
 # Merge on 'Newnam' and 'Index'
 DF_SAM_NORM = REGIONS_COVARGS.merge(DF_SAM_NORM, on=['Newnam'], how='left')
-# PI matix files don't get normalized 
+# PI matix files don't get normalized
 mask = DF_SAM_NORM["Region"] == "PI"
 DF_SAM_NORM.loc[mask, "Suffix"] = [
     suffix.replace(norm, "none", 1)
@@ -192,42 +203,57 @@ rule all:
               index=DF_SAM_NORM['Index'],
               suffix=DF_SAM_NORM['Suffix']
           ),
-          
+
+          # bamCoverage URL for amc-sandbox (only relevant when generating bigwigs
+          # here; when the bigwigs come from an already-completed alignment
+          # pipeline, its own run already made these URLs)
+          [] if (not START_FROM_BW) or config.get("skip_bw_urls") else [
+              expand(
+                  PROJ + "/URLS/" + PROJ + "_{index}_" + SEQ_DATE + "_norm_{suffix}_bw_URL.txt",
+                  zip, index=DF_SAM_NORM['Index'], suffix=DF_SAM_NORM['Suffix']
+              )
+          ],
+
           # matrix files
           expand(
               PROJ + "/matrix/{region}/{newnam}_aligned_{index}_" + SEQ_DATE + "_{region}_{covarg}_norm_{suffix}_{sense_asense}_matrix.gz",
-              zip, 
-              region=DF_SAM_NORM['Region'], 
+              zip,
+              region=DF_SAM_NORM['Region'],
               newnam=DF_SAM_NORM['Newnam'],
-              index=DF_SAM_NORM['Index'], 
-              covarg=DF_SAM_NORM['Value'], 
-              suffix=DF_SAM_NORM['Suffix'], 
+              index=DF_SAM_NORM['Index'],
+              covarg=DF_SAM_NORM['Value'],
+              suffix=DF_SAM_NORM['Suffix'],
               sense_asense=DF_SAM_NORM['Sense_Asense']
           ),
-          
+
           # matrix url file for amc-sandbox
           [] if config.get("skip_matrix_url") else [
             expand(
                 PROJ + "/URLS/{region}_aligned_{index}_" + SEQ_DATE + "_{covarg}_norm_{suffix}_{sense_asense}_matrix.url.txt",
-                zip, 
-                region=DF_SAM_NORM['Region'], 
-                index=DF_SAM_NORM['Index'], 
-                covarg=DF_SAM_NORM['Value'], 
-                suffix=DF_SAM_NORM['Suffix'], 
+                zip,
+                region=DF_SAM_NORM['Region'],
+                index=DF_SAM_NORM['Index'],
+                covarg=DF_SAM_NORM['Value'],
+                suffix=DF_SAM_NORM['Suffix'],
                 sense_asense=DF_SAM_NORM['Sense_Asense']
             )
           ],
-          
-          # qc with heatmap, cluster, profile plots
-          [] if config.get("skip_matrix_html_report") else [
+
+          # qc with heatmap, cluster, profile plots (needs the alignment
+          # pipeline's results.tsv, not available when starting from bigwigs)
+          [] if START_FROM_BW or config.get("skip_matrix_html_report") else [
               expand(SEQ_DATE + "_" + PROJ + "_{index}" + "_qc_plots_analysis.html", index=INDEXES[0])
           ]
         ]
 
-# BW with deeptools bamCoverage
-include: "rules/04a_bamCoverage_stranded.snake"
+# bigwigs: generate from BAMs, or fetch existing ones
+if START_FROM_BW:
+    include: "rules/04_get_BW_Stranded.snake"
+    include: "rules/04b_bw_UCSC_URL_stranded.snake"
+else:
+    include: "rules/04a_bamCoverage_stranded.snake"
 # 5 sense matrix file
 include: "rules/05_Stranded_matrix.snake"
-include: "rules/06_matrix_heatmap.snake"
-include: "rules/07_results_html.snake"
-
+if not START_FROM_BW:
+    include: "rules/06_matrix_heatmap.snake"
+    include: "rules/07_results_html.snake"

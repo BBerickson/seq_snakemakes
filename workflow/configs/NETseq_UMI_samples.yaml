@@ -127,13 +127,9 @@ NORM:
   
 # set orentation of fastq files, can list one for each file
 # it will only align read1, read2 is only ever used for pre processing
+# (mapping is always single-end here; there is no PAIRED option to set)
 ORIENTATION:
     "R1R2" # R2R1
-
-# single (False) vs paired (True) end mapping, decoupled from ORIENTATION above.
-# NETseq_UMI only ever aligns read1; read2 is used for UMI extraction only.
-PAIRED:
-    "False"
 
 # which matrix type(s) to make
 # deeptools options set in Stranded_matrix.yaml
