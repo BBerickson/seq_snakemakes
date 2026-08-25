@@ -17,6 +17,10 @@ FA_SAMPLE:
   "/beevol/home/erickson/ref/misc/e_coli/GCF_000005845.2_ASM584v2_genomic.fna"
 MY_REF:
   ""
+# BED region set for multiBamSummary's --scalingFactors computation
+# (CMD_PARAMS.scalingFactors mode "BED-file"). See workflow/rules/03b_results.snake.
+SCALING_REF:
+  ""
 FW_REF:
   ""
 REV_REF:

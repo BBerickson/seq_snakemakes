@@ -22,6 +22,7 @@ fi
 
 SMK_FILE="ChIPseq_dual_IP.smk"
 CONFIG_FILE="ChIPseq_dual_IP_samples.yaml"
+CONFIG_FILE2="ChIPseq_dual_IP_tRNA_samples.yaml"
 MTX_CONFIG_FILE="UnStranded_matrix.yaml"
 
 PIPELINE_TYPE="$1"
@@ -73,6 +74,9 @@ rsync -a "$EXTRACT_DIR/workflow/$SMK_FILE" workflow/
 if [ ! -f "$CONFIG_FILE" ]; then
     rsync -a "$EXTRACT_DIR/workflow/configs/$CONFIG_FILE" .
 fi
+if [ ! -f "$CONFIG_FILE2" ]; then
+    rsync -a "$EXTRACT_DIR/workflow/configs/$CONFIG_FILE2" .
+fi
 rsync -a "$EXTRACT_DIR/workflow/"*_matrix.smk workflow/
 rsync -a "$EXTRACT_DIR/workflow/configs/$MTX_CONFIG_FILE" .
 rsync -a "$EXTRACT_DIR/workflow/configs/"*_matrix.yaml workflow/
@@ -96,6 +100,7 @@ echo ""
 echo "Files created:"
 echo "  - workflow/$SMK_FILE"
 echo "  - $CONFIG_FILE"
+echo "  - $CONFIG_FILE2"
 echo "  - workflow/rules/"
 echo "  - workflow/ref/"
 echo "  - workflow/profiles/"

@@ -14,35 +14,14 @@ from pathlib import Path
 include: workflow.source_path("scripts/funs.py")
 
 # ------------------------------------------------------------------------------
-# Load main genome config
+# Load index config
 # ------------------------------------------------------------------------------
 
-GENOME = config["GENOME"]
-GENOME_CONFIG = Path("workflow/ref") / f"{GENOME}.yaml"
-
-if not GENOME_CONFIG.exists():
-    sys.exit(f"ERROR: {GENOME} is not a valid GENOME selection.")
-
-# Load the main config file into Snakemake's config dictionary
-configfile: str(GENOME_CONFIG)
-
-# ------------------------------------------------------------------------------
-# Load additional genome-specific configs manually
-# ------------------------------------------------------------------------------
-
-INDEXES = config['INDEXES']
-if isinstance(INDEXES, str):
-    INDEXES = [INDEXES]
-
-# Load genome-specific config files into a dictionary
-config_indexes = {}
-for idx in INDEXES:
-    path = Path("workflow/ref") / f"{idx}.yaml"
-    if not path.exists():
-        sys.exit(f"ERROR: {idx} is not a valid genome index.")
-    with open(path) as f:
-        config_indexes[idx] = yaml.safe_load(f)
-
+INDEXES, config_indexes, ROLE_MAP, ALIGNMENT_MODE, PRIMARY_INDEX, INDEX_PATH, INDEX_MAP = (
+    load_index_config(config)
+)
+MASK = config_indexes[PRIMARY_INDEX].get("MASK")
+INDEX_ROLE = {v: k for k, v in ROLE_MAP.items()}  # index name -> role, for rules/03a_fragmentSize.snake
 
 # ------------------------------------------------------------------------------
 # Assign parameters from configs
@@ -55,15 +34,13 @@ USE_SINGULARITY = bool(SINGULARITY and SINGULARITY.strip())
 # Set container if using Singularity
 if USE_SINGULARITY:
     singularity:
-        config["CONTAINER"] 
-    
+        config["CONTAINER"]
+
 # From main config
 PROJ         = config.get("PROJ")
 RAW_DATA     = config.get("RAW_DATA")
 ALL_SAMPLES  = config.get("SAMPLES")
 SEQ_DATE     = config.get("SEQ_DATE")
-INDEX_PATH   = config.get("INDEX_PATH")
-INDEX_MAP    = config.get("INDEX_MAP")
 CMD_PARAMS   = config.get("CMD_PARAMS")
 NORM         = config.get('NORM')
 COLORS       = config.get("COLORS")
@@ -78,7 +55,7 @@ os.makedirs(BAM_DIR, exist_ok = True)
 
 # Simplify ALL_SAMPLES dictionary
 SAMPLES, SAMPIN, GROUPS, NORMMAP, PAIREDMAP = process_samples(
-    ALL_SAMPLES, INDEXES, NORM, ORIENTATION, paired=PAIRED
+    ALL_SAMPLES, PRIMARY_INDEX, [i for i in INDEXES if i != PRIMARY_INDEX], NORM, ORIENTATION, paired=PAIRED
 )
 
 # make file suffix from bamCoverage settings and NORM 
@@ -143,7 +120,7 @@ rule all:
             sample = SAMS_UNIQ
         ),
         # Make dummy file
-        expand(PROJ + "/report/" + PROJ + "_{index}_results.tsv", index=INDEXES[0]),
+        expand(PROJ + "/report/" + PROJ + "_{index}_results.tsv", index=PRIMARY_INDEX),
         
         # bam URL
         [] if config.get("skip_bam_urls") else [

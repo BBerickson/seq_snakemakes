@@ -107,7 +107,13 @@ rule align_filter_indexed:
         job_name = "{sample}_align_filter_{index}",
         cmd      = PROJ + "/pipeline/06_index_filter.cmd",
         cmdd     = PROJ + "/pipeline",
-        idx      = lambda wildcards: INDEX_PATH + wildcards.index + ".txt",
+        # Sequential/dual-IP mode: hg38 and hg38_polIII are two real, separate
+        # indexes with their own directories (unlike split mode's single
+        # combined-index directory, where INDEX_PATH alone is correct for
+        # both indexes) -- each index's own contig-list .txt file lives
+        # alongside its own bowtie2 index, not the spike index's directory.
+        # Look it up per-index, mirroring FA_SAMPLE just below.
+        idx      = lambda wildcards: config_indexes[wildcards.index]["INDEX_PATH"] + wildcards.index + ".txt",
         samp     = "{sample}_{index}",
         args     = CMD_PARAMS["samtools"],
         fa       = lambda wildcards: config_indexes[wildcards.index].get("FA_SAMPLE"),

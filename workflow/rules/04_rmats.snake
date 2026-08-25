@@ -3,7 +3,7 @@
 # gathering results
 rule gathering_bams_groups:
     input:
-        PROJ + "/report/" + PROJ + "_" + INDEXES[0] + "_results.tsv"
+        PROJ + "/report/" + PROJ + "_" + PRIMARY_INDEX + "_results.tsv"
     output:
         PROJ + "/rmats/{compgroups}_S1.txt",
         PROJ + "/rmats/{compgroups}_S2.txt",

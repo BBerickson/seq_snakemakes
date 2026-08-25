@@ -3,10 +3,12 @@
 # no sense/antisense here -- transcription runs both directions at these loci,
 # so fw/rev are just the two genomic strands, always both computed
 def get_fw_ref(wildcards):
-    return FW_PI_REF if wildcards.region == "PI" else FW_REF
+    yaml_data = REF_BY_REGION_COVARG[(wildcards.region, wildcards.covarg)]
+    return yaml_data.get("FW_PI_REF") if wildcards.region == "PI" else yaml_data.get("FW_REF")
 
 def get_rev_ref(wildcards):
-    return REV_PI_REF if wildcards.region == "PI" else REV_REF
+    yaml_data = REF_BY_REGION_COVARG[(wildcards.region, wildcards.covarg)]
+    return yaml_data.get("REV_PI_REF") if wildcards.region == "PI" else yaml_data.get("REV_REF")
         
         
 # stranded sense matrix files
@@ -21,8 +23,8 @@ rule my_5_bidirectonal_matrix:
         job_name = "{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_bi_matrix",
         cmd      = PROJ + "/pipeline/12_computeMatrix_bi.cmd",
         cmdd     = PROJ + "/pipeline",
-        args     = lambda wildcards: CMD_PARAMS[f"region{wildcards.region}"] + ("--blackListFileName " + config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else ""),
-        mask_path = config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else "",
+        args     = lambda wildcards: CMD_PARAMS[f"region{wildcards.region}"] + ("--blackListFileName " + MASK if CMD_PARAMS.get("bamCoverageBL",False) and MASK else ""),
+        mask_path = MASK if CMD_PARAMS.get("bamCoverageBL",False) and MASK else "",
         fw_ref  = get_fw_ref,
         rev_ref = get_rev_ref
     resources:

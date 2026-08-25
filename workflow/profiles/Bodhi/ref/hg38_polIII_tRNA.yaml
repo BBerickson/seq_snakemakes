@@ -1,0 +1,47 @@
+#===== Config file for select hg38 pol III genome, tRNA-only gene list ===================
+# Gene-list variant of hg38_polIII.yaml -- same alignment index (INDEX_PATH/
+# INDEX_MAP/INDEXES unchanged), only MY_REF/FW_REF/REV_REF point at tRNA loci
+# instead of the full polIII-filtered region set. Safe to reuse plain hg38's
+# tRNA bed files here: hg38_polIII's masked FASTA was built by bedtools
+# maskfasta on the SAME Homo_sapiens.GRCh38.dna.primary_assembly.fa (see
+# .../PolIII/build_index2.sh) -- chr1..chrY coordinates are unchanged, only
+# sequence outside the retained polIII/tRNA loci is masked to N. tRNA loci
+# were explicitly included among the retained regions (see PolIII/ReadMe.txt:
+# "extract polIII transcripts and combine with tRNA list"), so reads do align
+# there in this index.
+
+GENELIST:
+    "polIII_tRNA"
+# Path to bowtie2 index ref files
+INDEX_PATH:
+  "/beevol/home/erickson/ref/hg38_p14/PolIII/"
+# bowtie2 index prefix
+INDEX_MAP:
+  "hg38_polIII"
+# index.yaml prefix -- must match hg38_polIII.yaml's own INDEXES value so
+# GENELISTS validates and matrix/bam lookups resolve to the real alignment
+INDEXES:
+  "hg38_polIII"
+# ref file locations
+MASK:
+  ""
+GTF:
+  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_chrfix_GRCh38.113.gtf"
+FA_SAMPLE:
+  "/beevol/home/erickson/ref/hg38_p14/PolIII/CTD_Ser5_polIII_fitered_slop200.fa"
+MY_REF:
+  "/beevol/home/erickson/ref/hg38/ref/hg38-tRNAs.bed"
+# BED region set for multiBamSummary's --scalingFactors computation
+# (CMD_PARAMS.scalingFactors mode "BED-file"). See workflow/rules/03b_results.snake.
+SCALING_REF:
+  "/beevol/home/erickson/ref/hg38/ref/hg38-tRNAs.bed"
+FW_REF:
+  "/beevol/home/erickson/ref/hg38/ref/hg38-tRNAs_fw.bed"
+REV_REF:
+  "/beevol/home/erickson/ref/hg38/ref/hg38-tRNAs_rev.bed"
+PI_REF:
+  ""
+FW_PI_REF:
+  ""
+REV_PI_REF:
+  ""

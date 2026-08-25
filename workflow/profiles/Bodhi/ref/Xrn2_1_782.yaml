@@ -6,9 +6,9 @@ GENELIST:
 INDEX_PATH:
     "/beevol/home/erickson/ref/misc/Xrn2_1_782/"
 INDEX_MAP:
-    "Xrn2_1-782"
+    "Xrn2_1_782"
 INDEXES:
-    "Xrn2_1-782"
+    "Xrn2_1_782"
 MASK:
   ""
 GTF:
@@ -16,6 +16,10 @@ GTF:
 FA_SAMPLE:
   "/beevol/home/erickson/ref/misc/Xrn2_1_782/Xrn2.fa"
 MY_REF:
+  ""
+# BED region set for multiBamSummary's --scalingFactors computation
+# (CMD_PARAMS.scalingFactors mode "BED-file"). See workflow/rules/03b_results.snake.
+SCALING_REF:
   ""
 FW_REF:
   ""

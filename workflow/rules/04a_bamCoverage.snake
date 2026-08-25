@@ -17,15 +17,15 @@ rule bamCoverage:
             PROJ + "/stats/" + sample + "_summary_featureCounts.tsv" 
             for sample in SAMPLES[wildcards.newnam]
         ],
-        check_point = PROJ + "/report/" + PROJ + "_" + INDEXES[0] + "_results.tsv"
+        check_point = PROJ + "/report/" + PROJ + "_" + PRIMARY_INDEX + "_results.tsv"
     output:
         bigwig = PROJ + "/bw/{newnam}_aligned_{index}_" + SEQ_DATE + "_norm_{suffix}.bw"
     params:
         job_name = "{newnam}_aligned_{index}_" + SEQ_DATE + "_{suffix}_bamCoverage",
         cmd      = PROJ + "/pipeline/11_bamCoverage.cmd",
         cmdd     = PROJ + "/pipeline",
-        args = CMD_PARAMS["bamCoverage"] + ("--blackListFileName " + config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else ""),
-        mask_path = config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else "",
+        args = CMD_PARAMS["bamCoverage"] + ("--blackListFileName " + MASK if CMD_PARAMS.get("bamCoverageBL",False) and MASK else ""),
+        mask_path = MASK if CMD_PARAMS.get("bamCoverageBL",False) and MASK else "",
         sam_norm = SAM_NORM  # Pass the original data
     resources:
         memory = lambda wildcards, input: memory_estimator(input.bam, 0.2, 5)

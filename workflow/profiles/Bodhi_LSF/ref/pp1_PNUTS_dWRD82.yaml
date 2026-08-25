@@ -6,9 +6,9 @@ GENELIST:
 INDEX_PATH:
     "/beevol/home/erickson/ref/misc/pp1_PNUTS/"
 INDEX_MAP:
-    "prom_pp1_PNUTS_dWRD82"
+    "pp1_PNUTS_dWRD82"
 INDEXES:
-    "prom_pp1_PNUTS_dWRD82"
+    "pp1_PNUTS_dWRD82"
 MASK:
   ""
 GTF:
@@ -18,6 +18,10 @@ FA_SAMPLE:
 FA_SPIKE:
   ""
 MY_REF:
+  ""
+# BED region set for multiBamSummary's --scalingFactors computation
+# (CMD_PARAMS.scalingFactors mode "BED-file"). See workflow/rules/03b_results.snake.
+SCALING_REF:
   ""
 FW_REF:
   ""

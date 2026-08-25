@@ -10,9 +10,13 @@ rule standared_matrix:
         job_name = "{region}_{newnam}_aligned_{index}__{covarg}_norm_{suffix}_matrix",
         cmd      = PROJ + "/pipeline/12_computeMatrix.cmd",
         cmdd     = PROJ + "/pipeline",
-        args = lambda wildcards: CMD_PARAMS[f"region{wildcards.region}"] + ("--blackListFileName " + config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else ""),
-        mask_path = config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else "",
-        my_ref = lambda wildcards: PI_REF if wildcards.region == "PI" else MY_REF
+        args = lambda wildcards: CMD_PARAMS[f"region{wildcards.region}"] + ("--blackListFileName " + MASK if CMD_PARAMS.get("bamCoverageBL",False) and MASK else ""),
+        mask_path = MASK if CMD_PARAMS.get("bamCoverageBL",False) and MASK else "",
+        my_ref = lambda wildcards: (
+            REF_BY_REGION_COVARG[(wildcards.region, wildcards.covarg)].get("PI_REF")
+            if wildcards.region == "PI"
+            else REF_BY_REGION_COVARG[(wildcards.region, wildcards.covarg)].get("MY_REF")
+        )
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 2, 2)
     threads: 

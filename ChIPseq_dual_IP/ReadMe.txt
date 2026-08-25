@@ -5,12 +5,14 @@ wget https://raw.githubusercontent.com/BBerickson/seq_snakemakes/main/ChIPseq_du
 bash setup_pipeline.sh Bodhi
 
 # edit ChIPseq_dual_IP_samples.yaml with your sample information
-# also review/edit UnStranded_matrix.yaml (computeMatrix/heatmap parameters, steps 5-7 below,
-#   run as a second snakemake workflow against workflow/UnStranded_matrix.smk)
+# also review/edit UnStranded_matrix.yaml 
 # run script by submitting to Bodhi (AMC) or Alpine (Boulder)
 
-!!! Genome must point to ref yaml file with 2 genomes !!!
-!!! see workflow/ref/hg38_polIII_SEQL_hg38.yaml for example !!!
+!!! The default set up is for PolII + PolIII ChIP normalization scalefactor !!!
+!!! ALIGNMENT_MODE: sequential, with two INDEXES entries (role: primary / role: spike) --
+    see workflow/ref/hg38.yaml + workflow/ref/hg38_polIII.yaml for example !!!
+!!! ChIPseq_dual_IP_tRNA_samples.yaml + workflow/small_matrix.yaml (run as a third snakemake
+    workflow to check polIII scaleFactor normalization)!!!
 
 
 ### Pipeline Overview ###

@@ -11,14 +11,14 @@ rule gathering_results:
         ),
         extra = [] if NORM != "subsample" else expand(
                     PROJ + "/stats/" + PROJ + "_{index}_subsample_frac.tsv", 
-                    index=INDEXES[0]
+                    index=PRIMARY_INDEX
                 ),
         FC_files = expand( PROJ + "/counts/{sample}_aligned_{index}_featureCounts.tsv",
             sample = SAMS_UNIQ,
-            index  = INDEXES[0]
+            index  = PRIMARY_INDEX
         )
     output:
-        PROJ + "/report/" + PROJ + "_" + INDEXES[0] + "_results.tsv"
+        PROJ + "/report/" + PROJ + "_" + PRIMARY_INDEX + "_results.tsv"
     params:
         job_name = "results",
         indexmap = INDEX_MAP,
@@ -41,20 +41,20 @@ rule gathering_results:
   
 rule create_plots:
     input:
-        PROJ + "/report/" + PROJ + "_" + INDEXES[0] + "_results.tsv"
+        PROJ + "/report/" + PROJ + "_" + PRIMARY_INDEX + "_results.tsv"
     output:
-        report  = SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_qc_analysis.html",
+        report  = SEQ_DATE + "_" + PROJ + "_" + PRIMARY_INDEX + "_qc_analysis.html",
         reportc = PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_pipeline_methods.txt",
-        config  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_config.yaml"),
-        result  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_clean_results.tsv")
+        config  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + PRIMARY_INDEX + "_config.yaml"),
+        result  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + PRIMARY_INDEX + "_clean_results.tsv")
     params:
         job_name  = PROJ + "_qc_html",
         cmdd     = PROJ + "/pipeline",
-        out_file  = SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_qc_analysis",
+        out_file  = SEQ_DATE + "_" + PROJ + "_" + PRIMARY_INDEX + "_qc_analysis",
         script  = "workflow/scripts/multiqc_config.R",
         seqdate = SEQ_DATE,
         mydir   = PROJ,
-        index   = INDEXES[0]
+        index   = PRIMARY_INDEX
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     threads:

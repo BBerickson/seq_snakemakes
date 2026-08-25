@@ -14,41 +14,17 @@ from pathlib import Path
 include: workflow.source_path("scripts/funs.py")
 
 # ------------------------------------------------------------------------------
-# Load main genome config
+# Load index config
 # ------------------------------------------------------------------------------
 
-GENOME = config["GENOME"]
-GENOME_CONFIG = Path("workflow/ref") / f"{GENOME}.yaml"
-
-if not GENOME_CONFIG.exists():
-    sys.exit(f"ERROR: {GENOME} is not a valid GENOME selection.")
-
-# Load the main config file into Snakemake's config dictionary
-configfile: str(GENOME_CONFIG)
-
-# ------------------------------------------------------------------------------
-# Load additional genome-specific configs manually
-# ------------------------------------------------------------------------------
+INDEXES, config_indexes, ROLE_MAP, ALIGNMENT_MODE, PRIMARY_INDEX, INDEX_PATH, INDEX_MAP = (
+    load_index_config(config)
+)
 
 # Docker container
 singularity:
-    config["CONTAINER"] 
-    
-raw_indexes = config['INDEXES']
-INDEXES = [raw_indexes] if isinstance(raw_indexes, str) else [raw_indexes[0]]
+    config["CONTAINER"]
 
-
-# Paths to additional config files
-GENOME_CONFIG1 = Path("workflow/ref") / f"{INDEXES[0]}.yaml"
-
-# Validate existence
-if not GENOME_CONFIG1.exists():
-    sys.exit(f"ERROR: Config file not found for index '{INDEXES[0]}'. Expected at: {GENOME_CONFIG1}")
-
-# Load additional configs
-with open(GENOME_CONFIG1) as f:
-    config1 = yaml.safe_load(f)
-    
 # ------------------------------------------------------------------------------
 # Assign parameters from configs
 # ------------------------------------------------------------------------------
@@ -66,7 +42,7 @@ ORIENTATION    = config.get("ORIENTATION")
 USER           = config.get("USER")
 
 # From additional configs
-GTF          = config1.get("GTF")
+GTF          = config_indexes[PRIMARY_INDEX].get("GTF")
 
 # Sample and group lists
 SAMS = [[y, x] for y in ALL_SAMPLES for x in ALL_SAMPLES[y]]

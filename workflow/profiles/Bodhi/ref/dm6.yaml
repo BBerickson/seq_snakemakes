@@ -5,10 +5,10 @@ INDEX_PATH:
   "/beevol/home/erickson/ref/Drosophila/genome/"
 # bowtie2 index prefix
 INDEX_MAP:
-  "Drosophila"
+  "dm6"
 # index.yaml prefix
 INDEXES:
-  "Drosophila"
+  "dm6"
 # ref file locations
 MASK:
   ""
@@ -17,6 +17,10 @@ GTF:
 FA_SAMPLE:
   "/beevol/home/erickson/ref/Drosophila/genome.fa"
 MY_REF:
+  "/beevol/home/erickson/ref/Drosophila/Drosophila.bed"
+# BED region set for multiBamSummary's --scalingFactors computation
+# (CMD_PARAMS.scalingFactors mode "BED-file"). See workflow/rules/03b_results.snake.
+SCALING_REF:
   "/beevol/home/erickson/ref/Drosophila/Drosophila.bed"
 FW_REF:
   "/beevol/home/erickson/ref/Drosophila/Drosophila_fw.bed"

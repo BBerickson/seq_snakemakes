@@ -18,6 +18,10 @@ FA_SAMPLE:
   "/beevol/home/erickson/ref/Antarctic_spiny_plunderfish/genome_builds/genome_primary.fa"
 MY_REF:
   "/beevol/home/erickson/ref/Antarctic_spiny_plunderfish/ref_files/fHarAnt_gene.bed"
+# BED region set for multiBamSummary's --scalingFactors computation
+# (CMD_PARAMS.scalingFactors mode "BED-file"). See workflow/rules/03b_results.snake.
+SCALING_REF:
+  "/beevol/home/erickson/ref/Antarctic_spiny_plunderfish/ref_files/fHarAnt_gene.bed"
 FW_REF:
   "/beevol/home/erickson/ref/Antarctic_spiny_plunderfish/ref_files/fHarAnt_gene_pos.bed"
 REV_REF:

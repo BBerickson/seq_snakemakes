@@ -14,35 +14,23 @@ from pathlib import Path
 include: workflow.source_path("scripts/funs.py")
 
 # ------------------------------------------------------------------------------
-# Load main genome config
+# Load index config
 # ------------------------------------------------------------------------------
 
-GENOME = config["GENOME"]
-GENOME_CONFIG = Path("workflow/ref") / f"{GENOME}.yaml"
+INDEXES, config_indexes, ROLE_MAP, ALIGNMENT_MODE, PRIMARY_INDEX, INDEX_PATH, INDEX_MAP = (
+    load_index_config(config)
+)
+MASK = config_indexes[PRIMARY_INDEX].get("MASK")
+INDEX_ROLE = {v: k for k, v in ROLE_MAP.items()}  # index name -> role, for rules/03a_fragmentSize.snake
 
-if not GENOME_CONFIG.exists():
-    sys.exit(f"ERROR: {GENOME} is not a valid GENOME selection.")
-
-# Load the main config file into Snakemake's config dictionary
-configfile: str(GENOME_CONFIG)
-
-# ------------------------------------------------------------------------------
-# Load additional genome-specific configs manually
-# ------------------------------------------------------------------------------
-
-INDEXES = config['INDEXES']
-if isinstance(INDEXES, str):
-    INDEXES = [INDEXES]
-
-# Load genome-specific config files into a dictionary
-config_indexes = {}
-for idx in INDEXES:
-    path = Path("workflow/ref") / f"{idx}.yaml"
-    if not path.exists():
-        sys.exit(f"ERROR: {idx} is not a valid genome index.")
-    with open(path) as f:
-        config_indexes[idx] = yaml.safe_load(f)
-
+# sequential mode: two real, separate indexes aligned in two passes. The
+# spike-role index is aligned FIRST (bowtie_first_pass); the primary-role
+# index is aligned SECOND and is the reported/results index.
+SPIKE_INDEX  = ROLE_MAP["spike"]
+INDEX_MAP    = config_indexes[SPIKE_INDEX]["INDEX_MAP"]
+INDEX_PATH   = config_indexes[SPIKE_INDEX]["INDEX_PATH"]
+INDEX_SECOND = config_indexes[PRIMARY_INDEX]["INDEX_MAP"]
+INDEX_PATH2  = config_indexes[PRIMARY_INDEX]["INDEX_PATH"]
 
 # ------------------------------------------------------------------------------
 # Assign parameters from configs
@@ -55,9 +43,8 @@ USE_SINGULARITY = bool(SINGULARITY and SINGULARITY.strip())
 # Set container if using Singularity
 if USE_SINGULARITY:
     singularity:
-        config["CONTAINER"] 
+        config["CONTAINER"]
 
-    
 # From main config
 PROJ         = config.get("PROJ")
 RAW_DATA     = config.get("RAW_DATA")
@@ -72,6 +59,9 @@ PAIRED       = config.get("PAIRED")
 USER         = config.get("USER")
 UNALIGNED    = config.get("UNALIGNED")
 
+if ALIGNMENT_MODE != "sequential":
+    sys.exit(f"ERROR: ChIPseq_dual_IP.smk requires ALIGNMENT_MODE: sequential, got {ALIGNMENT_MODE!r}.")
+
 # Directories for data and scripts
 FASTQ_DIR = PROJ + "/fastqs"
 
@@ -79,16 +69,10 @@ os.makedirs(FASTQ_DIR, exist_ok = True)
 
 # Simplify ALL_SAMPLES dictionary
 SAMPLES, SAMPIN, GROUPS, NORMMAP, PAIREDMAP = process_samples(
-    ALL_SAMPLES, INDEXES, NORM, ORIENTATION, paired=PAIRED
+    ALL_SAMPLES, PRIMARY_INDEX, [i for i in INDEXES if i != PRIMARY_INDEX], NORM, ORIENTATION, paired=PAIRED
 )
 
-# align to the second entry then the first
-INDEX_MAP    = config_indexes.get(INDEXES[1], {}).get("INDEX_MAP", config["INDEX_MAP"])
-INDEX_PATH  = config_indexes.get(INDEXES[1], {}).get("INDEX_PATH", config["INDEX_PATH"])
-INDEX_SECOND = config_indexes.get(INDEXES[0], {}).get("INDEX_MAP", config["INDEX_MAP"])
-INDEX_PATH2   = config_indexes.get(INDEXES[0], {}).get("INDEX_PATH", config["INDEX_PATH"])
-
-# make file suffix from bamCoverage settings and NORM 
+# make file suffix from bamCoverage settings and NORM
 for sample, norm_list in NORMMAP.items():
     updated_list = [
         (index, norm_value, _get_normtype(
@@ -102,10 +86,8 @@ for sample, norm_list in NORMMAP.items():
     NORMMAP[sample] = updated_list
 
 # add scalefactor index info
-for key in NORMMAP:
-    NORMMAP[key] = [(index, norm, f'scalefactor_{INDEXES[-1]}' if suffix.lower() == 'scalefactor' else suffix) 
-                    for index, norm, suffix in NORMMAP[key]]
-    
+NORMMAP = tag_scalefactor_suffix(NORMMAP, SPIKE_INDEX)
+
 # Combine into a list of records with expanded NormMap
 SAM_NORM = []
 for key in SAMPIN:
@@ -167,9 +149,9 @@ rule all:
           expand(PROJ + "/stats/" + PROJ + "_{index}_fragment_results.tsv", index=INDEXES),
           expand(PROJ + "/report/" + PROJ + "_{index}_fragmentSize.pdf", index=INDEXES)
         ],
-        expand(PROJ + "/report/" + PROJ + "_{index}_results.tsv", index=INDEXES[0]),
+        expand(PROJ + "/report/" + PROJ + "_{index}_results.tsv", index=PRIMARY_INDEX),
         [] if config.get("skip_html_report") else [
-            expand(SEQ_DATE + "_" + PROJ + "_{index}" + "_qc_analysis.html", index=INDEXES[0])
+            expand(SEQ_DATE + "_" + PROJ + "_{index}" + "_qc_analysis.html", index=PRIMARY_INDEX)
         ],
         
         # bamCoverage

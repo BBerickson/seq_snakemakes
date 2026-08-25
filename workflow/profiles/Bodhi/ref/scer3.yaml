@@ -18,6 +18,10 @@ FA_SAMPLE:
   "/beevol/home/bentleyd/ref/scer3/scer3.fa"
 MY_REF:
   "/beevol/home/bentleyd/ref/scer3/sgd3Gene.bed"
+# BED region set for multiBamSummary's --scalingFactors computation
+# (CMD_PARAMS.scalingFactors mode "BED-file"). See workflow/rules/03b_results.snake.
+SCALING_REF:
+  "/beevol/home/bentleyd/ref/scer3/sgd3Gene.bed"
 FW_REF:
   "/beevol/home/bentleyd/ref/scer3/sgd3Gene_fw.bed"
 REV_REF:

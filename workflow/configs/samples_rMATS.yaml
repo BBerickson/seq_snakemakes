@@ -35,7 +35,7 @@ GROUPS_COMP:
 # R2R1 use --libType fr-firststrand and --strand MATE2_SENSE for sashimi
 # R1R2 use --libType fr-secondstrand and --strand MATE1_SENSE for sashimi
 CMD_PARAMS:
-    rmats:         " -t paired --readLength 150 --libType fr-firststrand "
+    rmats:         " -t paired --readLength 150 --variable-read-length --libType fr-firststrand "
     min_count:          "20"
     max_FDR:            "0.05"
     max_IncDifference:  "0.1"

@@ -1,5 +1,25 @@
 # ====== Rules for getting overall results =================================
 
+# CMD_PARAMS.scalingFactors holds only the multiBamSummary mode + flags (e.g.
+# "BED-file --centerReads" or "bins --binSize 100 --centerReads") -- the
+# region file itself is genome-specific and lives in a ref yaml's SCALING_REF,
+# not duplicated as a path here. In BED-file mode, this looks up SCALING_REF
+# per-index, but prefers the spike index's SCALING_REF over the index being
+# summarized (dual-IP/split-style setups use one common spike-defined region
+# set to compute a shared scaling factor across both genomes' alignments,
+# including the primary's) -- falls back to the index's own SCALING_REF when
+# there's no spike role (e.g. plain single-genome setups).
+def get_scaling_args(wildcards):
+    mode_args = CMD_PARAMS.get("scalingFactors", "")
+    if not mode_args.strip().startswith("BED-file"):
+        return mode_args
+    spike = ROLE_MAP.get("spike")
+    ref_index = spike if spike else wildcards.index
+    bed = config_indexes.get(ref_index, {}).get("SCALING_REF")
+    if not bed:
+        sys.exit(f"ERROR: CMD_PARAMS.scalingFactors is set to BED-file mode, but index '{ref_index}' has no SCALING_REF in its ref yaml.")
+    return f"{mode_args} --BED {bed}"
+
 # multiBamSummary spikein reads
 rule multiBamSummary:
     input:
@@ -19,7 +39,7 @@ rule multiBamSummary:
         job_name = "{group}_aligned_{index}_multiBamSummary",
         index_sample = "{index}",
         labs = lambda wildcards: " ".join(GROUPS[wildcards.group]),
-        args = lambda wildcards: config["CMD_PARAMS"].get("scalingFactors", ""),
+        args = get_scaling_args,
         script = "workflow/scripts/multiBamSummary.R"
     resources:
         memory   = lambda wildcards, input: memory_estimator(input.bam, 0.2, 5)
@@ -110,14 +130,14 @@ rule gathering_results:
         ),
         extra = [] if NORM != "subsample" else expand(
                     PROJ + "/stats/" + PROJ + "_{index}_subsample_frac.tsv", 
-                    index=INDEXES[0]
+                    index=PRIMARY_INDEX
                 ),
         FC_files = expand( PROJ + "/counts/{sample}_aligned_{index}_featureCounts.tsv",
             sample = SAMS_UNIQ,
-            index  = INDEXES[0]
+            index  = PRIMARY_INDEX
         )
     output:
-        PROJ + "/report/" + PROJ + "_" + INDEXES[0] + "_results.tsv"
+        PROJ + "/report/" + PROJ + "_" + PRIMARY_INDEX + "_results.tsv"
     params:
         job_name = "results",
         indexmap = INDEX_MAP,
@@ -140,20 +160,20 @@ rule gathering_results:
   
 rule create_plots:
     input:
-        PROJ + "/report/" + PROJ + "_" + INDEXES[0] + "_results.tsv"
+        PROJ + "/report/" + PROJ + "_" + PRIMARY_INDEX + "_results.tsv"
     output:
-        report  = SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_qc_analysis.html",
+        report  = SEQ_DATE + "_" + PROJ + "_" + PRIMARY_INDEX + "_qc_analysis.html",
         reportc = PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_pipeline_methods.txt",
-        config  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_config.yaml"),
-        result  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_clean_results.tsv")
+        config  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + PRIMARY_INDEX + "_config.yaml"),
+        result  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + PRIMARY_INDEX + "_clean_results.tsv")
     params:
         job_name  = PROJ + "_qc_html",
         cmdd     = PROJ + "/pipeline",
-        out_file  = SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_qc_analysis",
+        out_file  = SEQ_DATE + "_" + PROJ + "_" + PRIMARY_INDEX + "_qc_analysis",
         script  = "workflow/scripts/multiqc_config.R",
         seqdate = SEQ_DATE,
         mydir   = PROJ,
-        index   = INDEXES[0]
+        index   = PRIMARY_INDEX
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 1, 1) # multiplier, min, max, unit=GB
     threads:

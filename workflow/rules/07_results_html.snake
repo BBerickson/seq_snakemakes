@@ -2,7 +2,7 @@
 
 rule create_plots:
     input:
-        PROJ + "/report/" + PROJ + "_" + INDEXES[0] + "_results.tsv",
+        PROJ + "/report/" + PROJ + "_" + PRIMARY_INDEX + "_results.tsv",
         sorted(list(set([
             PROJ + f"/heatmap/{row['Region']}_{group}_aligned_{row['Index']}__{row['Value']}_norm_{row['Suffix']}_{sense_asense}_heatmap.png"
             for _, row in DF_SAM_NORM.iterrows()
@@ -11,18 +11,18 @@ rule create_plots:
             if str(row['Region']) in HEATMAP_REGIONS  # Explicit whitelist
         ])))
     output:
-        report  = SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_qc_plots_analysis.html",
+        report  = SEQ_DATE + "_" + PROJ + "_" + PRIMARY_INDEX + "_qc_plots_analysis.html",
         reportc = PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_pipeline_methods.txt",
-        config  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_config.yaml"),
-        result  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_clean_results.tsv")
+        config  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + PRIMARY_INDEX + "_config.yaml"),
+        result  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + PRIMARY_INDEX + "_clean_results.tsv")
     params:
         job_name   = PROJ + "_qc_plots_html",
         cmdd     = PROJ + "/pipeline",
-        out_file  = SEQ_DATE + "_" + PROJ + "_" + INDEXES[0] + "_qc_plots_analysis",
+        out_file  = SEQ_DATE + "_" + PROJ + "_" + PRIMARY_INDEX + "_qc_plots_analysis",
         script  = "workflow/scripts/multiqc_config.R",
         seqdate = SEQ_DATE,
         mydir   = PROJ,
-        index   = INDEXES[0]
+        index   = PRIMARY_INDEX
     resources:
         memory   = lambda wildcards, input: memory_estimator(input, 2, 4) # multiplier, min, max, unit=GB
     threads:

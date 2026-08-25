@@ -17,6 +17,10 @@ FA_SAMPLE:
   "/beevol/home/erickson/ref/misc/pp1_PNUTS/pp1_PNUTS2.ref"
 MY_REF:
   ""
+# BED region set for multiBamSummary's --scalingFactors computation
+# (CMD_PARAMS.scalingFactors mode "BED-file"). See workflow/rules/03b_results.snake.
+SCALING_REF:
+  ""
 FW_REF:
   ""
 REV_REF:

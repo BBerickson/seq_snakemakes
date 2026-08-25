@@ -17,6 +17,10 @@ FA_SAMPLE:
   "/beevol/home/bentleyd/ref/hg38/genome/Homo_sapiens.GRCh38.dna.primary_assembly.fa"
 MY_REF:
   "/beevol/home/erickson/Human/CAGE/hg38_gene_HEK293_CAGE_TSS.bed"
+# BED region set for multiBamSummary's --scalingFactors computation
+# (CMD_PARAMS.scalingFactors mode "BED-file"). See workflow/rules/03b_results.snake.
+SCALING_REF:
+  "/beevol/home/erickson/Human/CAGE/hg38_gene_HEK293_CAGE_TSS.bed"
 FW_REF:
   "/beevol/home/erickson/Human/CAGE/hg38_gene_HEK293_CAGE_TSS_fw.bed"
 REV_REF:

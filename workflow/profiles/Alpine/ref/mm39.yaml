@@ -18,6 +18,10 @@ FA_SAMPLE:
   "/projects/berickson@xsede.org/ref/mm39/genome/Mus_musculus.GRCm39.dna.primary_assembly.fa"
 MY_REF:
   "/projects/berickson@xsede.org/ref/mm39/ref_bed/mm39.bed"
+# BED region set for multiBamSummary's --scalingFactors computation
+# (CMD_PARAMS.scalingFactors mode "BED-file"). See workflow/rules/03b_results.snake.
+SCALING_REF:
+  "/projects/berickson@xsede.org/ref/mm39/ref_bed/mm39.bed"
 FW_REF:
   "/projects/berickson@xsede.org/ref/mm39/ref_bed/mm39_pos.bed"
 REV_REF:

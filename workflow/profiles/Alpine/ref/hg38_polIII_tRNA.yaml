@@ -1,0 +1,36 @@
+#===== Config file for select hg38 pol III genome, tRNA-only gene list ===================
+# Gene-list variant of hg38_polIII.yaml -- same alignment index (INDEX_PATH/
+# INDEX_MAP/INDEXES unchanged), only MY_REF/FW_REF/REV_REF point at tRNA loci
+# instead of the full polIII-filtered region set. See the Bodhi profile's
+# hg38_polIII_tRNA.yaml for why plain hg38's tRNA bed files are safe to reuse
+# here (same masked-FASTA coordinate system as hg38_polIII.yaml) -- NOTE this
+# was verified directly against the Bodhi/beevol filesystem only; the paths
+# below mirror Alpine's existing hg38_polIII.yaml/hg38_tRNA.yaml conventions
+# but weren't independently checked on the Alpine filesystem.
+
+GENELIST:
+    "polIII_tRNA"
+INDEX_PATH:
+  "/projects/berickson@xsede.org/ref/hg38/PolIII/"
+INDEX_MAP:
+  "hg38_polIII"
+INDEXES:
+  "hg38_polIII"
+MASK:
+  ""
+GTF:
+  "/projects/berickson@xsede.org/ref/hg38/base_ref/hg38_chrfix_GRCh38.113.gtf"
+FA_SAMPLE:
+  "/projects/berickson@xsede.org/ref/hg38/PolIII/CTD_Ser5_polIII_fitered_slop200.fa"
+MY_REF:
+  "/projects/berickson@xsede.org/ref/hg38/base_ref/hg38-tRNAs.bed"
+# BED region set for multiBamSummary's --scalingFactors computation
+# (CMD_PARAMS.scalingFactors mode "BED-file"). See workflow/rules/03b_results.snake.
+SCALING_REF:
+  "/projects/berickson@xsede.org/ref/hg38/base_ref/hg38-tRNAs.bed"
+FW_REF:
+  "/projects/berickson@xsede.org/ref/hg38/base_ref/hg38-tRNAs_pos.bed"
+REV_REF:
+  "/projects/berickson@xsede.org/ref/hg38/base_ref/hg38-tRNAs_neg.bed"
+PI_REF:
+  ""

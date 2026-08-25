@@ -11,7 +11,7 @@ rule fragment_size:
         pic  = temp(PROJ + "/stats/{sample}_aligned_{index}_fragmentSize.png")
     params:
         job_name = "{sample}_fragment_size_{index}",
-        labels   = lambda wildcards: wildcards.sample if "spike" not in wildcards.index else f"{wildcards.sample}_spike",
+        labels   = lambda wildcards: f"{wildcards.sample}_spike" if INDEX_ROLE.get(wildcards.index) == "spike" else wildcards.sample,
         script   = "workflow/scripts/read_size_png.R",
         args     = lambda wildcards: CMD_PARAMS["fragment_size"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
         is_paired = lambda wildcards: PAIREDMAP[wildcards.sample]

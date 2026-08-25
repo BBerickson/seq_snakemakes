@@ -14,33 +14,43 @@ SEQ_DATE:
 RAW_DATA:
     - "/beevol/home/erickson/fastqs/231222_Novogene"
 
-# Genome to use for analysis
-# * The specified genome must have a config file present in workflow/ref
-GENOME:
-    "hg38"
- 
+# Alignment mode and index(es) to use for analysis
+# * ALIGNMENT_MODE: single 
+# * Each INDEXES entry's name must match a ref yaml file present in workflow/ref
+ALIGNMENT_MODE:
+    "single"
+INDEXES:
+  - name: "hg38"
+
+# GENELISTS: only used by the downstream matrix pipeline (Stranded_matrix.smk /
+# UnStranded_matrix.smk / bidirectional_matrix.smk) -- ignored at this
+# alignment stage. If not set, matrix files are built for just the primary
+# index's own gene list. If set, matrix files are built ONLY for the ref
+# yaml(s) listed here (not also the primary's own, unless you list it too).
+# Every entry must be a ref yaml name that resolves to the SAME real
+# alignment index as the primary INDEXES entry above (see workflow/ref/readme.txt).
+# GENELISTS:
+#   - hg38
+#   - hg38_tRNA
+
 # The sample names must match the beginning of a fastq file in one of the
 # directories listed under RAW_DATA. If the sample name
 # matches multiple fastqs, an error will be thrown.
-# If samples have a input pair with a spikeIN list together
-# subsampling works on samples within a group
 # nicknames will be used for bw and matrix/plots names
 #
 # SAMPLES:
 #     SECTION-1:
-#         SAMPLING-GROUP-1: # subsample norm example
+#         GROUP-1: # subsample norm example
 #             sample_nickname-1:
 #                  - "fastq_sample_1_prefix"
 #             sample_nickname-2:
 #                  - "fastq_sample_2_prefix"
 # 
-#         SAMPLING-GROUP-2: # with input for OR norm example
+#         GROUP-2: 
 #             sample_nickname-3:
 #                  - "fastq_sample_3_prefix"
-#                  - "fastq_input_3_prefix"
 #             sample_nickname-4:
 #                  - "fastq_sample_4_prefix"
-#                  - "fastq_input_4_prefix"
 # 
 #     SECTION-2:
 #         ...
@@ -104,7 +114,7 @@ CMD_PARAMS:
     multimap:     ""  # " -k 1 " # all but -k n multi-mapper from will be randomly filtered out.
     samtools:      " -bF4q10 "
     bamCoverage:   " --binSize 1 --skipNonCoveredRegions --Offset -1 " # --Offset -1 = last bp --Offset 1 = first bp, 
-    scalingFactors:         "" # " BED-file --BED /beevol/home/erickson/ref/hg38_p14/PolIII/polIII_fitered_slop200.bed " or " bins --binSize 100 "
+    scalingFactors: "" # " BED-file --centerReads " (set SCALING_REF in the ref yaml) or " bins --binSize 100 "
     fragment_size: 
       paired:  " --maxFragmentLength 1000 "
       single:  " bin=10 max=1010 "
@@ -116,12 +126,12 @@ USER:
   "User7"
 
 # Norm sample bw and matix files,
-# with "RPKM","CPM","BPM","RPGC" (spike-in will be CPM)
-# Or with scaleFactor from count file i.e. "chrM", 
-# scaleFactor within a group for bed file or bins, used: "scalefactor" 
-#     first aligned index used to norm second aligned index
-# Or "subsample" : make bw and matix files from sub-sampled bam files (paired groups)
-NORM:
+# with "RPKM","CPM","BPM","RPGC" 
+# Or with scaleFactor from featureCounts file i.e. "chrM" "protein_coding", 
+# Group norm bw and matix files
+# scaleFactor within a group for bed file or bins, use: "scalefactor"
+# subsampling: make bw and matix files from sub-sampled bam files within each group, use: "subsample"
+NORM: # more than one can be set at at time
   - "CPM"
   - "subsample"
   
@@ -129,7 +139,7 @@ NORM:
 # it will only align read1, read2 is only ever used for pre processing
 # (mapping is always single-end here; there is no PAIRED option to set)
 ORIENTATION:
-    "R1R2" # R2R1
+    "R1R2" # R2R1, R1R2
 
 # which matrix type(s) to make
 # deeptools options set in Stranded_matrix.yaml

@@ -13,7 +13,7 @@ import pysam
 # 2024-12-18 added --filter_duplicates
 # 2025-xx-xx modernized for Python 3.10+ and R 4+
 
-__version__ = "1.2.0"
+__version__ = "1.2.1"
 
 
 def get_version() -> str:
@@ -364,6 +364,35 @@ def read_gtf(f: str, c: str, filter_duplicates: bool = False):
         return transcripts, exons, genes
 
 
+def shrink_point(p: int, intersected_introns) -> float:
+    """Map a single genomic coordinate through the same length**0.7 intron
+    compression used by shrink_density()/shrink_junctions(), so annotation
+    coordinates (exon/transcript boundaries from the GTF) land on exactly
+    the same shrunk x-axis as the read-coverage/junction track.
+
+    Introns from the read data don't necessarily match a given transcript's
+    own exon boundaries — a junction observed in one isoform can partially
+    or fully overlap an exon that another overlapping isoform retains (e.g.
+    a skipped/poison exon, or two genes' annotations interleaved). Handle
+    that by prorating the shift for whichever intron straddles p, using the
+    same compression law as a full intron.
+    """
+    shift = 0.0
+    for a, b in intersected_introns:
+        if p <= a:
+            break
+        l = b - a
+        full_shift = l - int(l ** 0.7)
+        if p >= b:
+            shift += full_shift
+        else:
+            # p falls strictly inside this intron: prorate by how far into
+            # it p sits, rather than applying the intron's full shift.
+            shift += full_shift * (p - a) / l
+            break
+    return int(round(p - shift))
+
+
 def make_introns(transcripts, exons, intersected_introns=None) -> dict:
     new_transcripts = copy.deepcopy(transcripts)
     new_exons = copy.deepcopy(exons)
@@ -371,25 +400,19 @@ def make_introns(transcripts, exons, intersected_introns=None) -> dict:
 
     if intersected_introns:
         for tx, (tx_start, tx_end, strand) in new_transcripts.items():
-            total_shift = 0
-            for a, b in intersected_introns:
-                l = b - a
-                shift = l - int(l ** 0.7)
-                total_shift += shift
-                for i, (exon_start, exon_end, _strand) in enumerate(exons.get(tx, [])):
-                    new_exon_start, new_exon_end = new_exons[tx][i][:2]
-                    if a < exon_start:
-                        if b > exon_end:
-                            if i == len(exons[tx]) - 1:
-                                total_shift = total_shift - shift + (exon_start - a) * (1 - int(l ** -0.3))
-                            shift = (exon_start - a) * (1 - int(l ** -0.3))
-                            new_exon_end = new_exons[tx][i][1] - shift
-                        new_exon_start = new_exons[tx][i][0] - shift
-                    if b <= exon_end:
-                        new_exon_end = new_exons[tx][i][1] - shift
-                    new_exons[tx][i] = (new_exon_start, new_exon_end, _strand)
-            tx_start = min(tx_start, sorted(new_exons.get(tx, [[sys.maxsize]]))[0][0])
-            new_transcripts[tx] = (tx_start, tx_end - total_shift, strand)
+            new_transcripts[tx] = (
+                shrink_point(tx_start, intersected_introns),
+                shrink_point(tx_end, intersected_introns),
+                strand,
+            )
+            new_exons[tx] = [
+                (
+                    shrink_point(exon_start, intersected_introns),
+                    shrink_point(exon_end, intersected_introns),
+                    exon_strand,
+                )
+                for exon_start, exon_end, exon_strand in exons.get(tx, [])
+            ]
 
     for tx, (tx_start, tx_end, strand) in new_transcripts.items():
         intron_start = tx_start
@@ -521,6 +544,11 @@ def setup_R_script(h: float, w: float, b: float, label_dict: dict) -> str:
     suppressPackageStartupMessages(library(data.table))
     suppressPackageStartupMessages(library(gtable))
     suppressPackageStartupMessages(library(labeling))
+    if (!requireNamespace("ggrepel", quietly=TRUE)) {
+        stop("Package 'ggrepel' is required to keep junction-count labels from ",
+             "overlapping. Install it with install.packages('ggrepel').")
+    }
+    suppressPackageStartupMessages(library(ggrepel))
 
     scale_lwd = function(r) {
         lmin = 0.1
@@ -806,6 +834,7 @@ pdf(NULL)   # suppress the blank PDF that ggplotGrob can produce
 <<coord_dict_block>>
 
 density_grobs = list()
+label_widths = list()
 
 for (bam_index in 1:length(density_list)) {
 
@@ -873,6 +902,10 @@ for (bam_index in 1:length(density_list)) {
         row_i = 1:nrow(junctions)
     }
 
+    label_x = c()
+    label_y = c()
+    label_text = c()
+
     for (i in row_i) {
         j_tot_counts = sum(junctions[['count']])
         j = as.numeric(junctions[i, 1:5])
@@ -903,52 +936,80 @@ for (bam_index in 1:length(density_list)) {
             gp = gp + annotation_custom(curve, xmid, j[2], j[4], ymid)
         }
 
-        gp = gp + annotate("label", x=xmid, y=ymid,
-                           label=as.character(junctions[i, 6]),
+        label_x = c(label_x, xmid)
+        label_y = c(label_y, ymid)
+        label_text = c(label_text, as.character(junctions[i, 6]))
+    }
+
+    if (length(label_x) > 0) {
+        label_df = data.frame(x=label_x, y=label_y, label=label_text)
+        gp = gp + geom_label_repel(
+                           data=label_df, mapping=aes(x=x, y=y, label=label),
                            vjust=0.5, hjust=0.5,
                            label.padding=unit(0.01, "lines"),
-                           label.size=NA, size=(base_size * 0.35))
+                           label.size=NA,
+                           size=(base_size * 0.35),
+                           seed=1, max.overlaps=Inf,
+                           box.padding=0.15, point.padding=0,
+                           min.segment.length=0, segment.size=0.3,
+                           segment.color="grey50")
     }
 
     # ---- Grob assembly ----
     gpGrob = ggplotGrob(gp)
     gpGrob$layout$clip[gpGrob$layout$name == "panel"] <- "off"
 
+    # Locate the y-axis title / tick-text columns by NAME rather than a
+    # hardcoded index. ggplotGrob()'s internal gtable column layout has
+    # changed across ggplot2 versions (e.g. ggplot2 4.x inserts extra
+    # guide-box columns), so a fixed widths[2]/widths[3] silently stops
+    # pointing at the real label columns and the stacked panels drift out
+    # of horizontal alignment with each other.
+    ttl_col = gpGrob$layout$l[gpGrob$layout$name == "ylab-l"][1]
+    txt_col = gpGrob$layout$l[gpGrob$layout$name == "axis-l"][1]
+    own_label_width = gpGrob$widths[ttl_col] + gpGrob$widths[txt_col]
+
     if (bam_index == 1) {
-        # ggplot2 >= 3.4 stable grob positions (no vs offset needed)
-        maxWidth     = gpGrob$widths[2] + gpGrob$widths[3]
-        maxYtextWidth = gpGrob$widths[3]
-        xaxisGrob    = gtable_filter(gpGrob, "axis-b", trim=FALSE)
+        maxWidth          = own_label_width
+        xaxisGrob         = gtable_filter(gpGrob, "axis-b", trim=FALSE)
         xaxisGrob$heights[8] = gpGrob$heights[1]
-        x.axis.height = gpGrob$heights[7] + gpGrob$heights[1]
+        x.axis.height     = gpGrob$heights[7] + gpGrob$heights[1]
+        xaxis_label_width = own_label_width
     }
 
     # Remove x axis from density plots (added once after the loop)
     kept_names = gpGrob$layout$name[gpGrob$layout$name != "axis-b"]
     gpGrob = gtable_filter(gpGrob, paste(kept_names, sep="", collapse="|"), trim=FALSE)
 
-    maxWidth      = grid::unit.pmax(maxWidth,      gpGrob$widths[2] + gpGrob$widths[3])
-    maxYtextWidth = grid::unit.pmax(maxYtextWidth, gpGrob$widths[3])
+    maxWidth = grid::unit.pmax(maxWidth, own_label_width)
     density_grobs[[id]] = gpGrob
+    label_widths[[id]]  = own_label_width
 }
 
 # Append x-axis grob, then optional annotation grob
 density_grobs[["xaxis"]] = xaxisGrob
+label_widths[["xaxis"]]  = xaxis_label_width
 
 if (<<has_gtf>> == 1) {
     gtfGrob = ggplotGrob(gtfp)
-    maxWidth = grid::unit.pmax(maxWidth, gtfGrob$widths[2] + gtfGrob$widths[3])
+    gtf_ttl_col = gtfGrob$layout$l[gtfGrob$layout$name == "ylab-l"][1]
+    gtf_txt_col = gtfGrob$layout$l[gtfGrob$layout$name == "axis-l"][1]
+    gtf_label_width = gtfGrob$widths[gtf_ttl_col] + gtfGrob$widths[gtf_txt_col]
+    maxWidth = grid::unit.pmax(maxWidth, gtf_label_width)
     density_grobs[['gtf']] = gtfGrob
+    label_widths[['gtf']]  = gtf_label_width
 }
 
-# Align all grob widths
+# Align all grob widths: pad each panel's left margin so the y-axis label
+# area (title + tick text) totals the same overall width everywhere. This
+# only inflates the outer margin unit — it never shrinks/clips the real
+# label text the way overwriting the text column's width used to.
 for (id in names(density_grobs)) {
     density_grobs[[id]]$widths[1] <- (
         density_grobs[[id]]$widths[1] +
         maxWidth -
-        (density_grobs[[id]]$widths[2] + maxYtextWidth)
+        label_widths[[id]]
     )
-    density_grobs[[id]]$widths[3] <- maxYtextWidth
 }
 
 heights = unit.c(

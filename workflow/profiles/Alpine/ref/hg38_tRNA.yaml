@@ -20,6 +20,10 @@ FA_SAMPLE:
   "/projects/berickson@xsede.org/ref/hg38/genome/Homo_sapiens.GRCh38.dna.primary_assembly.fa"
 MY_REF:
   "/projects/berickson@xsede.org/ref/hg38/base_ref/hg38-tRNAs.bed"
+# BED region set for multiBamSummary's --scalingFactors computation
+# (CMD_PARAMS.scalingFactors mode "BED-file"). See workflow/rules/03b_results.snake.
+SCALING_REF:
+  "/projects/berickson@xsede.org/ref/hg38/base_ref/hg38-tRNAs.bed"
 FW_REF:
   "/projects/berickson@xsede.org/ref/hg38/base_ref/hg38-tRNAs_pos.bed"
 REV_REF:

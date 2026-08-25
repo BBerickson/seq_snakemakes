@@ -1,16 +1,18 @@
 # ====== Rules for making standard matrix files =================================
 
 def get_fw_ref(wildcards):
+    yaml_data = REF_BY_REGION_COVARG[(wildcards.region, wildcards.covarg)]
     if wildcards.sense_asense == "sense":
-        return FW_PI_REF if wildcards.region == "PI" else FW_REF
+        return yaml_data.get("FW_PI_REF") if wildcards.region == "PI" else yaml_data.get("FW_REF")
     else:
-        return REV_PI_REF if wildcards.region == "PI" else REV_REF
+        return yaml_data.get("REV_PI_REF") if wildcards.region == "PI" else yaml_data.get("REV_REF")
 
 def get_rev_ref(wildcards):
+    yaml_data = REF_BY_REGION_COVARG[(wildcards.region, wildcards.covarg)]
     if wildcards.sense_asense == "sense":
-        return REV_PI_REF if wildcards.region == "PI" else REV_REF
+        return yaml_data.get("REV_PI_REF") if wildcards.region == "PI" else yaml_data.get("REV_REF")
     else:
-        return FW_PI_REF if wildcards.region == "PI" else FW_REF
+        return yaml_data.get("FW_PI_REF") if wildcards.region == "PI" else yaml_data.get("FW_REF")
         
 # stranded sense matrix files
 rule create_strand_matrix:
@@ -26,10 +28,10 @@ rule create_strand_matrix:
         cmd      = PROJ + "/pipeline/12_computeMatrix_stranded.cmd",
         cmdd     = PROJ + "/pipeline",
         args = lambda wildcards: (
-            CMD_PARAMS[f"region{wildcards.region}"] + ("--blackListFileName " + config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else "") +
+            CMD_PARAMS[f"region{wildcards.region}"] + ("--blackListFileName " + MASK if CMD_PARAMS.get("bamCoverageBL",False) and MASK else "") +
             (" --scale -1 " if wildcards.sense_asense == "anti" else "")
         ),
-        mask_path = config["MASK"] if CMD_PARAMS.get("bamCoverageBL",False) and config.get("MASK") else "",
+        mask_path = MASK if CMD_PARAMS.get("bamCoverageBL",False) and MASK else "",
         fw_ref  = get_fw_ref,
         rev_ref = get_rev_ref
     resources:

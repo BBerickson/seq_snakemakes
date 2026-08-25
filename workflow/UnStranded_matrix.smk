@@ -14,39 +14,25 @@ from pathlib import Path
 include: workflow.source_path("scripts/funs.py")
 
 # ------------------------------------------------------------------------------
-# Load main genome config
+# Load index config
 # ------------------------------------------------------------------------------
 
-GENOME = config["GENOME"]
-GENOME_CONFIG = Path("workflow/ref") / f"{GENOME}.yaml"
+INDEXES, config_indexes, ROLE_MAP, ALIGNMENT_MODE, PRIMARY_INDEX, INDEX_PATH, INDEX_MAP = (
+    load_index_config(config)
+)
+# MASK is a bamCoverage/bigwig-level concern -- bigwigs don't vary by matrix
+# region subset, so MASK always comes from the primary INDEXES entry's own
+# yaml, never from a GENELISTS variant below.
+MASK        = config_indexes[PRIMARY_INDEX].get("MASK")
+SPIKE_INDEX = ROLE_MAP.get("spike")   # None for single mode
+INDEXES     = [PRIMARY_INDEX]         # matrix pipelines stay architecturally single-genome downstream
 
-if not GENOME_CONFIG.exists():
-    sys.exit(f"ERROR: {GENOME} is not a valid GENOME selection.")
-
-# Load the main config file into Snakemake's config dictionary
-configfile: str(GENOME_CONFIG)
-
-# ------------------------------------------------------------------------------
-# Load additional genome-specific configs manually
-# ------------------------------------------------------------------------------
-
-raw_indexes = config['INDEXES']
-INDEXES_FIRST = [raw_indexes] if isinstance(raw_indexes, str) else [raw_indexes[0]]
-INDEXES_LAST = [raw_indexes] if isinstance(raw_indexes, str) else [raw_indexes[-1]]
-
-# Paths to additional config files
-if config.get("GENELIST"):
-    GENOME_CONFIG1 = GENOME_CONFIG
-else:
-    GENOME_CONFIG1 = Path("workflow/ref") / f"{INDEXES_FIRST[0]}.yaml"
-
-# Validate existence
-if not GENOME_CONFIG1.exists():
-    sys.exit(f"ERROR: Config file not found for index '{INDEXES_FIRST[0]}'. Expected at: {GENOME_CONFIG1}")
-
-# Load additional configs
-with open(GENOME_CONFIG1) as f:
-    config1 = yaml.safe_load(f)
+# GENELISTS: one or more gene-list variants of the primary index to build
+# matrix files for in this one run (e.g. whole-genome + tRNA-only), keyed by
+# each variant's own GENELIST tag. Defaults to just the primary index's own
+# yaml when samples.yaml has no GENELISTS -- identical to today's
+# single-genelist behavior.
+GENELIST_VARIANTS = load_genelists(config, config_indexes, PRIMARY_INDEX)
 
 # ------------------------------------------------------------------------------
 # Assign parameters from configs
@@ -71,8 +57,6 @@ PROJ         = config.get("PROJ")
 RAW_DATA     = config.get("RAW_DATA")
 ALL_SAMPLES  = config.get("SAMPLES")
 SEQ_DATE     = config.get("SEQ_DATE")
-INDEX_PATH   = config.get("INDEX_PATH")
-INDEX_MAP    = config.get("INDEX_MAP")
 CHROM_SIZES  = config.get("CHROM_SIZES")
 NORM         = config.get("NORM")
 CMD_PARAMS   = config.get("CMD_PARAMS")
@@ -86,20 +70,13 @@ USER         = config.get("USER")
 if not SENSE_ASENSE:
     SENSE_ASENSE = [""]  # Empty string for no sense/antisense distinction
 
-# From additional configs
-raw_indexes = config1['INDEXES']
-INDEXES     = [raw_indexes] if isinstance(raw_indexes, str) else [raw_indexes[0]]
-MY_REF      = config1.get("MY_REF")
-PI_REF      = config1.get("PI_REF")
-GENELIST = config1.get("GENELIST") or ""
-
 if START_FROM_BW:
     BW_DIR = PROJ + "/raw_bw"
     os.makedirs(BW_DIR, exist_ok = True)
 
 # Simplify ALL_SAMPLES dictionary
 SAMPLES, SAMPIN, GROUPS, NORMMAP, PAIREDMAP = process_samples(
-    ALL_SAMPLES, INDEXES, NORM, ORIENTATION, paired=PAIRED
+    ALL_SAMPLES, PRIMARY_INDEX, [], NORM, ORIENTATION, paired=PAIRED
 )
 
 # make file suffix from bamCoverage settings and NORM
@@ -116,9 +93,7 @@ for sample, norm_list in NORMMAP.items():
     NORMMAP[sample] = updated_list
 
 # add scalefactor index info
-for key in NORMMAP:
-    NORMMAP[key] = [(index, norm, f'scalefactor_{INDEXES_LAST[0]}' if suffix.lower() == 'scalefactor' else suffix)
-                    for index, norm, suffix in NORMMAP[key]]
+NORMMAP = tag_scalefactor_suffix(NORMMAP, SPIKE_INDEX)
 
 # unpack samples and groups
 SAMS = [[y, x] for y in SAMPLES for x in SAMPLES[y]]
@@ -150,11 +125,18 @@ HEATMAP_REGIONS = ["543","5","5L","3"]
 
 COLS_DICT = _get_colors(NAMS_UNIQ, COLORS)
 
-COVARGS = _get_all_matrixtypes(REGIONS,CMD_PARAMS,GENELIST)
-GENELIST = config1.get("GENELIST") or "all"
-
-# Create the Cartesian product
-product = [(s, i, v) for s in NAMS_UNIQ for i, v in zip(REGIONS, COVARGS)]
+# Build region x covarg combos for every gene-list variant of the primary
+# index, and a (region, covarg) -> yaml_data lookup so the matrix/heatmap
+# rules can find the right MY_REF/PI_REF for whichever variant produced a
+# given covarg (each variant's GENELIST tag keeps its covarg strings
+# distinct -- see load_genelists's uniqueness check).
+REF_BY_REGION_COVARG = {}
+product = []
+for genelist_tag, yaml_data in GENELIST_VARIANTS.items():
+    covargs = _get_all_matrixtypes(REGIONS, CMD_PARAMS, genelist_tag)
+    for region, covarg in zip(REGIONS, covargs):
+        REF_BY_REGION_COVARG[(region, covarg)] = yaml_data
+    product += [(s, i, v) for s in NAMS_UNIQ for i, v in zip(REGIONS, covargs)]
 
 # Convert to DataFrame
 REGIONS_COVARGS = pd.DataFrame(product, columns=['Newnam', 'Region', 'Value'])
@@ -177,6 +159,16 @@ DF_SAM_NORM.loc[mask, "Suffix"] = [
     for suffix, norm in zip(DF_SAM_NORM.loc[mask, "Suffix"], DF_SAM_NORM.loc[mask, "Norm"])
 ]
 DF_SAM_NORM.loc[mask, "Norm"] = "none"
+
+# Keep SAM_NORM in sync with the PI-relabeled DF_SAM_NORM above -- 04a_bamCoverage.snake's
+# embedded scale-factor lookup reads params.sam_norm (this list), and needs the
+# PI-region "none"-relabeled rows to exist here too, or it can't find a matching
+# row for a PI-region bigwig's suffix and crashes.
+SAM_NORM = (
+    DF_SAM_NORM[['Sample', 'Newnam', 'Index', 'Norm', 'Suffix', 'Bam_dir']]
+    .drop_duplicates()
+    .values.tolist()
+)
 
 print(DF_SAM_NORM.to_string(index=False))
 
@@ -229,7 +221,7 @@ rule all:
           # qc with heatmap, cluster, profile plots (needs the alignment
           # pipeline's results.tsv, not available when starting from bigwigs)
           [] if START_FROM_BW or config.get("skip_matrix_html_report") else [
-              expand(SEQ_DATE + "_" + PROJ + "_{index}" + "_qc_plots_analysis.html", index=INDEXES[0])
+              expand(SEQ_DATE + "_" + PROJ + "_{index}" + "_qc_plots_analysis.html", index=PRIMARY_INDEX)
           ]
         ]
 

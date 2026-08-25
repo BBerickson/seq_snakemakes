@@ -1,8 +1,8 @@
 # ====== Rules for getting bw files =================================
 
 
-# stranded bw files
-rule get_bw:
+# bam files
+rule get_bams:
     input:
         lambda wildcards: _get_bams(wildcards.sample, RAW_DATA)
     output:
@@ -32,7 +32,7 @@ rule dummy_results:
             sample = SAMS_UNIQ
         )
     output:
-        check_point = PROJ + "/report/" + PROJ + "_results.tsv"
+        check_point = PROJ + "/report/" + PROJ + "_" + PRIMARY_INDEX + "_results.tsv"
     params:
         job_name = "dummy_results",
     resources:

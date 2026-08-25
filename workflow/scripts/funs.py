@@ -2,11 +2,14 @@
 
 import os
 import re
+import sys
 import gzip
 import glob
+import yaml
 import pandas as pd
 import itertools
 from itertools import cycle
+from pathlib import Path
 import subprocess
 import fcntl
 
@@ -175,11 +178,135 @@ def _coerce_bool(value):
         return value.strip().lower() == "true"
     return bool(value)
 
+_VALID_ALIGNMENT_MODES = {"single", "split", "sequential"}
+
+# Parse config['INDEXES'] ({name, role} list) and config['ALIGNMENT_MODE'],
+# loading each named index's own ref yaml (workflow/ref/<name>.yaml). This
+# replaces the old GENOME/combo-yaml/configfile mechanism -- every index
+# relationship (single genome, split from one combined index, sequential
+# two-pass) is now explicit instead of inferred from list position or which
+# pipeline file is running.
+#
+# 'name' is only a lookup key into workflow/ref/ -- it can be a gene-list
+# variant yaml (e.g. "hg38_tRNA") that shares its real alignment index with
+# another yaml (e.g. "hg38"): same bam/bw files, different MASK/MY_REF/
+# region files. The actual index label used in bam/bw/matrix filenames (and
+# everywhere config_indexes/INDEXES/ROLE_MAP are used downstream) comes from
+# that yaml's own INDEXES: field, not from 'name' -- so pointing at a variant
+# yaml never breaks the lookup of an already-existing alignment's files.
+def load_index_config(config, ref_dir="workflow/ref", ref_suffix=""):
+    ALIGNMENT_MODE = config.get("ALIGNMENT_MODE")
+    if ALIGNMENT_MODE not in _VALID_ALIGNMENT_MODES:
+        sys.exit(f"ERROR: ALIGNMENT_MODE must be one of {sorted(_VALID_ALIGNMENT_MODES)}, got {ALIGNMENT_MODE!r}.")
+
+    raw_indexes = config.get("INDEXES")
+    if not isinstance(raw_indexes, list) or not raw_indexes:
+        sys.exit("ERROR: INDEXES must be a non-empty list of {name, role} entries.")
+
+    INDEXES, config_indexes, ROLE_MAP = [], {}, {}
+    for entry in raw_indexes:
+        name = entry.get("name")
+        role = entry.get("role", "primary" if len(raw_indexes) == 1 else None)
+        if not name:
+            sys.exit(f"ERROR: INDEXES entry missing 'name': {entry}")
+        if role is None:
+            sys.exit(f"ERROR: INDEXES entry for '{name}' missing 'role' (required when more than one index is listed).")
+        path = Path(ref_dir) / f"{name}{ref_suffix}.yaml"
+        if not path.exists():
+            sys.exit(f"ERROR: {name} is not a valid genome index (expected {path}).")
+        with open(path) as f:
+            yaml_data = yaml.safe_load(f)
+
+        real_index = yaml_data.get("INDEXES", name)
+        if isinstance(real_index, list):
+            sys.exit(f"ERROR: {path} has a list-valued INDEXES (old combo yaml?) -- index relationships now belong in samples.yaml's INDEXES list, not in a ref yaml.")
+        if real_index in config_indexes:
+            sys.exit(f"ERROR: '{name}' resolves to the same real index ('{real_index}') as another INDEXES entry.")
+
+        config_indexes[real_index] = yaml_data
+        if role in ROLE_MAP:
+            sys.exit(f"ERROR: role '{role}' assigned to more than one index ({ROLE_MAP[role]}, {real_index}).")
+        INDEXES.append(real_index)
+        ROLE_MAP[role] = real_index
+
+    if "primary" not in ROLE_MAP:
+        sys.exit("ERROR: INDEXES must include exactly one entry with role: primary.")
+    if ALIGNMENT_MODE == "single" and len(INDEXES) != 1:
+        sys.exit("ERROR: ALIGNMENT_MODE 'single' requires exactly 1 INDEXES entry.")
+    if ALIGNMENT_MODE in ("split", "sequential") and (len(INDEXES) != 2 or "spike" not in ROLE_MAP):
+        sys.exit(f"ERROR: ALIGNMENT_MODE '{ALIGNMENT_MODE}' requires exactly 2 INDEXES entries with roles primary and spike.")
+
+    PRIMARY_INDEX = ROLE_MAP["primary"]
+
+    if ALIGNMENT_MODE == "split":
+        INDEX_PATH, INDEX_MAP = config.get("INDEX_PATH"), config.get("INDEX_MAP")
+        if not INDEX_PATH or not INDEX_MAP:
+            sys.exit("ERROR: ALIGNMENT_MODE 'split' requires top-level INDEX_PATH and INDEX_MAP in samples.yaml (the pre-built combined index location).")
+    else:
+        INDEX_PATH = config_indexes[PRIMARY_INDEX].get("INDEX_PATH")
+        INDEX_MAP = config_indexes[PRIMARY_INDEX].get("INDEX_MAP")
+
+    return INDEXES, config_indexes, ROLE_MAP, ALIGNMENT_MODE, PRIMARY_INDEX, INDEX_PATH, INDEX_MAP
+
+
+# Load one or more gene-list variants of the PRIMARY index only (Pattern-B
+# matrix pipelines). Each name in config['GENELISTS'] is a ref yaml that must
+# resolve to the SAME real alignment index as primary_index (same bam/bw
+# files) but can supply its own MASK/MY_REF/region files and GENELIST tag --
+# e.g. ["hg38", "hg38_tRNA"] builds both whole-genome and tRNA-only matrix
+# files from one alignment in a single run. Returns an ordered
+# {genelist_tag: yaml_data} dict, keyed by each variant's own GENELIST tag
+# ("" when a variant has none -- same sentinel _get_all_matrixtypes expects).
+# When GENELISTS is absent, returns just the primary index's own already-
+# loaded yaml, identical to today's single-genelist behavior.
+def load_genelists(config, config_indexes, primary_index, ref_dir="workflow/ref"):
+    names = config.get("GENELISTS")
+    if not names:
+        yaml_data = config_indexes[primary_index]
+        return {yaml_data.get("GENELIST") or "": yaml_data}
+
+    genelists = {}
+    for name in names:
+        path = Path(ref_dir) / f"{name}.yaml"
+        if not path.exists():
+            sys.exit(f"ERROR: {name} is not a valid GENELISTS entry (expected {path}).")
+        with open(path) as f:
+            yaml_data = yaml.safe_load(f)
+
+        real_index = yaml_data.get("INDEXES", name)
+        if isinstance(real_index, list):
+            sys.exit(f"ERROR: {path} has a list-valued INDEXES -- not a valid GENELISTS entry.")
+        if real_index != primary_index:
+            sys.exit(f"ERROR: GENELISTS entry '{name}' resolves to index '{real_index}', but the primary index is '{primary_index}'. Every GENELISTS entry must share the primary index's alignment.")
+
+        tag = yaml_data.get("GENELIST") or ""
+        if tag in genelists:
+            sys.exit(f"ERROR: GENELISTS entry '{name}' and another entry both resolve to GENELIST {tag or '(none)'!r} -- tags must be unique since they're used in output filenames.")
+        genelists[tag] = yaml_data
+
+    return genelists
+
+
+# Tag each sample's 'scalefactor' norm entry with the spike index it should
+# be computed from (f'scalefactor_{spike_index}'), so downstream lookups
+# (_get_norm) never have to guess the index from a CPM row. No-op for
+# single-mode pipelines (spike_index is None).
+def tag_scalefactor_suffix(normmap, spike_index):
+    if not spike_index:
+        return normmap
+    for key in normmap:
+        normmap[key] = [
+            (index, norm, f"scalefactor_{spike_index}" if suffix.lower() == "scalefactor" else suffix)
+            for index, norm, suffix in normmap[key]
+        ]
+    return normmap
+
+
 # Simplify ALL_SAMPLES dictionary
 # ALL_SAMPLES = {'SECTION-1':{'SAMPLING-GROUP-1':{newname1:[fastq1],newname2:[fastq2]}}} or {'SECTION-1':{'SAMPLING-GROUP-1':{newname1:[fastq1,input1],newname2:[fastq2,input2]}}}
 # collapse sections and combine subsampling groups
 # paired=None falls back to the old orientation-inferred pairing
-def process_samples(all_samples, index_list, norm, orientations, paired=None):
+def process_samples(all_samples, primary_index, other_indexes, norm, orientations, paired=None):
     SAMPLES = {}    # {sample_name: [fastq]}
     SAMPIN = {}     # {sample_name: [fastq, input_file]}
     GROUPS = {}     # {pair_name: [fastq]}
@@ -207,10 +334,10 @@ def process_samples(all_samples, index_list, norm, orientations, paired=None):
         for sample_name in all_sample_names
     }
 
-    # First index paired with each norm, remaining indexes get CPM
+    # Primary index paired with each norm, remaining (spike) indexes get CPM
     index_norm_pairs = (
-        [(index_list[0], n) for n in norm] +
-        [(idx, "CPM") for idx in index_list[1:]]
+        [(primary_index, n) for n in norm] +
+        [(idx, "CPM") for idx in other_indexes]
     )
 
     for section, pairs in all_samples.items():
@@ -397,24 +524,12 @@ def _get_norm(df, newnam, suffix, index, norm_files):
     sample = row.iloc[0]['Sample']
     norm = row.iloc[0]['Norm']
 
-    # For scalefactor, if duel IP or spikein get the corresponding row to extract its Index
+    # For scalefactor, if dual IP or spikein, use the spike index the suffix
+    # was tagged with upstream (see tag_scalefactor_suffix()) as
+    # f'scalefactor_{spike_index}' -- always present for a 'scalefactor' norm
+    # entry now, so there's no need to guess the index via a CPM-row lookup.
     if norm.lower() == 'scalefactor':
-        if suffix.lower().startswith('scalefactor_'):
-            # Suffix was built upstream (see ChIPseq_dual_IP.smk) as
-            # f'scalefactor_{second_index}' -- use that index directly instead
-            # of guessing via a CPM-row lookup, which can pick the wrong index
-            # when the primary index ALSO has its own CPM entry configured
-            # alongside scalefactor.
-            index_val = suffix.split('_', 1)[1]
-        else:
-            cpm_rows = df[
-                (df['Newnam'] == newnam) &
-                (df['Norm'] == 'CPM')
-            ]
-            if cpm_rows.empty:
-                index_val = row.iloc[0]['Index']
-            else:
-                index_val = cpm_rows.iloc[0]['Index']
+        index_val = suffix.split('_', 1)[1]
     else:
         index_val = row.iloc[0]['Index']
         

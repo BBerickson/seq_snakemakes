@@ -20,6 +20,12 @@ FA_SAMPLE:
   "/beevol/home/erickson/ref/hg38_p14/PolIII/CTD_Ser5_polIII_fitered_slop200.fa"
 MY_REF:
   "/beevol/home/erickson/ref/hg38_p14/PolIII/CTD_Ser5_polIII_fitered_slop200.bed"
+# BED region set for multiBamSummary's --scalingFactors computation
+# (CMD_PARAMS.scalingFactors mode "BED-file"). Used as the spike index's
+# scaling regions when this index is the spike in a dual-IP/split setup --
+# see workflow/rules/03b_results.snake.
+SCALING_REF:
+  "/beevol/home/erickson/ref/hg38_p14/PolIII/CTD_Ser5_polIII_fitered_slop200.bed"
 FW_REF:
   ""
 REV_REF:
