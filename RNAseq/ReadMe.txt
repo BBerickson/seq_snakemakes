@@ -9,8 +9,6 @@ bash setup_pipeline.sh Bodhi
 #   run as a second snakemake workflow against workflow/Stranded_matrix.smk)
 # run script by submitting to Bodhi (AMC) or Alpine (Boulder)
 
-!!!STAR is not set up for mixed genome alignment!!!
-
 
 ### Pipeline Overview ###
 1. Quality Control & Preprocessing

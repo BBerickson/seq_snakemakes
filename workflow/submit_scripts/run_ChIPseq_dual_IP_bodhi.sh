@@ -39,6 +39,27 @@ snakemake \
 SAMPLES_FILE2="ChIPseq_dual_IP_tRNA_samples.yaml"
 MATRIX_FILE="workflow/small_matrix.yaml"
 
+# SAMPLES_FILE2 swaps primary/spike roles to build matrix files "of the spike
+# alignment" using its own scalefactor (see workflow/ref/readme.txt). 
+# make a dummy results.tsv to let run trigger
+SWAPPED_PRIMARY=$(python3 -c "
+import yaml
+cfg = yaml.safe_load(open('${SAMPLES_FILE2}'))
+print(next(e['name'] for e in cfg['INDEXES'] if e.get('role') == 'primary'))
+")
+PROJ_NAME=$(python3 -c "
+import yaml
+cfg = {}
+for f in ['${SAMPLES_FILE}', '${SAMPLES_FILE2}']:
+    cfg.update(yaml.safe_load(open(f)))
+print(cfg['PROJ'])
+")
+MARKER="${PROJ_NAME}/report/${PROJ_NAME}_${SWAPPED_PRIMARY}_results.tsv"
+if [ ! -f "${MARKER}" ]; then
+    mkdir -p "$(dirname "${MARKER}")"
+    touch "${MARKER}"
+fi
+
 snakemake \
     --profile ${PROFILE} \
     --snakefile workflow/UnStranded_matrix.smk \
