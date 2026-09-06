@@ -22,14 +22,45 @@ rule fragment_size:
     shell:
         """
         if [ "{params.is_paired}" = "True" ]; then
-            # Paired-end fragment size analysis
-            bamPEFragmentSize \
-              -hist {output.pic} \
-              --numberOfProcessors {threads} \
-              -T "Fragment size of PE data" \
-              -b  {input.bam} {params.args} \
-              --samplesLabel {params.labels} \
-              --table {output.log}
+            # Paired-end fragment size analysis. deepTools' bamPEFragmentSize
+            # can crash with "ValueError: max must be larger than min in range
+            # parameter" -- its histogram step does
+            # plt.hist(lengths, range=(observed_min, --maxFragmentLength)),
+            # which throws whenever a bam is so low-signal that every sampled
+            # fragment is already >= --maxFragmentLength (e.g. a near-empty
+            # spike/control bam). That's a deepTools bug (it never validates
+            # the range), not something our args can prevent, and it kills
+            # the whole process before --table is ever written since the
+            # crash happens before printTable() is called. If it happens,
+            # retry without -hist: the numeric --table stats (min/mean/etc.)
+            # are computed earlier and are unaffected by the histogram code
+            # path, so this still gets real per-sample stats into
+            # fragment_results.tsv -- only the cosmetic PNG is faked.
+            if ! bamPEFragmentSize \
+                  -hist {output.pic} \
+                  --numberOfProcessors {threads} \
+                  -T "Fragment size of PE data" \
+                  -b  {input.bam} {params.args} \
+                  --samplesLabel {params.labels} \
+                  --table {output.log}; then
+                echo "WARNING: bamPEFragmentSize histogram failed for {params.labels} (deepTools min>=max range crash -- likely too few/short paired fragments in this bam). Retrying without the histogram so the table stats still get captured; {output.pic} will be a placeholder." >&2
+                bamPEFragmentSize \
+                  --numberOfProcessors {threads} \
+                  -T "Fragment size of PE data" \
+                  -b  {input.bam} {params.args} \
+                  --samplesLabel {params.labels} \
+                  --table {output.log}
+                python3 -c "
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+fig, ax = plt.subplots()
+ax.text(0.5, 0.5, 'histogram unavailable\n(too few/short paired fragments)', ha='center', va='center', wrap=True)
+ax.axis('off')
+fig.savefig('{output.pic}')
+plt.close(fig)
+"
+            fi
         else
             # Single-end read length analysis
             readlength.sh \
