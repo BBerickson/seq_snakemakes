@@ -2,7 +2,7 @@
 
 # Path to mixed bowtie2 index and chrom name txt files
 INDEX_PATH:
-    "/beevol/home/bentleyd/ref/hg38/genome/star_idx/"
+    "/beevol/home/erickson/ref/hg38_p14/genome_builds/star_idx"
 # bowtie2 index prefix
 INDEX_MAP:
   "hg38"
@@ -13,24 +13,38 @@ INDEXES:
 MASK:
   "/beevol/home/erickson/ref/hg38_p14/base_ref/matrix_ref/merge_filter_RNAs.bed"
 GTF:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_chrfix_GRCh38.113.gtf"
+  "/beevol/home/erickson/ref/hg38_p14/base_ref/hg38_chrfix_GRCh38.113.gtf"
 FA_SAMPLE:
-  "/beevol/home/bentleyd/ref/hg38/genome/Homo_sapiens.GRCh38.dna.primary_assembly.fa"
-MY_REF:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38.bed"
+  "/beevol/home/erickson/ref/hg38_p14/genome_builds/Homo_sapiens.GRCh38.dna.primary_assembly.fa"
 # BED region set for multiBamSummary's --scalingFactors computation
 # (CMD_PARAMS.scalingFactors mode "BED-file"). See workflow/rules/03b_results.snake.
 SCALING_REF:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38.bed"
+  "/beevol/home/erickson/ref/hg38_p14/base_ref/hg38.bed"
+
+# files for deeptools matrix  
+MY_REF:
+  "/beevol/home/erickson/ref/hg38_p14/base_ref/hg38.bed"
 FW_REF:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_pos.bed"
+  "/beevol/home/erickson/ref/hg38_p14/base_ref/hg38_pos.bed"
 REV_REF:
-  "/beevol/home/bentleyd/ref/hg38/ref_bed/hg38_neg.bed"
+  "/beevol/home/erickson/ref/hg38_p14/base_ref/hg38_neg.bed"
 PI_REF:
   "/beevol/home/erickson/ref/hg38_p14/base_ref/matrix_ref/PI.bed"
 FW_PI_REF:
   "/beevol/home/erickson/ref/hg38_p14/base_ref/matrix_ref/PI_pos.bed"
 REV_PI_REF:
   "/beevol/home/erickson/ref/hg38_p14/base_ref/matrix_ref/PI_neg.bed"
+  
+# Ribo-seq only (workflow/RiboSeq.smk / RiboSeq_UMI.smk):
+# rRNA database for SortMeRNA (workflow/rules/01d_riboseq_sortmerna.snake)
+SORTMERNA_DB:
+    "/beevol/home/erickson/ref/rRNA_db/smr_v4.3_default_db.fasta"
+# BED12 gene model for RSeQC's read_distribution.py (workflow/rules/03c_rseqc.snake)
+BED12:
+  "/beevol/home/erickson/ref/hg38_p14/base_ref/hg38_chrfix_GRCh38.113.bed12"
+# small transcriptome quasi-index for Salmon's advisory strandedness check
+# (workflow/rules/01e_riboseq_strandedness.snake) -- informational only
+SALMON_INDEX:
+  "/beevol/home/erickson/ref/hg38_p14/salmon_index"
 
 

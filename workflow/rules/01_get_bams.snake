@@ -4,7 +4,7 @@
 # bam files
 rule get_bams:
     input:
-        lambda wildcards: _get_bams(wildcards.sample, RAW_DATA)
+        lambda wildcards: _get_bams(wildcards.sample, RAW_DATA, allow_suffix=True)
     output:
         bam = temp(PROJ + "/{sample}_" + INDEX_MAP + ".bam"),
         bai = temp(PROJ + "/{sample}_" + INDEX_MAP + ".bam.bai")

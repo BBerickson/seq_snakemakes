@@ -1,0 +1,61 @@
+#===== Config file for translational efficiency (TE) analysis =================
+# This gets appended to config
+#
+# Joins a COMPLETED Ribo-seq run (RiboSeq.smk / RiboSeq_UMI.smk) and a
+# COMPLETED RNA-seq run (RNAseq.smk) into anota2seq (primary) + xtail
+# (secondary) translational-efficiency analysis. Reads each run's existing
+# PROJ/counts/{sample}_aligned_{index}_featureCounts.tsv outputs directly --
+# no new per-project manifest format, just point at the two PROJ directories.
+#
+# Run RiboSeq.smk/RiboSeq_UMI.smk and RNAseq.smk to completion FIRST -- this
+# pipeline does no alignment/quantification of its own, only the TE join.
+
+PROJ:
+    "Example_RiboSeq_TE"
+
+# Completed run directories + the PRIMARY_INDEX each one used (needed to
+# construct the exact featureCounts file paths each run already produced).
+RIBO_PROJ:
+    "/path/to/completed/riboseq/run/ProjName"
+RIBO_INDEX:
+    "hg38"
+
+RNA_PROJ:
+    "/path/to/completed/rnaseq/run/ProjName"
+RNA_INDEX:
+    "hg38"
+
+# Each contrast compares two groups of samples. Nicknames must match EXACTLY
+# between the Ribo-seq and RNA-seq runs' own SAMPLES dicts (e.g. both runs
+# must use "WT_Rep1"/"KO_Rep1" etc. as their nickname) -- samples are paired
+# by nickname, not by position.
+#
+# CONTRASTS:
+#   - name: "KO_vs_WT"
+#     group1: ["WT_Rep1", "WT_Rep2"]  # baseline/reference
+#     group2: ["KO_Rep1", "KO_Rep2"]  # comparison
+#
+CONTRASTS:
+  - name: "KO_vs_WT"
+    group1: ["WT_Rep1", "WT_Rep2"]
+    group2: ["KO_Rep1", "KO_Rep2"]
+
+CMD_PARAMS:
+    # restrict to one biotype before testing (standard practice for TE --
+    # matches results_riboseq.R's own featureCounts biotype column); empty
+    # string disables filtering
+    filter_biotype: "protein_coding"
+
+# GO enrichment on TE-changed genes needs clusterProfiler + an org.*.eg.db
+# Bioconductor annotation package -- NEITHER is in your Ribo-seq container's
+# install_packages_riboseq.R as pasted earlier this session (only
+# riboWaltz/anota2seq/xtail/tximeta/tximport are listed there). Leave this
+# false until you've added those packages to the container, or this step
+# will fail outright.
+run_go_enrichment: false
+GO_ORGANISM_DB: "org.Hs.eg.db"
+
+USER:
+  "User7"
+
+skip_html_report: true

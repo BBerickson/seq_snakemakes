@@ -1,0 +1,70 @@
+# ====== deepTools PCA + correlation heatmap across all samples ===============
+# Same multiBamSummary CLI tool 03b_results.snake already uses for spike
+# scaling (different sub-command) -- matches the sketch's own "deepTools --
+# bigWig coverage tracks, PCA, correlation heatmap" wording exactly.
+
+rule riboseq_multiBamSummary_all:
+    input:
+        bams = expand(
+            PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
+            sample = SAMS_UNIQ, index = PRIMARY_INDEX
+        )
+    output:
+        npz = PROJ + "/report/" + PROJ + "_all_samples_" + PRIMARY_INDEX + ".npz"
+    params:
+        job_name = PROJ + "_multiBamSummary_all",
+        labs = " ".join(SAMS_UNIQ)
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 0.2, 5)
+    threads:
+        12
+    shell:
+        """
+        multiBamSummary bins \
+            --bamfiles {input.bams} \
+            --labels {params.labs} \
+            -p {threads} \
+            -o {output.npz}
+        """
+
+
+rule riboseq_plotPCA:
+    input:
+        PROJ + "/report/" + PROJ + "_all_samples_" + PRIMARY_INDEX + ".npz"
+    output:
+        PROJ + "/report/" + PROJ + "_" + PRIMARY_INDEX + "_PCA.png"
+    params:
+        job_name = PROJ + "_plotPCA"
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1)
+    threads:
+        1
+    shell:
+        """
+        plotPCA -in {input} -o {output} -T "{PROJ} sample PCA"
+        """
+
+
+rule riboseq_plotCorrelation:
+    input:
+        PROJ + "/report/" + PROJ + "_all_samples_" + PRIMARY_INDEX + ".npz"
+    output:
+        PROJ + "/report/" + PROJ + "_" + PRIMARY_INDEX + "_correlation_heatmap.png"
+    params:
+        job_name = PROJ + "_plotCorrelation"
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1)
+    threads:
+        1
+    shell:
+        """
+        plotCorrelation \
+            -in {input} \
+            --corMethod spearman \
+            --skipZeros \
+            --plotTitle "{PROJ} sample correlation" \
+            --whatToPlot heatmap \
+            --colorMap RdYlBu \
+            --plotNumbers \
+            -o {output}
+        """

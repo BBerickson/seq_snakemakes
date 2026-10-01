@@ -1,0 +1,78 @@
+# ====== Overall results (Ribo-seq, no-UMI variant) ===========================
+# Forked from rules/03b_results_UMI.snake's stripped-down shape (no
+# multiBamSummary/OR spike-scaling machinery -- Ribo-seq is always
+# ALIGNMENT_MODE: single, so that machinery would never exercise anything
+# real), calling the new results_riboseq.R with no dedup input (no-UMI
+# variant has no deduplication step at all -- see rules/01a_riboseq_umi_extract.snake's
+# header comment for why: without UMIs, position-based dedup would strip real
+# Ribo-seq codon-level positional signal, not just PCR duplicates).
+
+rule gathering_results:
+    input:
+        trim_galore = PROJ + "/stats/" + PROJ + "_trim_galore.tsv",
+        aligned     = PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_aligned.tsv",
+        fc_file     = expand(PROJ + "/stats/{sample}_summary_featureCounts.tsv", sample = SAMS_UNIQ),
+        ribowaltz   = PROJ + "/stats/" + PROJ + "_ribowaltz_psite.tsv",
+        extra = [] if NORM != "subsample" else expand(
+                    PROJ + "/stats/" + PROJ + "_{index}_subsample_frac.tsv",
+                    index=PRIMARY_INDEX
+                ),
+        FC_files = expand(PROJ + "/counts/{sample}_aligned_{index}_featureCounts.tsv",
+            sample = SAMS_UNIQ, index = PRIMARY_INDEX)
+    output:
+        PROJ + "/report/" + PROJ + "_" + PRIMARY_INDEX + "_results.tsv"
+    params:
+        job_name = "results",
+        indexmap = INDEX_MAP,
+        indexs   = INDEXES,
+        sam_new  = SAMPLES,
+        project  = PROJ,
+        filterty = CMD_PARAMS["filter_results"],
+        script = "workflow/scripts/results_riboseq.R"
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1)
+    message:
+        "getting final results"
+    threads:
+        1
+    shell:
+        """
+        Rscript {params.script} "{input.trim_galore}" "{input.aligned}" "" "{input.fc_file}" "{input.FC_files}" "{params.indexmap}" "{params.indexs}" "{params.sam_new}" "{params.project}" "{params.filterty}" "{output}"
+        """
+
+
+rule create_plots:
+    input:
+        PROJ + "/report/" + PROJ + "_" + PRIMARY_INDEX + "_results.tsv"
+    output:
+        report  = SEQ_DATE + "_" + PROJ + "_" + PRIMARY_INDEX + "_qc_analysis.html",
+        reportc = PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_pipeline_methods.txt",
+        config  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + PRIMARY_INDEX + "_config.yaml"),
+        result  = temp(PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_" + PRIMARY_INDEX + "_clean_results.tsv")
+    params:
+        job_name  = PROJ + "_qc_html",
+        cmdd     = PROJ + "/pipeline",
+        out_file  = SEQ_DATE + "_" + PROJ + "_" + PRIMARY_INDEX + "_qc_analysis",
+        script  = "workflow/scripts/multiqc_config.R",
+        seqdate = SEQ_DATE,
+        mydir   = PROJ,
+        index   = PRIMARY_INDEX
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1)
+    threads:
+        1
+    shell:
+        """
+        echo "Pipeline run: $(date '+%Y-%m-%d %H:%M:%S')" >> {output.reportc}
+        echo "" >> {output.reportc}
+        python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.aggregate_cmds("{params.cmdd}", "{output.reportc}")
+EOF
+        Rscript {params.script} "{input}" "{params.mydir}" "{params.seqdate}" "{params.index}" "{output.result}" "{output.config}"
+        multiqc {params.mydir} --config {output.config} --force --filename {params.out_file}
+        rm -r {params.out_file}_data
+        rm -f {PROJ}/pipeline/*.lock
+        """

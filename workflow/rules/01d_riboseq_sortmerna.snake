@@ -1,0 +1,95 @@
+# ====== Snakefile for rRNA removal with SortMeRNA (mandatory Ribo-seq step) ===
+# Unlike BBSplit, this step is not toggled -- rRNA contamination is core to
+# Ribo-seq QC even in rRNA-depleted libraries. Reads the primary index's
+# SORTMERNA_DB ref-yaml field (rRNA database path), following the same
+# per-index-ref-yaml-field convention as SCALING_REF/PI_REF.
+
+rule sortmerna:
+    input:
+        PROJ + "/{sample}_R1_bbsplit.fastq" + (".gz" if config.get("compress_temp", True) else "")
+    output:
+        R1  = temp(PROJ + "/{sample}_R1_sortmerna.fastq" + (".gz" if config.get("compress_temp", True) else "")),
+        log = PROJ + "/sortmerna/{sample}_sortmerna.log"
+    params:
+        job_name = "{sample}_sortmerna",
+        cmd      = PROJ + "/pipeline/03b_sortmerna.cmd",
+        cmdd     = PROJ + "/pipeline",
+        workdir  = PROJ + "/sortmerna/{sample}_workdir",
+        aligned  = PROJ + "/sortmerna/{sample}_rRNA",
+        other    = PROJ + "/sortmerna/{sample}_nonrRNA",
+        db       = config_indexes[PRIMARY_INDEX].get("SORTMERNA_DB"),
+        args     = CMD_PARAMS.get("sortmerna", "")
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 4, 8)
+    threads:
+        8
+    shell:
+      """
+      mkdir -p '{params.cmdd}' '{PROJ}/sortmerna'
+      if [ -z "{params.db}" ]; then
+          cp {input[0]} {output.R1}
+          touch {output.log}
+          python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="sortmerna: step skipped (no SORTMERNA_DB set)",
+    echo_cmd="sortmerna: step skipped, copied through"
+)
+EOF
+      else
+          rm -rf {params.workdir}
+          sortmerna \
+              --ref {params.db} \
+              --reads {input[0]} \
+              --workdir {params.workdir} \
+              --aligned {params.aligned} \
+              --other {params.other} \
+              --fastx \
+              --threads {threads} \
+              {params.args} \
+              2> {output.log}
+          mv {params.other}.fq.gz {output.R1} 2>/dev/null || mv {params.other}.fq {output.R1}
+          rm -rf {params.workdir}
+          python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="sortmerna active",
+    version_cmd="sortmerna --version 2>&1 | head -1",
+    echo_cmd="sortmerna --ref <rRNA_db> --reads <sample_R1.fastq.gz> --aligned <sample_rRNA> --other <sample_nonrRNA> --fastx {params.args}"
+)
+EOF
+      fi
+      """
+
+
+rule sortmerna_summary:
+    input:
+        expand(
+            PROJ + "/sortmerna/{sample}_sortmerna.log",
+            sample = SAMS_UNIQ
+        )
+    output:
+        PROJ + "/stats/" + PROJ + "_sortmerna.tsv"
+    params:
+        job_name = PROJ + "_sortmerna_summary"
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1)
+    threads:
+        1
+    shell:
+        """
+        python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+
+import rules
+
+rules._sortmerna_summary("{input}".split(), "{output[0]}")
+EOF
+        """

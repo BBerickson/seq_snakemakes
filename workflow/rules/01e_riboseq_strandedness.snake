@@ -1,0 +1,92 @@
+# ====== Snakefile for advisory strandedness/library-type inference ===========
+# Informational QC only -- Snakemake's DAG and ORIENTATION are resolved at
+# parse time, before any rule runs, so this rule's output CANNOT feed back
+# into ORIENTATION within the same run. It reports what Salmon infers so you
+# can confirm/set ORIENTATION yourself; it does not self-configure anything.
+
+rule strandedness:
+    input:
+        PROJ + "/{sample}_R1_sortmerna.fastq" + (".gz" if config.get("compress_temp", True) else "")
+    output:
+        sub  = temp(PROJ + "/{sample}_R1_strand_subsample.fastq.gz"),
+        json = PROJ + "/strandedness/{sample}_lib_format_counts.json"
+    params:
+        job_name = "{sample}_strandedness",
+        cmd      = PROJ + "/pipeline/03c_strandedness.cmd",
+        cmdd     = PROJ + "/pipeline",
+        outdir   = PROJ + "/strandedness/{sample}",
+        salmon_index = config_indexes[PRIMARY_INDEX].get("SALMON_INDEX"),
+        n_reads  = config.get("STRANDEDNESS_SUBSAMPLE", 200000)
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 2, 8)
+    threads:
+        4
+    shell:
+      """
+      mkdir -p '{params.cmdd}'
+      if [ -z "{params.salmon_index}" ]; then
+          touch {output.sub} {output.json}
+          python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="strandedness: step skipped (no SALMON_INDEX set)",
+    echo_cmd="strandedness inference: step skipped"
+)
+EOF
+      else
+          reformat.sh in={input[0]} out={output.sub} samplereadstarget={params.n_reads} overwrite=t
+
+          salmon quant \
+              -i {params.salmon_index} \
+              -l A \
+              -r {output.sub} \
+              -o {params.outdir} \
+              -p {threads} \
+              --validateMappings
+
+          cp {params.outdir}/lib_format_counts.json {output.json}
+          rm -rf {params.outdir}
+
+          python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="strandedness active",
+    version_cmd="salmon --version 2>&1 | head -1",
+    echo_cmd="reformat.sh in=<sample_R1.fastq.gz> out=<sample_sub.fastq.gz> samplereadstarget={params.n_reads}\\nsalmon quant -i <SALMON_INDEX> -l A -r <sample_sub.fastq.gz> -o <outdir> --validateMappings"
+)
+EOF
+      fi
+      """
+
+
+rule strandedness_summary:
+    input:
+        expand(
+            PROJ + "/strandedness/{sample}_lib_format_counts.json",
+            sample = SAMS_UNIQ
+        )
+    output:
+        PROJ + "/stats/" + PROJ + "_strandedness.tsv"
+    params:
+        job_name = PROJ + "_strandedness_summary"
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1)
+    threads:
+        1
+    shell:
+        """
+        python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+
+import rules
+
+rules._strandedness_summary("{input}".split(), "{output[0]}")
+EOF
+        """

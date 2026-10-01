@@ -172,6 +172,97 @@ def _dedup_summary(input, output):
                           out.write("%s\t%s\t%s\n" % (name, met, num))
 
                       
+def _trim_galore_summary(input, output):
+    import glob
+    # Derive the directory from the first input file
+    trimgalore_dir = os.path.dirname(input[0])
+    # Glob all stats files in that directory
+    all_files = sorted(glob.glob(os.path.join(trimgalore_dir, "*_trimming_report.txt")))
+
+    with open(output, "w") as out:
+        for file in input:
+            name = os.path.basename(file)
+            name = re.sub("_trimming_report.txt", "", name)
+
+            for line in open(file, "r"):
+                # Trim Galore's report embeds a cutadapt-style summary block --
+                # same wording cutadapt itself uses, just with Ribo-seq's
+                # single-end phrasing ("Total reads processed", not "Total
+                # read pairs processed").
+                match = re.search(
+                    r"Total reads processed|Reads with adapters|Reads written \(passing filters\)",
+                    line,
+                )
+                if match:
+                    line = line.strip()
+                    mett = re.split(r'\s{2,}', line)
+                    if len(mett) < 2:
+                        continue
+                    num = mett[1].strip()
+                    num = re.sub(",", "", num)
+                    num = re.sub(" ", "", num)
+                    met = re.search(r"[\w\(\) ]+:", line).group(0)
+                    met = re.sub(":", "", met)
+                    met = re.sub(" ", "_", met.strip())
+
+                    out.write("%s\t%s\t%s\n" % (name, met, num))
+
+
+def _rseqc_summary(input, output):
+    # read_distribution.py writes a fixed-format block of
+    # "<group>  <Total_bases>  <Tag_count>  <Tags/Kb>" rows (CDS_Exons,
+    # 5'UTR_Exons, 3'UTR_Exons, Introns, TSS_up_1kb, TES_down_1kb, etc.) --
+    # pull out Tags/Kb per group, one row per sample.
+    with open(output, "w") as out:
+        for file in input:
+            name = os.path.basename(file)
+            name = re.sub("_read_distribution.txt", "", name)
+
+            in_table = False
+            for line in open(file, "r"):
+                if line.startswith("Group"):
+                    in_table = True
+                    continue
+                if line.startswith("="):
+                    if in_table:
+                        break
+                    continue
+                if in_table:
+                    fields = line.split()
+                    if len(fields) == 4:
+                        group, total_bases, tag_count, tags_per_kb = fields
+                        out.write("%s\t%s\t%s\n" % (name, group, tags_per_kb))
+
+
+def _sortmerna_summary(input, output):
+    with open(output, "w") as out:
+        for file in input:
+            name = os.path.basename(file)
+            name = re.sub("_sortmerna.log", "", name)
+            for line in open(file, "r"):
+                m = re.search(r"Total reads passing E-value threshold[^:]*:\s*([0-9,]+)", line)
+                if m:
+                    out.write("%s\trRNA_reads\t%s\n" % (name, m.group(1).replace(",", "")))
+
+
+def _strandedness_summary(input, output):
+    import json
+    with open(output, "w") as out:
+        out.write("sample\texpected_format\tcompatible_fraction\n")
+        for file in input:
+            name = os.path.basename(file)
+            name = re.sub("_lib_format_counts.json", "", name)
+            if os.path.getsize(file) == 0:
+                out.write("%s\tskipped (no SALMON_INDEX)\tNA\n" % name)
+                continue
+            with open(file) as f:
+                counts = json.load(f)
+            expected = counts.get("expected_format", "NA")
+            frac = counts.get("num_compatible_fragments", 0)
+            total = counts.get("num_assigned_fragments", 1) or 1
+            out.write("%s\t%s\t%.3f\n" % (name, expected, frac / total))
+
+
 def _extract_star_log_info(input_files, output_file, index):
     patterns = {
         "Number of input reads": ("reads", re.compile(r"Number of input reads \|\s+(.*)")),

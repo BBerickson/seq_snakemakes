@@ -1,0 +1,36 @@
+# ====== P-site offset calibration, periodicity, metagene (riboWaltz) =========
+# One rule per project (not per-sample, unlike most rules here) -- riboWaltz's
+# own API (bamtolist/create_annotation) idiomatically loads every sample's
+# transcriptome BAM together as one list, so batching all samples into one
+# rule invocation matches the tool, rather than being just an optimization.
+
+rule ribowaltz_psite:
+    input:
+        bams = expand(
+            PROJ + "/bams/{sample}_Aligned.toTranscriptome.out.bam",
+            sample = SAMS_UNIQ
+        )
+    output:
+        summary = PROJ + "/stats/" + PROJ + "_ribowaltz_psite.tsv",
+        pngs    = expand(
+            PROJ + "/report/riboWaltz/{sample}_{plot}.png",
+            sample = SAMS_UNIQ,
+            plot = ["periodicity", "metaprofile", "length_dist"]
+        )
+    params:
+        job_name = PROJ + "_ribowaltz_psite",
+        script   = "workflow/scripts/ribowaltz_psite.R",
+        gtf      = config_indexes[PRIMARY_INDEX].get("GTF"),
+        fa       = config_indexes[PRIMARY_INDEX].get("FA_SAMPLE"),
+        bamdir   = PROJ + "/bams",
+        outdir   = PROJ + "/report/riboWaltz",
+        samples  = " ".join(SAMS_UNIQ)
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 8, 64)
+    threads:
+        4
+    shell:
+        """
+        mkdir -p {params.outdir}
+        Rscript {params.script} "{params.bamdir}" "{params.samples}" "{params.gtf}" "{params.fa}" "{params.outdir}" "{output.summary}"
+        """

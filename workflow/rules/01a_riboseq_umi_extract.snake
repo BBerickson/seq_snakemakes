@@ -1,0 +1,61 @@
+# ====== Rule for extracting UMIs from Ribo-seq footprints (UMI variant only) ==
+# Forked from rules/01_UMI_cutadapt.snake's extract_umi rule, split out on its
+# own since Ribo-seq trims with Trim Galore afterward (01b_riboseq_trimgalore.snake),
+# not cutadapt -- that file's second rule is hardcoded to cutadapt, so it isn't
+# reused wholesale here.
+
+# Extract UMI sequence (single-end: UMI lives on the one read itself)
+rule extract_umi:
+    input:
+        lambda wildcards: _get_fqs(wildcards.sample, RAW_DATA, FASTQ_DIR, full_name=True, paired=False)
+    output:
+        R1  = temp(PROJ + "/{sample}_R1_umi.fastq" + (".gz" if config.get("compress_temp", True) else "")),
+        log = PROJ + "/logs/{sample}_extract_umi.out"
+    params:
+        job_name = "{sample}_umi_extract",
+        cmd      = PROJ + "/pipeline/02_extract_umi.cmd",
+        cmdd     = PROJ + "/pipeline",
+        umi_pat  = CMD_PARAMS["umi_pattern"]
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1, 2) # multiplier, min, max, unit=GB
+    message:
+        "Extracting UMIs for {wildcards.sample}"
+    threads:
+        1
+    shell:
+      """
+      mkdir -p '{params.cmdd}'
+      if [ -z "{params.umi_pat}" ]; then
+          ln -sf {input[0]} {output.R1}
+          touch {output.log}
+          python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="umi_tools extract: step skipped",
+    echo_cmd="umi_tools extract: step skipped, symlink created"
+)
+EOF
+      else
+          umi_tools extract \
+            -I {input[0]} \
+            --extract-method=string \
+            --bc-pattern={params.umi_pat} \
+            -L {output.log} \
+            | gzip \
+            > {output.R1}
+          python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="umi_tools extract SE",
+    version_cmd="pip show umi_tools | grep -E '^(Name|Version)'",
+    echo_cmd="umi_tools extract -I <sample_R1.fastq.gz> --extract-method=string --bc-pattern={params.umi_pat} -L <sample_extract_umi.out> | gzip > <sample_umi_R1.fastq.gz>"
+)
+EOF
+      fi
+      """

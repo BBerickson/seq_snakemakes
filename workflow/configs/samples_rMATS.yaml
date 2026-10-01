@@ -36,9 +36,9 @@ GROUPS_COMP:
 # R1R2 use --libType fr-secondstrand and --strand MATE1_SENSE for sashimi
 CMD_PARAMS:
     rmats:         " -t paired --readLength 150 --variable-read-length --libType fr-firststrand "
-    min_count:          "20"
+    min_count:          "50"
     max_FDR:            "0.05"
-    max_IncDifference:  "0.1"
+    max_IncDifference:  "0.05"
     # How min_count is applied across replicates when filtering significant events:
     #   per_replicate (recommended) - EVERY replicate in BOTH conditions must
     #       individually have >= min_count reads (inclusion + exclusion). Guards

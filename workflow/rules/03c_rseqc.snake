@@ -1,0 +1,76 @@
+# ====== RSeQC read_distribution.py -- CDS/UTR/intron enrichment check ========
+# Needs a BED12 gene model (not a GTF) -- new ref-yaml field BED12, following
+# the same per-index-ref-yaml-field convention as SCALING_REF/PI_REF.
+
+rule read_distribution:
+    input:
+        bam = PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam",
+        bai = PROJ + "/bams/{sample}_aligned_{index}_" + SEQ_DATE + ".bam.bai"
+    output:
+        PROJ + "/rseqc/{sample}_aligned_{index}_read_distribution.txt"
+    params:
+        job_name = "{sample}_aligned_{index}_read_distribution",
+        cmd      = PROJ + "/pipeline/10_read_distribution.cmd",
+        cmdd     = PROJ + "/pipeline",
+        bed12    = lambda wildcards: config_indexes[wildcards.index].get("BED12")
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 2)
+    threads:
+        1
+    shell:
+      """
+      mkdir -p '{params.cmdd}' '{PROJ}/rseqc'
+      if [ -z "{params.bed12}" ]; then
+          echo "read_distribution.py: skipped (no BED12 set for index {wildcards.index})" > {output}
+          python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="read_distribution.py: step skipped (no BED12 set)",
+    echo_cmd="read_distribution.py: step skipped"
+)
+EOF
+      else
+          read_distribution.py -i {input.bam} -r {params.bed12} > {output}
+          python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_once(
+    "{params.cmd}",
+    version_cmd="read_distribution.py --version 2>&1 | head -1",
+    echo_cmd="read_distribution.py -i <sample.bam> -r <annotation.bed12> > <sample_read_distribution.txt>"
+)
+EOF
+      fi
+      """
+
+
+rule rseqc_summary:
+    input:
+        expand(
+            PROJ + "/rseqc/{sample}_aligned_{index}_read_distribution.txt",
+            sample = SAMS_UNIQ,
+            index = PRIMARY_INDEX
+        )
+    output:
+        PROJ + "/stats/" + PROJ + "_rseqc.tsv"
+    params:
+        job_name = PROJ + "_rseqc_summary"
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 1, 1)
+    threads:
+        1
+    shell:
+        """
+        python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+
+import rules
+
+rules._rseqc_summary("{input}".split(), "{output[0]}")
+EOF
+        """

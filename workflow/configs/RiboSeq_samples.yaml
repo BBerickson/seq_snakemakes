@@ -1,0 +1,170 @@
+#===== Config file containing samples ==========================================
+# This gets appended to config
+
+# Project name to use for naming Directory and summary files
+PROJ:
+    "Example_RiboSeq"
+
+SEQ_DATE:
+    "260101"
+
+# Directories containing fastq files, this can be a relative path.
+# Multiple directories can be provided. The sample names must correspond
+# to the begining of the fastq name.
+RAW_DATA:
+    - "/path/to/fastqs"
+
+# Alignment mode and index(es) to use for analysis -- Ribo-seq aligns with
+# STAR (ALIGNMENT_MODE: single only; no split/sequential support here).
+# Each INDEXES entry's name must match a "<name>_star.yaml" ref yaml present
+# in workflow/ref (the same _star ref yaml family star.smk/RNAseq_samples.yaml
+# use, e.g. hg38_star.yaml -- see workflow/ref/readme.txt).
+ALIGNMENT_MODE:
+    "single"
+INDEXES:
+  - name: "hg38"
+
+# The sample names must match the beginning of a fastq file in one of the
+# directories listed under RAW_DATA. If the sample name
+# matches multiple fastqs, an error will be thrown.
+# nicknames will be used for bw and matrix/plots names
+#
+# SAMPLES:
+#     SECTION-1:
+#         GROUP-1:
+#             sample_nickname-1:
+#                  - "fastq_sample_1_prefix"
+#             sample_nickname-2:
+#                  - "fastq_sample_2_prefix"
+#
+#     SECTION-2:
+#         ...
+#
+
+SAMPLES:
+    SECTION-1:
+        WT:
+            WT_Rep1:
+              - "riboseq_WT_rep1"
+            WT_Rep2:
+              - "riboseq_WT_rep2"
+
+        KO:
+            KO_Rep1:
+              - "riboseq_KO_rep1"
+            KO_Rep2:
+              - "riboseq_KO_rep2"
+
+
+# Norm sample bw and matix files
+# with "RPKM","CPM","BPM","RPGC"
+# Or with scaleFactor from featureCounts file i.e. "chrM"
+NORM:
+  - "CPM"
+
+# sandbox User #
+USER:
+  "User7"
+
+CMD_PARAMS:
+    trim_galore:
+      single: " --fastqc --length 15 "
+    # a fasta file with a phiX/other contaminant reference, or empty to skip
+    bbsplit: ""
+    sortmerna: " --other -v "
+    star: # tuned for short (~28-32nt) Ribo-seq footprints
+      single: " --alignEndsType EndToEnd --outFilterMismatchNmax 2 --outFilterMultimapNmax 20 --outSAMattributes NH HI AS NM MD "
+    multimap:     ""  # " -k 1 " # all but -k n multi-mapper from will be randomly filtered out.
+    samtools:      " -bF4q10 "
+    bamCoverage:   " --binSize 1 --skipNonCoveredRegions "
+    scalingFactors: "" # " BED-file --centerReads " (set SCALING_REF in the ref yaml) or " bins --binSize 100 "
+    fragment_size:
+      single:  " bin=1 max=50 " # footprint length distribution (~15-50nt)
+    featureCounts: " " #--largestOverlap
+    filter_results: "protein_coding|scalefactor"
+
+# phiX/other contaminant reference fasta for BBSplit (workflow/rules/01c_riboseq_bbsplit.snake),
+# or leave empty to skip. Not genome-specific (unlike SORTMERNA_DB/BED12/
+# SALMON_INDEX, which live in the ref yaml instead), same convention as BARCODES.
+CONTAMINANT_REF:
+    ""
+
+# set orentation of fastq files -- single-end, so R1 or R2 only
+ORIENTATION:
+    "R1" # R1, R2
+
+# single (False) vs paired (True) end mapping -- always False for Ribo-seq
+# footprints (single-end after UMI extraction)
+PAIRED:
+    "False"
+
+# set colors for bw urls and table files, if missing 0,0,0 is default
+COLORS:
+  - "0,0,0"       # - Black
+  - "225,0,0"     # - Bright red
+  - "0,225,0"     # - Bright green
+  - "0,0,225"     # - Bright blue
+  - "255,127,0"   # - Orange
+  - "177,89,40"   # - Brown
+  - "106,61,154"  # - Purple
+  - "255,55,153"  # - Hot pink/magenta
+  - "166,206,22"  # - Lime green/yellow-green
+  - "31,120,180"  # - Steel blue
+  - "251,154,153" # - Light pink/salmon pink
+  - "178,223,138" # - Light green/pale green
+  - "51,160,44"   # - Forest green
+  - "227,26,28"   # - Red
+  - "253,191,111" # - Light orange/peach
+  - "202,178,214" # - Light purple/lavender
+
+
+# stop after alignment, used for small single gene genome expression alignment
+stop_after_alignment: false
+
+# optional contaminant removal (phiX etc.) -- skip if CONTAMINANT_REF is empty
+# anyway, but can be forced off here too
+skip_bbsplit: false
+
+# Save data on amc-sandbox and make URLS
+skip_bam_urls: true
+skip_bw_urls: false
+
+# html report
+skip_html_report: true
+
+## Additional common parameters for various processing steps
+### Trim Galore ##
+# --fastqc            Run FastQC once trimming is complete.
+# --length INT        Discard reads shorter than INT after trimming (default 20;
+#                      lower this for Ribo-seq footprints, which are ~20-35nt).
+# --adapter STR        Manually specify the adapter (auto-detected by default --
+#                      Illumina/Nextera/smallRNA).
+# --stringency INT     Overlap with adapter required to trim (default 1, quite
+#                      permissive; raise for less aggressive trimming).
+# --quality INT        Phred quality threshold for trimming (default 20).
+#
+### SortMeRNA ##
+# --ref FILE[,FILE...] One or more rRNA reference databases (fasta).
+# --other              Output non-rRNA (accepted) reads -- required, this is
+#                       what feeds alignment.
+# -v                   Verbose logging (parsed by rules._sortmerna_summary).
+#
+### STAR (short-read Ribo-seq tuning) ##
+# --alignEndsType EndToEnd          Disable soft-clipping (footprints are
+#                                    already precisely trimmed).
+# --outFilterMismatchNmax INT       Max mismatches allowed (lower for short
+#                                    reads than typical RNA-seq).
+# --outFilterMultimapNmax INT       Max loci a read can map to before being
+#                                    considered unmapped.
+# --quantMode TranscriptomeSAM      Always added by
+#                                    rules/02a_align_star_riboseq.snake --
+#                                    do not set here, it's hardcoded.
+#
+####bamCoverage#####
+# --binSize INT
+#                   Size of the bins, in bases, for the output of the bigwig/bedgraph file. (Default: 50)
+#                   Read coverage normalization options:
+# --normalizeUsing {RPKM,CPM,BPM,RPGC,None}
+#                  (Default: None)
+# --skipNonCoveredRegions, --skipNAs
+#                  This parameter determines if non-covered regions. The default is to treat those regions as having a value of zero. (default: False)

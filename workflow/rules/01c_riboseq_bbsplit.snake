@@ -1,0 +1,59 @@
+# ====== Snakefile for optional contaminant removal with BBSplit ==============
+# Optional step -- toggled by skip_bbsplit (same convention as
+# stop_after_alignment/skip_bam_urls elsewhere). When skipped, just copies
+# the input through so downstream rules see a consistent file regardless of
+# whether this step ran.
+
+rule bbsplit:
+    input:
+        PROJ + "/{sample}_R1.fastq" + (".gz" if config.get("compress_temp", True) else "")
+    output:
+        R1  = temp(PROJ + "/{sample}_R1_bbsplit.fastq" + (".gz" if config.get("compress_temp", True) else "")),
+        log = PROJ + "/bbsplit/{sample}_bbsplit.log"
+    params:
+        job_name = "{sample}_bbsplit",
+        cmd      = PROJ + "/pipeline/03a_bbsplit.cmd",
+        cmdd     = PROJ + "/pipeline",
+        ref      = CONTAMINANT_REF,
+        args     = CMD_PARAMS.get("bbsplit", ""),
+        skip     = _coerce_bool(config.get("skip_bbsplit", False))
+    resources:
+        memory   = lambda wildcards, input: memory_estimator(input, 4, 8)
+    threads:
+        8
+    shell:
+      """
+      mkdir -p '{params.cmdd}' '{PROJ}/bbsplit'
+      if [ "{params.skip}" = "True" ] || [ -z "{params.ref}" ]; then
+          cp {input[0]} {output.R1}
+          touch {output.log}
+          python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="bbsplit: step skipped",
+    echo_cmd="bbsplit: step skipped, copied through"
+)
+EOF
+      else
+          bbsplit.sh -Xmx{resources.memory}g threads={threads} \
+              ref={params.ref} \
+              in={input[0]} \
+              basename={PROJ}/bbsplit/{wildcards.sample}_%.fastq.gz \
+              outu={output.R1} \
+              {params.args} 2> {output.log}
+          python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="bbsplit active",
+    version_cmd="bbsplit.sh --version 2>&1 | grep 'BBTools version'",
+    echo_cmd="bbsplit.sh ref={params.ref} {params.args} in=<sample_R1.fastq.gz> basename=<sample_%.fastq.gz> outu=<sample_R1_bbsplit.fastq.gz>"
+)
+EOF
+      fi
+      """
