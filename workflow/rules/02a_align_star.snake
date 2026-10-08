@@ -1,16 +1,22 @@
 # ====== Rules for aligning reads =================================
 
 
-# Align trimmed reads with star
+# Align trimmed reads with star. Always emits a transcriptome-coordinate BAM
+# too (--quantMode TranscriptomeSAM) -- a small amount of extra runtime/disk
+# for any plain RNA-seq run that doesn't need it, but it means this one rule
+# covers both star.smk's own use and RiboSeq.smk/RiboSeq_UMI.smk's need for a
+# transcriptome BAM (riboWaltz's P-site calibration wants transcript, not
+# spliced-genome, coordinates), instead of maintaining a near-duplicate fork.
 rule star_twopass:
     input:
         R1 = lambda wildcards: PROJ + f"/{wildcards.sample}_R1.fastq" + (".gz" if config.get("compress_temp", True) else ""),
         R2 = lambda wildcards: PROJ + f"/{wildcards.sample}_R2.fastq" + (".gz" if config.get("compress_temp", True) else "")
     output:
-        bam   = temp(PROJ + "/{sample}_" + INDEX_MAP + ".bam"),
-        bai   = temp(PROJ + "/{sample}_" + INDEX_MAP + ".bam.bai"),
-        stats = PROJ + "/bams/{sample}_Log.out",
-        final = PROJ + "/bams/{sample}_Log.final.out"
+        bam    = temp(PROJ + "/{sample}_" + INDEX_MAP + ".bam"),
+        bai    = temp(PROJ + "/{sample}_" + INDEX_MAP + ".bam.bai"),
+        tx_bam = PROJ + "/bams/{sample}_Aligned.toTranscriptome.out.bam",
+        stats  = PROJ + "/bams/{sample}_Log.out",
+        final  = PROJ + "/bams/{sample}_Log.final.out"
     params:
         job_name = "{sample}_star_twopass",
         cmd      = PROJ + "/pipeline/04_star_twopass.cmd",
@@ -19,24 +25,41 @@ rule star_twopass:
         bam_unsorted = PROJ + "/bams/{sample}_Aligned.out.bam",
         args     = lambda wildcards: CMD_PARAMS["star"]["paired" if PAIREDMAP[wildcards.sample] else "single"],
         out      = PROJ + "/bams/{sample}_",
-        read_cmd = "--readFilesCommand gunzip -c" if config.get("compress_temp", True) else ""
+        read_cmd = "--readFilesCommand gunzip -c" if config.get("compress_temp", True) else "",
+        is_paired = lambda wildcards: PAIREDMAP[wildcards.sample]
     resources:
-        memory = lambda wildcards, input: memory_estimator([input.R1, input.R2], 20, 25, 250) # input, multiplyer, min, max
+        # min bumped 25->45: STAR + --quantMode TranscriptomeSAM against this
+        # hg38 index has a real, consistent RAM footprint of ~36-38GB
+        # regardless of input fastq size -- confirmed across 8+ real runs on
+        # multiple nodes (MaxRSS consistently 35.87-37.95GB). A 36GB floor
+        # still landed right on that edge and OOM-killed reliably (not node
+        # contention -- too consistent across nodes/retries for that); 25GB
+        # only ever worked for samples whose fastq size pushed the
+        # 20x-multiplier estimate comfortably above the real requirement on
+        # its own. 45GB gives real headroom above the observed range.
+        memory = lambda wildcards, input: memory_estimator([input.R1, input.R2], 20, 45, 250) # input, multiplyer, min, max
     message:
         "Running STAR alignment with two-pass mode"
-    threads: 
+    threads:
         16
     shell:
       """
       mkdir -p '{params.cmdd}'
       sort_threads=4
       mem_per_thread=$(( {resources.memory} * 1024 * 60 / 100 / $sort_threads ))
-  
+
+      if [ "{params.is_paired}" = "True" ]; then
+          reads="{input.R1} {input.R2}"
+      else
+          reads="{input.R1}"
+      fi
+
       STAR \
         --genomeDir {INDEX_PATH} \
         --runThreadN {threads} \
-        --readFilesIn {input.R1} {input.R2} \
+        --readFilesIn $reads \
         --outSAMtype BAM Unsorted \
+        --quantMode TranscriptomeSAM \
         {params.read_cmd} \
         --outFileNamePrefix {params.out} \
         --sjdbGTFfile {params.gtf} \
@@ -62,7 +85,7 @@ funs.write_cmd_once(
     "{params.cmd}",
     version_string=os.environ.get("STAR_VERSION"),
     extra_version_cmds=["samtools --version 2>&1 | head -1"],
-    echo_cmd="STAR --genomeDir <index> --readFilesIn <sample_trim_R1.fastq.gz> <sample_trim_R2.fastq.gz> --outSAMtype BAM Unsorted {params.read_cmd} --outFileNamePrefix <sample_> --sjdbGTFfile {params.gtf} {params.args} --twopassMode Basic\\nsamtools sort <sample_Aligned.out.bam> -T <sample.temp> -o <sample.bam>\\nsamtools index <sample.bam>"
+    echo_cmd="STAR --genomeDir <index> --readFilesIn <sample_trim_R1.fastq.gz> [<sample_trim_R2.fastq.gz>] --outSAMtype BAM Unsorted --quantMode TranscriptomeSAM {params.read_cmd} --outFileNamePrefix <sample_> --sjdbGTFfile {params.gtf} {params.args} --twopassMode Basic\\nsamtools sort <sample_Aligned.out.bam> -T <sample.temp> -o <sample.bam>\\nsamtools index <sample.bam>"
 )
 EOF
       """

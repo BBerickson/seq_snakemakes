@@ -177,7 +177,7 @@ include: "rules/01d_riboseq_sortmerna.snake"
 # Advisory strandedness/library-type inference
 include: "rules/01e_riboseq_strandedness.snake"
 # Align reads (STAR, genome + transcriptome BAM)
-include: "rules/02a_align_star_riboseq.snake"
+include: "rules/02a_align_star.snake"
 include: "rules/02b_align_UMI_samtools.snake"
 include: "rules/02c_align_URLS.snake"
 include: "rules/02s_align_mask_subsample.snake"

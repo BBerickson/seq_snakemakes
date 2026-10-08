@@ -20,7 +20,16 @@ rule sortmerna:
         db       = config_indexes[PRIMARY_INDEX].get("SORTMERNA_DB"),
         args     = CMD_PARAMS.get("sortmerna", "")
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 4, 8)
+        # Flat 28GB, not a file-size-scaled estimate: across 2 real OOM
+        # kills, SortMeRNA's actual peak RSS landed almost exactly at
+        # whatever the 4x-multiplier formula happened to compute (9GB then
+        # 13GB -- neither was the floor, both were genuine multiplier
+        # outputs), meaning input-fastq-size is not a reliable predictor of
+        # its real memory use for this tool+database at all -- any
+        # file-size-driven estimate risks landing back on that same knife's
+        # edge regardless of which floor/multiplier values are chosen. A
+        # flat allocation well above both observed peaks is the safer fix.
+        memory   = 28
     threads:
         8
     shell:

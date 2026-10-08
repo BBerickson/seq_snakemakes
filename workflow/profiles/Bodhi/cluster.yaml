@@ -4,3 +4,13 @@ __default__:
   partition: normal
   qos: normal
   time: "8:00:00"
+
+# SortMeRNA against the full default rRNA database on large single-end
+# Ribo-seq fastqs (100M+ reads) genuinely needs more than the 8h default --
+# confirmed via real runs: 3 of 4 samples hit the 8h TIMEOUT wall, only one
+# finished (in 7h25m). 24h gives real margin above the observed range.
+sortmerna:
+  account: normal
+  partition: normal
+  qos: normal
+  time: "24:00:00"

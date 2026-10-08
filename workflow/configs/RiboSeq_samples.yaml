@@ -156,8 +156,8 @@ skip_html_report: true
 #                                    reads than typical RNA-seq).
 # --outFilterMultimapNmax INT       Max loci a read can map to before being
 #                                    considered unmapped.
-# --quantMode TranscriptomeSAM      Always added by
-#                                    rules/02a_align_star_riboseq.snake --
+# --quantMode TranscriptomeSAM      Always added by rules/02a_align_star.snake
+#                                    (shared with plain RNA-seq's star.smk) --
 #                                    do not set here, it's hardcoded.
 #
 ####bamCoverage#####

@@ -15,6 +15,11 @@ rule trim_galore:
         )
     output:
         R1    = temp(PROJ + "/{sample}_R1.fastq" + (".gz" if config.get("compress_temp", True) else "")),
+        # Ribo-seq is always single-end -- R2 is an empty placeholder, same
+        # convention clumpify/bbduk already use for single-end samples, so
+        # the shared 02a_align_star.snake (which unconditionally declares
+        # both R1 and R2 as inputs) works identically for both pipelines.
+        R2    = temp(PROJ + "/{sample}_R2.fastq" + (".gz" if config.get("compress_temp", True) else "")),
         report = PROJ + "/trim_galore/{sample}_trimming_report.txt"
     params:
         job_name = "{sample}_trim_galore",
@@ -31,6 +36,7 @@ rule trim_galore:
       mkdir -p '{params.cmdd}' '{params.outdir}'
       if [ -z "{params.args}" ]; then
           cp {input[0]} {output.R1}
+          touch {output.R2}
           touch {output.report}
           python - << 'EOF'
 import sys
@@ -58,6 +64,7 @@ EOF
           mv "{params.outdir}/${{in_base}}_trimmed.fq.gz" {output.R1}
           mv "{params.outdir}/${{in_base}}.fastq.gz_trimming_report.txt" {output.report} 2>/dev/null || \
           mv "{params.outdir}/${{in_base}}.fq.gz_trimming_report.txt" {output.report}
+          touch {output.R2}
 
           python - << 'EOF'
 import sys

@@ -26,7 +26,13 @@ rule ribowaltz_psite:
         outdir   = PROJ + "/report/riboWaltz",
         samples  = " ".join(SAMS_UNIQ)
     resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 2, 8, 64)
+        # min bumped 8->16: OOM-killed twice with real usage (5.98GB, 7.33GB)
+        # comfortably under the 8GB request both times -- same node-pressure
+        # signature as 02b_align_samtools.snake's align_filter_indexed (this
+        # job runs concurrently with several large sortmerna/STAR jobs from
+        # sibling samples). Requesting more makes the scheduler less willing
+        # to co-locate it on an already-strained node.
+        memory   = lambda wildcards, input: memory_estimator(input, 2, 16, 64)
     threads:
         4
     shell:

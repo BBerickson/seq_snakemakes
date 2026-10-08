@@ -113,7 +113,14 @@ rule align_filter_indexed:
         fa       = lambda wildcards: config_indexes[wildcards.index].get("FA_SAMPLE"),
         sortname = PROJ + "/{sample}_aligned_{index}.temp"
     resources:
-        memory = lambda wildcards, input: memory_estimator(input, 4, 8) # multiplier, min, max, unit=GB
+        # min bumped 8->16->24: this small job (actual usage has ranged from
+        # under 100MB to 15.69GB) kept getting OOM-killed anyway -- 4 times
+        # across 2 different samples now, always with huge unrelated jobs
+        # (70+GB STAR, 28GB SortMeRNA x4 samples) running concurrently on
+        # shared nodes. The 15.69GB data point landed uncomfortably close to
+        # the 16GB floor, so this isn't purely a scheduling-pressure fix
+        # anymore either -- 24GB gives real margin on both fronts.
+        memory = lambda wildcards, input: memory_estimator(input, 4, 24) # multiplier, min, max, unit=GB
     threads: 4
     shell:
       """

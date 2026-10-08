@@ -23,11 +23,11 @@ SCALING_REF:
 
 # files for deeptools matrix  
 MY_REF:
-  "/beevol/home/erickson/ref/hg38_p14/base_ref/hg38.bed"
+  "/beevol/home/erickson/ref/hg38_p14/base_ref/matrix_ref/hg38.bed"
 FW_REF:
-  "/beevol/home/erickson/ref/hg38_p14/base_ref/hg38_pos.bed"
+  "/beevol/home/erickson/ref/hg38_p14/base_ref/matrix_ref/hg38_pos.bed"
 REV_REF:
-  "/beevol/home/erickson/ref/hg38_p14/base_ref/hg38_neg.bed"
+  "/beevol/home/erickson/ref/hg38_p14/base_ref/matrix_ref/hg38_neg.bed"
 PI_REF:
   "/beevol/home/erickson/ref/hg38_p14/base_ref/matrix_ref/PI.bed"
 FW_PI_REF:
