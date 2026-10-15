@@ -1,5 +1,5 @@
 RIBO-SEQ PIPELINE -- FILE TRACKING LIST
-Last updated: 2026-10-15
+Last updated: 2026-10-15 (Phase 2 debugged + verified)
 
 Covers the Ribo-seq + Ribo-seq/RNA-seq translational-efficiency pipeline
 built in Ben_pipelines/snakemake_pipelines, and its real-data test project
@@ -50,11 +50,19 @@ workflow/profiles/Bodhi/ref/hg38.yaml           + SORTMERNA_DB, BED12, SALMON_IN
 
 Phase 2 -- Translational efficiency (RiboSeq + RNAseq join)
 -------------------------------------------------------------
-workflow/RiboSeq_TE.smk                         entrypoint (not yet tested w/ real data)
-workflow/configs/RiboSeq_TE_samples.yaml        samples.yaml template
+workflow/RiboSeq_TE.smk                         entrypoint -- DEBUGGED + VERIFIED
+                                                 against real data 2026-10-15 (see
+                                                 "modified" section below for fixes)
+workflow/configs/RiboSeq_TE_samples.yaml        samples.yaml template -- added
+                                                 RIBO_SAMPLES_YAML/RNA_SAMPLES_YAML
 workflow/submit_scripts/run_RiboSeq_TE_bodhi.sh cluster submit script
-workflow/scripts/te_analysis.R                  anota2seq/xtail TE analysis
-workflow/scripts/te_go_enrichment.R             GO enrichment on TE results
+workflow/scripts/te_analysis.R                  anota2seq/xtail TE analysis --
+                                                 5 real bugs fixed, see below
+workflow/scripts/te_go_enrichment.R              GO enrichment on TE results --
+                                                 STILL UNTESTED (needs
+                                                 clusterProfiler + org.*.eg.db in
+                                                 the container, not yet added;
+                                                 run_go_enrichment stays false)
 
 
 ====================================================================
@@ -101,6 +109,48 @@ workflow/profiles/Bodhi/ref/hg38_star.yaml
 workflow/profiles/Bodhi/cluster.yaml
     - added a per-rule "sortmerna:" entry (24h time limit, default was 8h)
 
+workflow/rules/01d_riboseq_sortmerna.snake
+    - per-chunk cleanup never cleaned up the FINAL chunk's workdir once the
+      loop exited -- left ~19GB of dead idx/kvdb/readb files per sample on
+      a real run. Added a final rm -rf after the loop.
+
+workflow/scripts/funs.py
+    - added load_nickname_map(): reads a completed project's own
+      samples.yaml and returns {nickname: fastq_prefix} -- needed because
+      RiboSeq_TE.smk's two joined projects don't share a fastq-prefix
+      convention (see below)
+
+workflow/RiboSeq_TE.smk (Phase 2 debugging, 2026-10-15)
+    - real design gap: CONTRASTS' group1/group2 were used directly as the
+      fastq-prefix for BOTH runs' featureCounts paths, but the two
+      projects are never guaranteed to share one (confirmed on real data:
+      "ribo_untr_a" vs. "mrna_untr_a" for the same nickname). Now
+      translated per-project via load_nickname_map() against each
+      project's own RIBO_SAMPLES_YAML/RNA_SAMPLES_YAML.
+    - te_analysis rule's memory floor bumped 2->16GB (see te_analysis.R
+      entry below for why)
+
+workflow/scripts/te_analysis.R (Phase 2 debugging, 2026-10-15 -- 5 real
+bugs found running the untested first draft against real anota2seq/xtail,
+all on the real GSE65778_untr_tm_TE test run)
+    - purrr::reduce() shadowed by IRanges' S4 generic once anota2seq loads
+      its Bioconductor stack ("unable to find an inherited method for
+      function 'reduce' for signature x = 'list'") -- qualified as
+      purrr::reduce explicitly
+    - anota2seq hard-requires >=3 replicates per group (real test data has
+      2) and errors rather than degrading -- now skipped gracefully with
+      NA placeholder columns (apvEff/apvRvmPAdj) when a group is too
+      small, falling through to xtail alone
+    - xtail's memory need doesn't scale with featureCounts file size at
+      all (driven by its own permutation-based significance testing) --
+      OOM-killed at ~1.3GB against the old 2GB floor
+    - resultsTable(xt, log2FCs=TRUE) returns a matrix, not a data.frame --
+      rownames_to_column("ID") failed with "is.data.frame(df) is not
+      TRUE" -- wrapped in as.data.frame() first
+    - the 4-quadrant plot's aes() referenced log2FC_mRNA/log2FC_RPF, but
+      xtail's real resultsTable() output names them mRNA_log2FC/
+      RPF_log2FC (reversed word order) -- fixed to match
+
 
 ====================================================================
 MAIN REPO: DELETED FILES
@@ -143,6 +193,32 @@ rnaseq/RNAseq_samples.yaml
 rnaseq/                                         completed successfully, unaffected
                                                  by any of the Ribo-seq-specific bugs
 
+te/ (new, 2026-10-15)
+    - RiboSeq_TE_samples.yaml: joins riboseq/'s and rnaseq/'s completed
+      output, one contrast (Tm_vs_Untr: untr_a/untr_b vs. tm_a/tm_b)
+    - workflow/: synced copy of RiboSeq_TE.smk + scripts/funs.py,
+      te_analysis.R, te_go_enrichment.R + the Bodhi cluster profile
+      (no rules/ or ref/ needed -- this pipeline does no alignment/
+      quantification of its own)
+    - GSE65778_untr_tm_TE/report/: Tm_vs_Untr_TE_results.tsv + MA/volcano/
+      4-quadrant plots, all verified correct
+    - test_anota2seq_synthetic.R (standalone, not part of the pipeline):
+      GSE65778's full dataset (confirmed via direct GEO/NCBI E-utilities
+      lookup) has exactly 2 replicates/condition everywhere, so real data
+      can never exercise anota2seq's code path (hard-requires >=3/group).
+      Built a synthetic 1000-gene x 4-reps/group matrix with a deliberate
+      3x TE shift injected into the first 100 genes, ran the real
+      anota2seqDataSetFromMatrix/anota2seqRun/anota2seqGetOutput pipeline
+      against it inside the real container (job 479003, 2026-10-15).
+      Result: ran cleanly end-to-end; apvEff/apvRvmPAdj confirmed as real
+      output column names; shifted genes showed mean apvEff 1.55 vs.
+      -0.04 for unshifted genes -- a clean, obvious separation confirming
+      anota2seq's statistical model is genuinely working, not just
+      running without error. One additional confirmed gotcha (already
+      correctly handled in te_analysis.R:110): anota2seqGetOutput(...,
+      output="full") returns a plain matrix, not a data.frame, same
+      pattern as xtail's resultsTable().
+
 
 ====================================================================
 STATUS
@@ -156,6 +232,14 @@ clean up after themselves automatically).
 
 rnaseq/: COMPLETE -- ran cleanly, no Ribo-seq-specific bugs applied here.
 
-Phase 2 (RiboSeq_TE.smk): scaffold exists (built before Phase 1 testing
-began) but has NEVER been run against real data -- this is the next piece
-of work.
+Phase 2 (te/): COMPLETE -- first full real-data success 2026-10-15. xtail
+produced real per-gene TE results (mRNA/RPF log2FC, TE log2FC, p-values)
+for the Tm_vs_Untr contrast. anota2seq correctly skipped on real data
+(GSE65778's 2 replicates/group everywhere is below anota2seq's hard
+3-replicate minimum -- confirmed via direct GEO/NCBI lookup that no
+combination of the dataset's arms can reach 3/group) -- but its actual
+code path IS now validated, via a synthetic-data test (job 479003,
+2026-10-15): ran cleanly, apvEff/apvRvmPAdj confirmed as real columns,
+and a deliberately-injected TE shift was clearly recovered (mean apvEff
+1.55 shifted vs. -0.04 unshifted). GO enrichment still untested/disabled
+(container is missing clusterProfiler + org.*.eg.db).
