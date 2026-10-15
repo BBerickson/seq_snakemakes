@@ -47,7 +47,10 @@ read_fc <- function(file, sample) {
 
 build_matrix <- function(files, samples) {
   tabs <- map2(files, samples, ~read_fc(.x, .y))
-  merged <- reduce(tabs, full_join, by = c("ID", "gene_name", "biotype"))
+  # purrr::reduce explicitly -- anota2seq pulls in the Bioconductor stack
+  # (IRanges etc.), which masks reduce() with an S4 generic for interval
+  # ranges that has no method for a plain list, breaking the bare call.
+  merged <- purrr::reduce(tabs, full_join, by = c("ID", "gene_name", "biotype"))
   if (nzchar(filter_biotype)) {
     merged <- merged %>% dplyr::filter(biotype == filter_biotype)
   }
@@ -73,24 +76,43 @@ rna_mat  <- rna_mat[keep, , drop = FALSE]
 gene_meta <- gene_meta[keep, ]
 
 # ---- anota2seq (primary) ----------------------------------------------------
-a2s <- anota2seqDataSetFromMatrix(
-  dataP = ribo_mat,
-  dataT = rna_mat,
-  phenoVec = as.character(condition),
-  dataType = "RNAseq",
-  normalize = TRUE
-)
-a2s <- anota2seqRun(a2s, performQC = FALSE, performROT = FALSE)
+# anota2seq's regression-based model needs >=3 replicates per group to have
+# enough degrees of freedom -- it checks this itself and errors out
+# (confirmed: "Sample class group1 has less than three samples" on a real
+# 2-replicate-per-group test run). Rather than hard-failing the whole
+# analysis over a sample-size limitation that xtail doesn't share, skip
+# anota2seq with a clear warning and fall through to xtail alone; the
+# combined table's anota2seq columns are then all NA (via coalesce() below)
+# instead of absent, so this isn't a silent gap.
+min_group_n <- min(table(condition))
+if (min_group_n < 3) {
+  warning(sprintf(
+    "Skipping anota2seq: needs >=3 replicates per group, smallest group here has %d. xtail-only results will be produced.",
+    min_group_n
+  ))
+  a2s_translation <- gene_meta %>%
+    dplyr::select(ID) %>%
+    dplyr::mutate(apvEff = NA_real_, apvRvmPAdj = NA_real_)
+} else {
+  a2s <- anota2seqDataSetFromMatrix(
+    dataP = ribo_mat,
+    dataT = rna_mat,
+    phenoVec = as.character(condition),
+    dataType = "RNAseq",
+    normalize = TRUE
+  )
+  a2s <- anota2seqRun(a2s, performQC = FALSE, performROT = FALSE)
 
-# anota2seqGetOutput is the documented generic accessor for pulling a full
-# results table out of the run object -- if your anota2seq version exposes
-# this slightly differently, this is the one line to adjust.
-a2s_translation <- anota2seqGetOutput(a2s, output = "full", selContrast = 1, analysis = "translation")
-a2s_translation <- as.data.frame(a2s_translation) %>% rownames_to_column("ID")
+  # anota2seqGetOutput is the documented generic accessor for pulling a full
+  # results table out of the run object -- if your anota2seq version exposes
+  # this slightly differently, this is the one line to adjust.
+  a2s_translation <- anota2seqGetOutput(a2s, output = "full", selContrast = 1, analysis = "translation")
+  a2s_translation <- as.data.frame(a2s_translation) %>% rownames_to_column("ID")
+}
 
 # ---- xtail (secondary / complementary) --------------------------------------
 xt <- xtail(rna_mat, ribo_mat, as.character(condition), baseLevel = "group1", threads = n_threads)
-xt_table <- resultsTable(xt, log2FCs = TRUE) %>% rownames_to_column("ID")
+xt_table <- as.data.frame(resultsTable(xt, log2FCs = TRUE)) %>% rownames_to_column("ID")
 # resultsTable(log2FCs=TRUE)'s exact column names (expected: mRNA/RPF log2FC
 # columns alongside the TE log2FC/pvalue.adjust columns used below) weren't
 # verified against a live run -- print them once so a mismatch is obvious
@@ -132,7 +154,7 @@ volcano_plot <- ggplot(plot_dat, aes(x = te_effect, y = -log10(te_padj), color =
   theme_minimal()
 ggsave(file.path(outdir, paste0(contrast_name, "_volcano_plot.png")), volcano_plot, width = 7, height = 5)
 
-quad_plot <- ggplot(plot_dat, aes(x = log2FC_mRNA, y = log2FC_RPF, color = sig)) +
+quad_plot <- ggplot(plot_dat, aes(x = mRNA_log2FC, y = RPF_log2FC, color = sig)) +
   geom_point(alpha = 0.5) +
   geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
   scale_color_manual(values = c("grey60", "firebrick")) +

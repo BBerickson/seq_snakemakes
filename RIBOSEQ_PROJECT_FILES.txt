@@ -1,0 +1,161 @@
+RIBO-SEQ PIPELINE -- FILE TRACKING LIST
+Last updated: 2026-10-15
+
+Covers the Ribo-seq + Ribo-seq/RNA-seq translational-efficiency pipeline
+built in Ben_pipelines/snakemake_pipelines, and its real-data test project
+at /beevol/home/erickson/Human/RIBOseq/GSE65778_test/.
+
+
+====================================================================
+MAIN REPO: NEW FILES (created for this project, commit 88ec4c1)
+====================================================================
+
+Phase 1 -- Ribo-seq alignment + QC pipeline
+--------------------------------------------
+workflow/RiboSeq.smk                           entrypoint (no-UMI variant)
+workflow/RiboSeq_UMI.smk                        entrypoint (UMI variant)
+workflow/configs/RiboSeq_samples.yaml           samples.yaml template (no-UMI)
+workflow/configs/RiboSeq_UMI_samples.yaml       samples.yaml template (UMI)
+workflow/submit_scripts/run_RiboSeq_bodhi.sh    cluster submit script
+workflow/submit_scripts/run_RiboSeq_UMI_bodhi.sh
+
+workflow/rules/01a_riboseq_umi_extract.snake    UMI extraction (UMI variant only)
+workflow/rules/01b_riboseq_trimgalore.snake     Trim Galore adapter/quality trim
+workflow/rules/01c_riboseq_bbsplit.snake        optional contaminant removal
+workflow/rules/01d_riboseq_sortmerna.snake      rRNA removal (chunked SortMeRNA)
+workflow/rules/01e_riboseq_strandedness.snake   advisory strandedness check (Salmon)
+workflow/rules/02a_align_star_riboseq.snake     ORIGINAL Ribo-seq STAR fork --
+                                                 later merged into
+                                                 02a_align_star.snake and
+                                                 DELETED (see "merged" section)
+workflow/rules/03b_riboWaltz.snake              P-site offset, periodicity, metagene
+workflow/rules/03c_rseqc.snake                  RSeQC read_distribution (CDS/UTR QC)
+workflow/rules/03d_results_riboseq.snake        final results.tsv + MultiQC report
+workflow/rules/03d_results_riboseq_UMI.snake     (UMI variant)
+workflow/rules/04c_riboseq_qc_plots.snake       deepTools multiBamSummary/PCA/correlation
+
+workflow/scripts/results_riboseq.R              final results.tsv builder
+workflow/scripts/ribowaltz_psite.R              riboWaltz P-site/periodicity/metagene
+workflow/scripts/rules.py                       (new file this session -- note: an
+                                                 OLDER rules.py already existed from
+                                                 other pipelines; the 88ec4c1 commit
+                                                 added the _sortmerna_summary/
+                                                 _extract_star_log_info/etc.
+                                                 functions used here)
+
+Ref yaml additions (existing files, new fields):
+workflow/profiles/Bodhi/ref/hg38_star.yaml      + SORTMERNA_DB, BED12, SALMON_INDEX,
+                                                   CHROM_PATH (added later, see below)
+workflow/profiles/Bodhi/ref/hg38.yaml           + SORTMERNA_DB, BED12, SALMON_INDEX
+
+Phase 2 -- Translational efficiency (RiboSeq + RNAseq join)
+-------------------------------------------------------------
+workflow/RiboSeq_TE.smk                         entrypoint (not yet tested w/ real data)
+workflow/configs/RiboSeq_TE_samples.yaml        samples.yaml template
+workflow/submit_scripts/run_RiboSeq_TE_bodhi.sh cluster submit script
+workflow/scripts/te_analysis.R                  anota2seq/xtail TE analysis
+workflow/scripts/te_go_enrichment.R             GO enrichment on TE results
+
+
+====================================================================
+MAIN REPO: EXISTING FILES MODIFIED (shared across multiple pipelines)
+====================================================================
+
+workflow/rules/02a_align_star.snake
+    - merged with the (now-deleted) 02a_align_star_riboseq.snake: single-end
+      STAR bug fix (was unconditionally passing empty R2), unconditional
+      --quantMode TranscriptomeSAM + transcriptome BAM output, memory tuning.
+
+workflow/rules/02b_align_samtools.snake
+    - CHROM_PATH fix (contig-filter lookup was resolving to a nonexistent
+      path for *_star.yaml ref families)
+    - align_filter_indexed memory scaling bumped (8->16->24->32 floor,
+      multiplier 4->6->8) across several real OOM rounds
+
+workflow/rules/02b_align_UMI_samtools.snake     CHROM_PATH fix (same as above)
+workflow/rules/02s_align_mask_subsample.snake   CHROM_PATH fix (same as above)
+
+workflow/rules/03a_fragmentSize.snake
+    - single-end branch: replaced BBMap's readlength.sh (hangs on certain
+      CIGAR+MD combos) with a direct samtools+awk read-length histogram
+    - paired-end branch: bamPEFragmentSize min>=max histogram-crash fallback
+      (this was fixed earlier, commit 7c4a489, not part of this session)
+
+workflow/scripts/rules.py
+    - _extract_star_log_info: fixed overall_alignment_rate (was STAR's
+      "Uniquely mapped reads %" alone, not a true overall rate -- now
+      summed with multi-mapped %)
+    - _sortmerna_summary: fixed to read real SortMeRNA stdout output
+      ("Aligned reads (passing E-value)") instead of a line that never
+      matched real output
+
+workflow/rules/03d_results_riboseq.snake
+workflow/rules/03d_results_riboseq_UMI.snake
+    - declared fragment_results.tsv as an explicit Snakemake input
+      (results_riboseq.R was reading it via an undeclared filesystem glob)
+
+workflow/profiles/Bodhi/ref/hg38_star.yaml
+    - added CHROM_PATH (separate from INDEX_PATH, which *_star.yaml ref
+      families repurpose for STAR's genomeDir)
+
+workflow/profiles/Bodhi/cluster.yaml
+    - added a per-rule "sortmerna:" entry (24h time limit, default was 8h)
+
+
+====================================================================
+MAIN REPO: DELETED FILES
+====================================================================
+
+workflow/rules/02a_align_star_riboseq.snake
+    - merged into 02a_align_star.snake (see above) once the Ribo-seq-specific
+      STAR behavior was confirmed to just be config, not code, differences
+
+
+====================================================================
+LIVE TEST PROJECT: /beevol/home/erickson/Human/RIBOseq/GSE65778_test/
+====================================================================
+
+riboseq/RiboSeq_samples.yaml
+    - filled in for GSE65778 (untreated vs. tunicamycin, 4 samples), fixed
+      mid-testing: adapter sequence (AACTGTAGGCACCATCAAT -> correct
+      CTGTAGGCACCATCAAT -- the original had 2 erroneous leading bases)
+
+riboseq/run_RiboSeq_bodhi.sh                    (copied from repo template, unmodified)
+
+riboseq/workflow/                               full synced copy of the repo's
+                                                 workflow/ directory (rules, scripts,
+                                                 profiles) -- kept in sync by hand
+                                                 with every repo-side fix this session
+
+riboseq/workflow/ref/hg38_star.yaml
+    NOTE: this is a SEPARATE, one-time flattened copy of the ref yaml made at
+    project setup (load_index_config's default ref_dir is "workflow/ref",
+    NOT "workflow/profiles/Bodhi/ref") -- it is the file actually read at
+    runtime and needed the CHROM_PATH fix applied directly; the repo's own
+    workflow/profiles/Bodhi/ref/hg38_star.yaml copy is NOT read by this
+    live project at all.
+
+rnaseq/RNAseq_samples.yaml
+    - filled in for the matched RNA-seq data (same 4 nicknames), no pipeline
+      code changes needed -- this just runs the existing, already-working
+      RNAseq.smk
+
+rnaseq/                                         completed successfully, unaffected
+                                                 by any of the Ribo-seq-specific bugs
+
+
+====================================================================
+STATUS
+====================================================================
+
+Phase 1 (riboseq/): COMPLETE -- all 4 samples processed end-to-end, verified
+correct (76-93.5% alignment rates, 13nt P-site offset, ~29nt dominant
+footprint length, clean periodicity). 19GB of leftover SortMeRNA working-
+directory files cleaned up 2026-10-15 (also fixed the rule so future runs
+clean up after themselves automatically).
+
+rnaseq/: COMPLETE -- ran cleanly, no Ribo-seq-specific bugs applied here.
+
+Phase 2 (RiboSeq_TE.smk): scaffold exists (built before Phase 1 testing
+began) but has NEVER been run against real data -- this is the next piece
+of work.

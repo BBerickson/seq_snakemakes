@@ -25,10 +25,21 @@ RNA_PROJ:
 RNA_INDEX:
     "hg38"
 
-# Each contrast compares two groups of samples. Nicknames must match EXACTLY
-# between the Ribo-seq and RNA-seq runs' own SAMPLES dicts (e.g. both runs
-# must use "WT_Rep1"/"KO_Rep1" etc. as their nickname) -- samples are paired
-# by nickname, not by position.
+# Each completed run's OWN samples.yaml -- needed to translate a shared
+# nickname (below) into that run's own fastq-prefix naming, since the two
+# runs are never guaranteed to share one (e.g. "ribo_untr_a" vs
+# "mrna_untr_a" for the same "untr_a" nickname) and featureCounts files are
+# named after the fastq prefix, not the nickname.
+RIBO_SAMPLES_YAML:
+    "/path/to/completed/riboseq/run/RiboSeq_samples.yaml"
+RNA_SAMPLES_YAML:
+    "/path/to/completed/rnaseq/run/RNAseq_samples.yaml"
+
+# Each contrast compares two groups of samples, by NICKNAME (e.g. "untr_a",
+# not "ribo_untr_a"/"mrna_untr_a") -- nicknames must match EXACTLY between
+# the Ribo-seq and RNA-seq runs' own SAMPLES dicts (e.g. both runs must use
+# "WT_Rep1"/"KO_Rep1" etc. as their nickname) -- samples are paired by
+# nickname, not by position or by fastq-prefix.
 #
 # CONTRASTS:
 #   - name: "KO_vs_WT"

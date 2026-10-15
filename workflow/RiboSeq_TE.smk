@@ -35,6 +35,15 @@ os.makedirs(PROJ + "/report", exist_ok=True)
 CONTRAST_NAMES = [c["name"] for c in CONTRASTS]
 CONTRAST_BY_NAME = {c["name"]: c for c in CONTRASTS}
 
+# CONTRASTS' group1/group2 are nicknames shared between the two completed
+# runs -- but each run's OWN fastq-prefix naming is independent (e.g.
+# "ribo_untr_a" vs "mrna_untr_a" for the same nickname), since
+# featureCounts files are named after the fastq prefix, not the nickname.
+# Translate through each project's own samples.yaml before constructing
+# featureCounts paths.
+RIBO_NICKNAME_MAP = load_nickname_map(config.get("RIBO_SAMPLES_YAML"))
+RNA_NICKNAME_MAP  = load_nickname_map(config.get("RNA_SAMPLES_YAML"))
+
 wildcard_constraints:
     contrast = r"[a-zA-Z0-9_\-]+"
 
@@ -51,12 +60,14 @@ rule te_analysis:
     input:
         ribo_fc = lambda wildcards: expand(
             RIBO_PROJ + "/counts/{sample}_aligned_{index}_featureCounts.tsv",
-            sample = CONTRAST_BY_NAME[wildcards.contrast]["group1"] + CONTRAST_BY_NAME[wildcards.contrast]["group2"],
+            sample = [RIBO_NICKNAME_MAP[n] for n in
+                      CONTRAST_BY_NAME[wildcards.contrast]["group1"] + CONTRAST_BY_NAME[wildcards.contrast]["group2"]],
             index = RIBO_INDEX
         ),
         rna_fc = lambda wildcards: expand(
             RNA_PROJ + "/counts/{sample}_aligned_{index}_featureCounts.tsv",
-            sample = CONTRAST_BY_NAME[wildcards.contrast]["group1"] + CONTRAST_BY_NAME[wildcards.contrast]["group2"],
+            sample = [RNA_NICKNAME_MAP[n] for n in
+                      CONTRAST_BY_NAME[wildcards.contrast]["group1"] + CONTRAST_BY_NAME[wildcards.contrast]["group2"]],
             index = RNA_INDEX
         )
     output:
@@ -72,7 +83,13 @@ rule te_analysis:
         filter_biotype = CMD_PARAMS.get("filter_biotype", ""),
         outdir   = PROJ + "/report"
     resources:
-        memory = lambda wildcards, input: memory_estimator(input, 1, 2, 16)
+        # min bumped 2->16: OOM-killed at ~1.3GB against the 2GB floor --
+        # xtail's internal permutation-based significance testing scales
+        # with gene/permutation count, not featureCounts input file size
+        # (a few MB here), so the file-size estimate was never going to be
+        # representative. Same pattern as sortmerna/riboWaltz elsewhere in
+        # this pipeline.
+        memory = lambda wildcards, input: memory_estimator(input, 1, 16, 32)
     threads:
         4
     shell:

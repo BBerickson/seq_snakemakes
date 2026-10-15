@@ -110,7 +110,7 @@ EOF
               *.gz) gzip -c {params.chunkdir}/filtered.fq > {output.R1} ;;
               *)    mv {params.chunkdir}/filtered.fq {output.R1} ;;
           esac
-          rm -rf {params.chunkdir}
+          rm -rf {params.chunkdir} {params.workdir}
 
           python - << 'EOF'
 import sys

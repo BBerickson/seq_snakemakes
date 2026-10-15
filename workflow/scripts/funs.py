@@ -367,6 +367,25 @@ def process_samples(all_samples, primary_index, other_indexes, norm, orientation
     return SAMPLES, SAMPIN, GROUPS, NORMMAP, PAIREDMAP
 
 
+# RiboSeq_TE.smk needs to translate a shared nickname (e.g. "untr_a") into
+# each of two ALREADY-COMPLETED, independent projects' own fastq-prefix
+# naming (e.g. "ribo_untr_a" on the Ribo-seq side, "mrna_untr_a" on the
+# RNA-seq side) -- the two runs are never guaranteed to share a fastq-prefix
+# convention, only the nickname. Reads just the SAMPLES block of a
+# completed project's own samples.yaml; a nickname mapping to more than one
+# fastq (multi-lane/multi-input samples) isn't supported here -- only the
+# first entry is used, since each one gets its own independent bam/
+# featureCounts file, not a combined one.
+def load_nickname_map(samples_yaml_path):
+    with open(samples_yaml_path) as f:
+        config = yaml.safe_load(f)
+    nickname_map = {}
+    for section in config["SAMPLES"].values():
+        for pair in section.values():
+            for nickname, values in pair.items():
+                nickname_map[nickname] = values[0]
+    return nickname_map
+
 
 # Determine the suffix (e.g. fw/rev pos/neg) for a list of bigwigs matching a single
 # sample name the expectation is that all bigwigs in the list will have the same suffix
