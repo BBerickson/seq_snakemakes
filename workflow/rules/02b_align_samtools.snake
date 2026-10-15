@@ -107,7 +107,18 @@ rule align_filter_indexed:
         job_name = "{sample}_align_filter_{index}",
         cmd      = PROJ + "/pipeline/06_index_filter.cmd",
         cmdd     = PROJ + "/pipeline",
-        idx      = lambda wildcards: INDEX_PATH + wildcards.index + ".txt",
+        # CHROM_PATH optional override: for *_star.yaml ref families,
+        # INDEX_PATH is intentionally repurposed to point at the STAR
+        # genomeDir (see star.smk's own comment), not the chrom-list-txt
+        # directory this rule actually needs -- confirmed via a real crash,
+        # "head: cannot open .../star_idxhg38.txt" (INDEX_PATH + index +
+        # ".txt" resolving into the STAR index dir, where no such file
+        # exists), which silently emptied the contig filter and let samtools
+        # view pass the entire unfiltered bam through, inflating real memory
+        # need well past what file-size-based estimates accounted for.
+        # CHROM_PATH defaults to INDEX_PATH (preserving existing behavior for
+        # every non-STAR ref yaml, where the two already coincide).
+        idx      = lambda wildcards: config_indexes[wildcards.index].get("CHROM_PATH", INDEX_PATH) + wildcards.index + ".txt",
         samp     = "{sample}_{index}",
         args     = CMD_PARAMS["samtools"],
         fa       = lambda wildcards: config_indexes[wildcards.index].get("FA_SAMPLE"),
@@ -120,7 +131,21 @@ rule align_filter_indexed:
         # shared nodes. The 15.69GB data point landed uncomfortably close to
         # the 16GB floor, so this isn't purely a scheduling-pressure fix
         # anymore either -- 24GB gives real margin on both fronts.
-        memory = lambda wildcards, input: memory_estimator(input, 4, 24) # multiplier, min, max, unit=GB
+        # multiplier 4->6, min 24->32: after fixing a Ribo-seq adapter bug
+        # elsewhere, STAR's alignment rate jumped from ~7% to ~93%, so the
+        # multimap.bam input to this rule is now much larger (e.g. 6.8GB for
+        # one sample, estimate ~27GB at multiplier=4) -- OOM-killed twice at
+        # that size even with margin (MaxRSS 23.99GB on the 2nd attempt,
+        # right at the old 24GB floor), confirming genuine data-driven
+        # undersizing now, not just node contention.
+        # multiplier 6->8: after also fixing a separate contig-filter bug
+        # (CHROM_PATH), the 2 smaller samples succeeded fine under
+        # multiplier=6, but the 2 largest (6.8GB/5.1GB multimap.bam, highest
+        # read counts) still OOM-killed comfortably under their own request
+        # (23.6GB/15.8GB) -- real per-sample scaling gap for the largest
+        # inputs specifically, not node contention (confirmed: ran alongside
+        # only a single small unrelated 8GB job on an otherwise-idle node).
+        memory = lambda wildcards, input: memory_estimator(input, 8, 32) # multiplier, min, max, unit=GB
     threads: 4
     shell:
       """

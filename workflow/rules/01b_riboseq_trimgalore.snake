@@ -14,11 +14,22 @@ rule trim_galore:
             _get_fqs(wildcards.sample, RAW_DATA, FASTQ_DIR, full_name=True, paired=False)
         )
     output:
-        R1    = temp(PROJ + "/{sample}_R1.fastq" + (".gz" if config.get("compress_temp", True) else "")),
+        # NOT the canonical {sample}_R1.fastq -- bbsplit/sortmerna still run
+        # after this (see 01c_riboseq_bbsplit.snake/01d_riboseq_sortmerna.snake),
+        # and sortmerna's own output is what's actually named {sample}_R1.fastq
+        # (the name 02a_align_star.snake's STAR rule reads), matching this
+        # repo's convention that the LAST filtering step always produces the
+        # canonical name. This was a real bug until now: trim_galore's output
+        # used to claim that name itself, which meant STAR read trim_galore's
+        # unfiltered reads directly and bbsplit/sortmerna's filtered fastqs
+        # were computed but never actually fed into alignment.
+        R1    = temp(PROJ + "/{sample}_R1_trim.fastq" + (".gz" if config.get("compress_temp", True) else "")),
         # Ribo-seq is always single-end -- R2 is an empty placeholder, same
         # convention clumpify/bbduk already use for single-end samples, so
         # the shared 02a_align_star.snake (which unconditionally declares
         # both R1 and R2 as inputs) works identically for both pipelines.
+        # This placeholder is never touched again downstream, so it keeps
+        # the canonical {sample}_R2.fastq name even though R1 doesn't.
         R2    = temp(PROJ + "/{sample}_R2.fastq" + (".gz" if config.get("compress_temp", True) else "")),
         report = PROJ + "/trim_galore/{sample}_trimming_report.txt"
     params:

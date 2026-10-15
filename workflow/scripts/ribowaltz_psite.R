@@ -42,39 +42,51 @@ reads_psite_list <- psite_info(reads_list, psite_offset)
 # one summary row per sample: P-site offset, in-frame %, dominant footprint length
 summary_rows <- NULL
 for (s in samples) {
-  offset_row <- psite_offset %>% dplyr::filter(sample == !!s)
-
-  frames <- frame_psite_length(reads_psite_list, sample = s, region = "cds")
-  frame_tab <- frames[["dt"]]
+  # frame_psite()'s default plot_style ("split") returns "count_dt" (raw
+  # dt key) and one "plot_<sample>" entry per sample (not a flat "dt"/
+  # "plot" key) -- same for rlength_distr()/metaprofile_psite() below.
+  frames <- frame_psite(reads_psite_list, annotation_dt, sample = s, region = "cds")
+  frame_tab <- frames[["count_dt"]]
   in_frame_pct <- frame_tab %>%
     dplyr::filter(frame == 0) %>%
-    dplyr::summarise(pct = sum(percentage_top_frame, na.rm = TRUE)) %>%
+    dplyr::summarise(pct = sum(scaled_count, na.rm = TRUE)) %>%
     dplyr::pull(pct)
 
   length_dist <- rlength_distr(reads_list, sample = s)
-  length_tab  <- length_dist[["dt"]]
+  length_tab  <- length_dist[["count_dt"]]
   dominant_len <- length_tab %>%
     dplyr::slice_max(count, n = 1, with_ties = FALSE) %>%
     dplyr::pull(length)
+
+  # psite_offset has one row per (sample, read length); offset_from_5 is
+  # frequently NA for rare lengths (not enough reads to estimate it), so
+  # grabbing row 1 (sorted by length ascending) was returning NA for every
+  # sample. corrected_offset_from_5 is riboWaltz's own backfilled/adjusted
+  # value (never NA, and what psite_info() actually assigns to reads), and
+  # tying it to the dominant (most common) footprint length -- rather than
+  # whatever length happens to sort first -- gives a meaningful, stable
+  # representative offset per sample.
+  offset_row <- psite_offset %>%
+    dplyr::filter(sample == !!s, length == dominant_len[1])
 
   summary_rows <- dplyr::bind_rows(
     summary_rows,
     tibble::tibble(
       sample = s,
-      psite_offset = if (nrow(offset_row) > 0) offset_row$offset_from_5[1] else NA_real_,
+      psite_offset = if (nrow(offset_row) > 0) offset_row$corrected_offset_from_5[1] else NA_real_,
       in_frame_pct = if (length(in_frame_pct) > 0) in_frame_pct else NA_real_,
       dominant_footprint_length = if (length(dominant_len) > 0) dominant_len else NA_real_
     )
   )
 
   # per-sample plots
-  periodicity <- frames[["plot"]]
+  periodicity <- frames[[paste0("plot_", s)]]
   ggsave(file.path(outdir, paste0(s, "_periodicity.png")), periodicity, width = 7, height = 5)
 
   metaprofile <- metaprofile_psite(reads_psite_list, annotation_dt, sample = s)
-  ggsave(file.path(outdir, paste0(s, "_metaprofile.png")), metaprofile[["plot"]], width = 7, height = 5)
+  ggsave(file.path(outdir, paste0(s, "_metaprofile.png")), metaprofile[[paste0("plot_", s)]], width = 7, height = 5)
 
-  ggsave(file.path(outdir, paste0(s, "_length_dist.png")), length_dist[["plot"]], width = 7, height = 5)
+  ggsave(file.path(outdir, paste0(s, "_length_dist.png")), length_dist[[paste0("plot_", s)]], width = 7, height = 5)
 }
 
 write_tsv(summary_rows, outfile)

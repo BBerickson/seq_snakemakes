@@ -6,7 +6,7 @@
 
 rule strandedness:
     input:
-        PROJ + "/{sample}_R1_sortmerna.fastq" + (".gz" if config.get("compress_temp", True) else "")
+        PROJ + "/{sample}_R1.fastq" + (".gz" if config.get("compress_temp", True) else "")
     output:
         sub  = temp(PROJ + "/{sample}_R1_strand_subsample.fastq.gz"),
         json = PROJ + "/strandedness/{sample}_lib_format_counts.json"

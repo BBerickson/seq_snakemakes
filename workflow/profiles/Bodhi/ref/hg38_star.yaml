@@ -3,6 +3,12 @@
 # Path to mixed bowtie2 index and chrom name txt files
 INDEX_PATH:
     "/beevol/home/erickson/ref/hg38_p14/genome_builds/star_idx"
+# STAR's own INDEX_PATH above points at the genomeDir (star.smk repurposes
+# it), not the chrom-list .txt directory 02b_align_samtools.snake's
+# align_filter_indexed rule needs -- CHROM_PATH overrides just that lookup
+# (see the rule's own comment for the real crash this caused).
+CHROM_PATH:
+    "/beevol/home/erickson/ref/hg38_p14/genome_builds/"
 # bowtie2 index prefix
 INDEX_MAP:
   "hg38"

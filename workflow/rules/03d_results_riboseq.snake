@@ -13,6 +13,14 @@ rule gathering_results:
         aligned     = PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_aligned.tsv",
         fc_file     = expand(PROJ + "/stats/{sample}_summary_featureCounts.tsv", sample = SAMS_UNIQ),
         ribowaltz   = PROJ + "/stats/" + PROJ + "_ribowaltz_psite.tsv",
+        # results_riboseq.R reads this via its own list.files() glob, not a
+        # declared argument -- without this, Snakemake has no idea
+        # gathering_results depends on it, so it can silently pick up a
+        # stale fragment_results.tsv snapshot instead of re-running once a
+        # sample's fragment data changes (confirmed: produced a results.tsv
+        # with the wrong hg38_Read_Len_Mean/Median values after a
+        # fragment_size re-run).
+        fragment_results = PROJ + "/stats/" + PROJ + "_" + PRIMARY_INDEX + "_fragment_results.tsv",
         extra = [] if NORM != "subsample" else expand(
                     PROJ + "/stats/" + PROJ + "_{index}_subsample_frac.tsv",
                     index=PRIMARY_INDEX

@@ -9,6 +9,10 @@ rule gathering_results:
         dedup       = PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_UMI_dedup.tsv",
         fc_file     = expand(PROJ + "/stats/{sample}_summary_featureCounts.tsv", sample = SAMS_UNIQ),
         ribowaltz   = PROJ + "/stats/" + PROJ + "_ribowaltz_psite.tsv",
+        # results_riboseq.R reads this via its own list.files() glob, not a
+        # declared argument -- see 03d_results_riboseq.snake's identical
+        # comment for why this needs to be an explicit input.
+        fragment_results = PROJ + "/stats/" + PROJ + "_" + PRIMARY_INDEX + "_fragment_results.tsv",
         extra = [] if NORM != "subsample" else expand(
                     PROJ + "/stats/" + PROJ + "_{index}_subsample_frac.tsv",
                     index=PRIMARY_INDEX

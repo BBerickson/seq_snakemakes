@@ -6,7 +6,7 @@
 
 rule bbsplit:
     input:
-        PROJ + "/{sample}_R1.fastq" + (".gz" if config.get("compress_temp", True) else "")
+        PROJ + "/{sample}_R1_trim.fastq" + (".gz" if config.get("compress_temp", True) else "")
     output:
         R1  = temp(PROJ + "/{sample}_R1_bbsplit.fastq" + (".gz" if config.get("compress_temp", True) else "")),
         log = PROJ + "/bbsplit/{sample}_bbsplit.log"

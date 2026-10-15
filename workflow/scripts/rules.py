@@ -235,14 +235,29 @@ def _rseqc_summary(input, output):
 
 
 def _sortmerna_summary(input, output):
+    # SortMeRNA's actual per-read alignment counts go to stdout (not stderr),
+    # one line per worker THREAD, e.g.:
+    #   "Aligned reads (passing E-value): 2924616"
+    # -- not the single "Total reads passing..." summary line this used to
+    # look for (that phrasing doesn't appear in real SortMeRNA output at
+    # all; this regex never actually matched anything before). Each sample's
+    # log is also now the concatenation of one SortMeRNA run per read-chunk
+    # (see rules/01d_riboseq_sortmerna.snake), multiplying the number of
+    # matching lines further -- sum every "Aligned reads" line (one per
+    # thread per chunk) into one grand total per sample.
     with open(output, "w") as out:
         for file in input:
             name = os.path.basename(file)
             name = re.sub("_sortmerna.log", "", name)
+            total = 0
+            found = False
             for line in open(file, "r"):
-                m = re.search(r"Total reads passing E-value threshold[^:]*:\s*([0-9,]+)", line)
+                m = re.search(r"Aligned reads \(passing E-value\):\s*([0-9,]+)", line)
                 if m:
-                    out.write("%s\trRNA_reads\t%s\n" % (name, m.group(1).replace(",", "")))
+                    total += int(m.group(1).replace(",", ""))
+                    found = True
+            if found:
+                out.write("%s\trRNA_reads\t%s\n" % (name, total))
 
 
 def _strandedness_summary(input, output):
@@ -264,24 +279,39 @@ def _strandedness_summary(input, output):
 
 
 def _extract_star_log_info(input_files, output_file, index):
+    # "overall_alignment_rate" previously took STAR's "Uniquely mapped reads
+    # %" directly -- that's only the unique-mapping rate, not a true overall
+    # rate (confirmed via a real case: 21.81% unique vs the true ~93.5%
+    # unique+multi-mapped, since ~29nt Ribo-seq footprints multi-map far
+    # more than typical RNA-seq reads). Now summed with "% of reads mapped
+    # to multiple loci" to match bowtie2's own "overall alignment rate"
+    # definition elsewhere in this repo (1 - reads that produced no
+    # alignment at all); "too many loci" reads are excluded since STAR
+    # reports no alignment for them either, functionally unmapped.
     patterns = {
         "Number of input reads": ("reads", re.compile(r"Number of input reads \|\s+(.*)")),
         "Uniquely mapped reads number": ("aligned exactly 1 time", re.compile(r"Uniquely mapped reads number \|\s+(.*)")),
         "Number of reads mapped to multiple loci": ("aligned >1 times", re.compile(r"Number of reads mapped to multiple loci \|\s+(.*)")),
-        "Uniquely mapped reads %": ("overall_alignment_rate", re.compile(r"Uniquely mapped reads % \|\s+(.*)%"))
+        "Uniquely mapped reads %": ("_unique_pct", re.compile(r"Uniquely mapped reads % \|\s+([\d.]+)%")),
+        "% of reads mapped to multiple loci": ("_multi_pct", re.compile(r"% of reads mapped to multiple loci \|\s+([\d.]+)%"))
     }
 
     with open(output_file, "w") as out:
         for file in input_files:
             name = os.path.basename(file).replace("_Log.final.out", "")
+            pct = {}
             with open(file, "r") as f:
                 for line in f:
                     for key, (metric, pattern) in patterns.items():
                         match = pattern.search(line)
                         if match:
                             num = match.group(1)
-                            if key == "Uniquely mapped reads %":
-                                num += "%"
-                            out.write("%s\t%s\t%s\t%s\n" % (index, name, metric, num))
+                            if metric in ("_unique_pct", "_multi_pct"):
+                                pct[metric] = float(num)
+                            else:
+                                out.write("%s\t%s\t%s\t%s\n" % (index, name, metric, num))
                             break
+            if "_unique_pct" in pct and "_multi_pct" in pct:
+                overall = pct["_unique_pct"] + pct["_multi_pct"]
+                out.write("%s\t%s\toverall_alignment_rate\t%.2f%%\n" % (index, name, overall))
 

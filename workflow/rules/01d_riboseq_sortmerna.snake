@@ -3,35 +3,58 @@
 # Ribo-seq QC even in rRNA-depleted libraries. Reads the primary index's
 # SORTMERNA_DB ref-yaml field (rRNA database path), following the same
 # per-index-ref-yaml-field convention as SCALING_REF/PI_REF.
+#
+# Processes the input in fixed-size read CHUNKS (fresh kvdb per chunk), not
+# as one whole-file invocation. Confirmed via 3 real OOM kills on this
+# dataset that SortMeRNA's kvdb (its RocksDB-backed alignment-results store)
+# keeps growing with total reads processed rather than plateauing at some
+# fixed reference-database footprint -- all 3 failures landed at exactly
+# whatever flat memory was requested (28GB) despite wildly different
+# elapsed times (11h-17h) before being OOM-killed, which only shows where
+# the kill happened, not a natural ceiling; simply requesting more memory
+# risks repeating the same multi-hour failure with no bound. Chunking keeps
+# each invocation's reads-in-flight (and therefore its real memory need)
+# fixed regardless of total sample size -- standard practice for SortMeRNA
+# on large datasets.
 
 rule sortmerna:
     input:
         PROJ + "/{sample}_R1_bbsplit.fastq" + (".gz" if config.get("compress_temp", True) else "")
     output:
-        R1  = temp(PROJ + "/{sample}_R1_sortmerna.fastq" + (".gz" if config.get("compress_temp", True) else "")),
+        # The canonical {sample}_R1.fastq name -- this is the LAST filtering
+        # step before alignment, and 02a_align_star.snake's STAR rule reads
+        # exactly this name unchanged (see 01b_riboseq_trimgalore.snake's
+        # header comment for why this matters: it used to be trim_galore's
+        # own output that claimed this name, silently bypassing bbsplit/
+        # sortmerna for actual alignment).
+        R1  = temp(PROJ + "/{sample}_R1.fastq" + (".gz" if config.get("compress_temp", True) else "")),
         log = PROJ + "/sortmerna/{sample}_sortmerna.log"
     params:
-        job_name = "{sample}_sortmerna",
-        cmd      = PROJ + "/pipeline/03b_sortmerna.cmd",
-        cmdd     = PROJ + "/pipeline",
-        workdir  = PROJ + "/sortmerna/{sample}_workdir",
-        aligned  = PROJ + "/sortmerna/{sample}_rRNA",
-        other    = PROJ + "/sortmerna/{sample}_nonrRNA",
-        db       = config_indexes[PRIMARY_INDEX].get("SORTMERNA_DB"),
-        args     = CMD_PARAMS.get("sortmerna", "")
+        job_name    = "{sample}_sortmerna",
+        cmd         = PROJ + "/pipeline/03b_sortmerna.cmd",
+        cmdd        = PROJ + "/pipeline",
+        chunkdir    = PROJ + "/sortmerna/{sample}_chunks",
+        workdir     = PROJ + "/sortmerna/{sample}_workdir",
+        db          = config_indexes[PRIMARY_INDEX].get("SORTMERNA_DB"),
+        args        = CMD_PARAMS.get("sortmerna", ""),
+        chunk_reads = CMD_PARAMS.get("sortmerna_chunk_reads", 20000000)
     resources:
-        # Flat 28GB, not a file-size-scaled estimate: across 2 real OOM
-        # kills, SortMeRNA's actual peak RSS landed almost exactly at
-        # whatever the 4x-multiplier formula happened to compute (9GB then
-        # 13GB -- neither was the floor, both were genuine multiplier
-        # outputs), meaning input-fastq-size is not a reliable predictor of
-        # its real memory use for this tool+database at all -- any
-        # file-size-driven estimate risks landing back on that same knife's
-        # edge regardless of which floor/multiplier values are chosen. A
-        # flat allocation well above both observed peaks is the safer fix.
-        memory   = 28
+        # Flat, not file-size-scaled -- every chunk is the same fixed read
+        # count by design, so a flat allocation sized for ONE chunk is the
+        # right model here (unlike the old whole-file approach, where no
+        # fixed value was ever safe). Raised 16->32GB: one real chunk (same
+        # size as all the others) OOM-killed twice in a row at exactly 16GB
+        # with kvdb still climbing steadily (~45MB/min) and no plateau in
+        # sight at the time of each kill -- per-chunk memory need varies
+        # with read content (rRNA-hit density), not just chunk size, so a
+        # fixed read count doesn't guarantee a fixed memory footprint.
+        memory = 32
     threads:
-        8
+        # Bumped 8->16: the node has 72 cores with only ~34 in use across all
+        # 4 concurrent samples + driver, plenty of idle headroom. SortMeRNA's
+        # alignment step parallelizes well, so this should give a close-to-
+        # proportional per-chunk speedup for the slow-sample case.
+        16
     shell:
       """
       mkdir -p '{params.cmdd}' '{PROJ}/sortmerna'
@@ -49,19 +72,46 @@ funs.write_cmd_tagged(
 )
 EOF
       else
-          rm -rf {params.workdir}
-          sortmerna \
-              --ref {params.db} \
-              --reads {input[0]} \
-              --workdir {params.workdir} \
-              --aligned {params.aligned} \
-              --other {params.other} \
-              --fastx \
-              --threads {threads} \
-              {params.args} \
-              2> {output.log}
-          mv {params.other}.fq.gz {output.R1} 2>/dev/null || mv {params.other}.fq {output.R1}
-          rm -rf {params.workdir}
+          rm -rf {params.chunkdir} {params.workdir}
+          mkdir -p {params.chunkdir}
+
+          zcat -f {input[0]} | split -l $(( {params.chunk_reads} * 4 )) -d -a 4 \
+              - {params.chunkdir}/chunk_
+
+          : > {output.log}
+          : > {params.chunkdir}/filtered.fq
+          for chunk in {params.chunkdir}/chunk_*; do
+              # Only clear the per-chunk alignment-results state (kvdb/readb/
+              # out) -- NOT idx/, the built rRNA reference index. The index
+              # only depends on {params.db} (the same for every chunk of this
+              # sample), so rebuilding it per chunk was pure, costly waste
+              # (confirmed: the first real chunked run spent 50+ min with
+              # zero chunks finished, entirely re-indexing from scratch each
+              # time) -- SortMeRNA reuses an existing idx/ automatically when
+              # it matches the --ref file, so leaving it in place after the
+              # first chunk lets every later chunk skip straight to alignment.
+              rm -rf {params.workdir}/kvdb {params.workdir}/readb {params.workdir}/out \
+                     {params.workdir}/nonrRNA* {params.workdir}/rRNA*
+              sortmerna \
+                  --ref {params.db} \
+                  --reads "$chunk" \
+                  --workdir {params.workdir} \
+                  --aligned {params.workdir}/rRNA \
+                  --other {params.workdir}/nonrRNA \
+                  --fastx \
+                  --threads {threads} \
+                  {params.args} \
+                  >> {output.log} 2>&1
+              cat {params.workdir}/nonrRNA.fq >> {params.chunkdir}/filtered.fq
+              rm -f "$chunk"
+          done
+
+          case "{output.R1}" in
+              *.gz) gzip -c {params.chunkdir}/filtered.fq > {output.R1} ;;
+              *)    mv {params.chunkdir}/filtered.fq {output.R1} ;;
+          esac
+          rm -rf {params.chunkdir}
+
           python - << 'EOF'
 import sys
 sys.path.insert(0, "workflow/scripts/")
@@ -70,7 +120,7 @@ funs.write_cmd_tagged(
     "{params.cmd}",
     tag="sortmerna active",
     version_cmd="sortmerna --version 2>&1 | head -1",
-    echo_cmd="sortmerna --ref <rRNA_db> --reads <sample_R1.fastq.gz> --aligned <sample_rRNA> --other <sample_nonrRNA> --fastx {params.args}"
+    echo_cmd="split <sample_R1_bbsplit.fastq.gz> into {params.chunk_reads}-read chunks; per chunk: sortmerna --ref <rRNA_db> --reads <chunk> --aligned <chunk_rRNA> --other <chunk_nonrRNA> --fastx {params.args}; concatenate chunks' --other output -> <sample_R1.fastq.gz>"
 )
 EOF
       fi
