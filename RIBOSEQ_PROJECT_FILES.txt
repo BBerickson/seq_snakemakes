@@ -1,6 +1,6 @@
 RIBO-SEQ PIPELINE -- FILE TRACKING LIST
-Last updated: 2026-10-16 (GO enrichment debugged + validated; Ribo-seq
-project scaffolding added)
+Last updated: 2026-10-16 (UMI pathway validation started against real
+GSE202881 data)
 
 Covers the Ribo-seq + Ribo-seq/RNA-seq translational-efficiency pipeline
 built in Ben_pipelines/snakemake_pipelines, and its real-data test project
@@ -536,6 +536,35 @@ both setup_pipeline.sh scripts downloaded correctly via real wget, and the
 resulting fresh projects (enable_psite_cds_counts: true) each produced a
 clean, correct Snakemake DAG via dry-run (76 jobs no-UMI / 81 jobs UMI).
 
-Still not started: the UMI pathway (RiboSeq_UMI.smk) has never been run
-against real data -- GSE65778 has no UMIs, so this would need a different
-real or synthetic UMI Ribo-seq dataset to validate end-to-end.
+UMI pathway validation: IN PROGRESS, started 2026-10-16. Real dataset
+identified and verified via direct GEO/SRA lookup (not guessed): GSE202881
+(Lee et al., Palazzo Lab, U Toronto -- "PKM binds ribosomes..."), HEK293T,
+shPKM knockdown vs. shCtrl. Confirmed REAL UMI usage directly from the
+GEO record's own data_processing text (not inferred): 12nt UMI + 4nt
+discarded spacer, extracted via umi_tools, deduplicated by UMI -- a
+genuinely different library chemistry (Diagenode D-Plex/CATS kits) than
+GSE65778's classic Ingolia-style linker. 6 Ribo-seq samples (3 reps/
+condition, meets anota2seq's >=3/group minimum on the Ribo-seq side), 4
+paired RNA-seq samples (only 2 reps/condition -- no stated biological
+correspondence to specific Ribo-seq rep numbers, so the eventual TE-join
+contrast will document an arbitrary-but-stated 2-of-3 rep pairing, not a
+claim of matched replicates). ~15-20GB total (vs. GSE65778's larger
+download), single run per sample (no multi-lane concatenation needed).
+
+New live test project: /beevol/home/erickson/Human/RIBOseq/GSE202881_test/
+(riboseq/ using RiboSeq_UMI.smk, rnaseq/ using workflow/star.smk, same
+structure as GSE65778_test/). raw_data/readme.txt documents the full
+verification + SRR accessions + download commands. Real SRA download
+submitted as a cluster job 2026-10-16 (prefetch + fasterq-dump via
+sratoolkit/3.4.1 module). Both RiboSeq_UMI_samples.yaml (umi_pattern:
+"NNNNNNNNNNNNXXXX", matching the confirmed real UMI position; adapter
+AAAAAAAAAACAAAAAAAAAA, also confirmed from the GEO record, not the classic
+GSE65778 linker) and RNAseq_samples.yaml dry-run validated cleanly against
+fake fastqs matching the real sample names (106 jobs riboseq / 56 jobs
+rnaseq) before the real download was even complete.
+
+Not yet done: waiting on the real SRA download to finish, then the actual
+RiboSeq_UMI.smk run against real data (expect at least one or two genuine
+bugs in umi_tools extract/dedup, since that code path has never executed
+before), then the matched RNA-seq run, then RiboSeq_TE.smk with the
+documented 2-of-3-rep pairing.
