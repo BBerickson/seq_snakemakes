@@ -62,14 +62,16 @@ CMD_PARAMS:
     # enable_psite_cds_counts: true, otherwise this file won't exist.
     use_psite_counts: false
 
-# GO enrichment on TE-changed genes needs clusterProfiler + an org.*.eg.db
-# Bioconductor annotation package -- NEITHER is in your Ribo-seq container's
-# install_packages_riboseq.R as pasted earlier this session (only
-# riboWaltz/anota2seq/xtail/tximeta/tximport are listed there). Leave this
-# false until you've added those packages to the container, or this step
-# will fail outright.
+# GO enrichment on TE-changed genes. clusterProfiler/AnnotationDbi/GO.db are
+# genome-agnostic and live in the Ribo-seq container itself -- but the
+# species-specific org.*.eg.db annotation package is deliberately kept OUT
+# of the container (installed on the server instead, in a shared R library
+# directory bind-mounted at runtime) so adding a new genome never requires a
+# container rebuild. See ref/hg38_p14/go_annotation/README.txt for how to
+# obtain/install one (hg38 already set up there; also covers mouse).
 run_go_enrichment: false
 GO_ORGANISM_DB: "org.Hs.eg.db"
+GO_ANNOTATION_LIB_DIR: "/beevol/home/erickson/ref/hg38_p14/go_annotation"
 
 USER:
   "User7"

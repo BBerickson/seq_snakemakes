@@ -1,5 +1,6 @@
 RIBO-SEQ PIPELINE -- FILE TRACKING LIST
-Last updated: 2026-10-16 (P-site/CDS counting debugged + validated)
+Last updated: 2026-10-16 (GO enrichment debugged + validated; Ribo-seq
+project scaffolding added)
 
 Covers the Ribo-seq + Ribo-seq/RNA-seq translational-efficiency pipeline
 built in Ben_pipelines/snakemake_pipelines, and its real-data test project
@@ -18,6 +19,35 @@ workflow/configs/RiboSeq_samples.yaml           samples.yaml template (no-UMI)
 workflow/configs/RiboSeq_UMI_samples.yaml       samples.yaml template (UMI)
 workflow/submit_scripts/run_RiboSeq_bodhi.sh    cluster submit script
 workflow/submit_scripts/run_RiboSeq_UMI_bodhi.sh
+
+RiboSeq/ReadMe.txt, RiboSeq/setup_pipeline.sh   (new, 2026-10-16) top-level
+RiboSeq_UMI/ReadMe.txt, RiboSeq_UMI/setup_pipeline.sh  project-scaffolding
+                                                 dirs -- Ribo-seq never had
+                                                 these despite every other
+                                                 pipeline in this repo
+                                                 (BRUseq/BRUseq_UMI/RNAseq/
+                                                 etc.) having one; mirrors
+                                                 that exact convention
+                                                 (wget+bash quickstart,
+                                                 numbered pipeline-stage
+                                                 overview in ReadMe.txt).
+                                                 Bundles BOTH Phase 1 (its
+                                                 own .smk) and Phase 2
+                                                 (RiboSeq_TE.smk) into one
+                                                 project dir, same pattern
+                                                 as RNAseq's bundling of
+                                                 RNAseq.smk + *_matrix.smk.
+                                                 Structurally validated
+                                                 locally (every rsync
+                                                 source path confirmed to
+                                                 exist, full dry-run against
+                                                 the local repo tree
+                                                 produces the expected
+                                                 output structure) -- NOT
+                                                 yet tested against the real
+                                                 GitHub download (needs the
+                                                 pending local commits
+                                                 pushed first).
 
 workflow/rules/01a_riboseq_umi_extract.snake    UMI extraction (UMI variant only)
 workflow/rules/01b_riboseq_trimgalore.snake     Trim Galore adapter/quality trim
@@ -86,10 +116,12 @@ workflow/submit_scripts/run_RiboSeq_TE_pipeline_bodhi.sh  (new, 2026-10-16)
 workflow/scripts/te_analysis.R                  anota2seq/xtail TE analysis --
                                                  5 real bugs fixed, see below
 workflow/scripts/te_go_enrichment.R              GO enrichment on TE results --
-                                                 STILL UNTESTED (needs
-                                                 clusterProfiler + org.*.eg.db in
-                                                 the container, not yet added;
-                                                 run_go_enrichment stays false)
+                                                 DEBUGGED 2026-10-16, see
+                                                 "GO enrichment" entry below
+workflow/scripts/install_go_annotation_db.sh     (new, 2026-10-16) installs
+                                                 an org.*.eg.db package into
+                                                 a shared, non-container R
+                                                 library dir -- see below
 
 P-site-restricted CDS counting (new, 2026-10-15; DEBUGGED + VALIDATED
 against real GSE65778 data 2026-10-16) -- stricter alternative to
@@ -289,6 +321,67 @@ all on the real GSE65778_untr_tm_TE test run)
       xtail's real resultsTable() output names them mRNA_log2FC/
       RPF_log2FC (reversed word order) -- fixed to match
 
+GO enrichment (te_go_enrichment.R) -- debugged + wired up 2026-10-16.
+Previously blocked on "clusterProfiler + org.*.eg.db aren't in the
+container" -- turned out to be stale: clusterProfiler/AnnotationDbi/GO.db
+(genome-agnostic) are ALL already present in bberickson/riboseq:1.0.0,
+confirmed live. Only the species-specific org.*.eg.db was missing, and it
+deliberately does NOT go in the container (keeps it genome-agnostic/
+stable) -- instead:
+--------------------------------------------------------------------------
+workflow/scripts/install_go_annotation_db.sh (new)
+    - installs any org.*.eg.db package into a shared, non-container R
+      library directory (BiocManager::install(lib=...)), then verifies it
+      loads standalone from that directory alone. Needs internet access
+      (confirmed both Bodhi's login node and compute nodes reach
+      bioconductor.org) -- but this is a one-time SETUP step; the real
+      pipeline never needs network access at runtime, only the already-
+      installed package.
+    - validated on two different organisms: org.Hs.eg.db (human, real use)
+      and org.Sc.sgd.db (yeast, used purely to confirm the script is
+      genuinely parameterized, not hardcoded) -- both installed and loaded
+      correctly standalone inside the real container.
+
+/beevol/home/erickson/ref/hg38_p14/go_annotation/ (new, server-side, NOT
+in this git repo)
+    - org.Hs.eg.db v3.20.0 installed here 2026-10-16 (hg38-based, confirmed
+      via its own GPSOURCEURL metadata pointing at UCSC hg38). This is the
+      directory GO_ANNOTATION_LIB_DIR points at for the real GSE65778_test
+      project.
+    - README.txt here explains what the directory is, why org.*.eg.db
+      deliberately isn't in the container, and how to add another organism
+      (e.g. mouse org.Mm.eg.db) via install_go_annotation_db.sh -- notes
+      org.*.eg.db is per-ORGANISM not per-genome-build, so one shared
+      directory can hold every species needed, not just hg38's.
+
+workflow/scripts/te_go_enrichment.R (modified)
+    - now accepts a 4th arg, GO_ANNOTATION_LIB_DIR, prepended to
+      .libPaths() before loading GO_ORGANISM_DB -- the only change needed
+      once the org.db package existed somewhere reachable.
+
+workflow/RiboSeq_TE.smk (modified)
+    - te_go_enrichment rule passes config.get("GO_ANNOTATION_LIB_DIR", "")
+      as a new positional arg.
+
+workflow/configs/RiboSeq_TE_samples.yaml (modified)
+    - added GO_ANNOTATION_LIB_DIR field alongside the existing
+      GO_ORGANISM_DB.
+
+Live GSE65778_test/te/RiboSeq_TE_samples.yaml: flipped run_go_enrichment to
+true (was false) and set GO_ANNOTATION_LIB_DIR to the real hg38 install --
+ran end-to-end against the already-completed Tm_vs_Untr TE results
+2026-10-16. One real bug found and fixed: OOM-killed twice at MaxRSS
+2.1GB against the old 2GB floor (loading clusterProfiler's full
+Bioconductor stack + enrichGO()'s GO.db term traversal against a real
+~20K-gene universe needs more than that) -- bumped to 8GB (real usage on
+the successful run: 2.55GB, good margin). Result: 69 enriched GO terms,
+top hits "cytoplasmic translation" (p.adjust ~3.2e-14) and "chaperone-
+mediated protein folding" -- exactly the expected biology for a
+tunicamycin (ER stress/UPR-inducing) vs. untreated comparison in this
+dataset (Sidrauski et al. 2015), a strong independent sanity check that
+the whole GO enrichment path is working correctly, not just running
+without error.
+
 
 ====================================================================
 MAIN REPO: DELETED FILES
@@ -379,8 +472,9 @@ combination of the dataset's arms can reach 3/group) -- but its actual
 code path IS now validated, via a synthetic-data test (job 479003,
 2026-10-15): ran cleanly, apvEff/apvRvmPAdj confirmed as real columns,
 and a deliberately-injected TE shift was clearly recovered (mean apvEff
-1.55 shifted vs. -0.04 unshifted). GO enrichment still untested/disabled
-(container is missing clusterProfiler + org.*.eg.db).
+1.55 shifted vs. -0.04 unshifted). GO enrichment: COMPLETE -- see its own
+entry below (clusterProfiler was already in the container; only the
+org.db annotation package needed sorting out).
 
 P-site-restricted CDS counting: COMPLETE -- validated end-to-end against
 real GSE65778 data 2026-10-16. One real bug found and fixed on the first
@@ -396,3 +490,24 @@ an alternative TE quantification input via enable_psite_cds_counts +
 RiboSeq_TE.smk's CMD_PARAMS.use_psite_counts, though the sparser counts may
 limit statistical power for lowly-expressed genes -- worth keeping in mind
 if/when actually run through te_analysis.R for a real TE comparison.
+
+GO enrichment: COMPLETE -- validated end-to-end 2026-10-16. clusterProfiler/
+AnnotationDbi/GO.db were already in the container (the "not in the
+container" blocker noted earlier this session was stale); only org.Hs.eg.db
+needed installing, done into a shared, non-container R library dir (see
+its own detailed entry above + ref/hg38_p14/go_annotation/README.txt). One
+real bug found and fixed (OOM at the old 2GB memory floor, bumped to 8GB).
+Real result against the Tm_vs_Untr contrast: 69 enriched GO terms, top hit
+"cytoplasmic translation" -- correct, expected biology for this dataset's
+tunicamycin/ER-stress comparison, a strong sanity check beyond "it ran
+without error."
+
+Ribo-seq project scaffolding: COMPLETE -- new RiboSeq/ and RiboSeq_UMI/
+top-level directories (ReadMe.txt + setup_pipeline.sh), matching every
+other pipeline in this repo's existing convention, which Ribo-seq never
+had. Structurally validated against the local repo tree; NOT yet tested
+against the real GitHub download (needs the pending local commits pushed).
+
+Still not started: the UMI pathway (RiboSeq_UMI.smk) has never been run
+against real data -- GSE65778 has no UMIs, so this would need a different
+real or synthetic UMI Ribo-seq dataset to validate end-to-end.

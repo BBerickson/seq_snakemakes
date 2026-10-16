@@ -118,14 +118,23 @@ rule te_go_enrichment:
     output:
         PROJ + "/report/{contrast}_GO_enrichment.tsv"
     params:
-        job_name = "{contrast}_go_enrichment",
-        script   = "workflow/scripts/te_go_enrichment.R",
-        orgdb    = config.get("GO_ORGANISM_DB", "org.Hs.eg.db")
+        job_name    = "{contrast}_go_enrichment",
+        script      = "workflow/scripts/te_go_enrichment.R",
+        orgdb       = config.get("GO_ORGANISM_DB", "org.Hs.eg.db"),
+        orgdb_lib   = config.get("GO_ANNOTATION_LIB_DIR", "")
     resources:
-        memory = lambda wildcards, input: memory_estimator(input, 1, 2, 8)
+        # min bumped 2->8GB: OOM-killed at 2.1GB against the old 2GB floor
+        # on real GSE65778 data (job 484079, 2026-10-16) -- loading
+        # clusterProfiler + its full Bioconductor stack (AnnotationDbi/
+        # GO.db/Biobase/...) plus enrichGO()'s GO.db term traversal against
+        # a real ~20K-gene universe needs more than the file-size-scaled
+        # estimate ever accounted for (this rule's only input is a small
+        # TSV), same pattern as several other R-script rules elsewhere in
+        # this pipeline (ribowaltz_psite, te_analysis).
+        memory = lambda wildcards, input: memory_estimator(input, 1, 8, 16)
     threads:
         1
     shell:
         """
-        Rscript {params.script} "{input}" "{params.orgdb}" "{output}"
+        Rscript {params.script} "{input}" "{params.orgdb}" "{output}" "{params.orgdb_lib}"
         """
