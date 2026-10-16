@@ -37,17 +37,43 @@ RiboSeq_UMI/ReadMe.txt, RiboSeq_UMI/setup_pipeline.sh  project-scaffolding
                                                  project dir, same pattern
                                                  as RNAseq's bundling of
                                                  RNAseq.smk + *_matrix.smk.
-                                                 Structurally validated
-                                                 locally (every rsync
-                                                 source path confirmed to
-                                                 exist, full dry-run against
-                                                 the local repo tree
-                                                 produces the expected
-                                                 output structure) -- NOT
-                                                 yet tested against the real
-                                                 GitHub download (needs the
-                                                 pending local commits
-                                                 pushed first).
+                                                 FULLY VALIDATED 2026-10-16
+                                                 against the real, pushed
+                                                 GitHub repo (not just the
+                                                 local tree): both
+                                                 RiboSeq/setup_pipeline.sh
+                                                 and
+                                                 RiboSeq_UMI/setup_pipeline.sh
+                                                 downloaded correctly via
+                                                 real wget+tar from
+                                                 raw.githubusercontent.com/
+                                                 BBerickson/seq_snakemakes,
+                                                 and the resulting fresh
+                                                 project directories (with
+                                                 enable_psite_cds_counts:
+                                                 true) each produced a
+                                                 clean, correct Snakemake
+                                                 DAG (76 jobs no-UMI / 81
+                                                 jobs UMI, including
+                                                 transcriptome_multimap_
+                                                 filter + psite_cds_counts)
+                                                 via a real dry-run. Noted
+                                                 in passing (pre-existing,
+                                                 unrelated to this session's
+                                                 work, not fixed): a
+                                                 compiled Python bytecode
+                                                 file (workflow/scripts/
+                                                 __pycache__/funs.cpython-
+                                                 313.pyc) is tracked in git
+                                                 from an old commit
+                                                 (176d724/b29332b) and gets
+                                                 pulled into every new
+                                                 project by every
+                                                 pipeline's setup_pipeline.sh,
+                                                 not just Ribo-seq's --
+                                                 harmless but should
+                                                 probably be removed/
+                                                 gitignored at some point.
 
 workflow/rules/01a_riboseq_umi_extract.snake    UMI extraction (UMI variant only)
 workflow/rules/01b_riboseq_trimgalore.snake     Trim Galore adapter/quality trim
@@ -505,8 +531,10 @@ without error."
 Ribo-seq project scaffolding: COMPLETE -- new RiboSeq/ and RiboSeq_UMI/
 top-level directories (ReadMe.txt + setup_pipeline.sh), matching every
 other pipeline in this repo's existing convention, which Ribo-seq never
-had. Structurally validated against the local repo tree; NOT yet tested
-against the real GitHub download (needs the pending local commits pushed).
+had. Fully validated 2026-10-16 against the real, pushed GitHub repo --
+both setup_pipeline.sh scripts downloaded correctly via real wget, and the
+resulting fresh projects (enable_psite_cds_counts: true) each produced a
+clean, correct Snakemake DAG via dry-run (76 jobs no-UMI / 81 jobs UMI).
 
 Still not started: the UMI pathway (RiboSeq_UMI.smk) has never been run
 against real data -- GSE65778 has no UMIs, so this would need a different
