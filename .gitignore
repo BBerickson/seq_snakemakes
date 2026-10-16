@@ -1,3 +1,5 @@
 .snakemake/
 .claude/
 .vscode
+__pycache__/
+*.pyc
