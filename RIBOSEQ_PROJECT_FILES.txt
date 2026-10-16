@@ -1,5 +1,5 @@
 RIBO-SEQ PIPELINE -- FILE TRACKING LIST
-Last updated: 2026-10-15 (Phase 2 debugged + verified)
+Last updated: 2026-10-16 (P-site/CDS counting debugged + validated)
 
 Covers the Ribo-seq + Ribo-seq/RNA-seq translational-efficiency pipeline
 built in Ben_pipelines/snakemake_pipelines, and its real-data test project
@@ -63,6 +63,117 @@ workflow/scripts/te_go_enrichment.R              GO enrichment on TE results --
                                                  clusterProfiler + org.*.eg.db in
                                                  the container, not yet added;
                                                  run_go_enrichment stays false)
+
+P-site-restricted CDS counting (new, 2026-10-15; DEBUGGED + VALIDATED
+against real GSE65778 data 2026-10-16) -- stricter alternative to
+featureCounts' whole-exon-overlap counts for TE analysis, counting only
+in-frame P-sites inside the annotated CDS. Off by default (opt-in via
+enable_psite_cds_counts / CMD_PARAMS.use_psite_counts).
+--------------------------------------------------------------------------
+workflow/rules/02d_riboseq_transcriptome_filter.snake (new; rewritten
+2026-10-16 after a real bug found on the first real run)
+    - FIRST ATTEMPT (wrong): rule transcriptome_mapq_filter applied the
+      SAME samtools filter used for the genome BAM (CMD_PARAMS["samtools"],
+      e.g. "-bF4q10") to STAR's Aligned.toTranscriptome.out.bam, on the
+      (plausible-looking, but WRONG) assumption that STAR's MAPQ encodes
+      transcript-level NH the same way it does for the genome BAM. On the
+      real first run this produced gene-level sums ~2x HIGHER than plain
+      featureCounts -- backwards for a stricter filter. Root-caused by
+      direct inspection: among 500,000 real "MAPQ>=10-surviving" records,
+      NH values ran up to 830+ and the same read name appeared ~7.3x on
+      average (-q10 did not reduce the record count AT ALL vs. the fully
+      unfiltered file -- 139,839,644 records either way, confirmed). STAR
+      evidently computes MAPQ differently (decoupled from NH) in
+      --quantMode TranscriptomeSAM output than in the genome BAM.
+    - REAL FIX: rule transcriptome_multimap_filter instead reuses
+      multimappers2.py (workflow/scripts/multimappers2.py -- the same
+      script the genome BAM's align_filter_multimap rule would use if
+      CMD_PARAMS["multimap"] were ever set, though it's empty in this
+      project's real config so that branch has never actually executed).
+      Groups alignment records by QNAME (qname-sorted input) and keeps at
+      most -k 1 per read, regardless of what MAPQ means for a given BAM --
+      this is what actually guarantees one alignment record per surviving
+      read (confirmed on real data: filtered record count == distinct read
+      name count exactly, 7,072,732 == 7,072,732 for ribo_untr_a). Also
+      found in passing: the existing align_filter_multimap rule's
+      multimap-enabled branch references "pipelines/multimappers2.py",
+      which doesn't exist in this repo (real path:
+      workflow/scripts/multimappers2.py) -- untested latent bug, since that
+      branch has never run with multimap set; not fixed here (out of scope,
+      genome-BAM path unaffected since multimap stays empty there), just
+      flagged for awareness.
+    - Real-data validation of the final counts: P-site/CDS counts came out
+      to 6.4-8.4% of plain featureCounts' totals, consistently across all 4
+      samples. Investigated whether this was still a bug (asked, user said
+      dig further) -- three independent signals confirmed it's a real,
+      explained dataset property, not a bug: (1) only ~12.8% of
+      genome-mapped reads produce ANY transcriptome-space alignment at all
+      (STAR's --quantMode TranscriptomeSAM can't represent intronic/
+      unspliced-incompatible reads); (2) RSeQC's own already-computed
+      read_distribution.txt (completely independent of STAR's transcriptome
+      BAM, computed from the genome BAM + BED12) shows ~45.6% of this
+      library's tags are INTRONIC (27.67M of 60.62M total tags for
+      ribo_untr_a) -- mechanically excluding nearly half the data from
+      transcriptome-space by construction; (3) riboWaltz's own in_frame_pct
+      stat (from the unmodified, already-verified ribowaltz_psite.R) is
+      only ~37-44% for this dataset, so most of what DOES survive
+      transcriptome-alignment is further cut by the in-frame-CDS
+      restriction. ~13% x ~40% ~= 5%, in the right ballpark for the
+      observed ~7% ratio. User accepted this as correct and expected for
+      this real (known messy -- rRNA/intron contamination already surfaced
+      throughout Phase 1) dataset, not a pipeline defect.
+
+workflow/scripts/ribowaltz_psite.R (modified)
+    - added 2 new outputs: annotation_dt.rds / psite_offset.rds, persisted
+      right after they're computed, so psite_cds_counts.R doesn't redo
+      create_annotation()/psite() (the ~100-150GB-RAM, read-count-scaled
+      steps) a second time. No change to this script's own plots/summary --
+      still computed from the FULL unfiltered transcriptome BAM (preserves
+      the already-verified Phase 1 P-site-offset/periodicity/length-
+      distribution results untouched).
+
+workflow/rules/03b_riboWaltz.snake (modified)
+    - wired the 2 new RDS outputs above into the ribowaltz_psite rule.
+
+workflow/scripts/psite_cds_counts.R (new)
+    - loads the filtered transcriptome bams + persisted annotation_dt/
+      psite_offset, reruns bamtolist()/psite_info() on the filtered reads
+      only (reusing the already-estimated per-length offsets rather than
+      re-running psite() itself), then calls riboWaltz's cds_coverage()
+      (confirmed real function, not assumed -- verified live in the
+      container: returns one row per transcript with an annotated CDS,
+      one column per sample, in-frame P-site counts restricted to the
+      CDS) for all samples in one call.
+    - rolls transcript-level counts up to genes via a GTF parse
+      (rtracklayer, confirmed present in the container) -- annotation_dt
+      has no gene_id of its own, confirmed via live inspection.
+    - emits one TSV per sample in featureCounts' exact 9-column schema
+      (ID/Chr/Start/End/Strand/Length/gene_name/biotype/count) --
+      confirmed te_analysis.R's read_fc() only actually uses
+      ID/gene_name/biotype/count, so Chr/Start/End/Strand/Length just need
+      to be present, not semantically exact, for this to be a true
+      drop-in.
+
+workflow/rules/03e_riboseq_psite_cds_counts.snake (new)
+    - new rule psite_cds_counts, one invocation per project (matches
+      cds_coverage()'s own all-samples-at-once behavior). Gated behind
+      enable_psite_cds_counts (default false) in both RiboSeq.smk's and
+      RiboSeq_UMI.smk's rule all.
+
+workflow/RiboSeq.smk / workflow/RiboSeq_UMI.smk (modified)
+    - include the 2 new rule files above; new enable_psite_cds_counts
+      toggle in rule all.
+
+workflow/RiboSeq_TE.smk (modified)
+    - te_analysis's ribo_fc input now switches between
+      "_featureCounts.tsv" and "_psite_cds_featureCounts.tsv" based on a
+      new CMD_PARAMS.use_psite_counts toggle (default false). RNA-seq side
+      (rna_fc) unaffected -- P-site/CDS restriction is Ribo-seq-specific.
+
+workflow/configs/RiboSeq_samples.yaml / RiboSeq_UMI_samples.yaml /
+RiboSeq_TE_samples.yaml (modified)
+    - added the 2 new toggles above (both default false/off) with
+      explanatory comments.
 
 
 ====================================================================
@@ -243,3 +354,18 @@ code path IS now validated, via a synthetic-data test (job 479003,
 and a deliberately-injected TE shift was clearly recovered (mean apvEff
 1.55 shifted vs. -0.04 unshifted). GO enrichment still untested/disabled
 (container is missing clusterProfiler + org.*.eg.db).
+
+P-site-restricted CDS counting: COMPLETE -- validated end-to-end against
+real GSE65778 data 2026-10-16. One real bug found and fixed on the first
+real run (MAPQ-based multimap filtering doesn't work on STAR's
+transcriptome BAM -- see the detailed entry above; fixed via
+multimappers2.py -k 1 instead). Final per-sample counts are 6.4-8.4% of
+plain featureCounts' totals, consistently across all 4 samples -- confirmed
+via 3 independent cross-checks (transcriptome-alignability rate, RSeQC's
+intron-tag fraction, riboWaltz's own in-frame-% stat) to be a real,
+explained property of this dataset's substantial intronic contamination
+(~45.6% of tags, RSeQC-measured) rather than a pipeline defect. Usable as
+an alternative TE quantification input via enable_psite_cds_counts +
+RiboSeq_TE.smk's CMD_PARAMS.use_psite_counts, though the sparser counts may
+limit statistical power for lowly-expressed genes -- worth keeping in mind
+if/when actually run through te_analysis.R for a real TE comparison.

@@ -58,8 +58,13 @@ rule all:
 
 rule te_analysis:
     input:
+        # Optionally uses rules/03e_riboseq_psite_cds_counts.snake's
+        # P-site-restricted, CDS-only counts instead of plain featureCounts
+        # (same 9-column schema, drop-in) -- off by default since it depends
+        # on RIBO_PROJ having been run with enable_psite_cds_counts: true.
         ribo_fc = lambda wildcards: expand(
-            RIBO_PROJ + "/counts/{sample}_aligned_{index}_featureCounts.tsv",
+            RIBO_PROJ + "/counts/{sample}_aligned_{index}_" +
+                ("psite_cds_featureCounts.tsv" if CMD_PARAMS.get("use_psite_counts") else "featureCounts.tsv"),
             sample = [RIBO_NICKNAME_MAP[n] for n in
                       CONTRAST_BY_NAME[wildcards.contrast]["group1"] + CONTRAST_BY_NAME[wildcards.contrast]["group2"]],
             index = RIBO_INDEX

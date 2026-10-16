@@ -1,0 +1,52 @@
+# ====== P-site-restricted, CDS-only gene counting (riboWaltz cds_coverage) ===
+# Optional, stricter alternative to 03a_featureCounts.snake's plain exon-
+# overlap counts for translational-efficiency analysis -- only counts
+# P-sites falling in-frame within the annotated CDS (excludes 5'/3' UTR
+# reads). Off by default (enable_psite_cds_counts); gated separately from
+# featureCounts because RiboSeq_TE.smk can choose either count source per
+# CMD_PARAMS.use_psite_counts, and because this path depends on riboWaltz's
+# own annotation_dt/psite_offset (rules/03b_riboWaltz.snake) plus the
+# MAPQ-filtered transcriptome BAM (rules/02d_riboseq_transcriptome_filter.snake).
+#
+# One rule per project (not per-sample) -- same reason as ribowaltz_psite:
+# cds_coverage() computes all samples' counts in one call.
+
+rule psite_cds_counts:
+    input:
+        bams             = expand(
+            PROJ + "/bams/{sample}_Aligned.toTranscriptome.filtered.bam",
+            sample = SAMS_UNIQ
+        ),
+        annotation_rds   = PROJ + "/report/riboWaltz/annotation_dt.rds",
+        psite_offset_rds = PROJ + "/report/riboWaltz/psite_offset.rds"
+    output:
+        expand(
+            PROJ + "/counts/{sample}_aligned_{index}_psite_cds_featureCounts.tsv",
+            sample = SAMS_UNIQ,
+            index = PRIMARY_INDEX
+        )
+    params:
+        job_name = PROJ + "_psite_cds_counts",
+        script   = "workflow/scripts/psite_cds_counts.R",
+        bamdir   = PROJ + "/bams",
+        samples  = " ".join(SAMS_UNIQ),
+        gtf      = config_indexes[PRIMARY_INDEX].get("GTF"),
+        index    = PRIMARY_INDEX,
+        outdir   = PROJ + "/counts"
+    resources:
+        # min bumped 48->100: OOM-killed twice on real GSE65778 data (both
+        # attempts MaxRSS ~48.6GB/50.3GB, still climbing when killed against
+        # the 48GB floor -- deterministic undersizing, not a fluke, same
+        # pattern as ribowaltz_psite's own real OOM history). This rule
+        # re-runs bamtolist()/psite_info() (same read-count-scaled cost as
+        # ribowaltz_psite) PLUS holds the full human GTF (4.1M records) in
+        # memory for the transcript->gene rollup -- matching
+        # ribowaltz_psite's own eventual real floor as a starting point.
+        memory = lambda wildcards, input: memory_estimator(input, 2, 100, 150)
+    threads:
+        4
+    shell:
+        """
+        mkdir -p {params.outdir}
+        Rscript {params.script} "{params.bamdir}" "{params.samples}" "{params.gtf}" "{input.annotation_rds}" "{input.psite_offset_rds}" "{params.index}" "{params.outdir}"
+        """

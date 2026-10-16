@@ -56,6 +56,11 @@ CMD_PARAMS:
     # matches results_riboseq.R's own featureCounts biotype column); empty
     # string disables filtering
     filter_biotype: "protein_coding"
+    # use RIBO_PROJ's P-site-restricted, CDS-only counts (rules/
+    # 03e_riboseq_psite_cds_counts.snake) instead of plain featureCounts for
+    # the Ribo-seq side -- requires RIBO_PROJ to have been run with
+    # enable_psite_cds_counts: true, otherwise this file won't exist.
+    use_psite_counts: false
 
 # GO enrichment on TE-changed genes needs clusterProfiler + an org.*.eg.db
 # Bioconductor annotation package -- NEITHER is in your Ribo-seq container's

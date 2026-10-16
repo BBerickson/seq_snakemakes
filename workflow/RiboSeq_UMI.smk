@@ -140,6 +140,16 @@ rule all:
           PROJ + "/report/" + PROJ + "_" + PRIMARY_INDEX + "_PCA.png",
           PROJ + "/report/" + PROJ + "_" + PRIMARY_INDEX + "_correlation_heatmap.png"
         ],
+
+        # P-site-restricted, CDS-only gene counts (stricter alternative to
+        # featureCounts for TE analysis) -- off by default, see
+        # rules/03e_riboseq_psite_cds_counts.snake
+        [] if config.get("stop_after_alignment") or not config.get("enable_psite_cds_counts") else [
+          expand(
+              PROJ + "/counts/{sample}_aligned_{index}_psite_cds_featureCounts.tsv",
+              sample=SAMS_UNIQ, index=PRIMARY_INDEX
+          )
+        ],
         expand(PROJ + "/report/" + PROJ + "_{index}_results.tsv", index=PRIMARY_INDEX),
         [] if config.get("skip_html_report") else [
             expand(SEQ_DATE + "_" + PROJ + "_{index}" + "_qc_analysis.html", index=PRIMARY_INDEX)
@@ -181,12 +191,15 @@ include: "rules/02a_align_star.snake"
 include: "rules/02b_align_UMI_samtools.snake"
 include: "rules/02c_align_URLS.snake"
 include: "rules/02s_align_mask_subsample.snake"
+# MAPQ filter on the transcriptome BAM, for P-site/CDS counting below
+include: "rules/02d_riboseq_transcriptome_filter.snake"
 # Results
 include: "rules/03a_featureCounts.snake"
 include: "rules/03a_fragmentSize.snake"
 include: "rules/03b_riboWaltz.snake"
 include: "rules/03c_rseqc.snake"
 include: "rules/03d_results_riboseq_UMI.snake"
+include: "rules/03e_riboseq_psite_cds_counts.snake"
 # BW with deeptools bamCoverage
 include: "rules/04a_bamCoverage_stranded.snake"
 include: "rules/04b_bw_UCSC_URL_stranded.snake"

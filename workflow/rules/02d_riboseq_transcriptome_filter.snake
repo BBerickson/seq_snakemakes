@@ -1,0 +1,59 @@
+# ====== Multi-mapping resolution for STAR's transcriptome BAM (P-site/CDS) ===
+# riboWaltz's bamtolist() has no multi-mapping resolution of its own, and the
+# project's real transcriptome BAMs have severe isoform/repeat-level
+# multi-mapping (NH into the hundreds for some reads, confirmed on real
+# GSE65778 data) -- summing cds_coverage()'s per-transcript P-site counts
+# across a gene's isoforms would badly over-count those reads unless each
+# read survives as exactly one alignment record.
+#
+# Originally tried reusing CMD_PARAMS["samtools"] (e.g. "-bF4q10"), the same
+# filter already applied to the genome BAM -- but direct inspection of a
+# real filtered transcriptome BAM disproved the assumption that MAPQ tracks
+# NH here: records with MAPQ>=10 still had NH into the hundreds, and the
+# same read name appeared ~7x on average among "surviving" records (139.8M
+# records survived -q10 for one sample vs. STAR's own 12.9M uniquely-mapped
+# genomic reads for that sample) -- confirmed via the real gene-level counts
+# this produced coming out ~2x HIGHER than plain featureCounts, the opposite
+# of what a stricter filter should do. STAR evidently computes MAPQ
+# differently (decoupled from transcript-level NH) in
+# --quantMode TranscriptomeSAM output than in the genome BAM.
+#
+# Fixed by reusing multimappers2.py (workflow/scripts/multimappers2.py,
+# already used -- if configured -- for the genome BAM's own multimapper
+# resolution in rules/02b_align_samtools.snake's align_filter_multimap rule,
+# though CMD_PARAMS["multimap"] is empty in this project's real config so
+# that branch has never actually executed there). Unlike a MAPQ filter,
+# multimappers2.py groups alignment records by QNAME (requires qname-sorted
+# input) and keeps at most -k per read regardless of what MAPQ means for a
+# given BAM -- -k 1 here guarantees each surviving read contributes exactly
+# one alignment record (one randomly-chosen compatible transcript), which is
+# what makes summing per-transcript CDS counts up to gene level correct
+# afterward. Note: the existing align_filter_multimap rule's multimap branch
+# references "pipelines/multimappers2.py", which doesn't exist in this repo
+# (the real path is workflow/scripts/multimappers2.py) -- untested because
+# that branch has never run; this rule uses the real path directly.
+
+rule transcriptome_multimap_filter:
+    input:
+        bam = PROJ + "/bams/{sample}_Aligned.toTranscriptome.out.bam"
+    output:
+        bam  = PROJ + "/bams/{sample}_Aligned.toTranscriptome.filtered.bam",
+        bamt = temp(PROJ + "/bams/{sample}_Aligned.toTranscriptome.multimap_temp.bam")
+    params:
+        job_name = "{sample}_transcriptome_multimap_filter",
+        sortname = PROJ + "/{sample}_transcriptome_multimap.temp"
+    resources:
+        memory = lambda wildcards, input: memory_estimator(input, 2, 8, 32)
+    threads:
+        4
+    shell:
+        """
+        samtools view -F4 -u {input.bam} \
+          | samtools sort -n -T {params.sortname} -@ {threads} \
+          | samtools view -h - \
+          | python workflow/scripts/multimappers2.py -k 1 \
+          | samtools fixmate -r - {output.bamt}
+        samtools view -F 1804 -u {output.bamt} \
+          | samtools sort - -T {params.sortname} -@ {threads} -O bam \
+          > {output.bam}
+        """

@@ -13,12 +13,14 @@ args <- commandArgs(trailingOnly = TRUE)
 library("tidyverse")
 library("riboWaltz")
 
-bam_dir  <- args[1]                       # PROJ/bams (contains *_Aligned.toTranscriptome.out.bam)
-samples  <- strsplit(args[2], " ")[[1]]   # sample names (bam basenames, minus the Aligned.toTranscriptome.out.bam suffix)
-gtf_file <- args[3]                       # primary index's GTF
-fa_file  <- args[4]                       # primary index's FA_SAMPLE (unused by riboWaltz itself here, kept for parity with other scripts' arg lists)
-outdir   <- args[5]                       # PROJ/report/riboWaltz -- per-sample PNGs go here
-outfile  <- args[6]                       # PROJ/stats/PROJ_ribowaltz_psite.tsv -- one summary row per sample
+bam_dir          <- args[1]                       # PROJ/bams (contains *_Aligned.toTranscriptome.out.bam)
+samples          <- strsplit(args[2], " ")[[1]]   # sample names (bam basenames, minus the Aligned.toTranscriptome.out.bam suffix)
+gtf_file         <- args[3]                       # primary index's GTF
+fa_file          <- args[4]                       # primary index's FA_SAMPLE (unused by riboWaltz itself here, kept for parity with other scripts' arg lists)
+outdir           <- args[5]                       # PROJ/report/riboWaltz -- per-sample PNGs go here
+outfile          <- args[6]                       # PROJ/stats/PROJ_ribowaltz_psite.tsv -- one summary row per sample
+annotation_rds   <- args[7]                       # PROJ/report/riboWaltz/annotation_dt.rds -- reused by psite_cds_counts.R
+psite_offset_rds <- args[8]                       # PROJ/report/riboWaltz/psite_offset.rds -- reused by psite_cds_counts.R
 
 dir.create(outdir, recursive = TRUE, showWarnings = FALSE)
 
@@ -38,6 +40,17 @@ reads_list    <- bamtolist(bamfolder = link_dir, annotation = annotation_dt)
 
 psite_offset     <- psite(reads_list, flanking = 6, extremity = "auto")
 reads_psite_list <- psite_info(reads_list, psite_offset)
+
+# Persisted for psite_cds_counts.R (P-site-restricted CDS counting, a
+# separate downstream step that needs its OWN reads_psite_list built from a
+# multimapping-filtered BAM, not this one -- but annotation_dt is identical
+# either way, and psite_offset (per-read-length offsets) is a property of
+# the full read set and should be estimated from ALL reads, not just the
+# filtered subset, for a more stable calibration). Avoids redoing
+# create_annotation()/psite() (bamtolist/psite are the ~100-150GB-RAM,
+# read-count-scaled steps here) a second time downstream.
+saveRDS(annotation_dt, annotation_rds)
+saveRDS(psite_offset, psite_offset_rds)
 
 # one summary row per sample: P-site offset, in-frame %, dominant footprint length
 summary_rows <- NULL

@@ -11,12 +11,17 @@ rule ribowaltz_psite:
             sample = SAMS_UNIQ
         )
     output:
-        summary = PROJ + "/stats/" + PROJ + "_ribowaltz_psite.tsv",
-        pngs    = expand(
+        summary          = PROJ + "/stats/" + PROJ + "_ribowaltz_psite.tsv",
+        pngs             = expand(
             PROJ + "/report/riboWaltz/{sample}_{plot}.png",
             sample = SAMS_UNIQ,
             plot = ["periodicity", "metaprofile", "length_dist"]
-        )
+        ),
+        # Reused by rules/03e_riboseq_psite_cds_counts.snake -- avoids
+        # redoing create_annotation()/psite() (the expensive steps here) a
+        # second time for P-site-restricted CDS counting.
+        annotation_rds   = PROJ + "/report/riboWaltz/annotation_dt.rds",
+        psite_offset_rds = PROJ + "/report/riboWaltz/psite_offset.rds"
     params:
         job_name = PROJ + "_ribowaltz_psite",
         script   = "workflow/scripts/ribowaltz_psite.R",
@@ -48,5 +53,5 @@ rule ribowaltz_psite:
     shell:
         """
         mkdir -p {params.outdir}
-        Rscript {params.script} "{params.bamdir}" "{params.samples}" "{params.gtf}" "{params.fa}" "{params.outdir}" "{output.summary}"
+        Rscript {params.script} "{params.bamdir}" "{params.samples}" "{params.gtf}" "{params.fa}" "{params.outdir}" "{output.summary}" "{output.annotation_rds}" "{output.psite_offset_rds}"
         """
