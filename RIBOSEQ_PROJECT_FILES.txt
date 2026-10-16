@@ -56,6 +56,33 @@ workflow/RiboSeq_TE.smk                         entrypoint -- DEBUGGED + VERIFIE
 workflow/configs/RiboSeq_TE_samples.yaml        samples.yaml template -- added
                                                  RIBO_SAMPLES_YAML/RNA_SAMPLES_YAML
 workflow/submit_scripts/run_RiboSeq_TE_bodhi.sh cluster submit script
+workflow/submit_scripts/run_RiboSeq_TE_pipeline_bodhi.sh  (new, 2026-10-16)
+                                                 lightweight orchestrator --
+                                                 submits run_RiboSeq[_UMI]_
+                                                 bodhi.sh + run_RNAseq_*_
+                                                 bodhi.sh IN PARALLEL (sbatch
+                                                 --parsable, independent
+                                                 arms), then run_RiboSeq_TE_
+                                                 bodhi.sh via --dependency=
+                                                 afterok on both -- TE never
+                                                 starts if either arm fails
+                                                 (confirmed via synthetic
+                                                 jobs: DependencyNeverSatisfied
+                                                 on a failed arm, held not
+                                                 run). Deliberately does NOT
+                                                 merge the 3 pipelines into
+                                                 one Snakemake DAG (would need
+                                                 Snakemake's module/namespace
+                                                 system just for this one
+                                                 pipeline, since RiboSeq.smk/
+                                                 RNAseq.smk both define PROJ/
+                                                 SAMPLES/CMD_PARAMS at module
+                                                 level -- inconsistent with
+                                                 every other pipeline in this
+                                                 repo, so not worth it). TE
+                                                 skipped entirely if no --rna
+                                                 given (Ribo-seq-only case
+                                                 needs nothing new).
 workflow/scripts/te_analysis.R                  anota2seq/xtail TE analysis --
                                                  5 real bugs fixed, see below
 workflow/scripts/te_go_enrichment.R              GO enrichment on TE results --
