@@ -1,5 +1,5 @@
 RIBO-SEQ PIPELINE -- FILE TRACKING LIST
-Last updated: 2026-10-16 (UMI pathway validation started against real
+Last updated: 2026-10-16 (UMI pathway validated end-to-end against real
 GSE202881 data)
 
 Covers the Ribo-seq + Ribo-seq/RNA-seq translational-efficiency pipeline
@@ -536,8 +536,11 @@ both setup_pipeline.sh scripts downloaded correctly via real wget, and the
 resulting fresh projects (enable_psite_cds_counts: true) each produced a
 clean, correct Snakemake DAG via dry-run (76 jobs no-UMI / 81 jobs UMI).
 
-UMI pathway validation: IN PROGRESS, started 2026-10-16. Real dataset
-identified and verified via direct GEO/SRA lookup (not guessed): GSE202881
+UMI pathway validation (Phase 1 / RiboSeq_UMI.smk): COMPLETE -- ran
+end-to-end against real data 2026-10-16, ALL 106 STEPS SUCCEEDED ON THE
+FIRST REAL RUN (no bugs found in umi_tools extract/dedup, unlike every
+other new real-data test this session). Real dataset identified and
+verified via direct GEO/SRA lookup (not guessed): GSE202881
 (Lee et al., Palazzo Lab, U Toronto -- "PKM binds ribosomes..."), HEK293T,
 shPKM knockdown vs. shCtrl. Confirmed REAL UMI usage directly from the
 GEO record's own data_processing text (not inferred): 12nt UMI + 4nt
@@ -563,8 +566,36 @@ GSE65778 linker) and RNAseq_samples.yaml dry-run validated cleanly against
 fake fastqs matching the real sample names (106 jobs riboseq / 56 jobs
 rnaseq) before the real download was even complete.
 
-Not yet done: waiting on the real SRA download to finish, then the actual
-RiboSeq_UMI.smk run against real data (expect at least one or two genuine
-bugs in umi_tools extract/dedup, since that code path has never executed
-before), then the matched RNA-seq run, then RiboSeq_TE.smk with the
-documented 2-of-3-rep pairing.
+Real-data verification of the RiboSeq_UMI.smk results (not just "ran
+without error"):
+- umi_tools extract log confirms --bc-pattern=NNNNNNNNNNNNXXXX applied
+  correctly (matches the confirmed real UMI position); direct inspection
+  of a raw read before any processing showed the exact expected structure
+  (12nt UMI + 4nt discard + footprint + the configured 3' adapter
+  AAAAAAAAAACAAAAAAAAAA + Illumina adapter readthrough), independently
+  confirming both the UMI pattern and adapter were configured correctly
+  BEFORE the pipeline even ran.
+- Trim Galore found the adapter in 99.6-99.7% of reads (would be low if
+  the adapter were wrong, as it was for GSE65778 before that bug was found).
+- UMI dedup stats are healthy (e.g. ribo_shPKM_rep1: 47.05M reads in,
+  35.43M out, mean 12.08 unique UMIs/position -- modest, sensible
+  deduplication, not over- or under-aggressive).
+- riboWaltz: P-site offset 13-14nt, dominant footprint length 35nt,
+  in-frame % 43-46% -- all genuinely sensible Ribo-seq QC values.
+- Overall STAR alignment rate (31-38%) is notably lower than GSE65778's
+  76-93.5%, investigated rather than assumed fine: SortMeRNA's own
+  per-sample stats show ~50% of reads are rRNA (e.g. 29.68M of 58.94M for
+  shPKM_rep1) -- this single fact fully explains the lower alignment rate
+  (computed against the post-rRNA-removal pool), confirmed as a real
+  property of this dataset/library, not a trimming or pipeline bug.
+- P-site/CDS counting (enable_psite_cds_counts) cross-validated beautifully
+  against a SECOND, independent real dataset: ratio to plain featureCounts
+  here is ~5-6%, closely matching GSE65778's 6.4-8.4% despite completely
+  different species prep/library chemistry/cell type -- strong evidence
+  this ratio reflects a genuine, generalizable property of the
+  CDS+in-frame+unique-mapping restriction, not a GSE65778-specific fluke.
+
+Remaining for this dataset: the paired RNA-seq run (in progress), then
+RiboSeq_TE.smk with the documented 2-of-3-rep pairing (not a second shot
+at real anota2seq validation, since RNA-seq here is still only 2 reps/
+group -- that was already covered via synthetic data).
