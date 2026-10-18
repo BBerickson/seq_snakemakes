@@ -1,6 +1,6 @@
 RIBO-SEQ PIPELINE -- FILE TRACKING LIST
-Last updated: 2026-10-16 (UMI pathway validated end-to-end against real
-GSE202881 data)
+Last updated: 2026-10-18 (root-caused + fixed a real clumpify hang on
+GSE202881's RNA-seq arm)
 
 Covers the Ribo-seq + Ribo-seq/RNA-seq translational-efficiency pipeline
 built in Ben_pipelines/snakemake_pipelines, and its real-data test project
@@ -595,7 +595,54 @@ without error"):
   this ratio reflects a genuine, generalizable property of the
   CDS+in-frame+unique-mapping restriction, not a GSE65778-specific fluke.
 
-Remaining for this dataset: the paired RNA-seq run (in progress), then
-RiboSeq_TE.smk with the documented 2-of-3-rep pairing (not a second shot
-at real anota2seq validation, since RNA-seq here is still only 2 reps/
-group -- that was already covered via synthetic data).
+RNA-seq arm (GSE202881_shPKM_rna, workflow/star.smk) -- hit a genuine
+clumpify HANG on real data, root-caused and fixed 2026-10-18:
+--------------------------------------------------------------------------
+Symptom: the RNAseq driver job (24h) timed out with only 23/56 steps done.
+Checked for orphaned sub-jobs first (per [[snakemake-cluster-cancel]] --
+scancel on a driver doesn't cancel its already-submitted sub-jobs) --
+squeue was clear, so no collision risk, safe to investigate/resubmit.
+sacct showed 2 of the 4 clumpify sub-jobs (mrna_shPKM_C, mrna_shCtrl_C)
+hit an 8h TIMEOUT exactly, MaxRSS only ~18.4GB (genuinely a time problem,
+not memory). Resumed incrementally once (bumped cluster.yaml's clumpify
+entry + the driver's own walltime to 24h/48h, both in the repo template
+AND this project), but the SAME two samples then ran 13+ hours with ZERO
+bytes written to their output file and near-zero CPU usage (confirmed via
+direct ssh+ps on the compute node: process state "S" sleeping, VmSwap 0,
+node had 207GB free -- genuinely stalled, not just slow, and not a memory/
+swap issue). Bumping time limits further would not have helped.
+
+Root cause, isolated via direct side-by-side testing (not guessed):
+neither raw SRA-style read headers (@SRR....N length=100, vs standard
+Illumina format) nor file size were the cause -- subset tests (first 20M
+reads, second ~22M reads, each alone) all completed in ~2 minutes
+regardless of header format or the lowcomplexity setting. Only the FULL
+file (41.7M reads) with lowcomplexity=t hung; the SAME full file with
+lowcomplexity=f completed in 5 minutes. Explained by this library's prep
+(Diagenode CATS RNA-seq Kit v2, template-switching-based): raw reads show
+a massive excess of 5' G/C-run sequence (e.g. "GGGGGG" as the single most
+common 6-mer prefix across 100K sampled reads) -- clumpify's low-
+complexity filter has pathological (effectively non-terminating) behavior
+once a duplicate-cluster built from this much near-identical low-
+complexity sequence gets large enough, which only happens at full file
+scale, not in either half considered alone.
+
+Fix: CMD_PARAMS.clumpify set to lowcomplexity=f for this project
+specifically (RNAseq_samples.yaml, not the shared repo default -- this is
+a real but dataset-specific pathological interaction, not evidence
+lowcomplexity=t is generally wrong). Whole RNA-seq run restarted cleanly
+from scratch for all 4 samples (not just the 2 that hung) to keep
+clumpify settings consistent across the comparison.
+
+Also fixed at the repo level (workflow/profiles/Bodhi/cluster.yaml +
+workflow/submit_scripts/run_RNAseq_STAR_bodhi.sh), since this is a
+real resource-sizing gap any RNA-seq project could hit: clumpify's time
+limit bumped 8h->24h (same pattern as the existing sortmerna entry), and
+the RNAseq driver script's own walltime bumped 24h->48h (needs real
+margin above any single rule's time limit to survive the rest of the
+pipeline afterward).
+
+RiboSeq_TE.smk join: not yet run -- waiting on this RNA-seq restart to
+finish, then will use the documented 2-of-3-rep pairing (not a second
+shot at real anota2seq validation, since RNA-seq here is still only 2
+reps/group -- that was already covered via synthetic data).
