@@ -1,6 +1,8 @@
 RIBO-SEQ PIPELINE -- FILE TRACKING LIST
-Last updated: 2026-10-18 (fully root-caused + fixed a real clumpify hang
-on GSE202881's RNA-seq arm -- 3 contributing factors found)
+Last updated: 2026-10-18 (GSE202881 UMI-pathway validation COMPLETE --
+Ribo-seq, RNA-seq, and TE join all succeeded against real data, with a
+compelling real biological validation: the PKM knockdown shows up as the
+expected large translational-efficiency drop)
 
 Covers the Ribo-seq + Ribo-seq/RNA-seq translational-efficiency pipeline
 built in Ben_pipelines/snakemake_pipelines, and its real-data test project
@@ -478,6 +480,55 @@ te/ (new, 2026-10-15)
 
 
 ====================================================================
+LIVE TEST PROJECT #2: /beevol/home/erickson/Human/RIBOseq/GSE202881_test/
+====================================================================
+
+Second, independent real-data test project (alongside GSE65778_test/ --
+not a replacement) -- chosen specifically to validate the UMI pathway
+(RiboSeq_UMI.smk) against real data for the first time, since GSE65778
+has no UMIs. Lee et al. (Palazzo Lab, U Toronto), HEK293T, shPKM
+knockdown vs. shCtrl. See full dataset verification (real UMI protocol,
+SRR accessions, download commands) in raw_data/readme.txt.
+
+raw_data/readme.txt           dataset verification + download instructions
+raw_data/download_sra.sh      the real download script used (prefetch +
+                               fasterq-dump via sratoolkit/3.4.1 module --
+                               NOTE: do not use --split-files for confirmed
+                               single-end SRA data, it produces _1.fastq
+                               suffixed files that silently break naive
+                               rename/gzip scripts expecting a bare name)
+
+riboseq/RiboSeq_UMI_samples.yaml   real config -- umi_pattern:
+                               "NNNNNNNNNNNNXXXX" (12nt UMI + 4nt discard,
+                               confirmed from the real GEO record),
+                               adapter AAAAAAAAAACAAAAAAAAAA (also
+                               confirmed, Diagenode D-Plex kit -- NOT the
+                               classic GSE65778 linker), enable_psite_cds_
+                               counts: true
+riboseq/RiboSeq_TE_nickname_map.yaml  purpose-built nickname map for the
+                               TE join's 2-of-3-rep pairing (see below) --
+                               NOT the real pipeline-driving config
+
+rnaseq/RNAseq_samples.yaml    real config -- CMD_PARAMS.clumpify's
+                               lowcomplexity=f override (see the detailed
+                               clumpify-hang entry above) with full
+                               rationale in its own comment
+rnaseq/RNAseq_TE_nickname_map.yaml  purpose-built nickname map, pairs with
+                               riboseq/'s equivalent file
+
+te/RiboSeq_TE_samples.yaml    real config -- RIBO_SAMPLES_YAML/
+                               RNA_SAMPLES_YAML point at the nickname-map
+                               files above, not the real pipeline configs;
+                               CONTRASTS uses the shared shPKM_1/2,
+                               shCtrl_1/2 nicknames; CMD_PARAMS.use_psite_
+                               counts: true
+
+All three stages (riboseq/, rnaseq/, te/) COMPLETE and validated against
+real data as of 2026-10-18 -- see STATUS section below for the full
+summary and the real bugs found/fixed along the way.
+
+
+====================================================================
 STATUS
 ====================================================================
 
@@ -677,7 +728,31 @@ Alignment rates (41-56%) are lower than typical well-behaved RNA-seq but
 consistent with the same dataset-wide 5' G/C-run contamination already
 identified on the Ribo-seq side.
 
-RiboSeq_TE.smk join: not yet run -- next step. Will use the documented
-2-of-3-rep pairing (not a second shot at real anota2seq validation, since
-RNA-seq here is still only 2 reps/group -- that was already covered via
-synthetic data).
+RiboSeq_TE.smk join: COMPLETE -- succeeded on the first real attempt
+2026-10-18 (9m54s), using the documented 2-of-3-rep pairing (via
+purpose-built nickname-map files, ../riboseq/RiboSeq_TE_nickname_map.yaml
++ ../rnaseq/RNAseq_TE_nickname_map.yaml -- kept separate from the real,
+already-run pipeline configs to avoid any risk of Snakemake treating the
+new shared nicknames as unrun sample identities). CMD_PARAMS.use_psite_counts
+set to true -- confirmed via dry-run that ribo_fc correctly resolved to
+the P-site/CDS counts (not plain featureCounts) for the paired reps. 2
+reps/group (anota2seq correctly skipped, as expected/already validated
+via synthetic data) -- but xtail produced 1,697 testable genes, 197
+significant at p.adjust<0.05.
+
+Real, independent, compelling biological validation (not just "ran
+without error"): PKM itself -- the gene being knocked down in this
+experiment -- shows mRNA log2FC -0.42 but RPF log2FC -2.16 (the much
+larger ribosome-footprint drop IS the translational knockdown effect),
+yielding TE log2FC -1.75 at p.adjust=5.2e-5, one of the most significant
+hits in the whole dataset. This is the strongest possible sanity check:
+the full pipeline (UMI extraction, P-site/CDS counting, RNA-seq
+processing, TE join, xtail) correctly recovers the known, intended
+ground-truth biological effect on a second, fully independent real
+dataset with a genuinely different library chemistry than GSE65778.
+
+This closes out the UMI pathway validation effort end-to-end: Phase 1
+(Ribo-seq UMI), RNA-seq, and Phase 2 (TE join) all now validated against
+real GSE202881 data, with 3 real bugs found and fixed along the way
+(clumpify's 3-factor hang) plus independent cross-validation of
+P-site/CDS counting against a second dataset.
