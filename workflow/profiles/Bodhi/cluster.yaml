@@ -14,3 +14,16 @@ sortmerna:
   partition: normal
   qos: normal
   time: "24:00:00"
+
+# clumpify's dedupe=t comparison scales with duplication complexity, not
+# just file size -- confirmed via a real run (GSE202881 RNA-seq test):
+# two samples both hit the 8h TIMEOUT wall exactly (MaxRSS only ~18.4GB,
+# so genuinely a time problem not memory) while two OTHER, LARGER fastqs
+# in the same project finished quickly -- a real property of certain
+# samples' read duplication pattern (seen here with a template-switching-
+# based library prep), not a general file-size scaling issue.
+clumpify:
+  account: normal
+  partition: normal
+  qos: normal
+  time: "24:00:00"
