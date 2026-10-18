@@ -135,8 +135,29 @@ COLORS:
 # HiSeq 2500   dupedist=40 (AM...XX, BC...XX)
 # HiSeq 3k/4k  dupedist=2500 (AC...XX, AN...XX)
 # Novaseq      dupedist=12000
+#
+# clumpify's lowcomplexity=t is a real, useful QC feature (flags/removes
+# low-information reads -- adapter dimers, polyA/polyG artifacts, and
+# NovaSeq's own 2-color chemistry calling "no signal" as G, which shows up
+# as G-runs especially on short-insert or template-switching-based preps)
+# -- don't remove it as an *option* just because of what's below. But if
+# you flip this to lowcomplexity=t for a project (some live projects have),
+# know this real failure mode first: on a real run (GSE202881 RNA-seq,
+# Diagenode CATS RNA-seq Kit v2 -- a template-switching prep), clumpify
+# HUNG for 13+ hours with zero output and near-zero CPU (confirmed
+# genuinely stalled via ssh+ps, not just slow -- plenty of free memory, no
+# swap). Root cause: this library's reads had a massive excess of 5' G/C-
+# run sequence, and clumpify's lowcomplexity filter has pathological
+# (effectively non-terminating) behavior once the resulting duplicate-
+# cluster is large enough -- confirmed directly, the exact same file
+# finished in 5 minutes with lowcomplexity=f. Quick diagnostic if clumpify
+# ever seems stuck with no growing output: check for 5' low-complexity
+# excess with
+#   zcat <sample>.fastq.gz | awk 'NR%4==2' | cut -c1-6 | sort | uniq -c | sort -rn | head
+# -- a handful of G/C-run 6-mers dominating the list is the signature; try
+# lowcomplexity=f first before assuming it's a memory or file-size problem.
 CMD_PARAMS:
-    clumpify:      
+    clumpify:
       paired: " lowcomplexity=f overwrite=t dedupe=t optical=t dupedist=12000 subs=0 " # PE settings
       single: " lowcomplexity=f overwrite=t dedupe=t optical=t dupedist=40 subs=0 " #  SE settings
     bbduk:      
