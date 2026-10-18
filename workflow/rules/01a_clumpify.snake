@@ -17,14 +17,36 @@ rule clumpify:
         is_paired = lambda wildcards: PAIREDMAP[wildcards.sample],
         input_r2 = lambda wildcards, input: input[1] if len(input) > 1 else ""
     resources:
-        memory = lambda wildcards, input: memory_estimator(input, 14, 15, 250) # multiplier, min, max=250, unit=GB
+        # min bumped 15->24: OOM-killed on a real run (GSE202881 RNA-seq)
+        # at MaxRSS 18.36GB against the old 15GB-floor-derived -Xmx17g
+        # heap, confirmed java.lang.OutOfMemoryError in multiple worker
+        # threads (BGZF-InputWorker/Thread-N) -- this got WORSE, not
+        # better, after bumping threads 1->4 above (real parallelism
+        # needs more concurrent memory, not less, since each thread needs
+        # its own buffers), even though a different sample's job with the
+        # exact same settings had already shown ~18.2-18.4GB real usage
+        # before that change too. The one isolated manual test that
+        # actually succeeded used -Xmx22g (real working set ~18GB plus
+        # genuine headroom) -- 24GB floor matches that with a bit more
+        # margin.
+        memory = lambda wildcards, input: memory_estimator(input, 14, 24, 250) # multiplier, min, max=250, unit=GB
     threads:
-        1
+        # bumped 1->4: clumpify's JVM spins up worker threads based on
+        # auto-detected host core count, NOT the cgroup/SLURM CPU
+        # allocation -- confirmed via a real run (GSE202881 RNA-seq) that
+        # a sample genuinely stalled (CPU time plateaued for 90+ minutes,
+        # confirmed via direct ssh+ps) under threads=1/--cpus-per-task=1,
+        # while the IDENTICAL clumpify command line against the IDENTICAL
+        # file completed in minutes when given 4 real cores -- the extra
+        # threads were thrashing against a single allocated core rather
+        # than genuinely parallelizing. Passing t={threads} below bounds
+        # clumpify's own thread count to match what's actually allocated.
+        4
     shell:
       """
       mkdir -p '{params.cmdd}'
       REDUCED_MEM=$(( {resources.memory} * 9 / 10))
-  
+
       if [ -z "{params.args}" ]; then
           cp {input[0]} {output.R1}
           if [ "{params.is_paired}" = "True" ]; then
@@ -47,6 +69,7 @@ EOF
       elif [ "{params.is_paired}" = "True" ]; then
           clumpify.sh -Xmx${{REDUCED_MEM}}g \
               groups={params.groups} \
+              t={threads} \
               in1={input[0]} in2={params.input_r2} \
               out1={output.R1} out2={output.R2} \
               {params.args} 2>> {output.log}
@@ -64,6 +87,7 @@ EOF
       else
           clumpify.sh -Xmx${{REDUCED_MEM}}g \
               groups={params.groups} \
+              t={threads} \
               in={input[0]} \
               out={output.R1} \
               {params.args} 2>> {output.log}
