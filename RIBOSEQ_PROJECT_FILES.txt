@@ -1,6 +1,6 @@
 RIBO-SEQ PIPELINE -- FILE TRACKING LIST
-Last updated: 2026-10-18 (root-caused + fixed a real clumpify hang on
-GSE202881's RNA-seq arm)
+Last updated: 2026-10-18 (fully root-caused + fixed a real clumpify hang
+on GSE202881's RNA-seq arm -- 3 contributing factors found)
 
 Covers the Ribo-seq + Ribo-seq/RNA-seq translational-efficiency pipeline
 built in Ben_pipelines/snakemake_pipelines, and its real-data test project
@@ -612,37 +612,63 @@ direct ssh+ps on the compute node: process state "S" sleeping, VmSwap 0,
 node had 207GB free -- genuinely stalled, not just slow, and not a memory/
 swap issue). Bumping time limits further would not have helped.
 
-Root cause, isolated via direct side-by-side testing (not guessed):
-neither raw SRA-style read headers (@SRR....N length=100, vs standard
-Illumina format) nor file size were the cause -- subset tests (first 20M
-reads, second ~22M reads, each alone) all completed in ~2 minutes
-regardless of header format or the lowcomplexity setting. Only the FULL
-file (41.7M reads) with lowcomplexity=t hung; the SAME full file with
-lowcomplexity=f completed in 5 minutes. Explained by this library's prep
-(Diagenode CATS RNA-seq Kit v2, template-switching-based): raw reads show
-a massive excess of 5' G/C-run sequence (e.g. "GGGGGG" as the single most
-common 6-mer prefix across 100K sampled reads) -- clumpify's low-
-complexity filter has pathological (effectively non-terminating) behavior
-once a duplicate-cluster built from this much near-identical low-
-complexity sequence gets large enough, which only happens at full file
-scale, not in either half considered alone.
+Root cause had THREE contributing factors, found incrementally by actually
+re-checking each fix against real data rather than assuming success:
 
-Fix: CMD_PARAMS.clumpify set to lowcomplexity=f for this project
-specifically (RNAseq_samples.yaml, not the shared repo default -- this is
-a real but dataset-specific pathological interaction, not evidence
-lowcomplexity=t is generally wrong). Whole RNA-seq run restarted cleanly
-from scratch for all 4 samples (not just the 2 that hung) to keep
-clumpify settings consistent across the comparison.
+1. lowcomplexity=t: isolated via direct side-by-side testing (not guessed)
+   -- neither raw SRA-style read headers (@SRR....N length=100, vs
+   standard Illumina format) nor file size were the cause; subset tests
+   (first 20M reads, second ~22M reads, each alone) all completed in ~2
+   minutes regardless of header format or the lowcomplexity setting. Only
+   the FULL file (41.7M reads) with lowcomplexity=t hung; the SAME full
+   file with lowcomplexity=f completed in 5 minutes via a bare manual
+   clumpify.sh invocation. Explained by this library's prep (Diagenode
+   CATS RNA-seq Kit v2, template-switching-based): raw reads show a
+   massive excess of 5' G/C-run sequence (e.g. "GGGGGG" as the single
+   most common 6-mer prefix across 100K sampled reads) -- clumpify's
+   low-complexity filter has pathological (effectively non-terminating)
+   behavior once a duplicate-cluster built from this much near-identical
+   low-complexity sequence gets large enough, only at full file scale.
+
+2. threads=1: lowcomplexity=f ALONE was not sufficient -- re-ran for real
+   and the same two samples still effectively stalled (CPU time plateaued
+   for 90+ minutes while the job stayed alive, confirmed via direct ssh+ps
+   on the compute node). Root-caused by comparing the manual test (which
+   had used 4 CPU cores, not specified in the rule) against the real
+   rule's threads: 1 -- the IDENTICAL clumpify command line against the
+   IDENTICAL file completed in minutes with 4 real cores, but stalled
+   under threads=1/--cpus-per-task=1. clumpify's JVM spins up worker
+   threads based on auto-detected HOST core count, not the actual
+   cgroup/SLURM allocation -- with only 1 real core, those threads thrash
+   against each other instead of parallelizing.
+
+3. Undersized memory: fixing threads surfaced a THIRD issue -- genuine
+   parallelism needs more concurrent memory, not less (each thread needs
+   its own buffers). One sample then OOM'd for real (confirmed
+   java.lang.OutOfMemoryError in multiple worker threads) at MaxRSS
+   18.36GB against the old 15GB-floor-derived -Xmx17g heap.
+
+Fixes: (1) CMD_PARAMS.clumpify set to lowcomplexity=f for this project
+specifically (RNAseq_samples.yaml, not the shared repo default -- a real
+but dataset-specific pathological interaction, not evidence lowcomplexity=t
+is generally wrong; documented the failure mode + a quick diagnostic
+command right at the repo template's default instead). (2) workflow/rules/
+01a_clumpify.snake: threads bumped 1->4, t={threads} now passed explicitly
+to clumpify.sh so its own thread count matches what's actually allocated.
+(3) same rule's memory floor bumped 15->24GB. Confirmed fixed end-to-end:
+both previously-stalling samples completed in ~3 minutes with comfortable
+headroom (MaxRSS 11-12GB against the new ~21.6GB heap) on the real retry.
 
 Also fixed at the repo level (workflow/profiles/Bodhi/cluster.yaml +
-workflow/submit_scripts/run_RNAseq_STAR_bodhi.sh), since this is a
-real resource-sizing gap any RNA-seq project could hit: clumpify's time
-limit bumped 8h->24h (same pattern as the existing sortmerna entry), and
-the RNAseq driver script's own walltime bumped 24h->48h (needs real
-margin above any single rule's time limit to survive the rest of the
-pipeline afterward).
+workflow/submit_scripts/run_RNAseq_STAR_bodhi.sh), since the TIME-limit
+symptom (before the real hang was understood) is a real resource-sizing
+gap any RNA-seq project could hit regardless of this specific bug:
+clumpify's time limit bumped 8h->24h (same pattern as the existing
+sortmerna entry), and the RNAseq driver script's own walltime bumped
+24h->48h (needs real margin above any single rule's time limit to survive
+the rest of the pipeline afterward).
 
-RiboSeq_TE.smk join: not yet run -- waiting on this RNA-seq restart to
-finish, then will use the documented 2-of-3-rep pairing (not a second
-shot at real anota2seq validation, since RNA-seq here is still only 2
-reps/group -- that was already covered via synthetic data).
+RiboSeq_TE.smk join: not yet run -- waiting on this RNA-seq run to finish,
+then will use the documented 2-of-3-rep pairing (not a second shot at real
+anota2seq validation, since RNA-seq here is still only 2 reps/group --
+that was already covered via synthetic data).
