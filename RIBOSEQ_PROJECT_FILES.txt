@@ -668,7 +668,16 @@ sortmerna entry), and the RNAseq driver script's own walltime bumped
 24h->48h (needs real margin above any single rule's time limit to survive
 the rest of the pipeline afterward).
 
-RiboSeq_TE.smk join: not yet run -- waiting on this RNA-seq run to finish,
-then will use the documented 2-of-3-rep pairing (not a second shot at real
-anota2seq validation, since RNA-seq here is still only 2 reps/group --
-that was already covered via synthetic data).
+RNA-seq run (GSE202881_shPKM_rna): COMPLETE 2026-10-18 after the above
+fixes -- all 33 steps succeeded (27m35s). Sanity-checked, not just
+trusted: clumpify dedup rate is high (74-80%) but CONSISTENT across all 4
+samples including the 2 that previously failed (not an artifact of the
+fix -- matches this library's known template-switching chemistry).
+Alignment rates (41-56%) are lower than typical well-behaved RNA-seq but
+consistent with the same dataset-wide 5' G/C-run contamination already
+identified on the Ribo-seq side.
+
+RiboSeq_TE.smk join: not yet run -- next step. Will use the documented
+2-of-3-rep pairing (not a second shot at real anota2seq validation, since
+RNA-seq here is still only 2 reps/group -- that was already covered via
+synthetic data).
