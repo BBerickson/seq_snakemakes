@@ -756,3 +756,39 @@ This closes out the UMI pathway validation effort end-to-end: Phase 1
 real GSE202881 data, with 3 real bugs found and fixed along the way
 (clumpify's 3-factor hang) plus independent cross-validation of
 P-site/CDS counting against a second dataset.
+
+Trim Galore -> cutadapt refactor (Ribo-seq, both variants): COMPLETE
+2026-10-20. Prompted by the question "are we using anything from Trim
+Galore that cutadapt on its own isn't doing?" -- answer was no: the
+adapter is always explicitly configured (no dataset in this repo relies
+on Trim Galore's auto-detection, its main differentiator over bare
+cutadapt), and its extra FastQC pass on trimmed reads was never consumed
+downstream. Replaced with a direct cutadapt call (-q 20 -O 1 in the
+config reproduces Trim Galore's own verified real defaults, confirmed via
+`trim_galore --help` in the live container, so trimming behavior doesn't
+silently change).
+
+Originally scoped as "one shared cutadapt rule" across all 4
+single-end/paired-end UMI pipelines, but that was deliberately NOT done:
+Snakemake output paths can't be functions of wildcards (confirmed via a
+direct minimal test), and more importantly a filesystem search turned up
+40+ real, live NetSeq_UMI projects still using 01_UMI_cutadapt.snake's
+old flat-string CMD_PARAMS format -- generalizing it to a paired/single
+dict (needed to genuinely share one rule) would have broken all of them.
+Surfaced this real blast radius before proceeding and decided to keep
+Ribo-seq's cutadapt rule fully separate (new workflow/rules/01b_cutadapt.snake,
+replacing the deleted 01b_riboseq_trimgalore.snake) rather than touch the
+shared rule -- 01_UMI_cutadapt.snake/BRUseq_UMI.smk/NETseq_UMI.smk are
+untouched (confirmed zero diff). The two rules' summary-parsing IS shared
+regardless: rules._cutadapt_summary()'s regex was generalized to handle
+both single- and paired-end cutadapt report wording.
+
+Validated via sandbox dry-run (fake fastqs matching real sample-name
+conventions, hg38_star.yaml ref from the GSE202881_test live project):
+RiboSeq.smk and RiboSeq_UMI.smk DAGs build cleanly (71/76 jobs
+respectively) with cutadapt wired in place of trim_galore throughout
+(rule list, results_riboseq.R's column naming, stats file naming).
+Not yet re-run against either live validated project (GSE65778_test/
+GSE202881_test) -- not needed, since those runs already completed and
+were validated under the old Trim Galore-based code; this is a
+code-quality refactor, not a bug fix those runs need.
