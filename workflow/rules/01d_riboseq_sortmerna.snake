@@ -23,9 +23,9 @@ rule sortmerna:
     output:
         # The canonical {sample}_R1.fastq name -- this is the LAST filtering
         # step before alignment, and 02a_align_star.snake's STAR rule reads
-        # exactly this name unchanged (see 01b_riboseq_trimgalore.snake's
-        # header comment for why this matters: it used to be trim_galore's
-        # own output that claimed this name, silently bypassing bbsplit/
+        # exactly this name unchanged (see 01b_cutadapt.snake's header
+        # comment for why this matters: it used to be Trim Galore's own
+        # output that claimed this name, silently bypassing bbsplit/
         # sortmerna for actual alignment).
         R1  = temp(PROJ + "/{sample}_R1.fastq" + (".gz" if config.get("compress_temp", True) else "")),
         log = PROJ + "/sortmerna/{sample}_sortmerna.log"

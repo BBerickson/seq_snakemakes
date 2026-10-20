@@ -9,14 +9,21 @@ def _cutadapt_summary(input, output):
     cutadapt_dir = os.path.dirname(input[0])
     # Glob all stats files in that directory
     all_files = sorted(glob.glob(os.path.join(cutadapt_dir, "*_cutadapt_stats.txt")))
-    
+
     with open(output, "w") as out:
         for file in all_files:
             name = os.path.basename(file)
             name = re.sub("_cutadapt_stats.txt", "", name)
 
             for line in open(file, "r"):
-                match = re.search("Pairs | pairs |with adapter", line)
+                # Handles both paired ("Total read pairs processed", "Pairs
+                # written (passing filters)", "Read 1/2 with adapter...") and
+                # single-end ("Total reads processed", "Reads with
+                # adapters...", "Reads written (passing filters)") cutadapt
+                # report wording -- single-end Ribo-seq used to go through
+                # Trim Galore (which wraps cutadapt and uses this exact SE
+                # wording) before cutadapt was called directly.
+                match = re.search(r"Total reads processed|Pairs | pairs |with adapter|Reads written \(passing filters\)", line)
 
                 if match:
                   line = line.strip()
@@ -170,42 +177,6 @@ def _dedup_summary(input, output):
                           met = re.sub(": [0-9\.]+$", "", met)
 
                           out.write("%s\t%s\t%s\n" % (name, met, num))
-
-                      
-def _trim_galore_summary(input, output):
-    import glob
-    # Derive the directory from the first input file
-    trimgalore_dir = os.path.dirname(input[0])
-    # Glob all stats files in that directory
-    all_files = sorted(glob.glob(os.path.join(trimgalore_dir, "*_trimming_report.txt")))
-
-    with open(output, "w") as out:
-        for file in input:
-            name = os.path.basename(file)
-            name = re.sub("_trimming_report.txt", "", name)
-
-            for line in open(file, "r"):
-                # Trim Galore's report embeds a cutadapt-style summary block --
-                # same wording cutadapt itself uses, just with Ribo-seq's
-                # single-end phrasing ("Total reads processed", not "Total
-                # read pairs processed").
-                match = re.search(
-                    r"Total reads processed|Reads with adapters|Reads written \(passing filters\)",
-                    line,
-                )
-                if match:
-                    line = line.strip()
-                    mett = re.split(r'\s{2,}', line)
-                    if len(mett) < 2:
-                        continue
-                    num = mett[1].strip()
-                    num = re.sub(",", "", num)
-                    num = re.sub(" ", "", num)
-                    met = re.search(r"[\w\(\) ]+:", line).group(0)
-                    met = re.sub(":", "", met)
-                    met = re.sub(" ", "_", met.strip())
-
-                    out.write("%s\t%s\t%s\n" % (name, met, num))
 
 
 def _rseqc_summary(input, output):

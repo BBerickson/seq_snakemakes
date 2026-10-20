@@ -67,8 +67,13 @@ USER:
   "User7"
 
 CMD_PARAMS:
-    trim_galore:
-      single: " --fastqc --length 15 "
+    # -q 20 -O 1 reproduce Trim Galore's own defaults explicitly (quality
+    # cutoff 20, stringency/overlap 1) -- cutadapt's own defaults are
+    # different (-q 0 i.e. off, -O 3), so these need to be set here rather
+    # than left to cutadapt's own bare defaults. Add -a <adapter_sequence>
+    # (or -g for 5' adapters) for your library's actual adapter.
+    cutadapt:
+      single: " -q 20 -O 1 -m 15 "
     # a fasta file with a phiX/other contaminant reference, or empty to skip
     bbsplit: ""
     sortmerna: " --other -v "
@@ -140,12 +145,16 @@ skip_html_report: true
 enable_psite_cds_counts: false
 
 ## Additional common parameters for various processing steps
-### Trim Galore ##
-# --fastqc            Run FastQC once trimming is complete.
-# --length INT        Discard reads shorter than INT after trimming (default 20;
-#                      lower this for Ribo-seq footprints, which are ~20-35nt).
-# --adapter STR        Manually specify the adapter (auto-detected by default --
-#                      Illumina/Nextera/smallRNA).
+### cutadapt ##
+# -q INT              Quality cutoff for trimming low-quality 3' ends (20
+#                      matches Trim Galore's own default -- see above).
+# -O INT               Minimum overlap required to trim an adapter match (1
+#                      matches Trim Galore's own default, quite permissive --
+#                      bare cutadapt's own default is a more conservative 3).
+# -m INT               Discard reads shorter than INT after trimming (lower
+#                      this for Ribo-seq footprints, which are ~20-35nt).
+# -a STR               3' adapter sequence (no auto-detection, unlike Trim
+#                      Galore -- must be set explicitly per library/kit).
 # --stringency INT     Overlap with adapter required to trim (default 1, quite
 #                      permissive; raise for less aggressive trimming).
 # --quality INT        Phred quality threshold for trimming (default 20).

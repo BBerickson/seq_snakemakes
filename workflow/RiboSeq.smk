@@ -26,7 +26,7 @@ INDEXES, config_indexes, ROLE_MAP, ALIGNMENT_MODE, PRIMARY_INDEX, INDEX_PATH, IN
 MASK = config_indexes[PRIMARY_INDEX].get("MASK")
 INDEX_ROLE = {v: k for k, v in ROLE_MAP.items()}  # index name -> role, for rules/03a_fragmentSize.snake
 
-# Shared with rules/01b_riboseq_trimgalore.snake -- selects raw fastqs (this
+# Shared with rules/01b_cutadapt.snake -- selects raw fastqs (this
 # file) vs. the UMI-extracted fastq (RiboSeq_UMI.smk)
 UMI_MODE = False
 
@@ -126,7 +126,7 @@ rule all:
     input:
         # process summary files
         expand("{proj}/stats/{proj}_{step}.tsv", proj=PROJ,
-               step=["fastqc", "trim_galore", "sortmerna", "strandedness"]),
+               step=["fastqc", "cutadapt", "sortmerna", "strandedness"]),
         PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_aligned.tsv",
 
         # bam URL
@@ -180,8 +180,8 @@ rule all:
 
 # Run FastQC
 include: "rules/01_fastqc.snake"
-# Trim adapters (Trim Galore)
-include: "rules/01b_riboseq_trimgalore.snake"
+# Trim adapters (cutadapt)
+include: "rules/01b_cutadapt.snake"
 # Optional contaminant removal (phiX etc.)
 include: "rules/01c_riboseq_bbsplit.snake"
 # rRNA removal

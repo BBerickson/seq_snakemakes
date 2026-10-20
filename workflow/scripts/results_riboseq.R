@@ -11,7 +11,7 @@ library("tidyverse")
 library("jsonlite")
 
 # arguments
-trim_galore_file <- args[1]  # PROJ + "/stats/" + PROJ + "_trim_galore.tsv"
+cutadapt_file    <- args[1]  # PROJ + "/stats/" + PROJ + "_cutadapt.tsv"
 aligner_file     <- args[2]  # PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_aligned.tsv"
 dedup_file       <- args[3]  # PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_UMI_dedup.tsv", or "" (non-UMI variant)
 FC_sum_files     <- strsplit(args[4], " ")[[1]]
@@ -32,15 +32,16 @@ sn <- enframe(sam_new, name = "new_name", value = "sample") %>%
   mutate(new_name = ifelse(row_number() == 1, new_name, NA)) %>%
   ungroup()
 
-# pre-alignment: Trim Galore's single-end report (wraps cutadapt, but uses SE
-# wording -- "Total reads processed"/"Reads written (passing filters)", not
-# the PE "Total read pairs processed"/"Pairs written (passing filters)").
-pre_alignment <- read_tsv(trim_galore_file, col_names = c("sample", "type", "value"), show_col_types = FALSE) %>%
+# pre-alignment: cutadapt's single-end report wording -- "Total reads
+# processed"/"Reads written (passing filters)", not the PE "Total read
+# pairs processed"/"Pairs written (passing filters)" results.R's own
+# cutadapt parsing expects (BRUseq_UMI/NETseq_UMI are always paired-end).
+pre_alignment <- read_tsv(cutadapt_file, col_names = c("sample", "type", "value"), show_col_types = FALSE) %>%
   dplyr::mutate(type = str_replace_all(type, " ", "_")) %>%
   spread(type, value) %>%
   dplyr::mutate(Total_reads = as.double(Total_reads_processed)) %>%
-  dplyr::rename(passing_filters_TrimGalore = `Reads_written_(passing_filters)`) %>%
-  dplyr::select(sample, Total_reads, passing_filters_TrimGalore)
+  dplyr::rename(passing_filters_Cutadapt = `Reads_written_(passing_filters)`) %>%
+  dplyr::select(sample, Total_reads, passing_filters_Cutadapt)
 
 if (nzchar(dedup_file)) {
   dedup <- read_tsv(dedup_file, col_names = c("sample", "type", "value"), show_col_types = FALSE) %>%

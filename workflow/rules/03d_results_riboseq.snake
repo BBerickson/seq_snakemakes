@@ -9,7 +9,7 @@
 
 rule gathering_results:
     input:
-        trim_galore = PROJ + "/stats/" + PROJ + "_trim_galore.tsv",
+        cutadapt    = PROJ + "/stats/" + PROJ + "_cutadapt.tsv",
         aligned     = PROJ + "/stats/" + PROJ + "_" + INDEX_MAP + "_aligned.tsv",
         fc_file     = expand(PROJ + "/stats/{sample}_summary_featureCounts.tsv", sample = SAMS_UNIQ),
         ribowaltz   = PROJ + "/stats/" + PROJ + "_ribowaltz_psite.tsv",
@@ -45,7 +45,7 @@ rule gathering_results:
         1
     shell:
         """
-        Rscript {params.script} "{input.trim_galore}" "{input.aligned}" "" "{input.fc_file}" "{input.FC_files}" "{params.indexmap}" "{params.indexs}" "{params.sam_new}" "{params.project}" "{params.filterty}" "{output}"
+        Rscript {params.script} "{input.cutadapt}" "{input.aligned}" "" "{input.fc_file}" "{input.FC_files}" "{params.indexmap}" "{params.indexs}" "{params.sam_new}" "{params.project}" "{params.filterty}" "{output}"
         """
 
 
