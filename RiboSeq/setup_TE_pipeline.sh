@@ -23,6 +23,17 @@ if [ $# -eq 0 ]; then
     show_usage
 fi
 
+# This script only adds Phase 2's own files (RNA-seq arm + TE join) --
+# RiboSeq_samples.yaml/ReadMe.txt/run_RiboSeq_bodhi.sh are Phase 1's
+# responsibility (setup_pipeline.sh), so check they're already here rather
+# than silently leaving an incomplete folder if someone runs this first.
+RIBO_CONFIG_FILE="RiboSeq_samples.yaml"
+if [ ! -f "$RIBO_CONFIG_FILE" ]; then
+    echo "Error: $RIBO_CONFIG_FILE not found in this folder." >&2
+    echo "Run setup_pipeline.sh (Phase 1) here first: bash setup_pipeline.sh Bodhi" >&2
+    exit 1
+fi
+
 # RNA-seq arm -- same files RNAseq/setup_pipeline.sh itself pulls, bundled
 # here rather than requiring a second, separate setup step (Phase 2 always
 # needs a completed, paired RNA-seq run anyway).
