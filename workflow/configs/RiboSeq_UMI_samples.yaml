@@ -96,13 +96,27 @@ CMD_PARAMS:
 CONTAMINANT_REF:
     ""
 
-# set orentation of fastq files -- single-end, so R1 or R2 only
+# set orientation of fastq files. Also used by UMI_PAIRED True below to say
+# which physical read (R1 or R2) is the biological footprint read -- the
+# other one is assumed to carry the UMI (see UMI_PAIRED's own comment).
 ORIENTATION:
     "R1" # R1, R2
 
 # single (False) vs paired (True) end mapping -- always False for Ribo-seq
-# footprints (single-end after UMI extraction)
+# footprints (single-end after UMI extraction, regardless of UMI_PAIRED
+# below -- that's about the raw UMI-bearing sequencing, not alignment)
 PAIRED:
+    "False"
+
+# False (default): the UMI is inline on the one sequenced read itself, no
+# R2 at all (e.g. GSE202881's Diagenode D-Plex/CATS kit: 12nt UMI + 4nt
+# spacer at the 5' end of R1).
+# True: the UMI sits on a separate read from the biological footprint
+# (NET-seq-style paired-end sequencing) -- ORIENTATION above says which
+# physical read is the biological one; umi_tools pulls the UMI off the
+# other read and discards it once extracted (see
+# rules/01a_riboseq_umi_extract.snake).
+UMI_PAIRED:
     "False"
 
 # set colors for bw urls and table files, if missing 0,0,0 is default
@@ -149,7 +163,9 @@ enable_psite_cds_counts: false
 ## Additional common parameters for various processing steps
 ### umi_tools extract ##
 # --bc-pattern    A string of "N"s matching the UMI's length -- must match
-#                 exactly where the UMI lives on the single Ribo-seq read.
+#                 exactly where the UMI lives (UMI_PAIRED False: on the
+#                 single sequenced read itself; UMI_PAIRED True: on
+#                 whichever read ORIENTATION doesn't name as biological).
 #
 ### umi_tools dedup ##
 # --method unique      Group reads with identical UMIs (simplest, most common).

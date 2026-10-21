@@ -1,36 +1,58 @@
 # ====== Rule for extracting UMIs from Ribo-seq footprints (UMI variant only) ==
-# Forked from rules/01_UMI_cutadapt.snake's extract_umi rule, split out on its
-# own since that file's second rule (cutadapt) is hardcoded to paired-end
-# args/outputs for BRUseq_UMI/NETseq_UMI, so it can't be reused for
-# Ribo-seq's single-end cutadapt rule (01b_cutadapt.snake) -- see that
-# file's header comment for why Ribo-seq's cutadapt rule lives separately
-# too.
-
-# Extract UMI sequence (single-end: UMI lives on the one read itself)
-rule extract_umi:
-    input:
-        lambda wildcards: _get_fqs(wildcards.sample, RAW_DATA, FASTQ_DIR, full_name=True, paired=False)
-    output:
-        R1  = temp(PROJ + "/{sample}_R1_umi.fastq" + (".gz" if config.get("compress_temp", True) else "")),
-        log = PROJ + "/logs/{sample}_extract_umi.out"
-    params:
-        job_name = "{sample}_umi_extract",
-        cmd      = PROJ + "/pipeline/02_extract_umi.cmd",
-        cmdd     = PROJ + "/pipeline",
-        umi_pat  = CMD_PARAMS["umi_pattern"]
-    resources:
-        memory   = lambda wildcards, input: memory_estimator(input, 1, 1, 2) # multiplier, min, max, unit=GB
-    message:
-        "Extracting UMIs for {wildcards.sample}"
-    threads:
-        1
-    shell:
-      """
-      mkdir -p '{params.cmdd}'
-      if [ -z "{params.umi_pat}" ]; then
-          ln -sf {input[0]} {output.R1}
-          touch {output.log}
-          python - << 'EOF'
+# UMI location is config-driven (RiboSeq_UMI.smk's UMI_PAIRED, set from
+# RiboSeq_UMI_samples.yaml) since it depends on library-prep chemistry, not
+# something the pipeline can infer:
+#   UMI_PAIRED False (default) -- UMI is inline on the one sequenced read
+#     itself (e.g. GSE202881's Diagenode D-Plex/CATS kit: 12nt UMI + 4nt
+#     spacer at the 5' end of R1, genuinely single-end sequencing, no R2).
+#   UMI_PAIRED True -- UMI sits on a separate read from the biological
+#     footprint (NET-seq-style paired-end sequencing). ORIENTATION says
+#     which physical read (R1/R2) is the biological one; the other read is
+#     assumed to carry the UMI -- the same --read2-in/--read2-out dance as
+#     rules/01_UMI_cutadapt.snake's own extract_umi rule, just not literally
+#     that Snakemake rule: that file's second rule (cutadapt) is hardcoded
+#     to paired-end args/outputs for BRUseq_UMI/NETseq_UMI and would
+#     collide with Ribo-seq's own single-end cutadapt rule
+#     (01b_cutadapt.snake) if both files were included together.
+# Either way only the biological read's UMI-stripped fastq is kept --
+# Ribo-seq always trims/aligns single-end afterward regardless of which
+# read the UMI came from, so in the paired case the UMI-bearing read's own
+# (biologically meaningless) leftover sequence is discarded immediately
+# rather than written out unused like rules/01_UMI_cutadapt.snake does.
+# Snakemake formats a rule's whole shell string up front (indexed
+# placeholders like {input[1]} get resolved even inside a bash branch that
+# won't run), so the two UMI_PAIRED cases can't share one rule body once
+# input arity differs (1 file vs. 2) -- {input[1]} would IndexError
+# whenever UMI_PAIRED is False and only one raw fastq was fetched. UMI_PAIRED
+# is a fixed, run-wide setting (not per-sample), so branching once here in
+# plain Python -- only one of these two `rule extract_umi:` blocks actually
+# gets defined -- is the correct fix, not a bash-level branch.
+if UMI_PAIRED:
+    rule extract_umi:
+        input:
+            lambda wildcards: _get_fqs(wildcards.sample, RAW_DATA, FASTQ_DIR, full_name=True, paired=True)
+        output:
+            R1  = temp(PROJ + "/{sample}_R1_umi.fastq" + (".gz" if config.get("compress_temp", True) else "")),
+            log = PROJ + "/logs/{sample}_extract_umi.out"
+        params:
+            job_name    = "{sample}_umi_extract",
+            cmd         = PROJ + "/pipeline/02_extract_umi.cmd",
+            cmdd        = PROJ + "/pipeline",
+            umi_pat     = CMD_PARAMS["umi_pattern"],
+            orientation = ORIENTATION
+        resources:
+            memory   = lambda wildcards, input: memory_estimator(input, 1, 1, 2) # multiplier, min, max, unit=GB
+        message:
+            "Extracting UMIs for {wildcards.sample}"
+        threads:
+            1
+        shell:
+          """
+          mkdir -p '{params.cmdd}'
+          if [ -z "{params.umi_pat}" ]; then
+              ln -sf {input[0]} {output.R1}
+              touch {output.log}
+              python - << 'EOF'
 import sys
 sys.path.insert(0, "workflow/scripts/")
 import funs
@@ -40,15 +62,91 @@ funs.write_cmd_tagged(
     echo_cmd="umi_tools extract: step skipped, symlink created"
 )
 EOF
-      else
-          umi_tools extract \
-            -I {input[0]} \
-            --extract-method=string \
-            --bc-pattern={params.umi_pat} \
-            -L {output.log} \
-            | gzip \
-            > {output.R1}
-          python - << 'EOF'
+          elif [[ "{params.orientation}" == R1* ]]; then
+              umi_tools extract \
+                -I {input[1]} \
+                --extract-method=string \
+                --bc-pattern={params.umi_pat} \
+                --read2-in={input[0]} \
+                --read2-out={output.R1} \
+                -L {output.log} \
+                > /dev/null
+              python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="umi_tools extract PE (UMI on R2)",
+    version_cmd="pip show umi_tools | grep -E '^(Name|Version)'",
+    echo_cmd="umi_tools extract -I <sample_R2.fastq.gz> --extract-method=string --bc-pattern={params.umi_pat} --read2-in=<sample_R1.fastq.gz> --read2-out=<sample_umi_R1.fastq.gz> -L <sample_extract_umi.out>"
+)
+EOF
+          else
+              umi_tools extract \
+                -I {input[0]} \
+                --extract-method=string \
+                --bc-pattern={params.umi_pat} \
+                --read2-in={input[1]} \
+                --read2-out={output.R1} \
+                -L {output.log} \
+                > /dev/null
+              python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="umi_tools extract PE (UMI on R1)",
+    version_cmd="pip show umi_tools | grep -E '^(Name|Version)'",
+    echo_cmd="umi_tools extract -I <sample_R1.fastq.gz> --extract-method=string --bc-pattern={params.umi_pat} --read2-in=<sample_R2.fastq.gz> --read2-out=<sample_umi_R1.fastq.gz> -L <sample_extract_umi.out>"
+)
+EOF
+          fi
+          """
+else:
+    rule extract_umi:
+        input:
+            lambda wildcards: _get_fqs(wildcards.sample, RAW_DATA, FASTQ_DIR, full_name=True, paired=False)
+        output:
+            R1  = temp(PROJ + "/{sample}_R1_umi.fastq" + (".gz" if config.get("compress_temp", True) else "")),
+            log = PROJ + "/logs/{sample}_extract_umi.out"
+        params:
+            job_name = "{sample}_umi_extract",
+            cmd      = PROJ + "/pipeline/02_extract_umi.cmd",
+            cmdd     = PROJ + "/pipeline",
+            umi_pat  = CMD_PARAMS["umi_pattern"]
+        resources:
+            memory   = lambda wildcards, input: memory_estimator(input, 1, 1, 2) # multiplier, min, max, unit=GB
+        message:
+            "Extracting UMIs for {wildcards.sample}"
+        threads:
+            1
+        shell:
+          """
+          mkdir -p '{params.cmdd}'
+          if [ -z "{params.umi_pat}" ]; then
+              ln -sf {input[0]} {output.R1}
+              touch {output.log}
+              python - << 'EOF'
+import sys
+sys.path.insert(0, "workflow/scripts/")
+import funs
+funs.write_cmd_tagged(
+    "{params.cmd}",
+    tag="umi_tools extract: step skipped",
+    echo_cmd="umi_tools extract: step skipped, symlink created"
+)
+EOF
+          else
+              umi_tools extract \
+                -I {input[0]} \
+                --extract-method=string \
+                --bc-pattern={params.umi_pat} \
+                -L {output.log} \
+                | gzip \
+                > {output.R1}
+              python - << 'EOF'
 import sys
 sys.path.insert(0, "workflow/scripts/")
 import funs
@@ -59,5 +157,5 @@ funs.write_cmd_tagged(
     echo_cmd="umi_tools extract -I <sample_R1.fastq.gz> --extract-method=string --bc-pattern={params.umi_pat} -L <sample_extract_umi.out> | gzip > <sample_umi_R1.fastq.gz>"
 )
 EOF
-      fi
-      """
+          fi
+          """

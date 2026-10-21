@@ -27,6 +27,15 @@ INDEX_ROLE = {v: k for k, v in ROLE_MAP.items()}  # index name -> role, for rule
 # fastq (this file) vs. raw fastqs (RiboSeq.smk)
 UMI_MODE = True
 
+# Where the UMI physically lives -- set via config (library-prep-dependent,
+# not something the pipeline can infer). False (default): UMI is inline on
+# the one sequenced read itself, genuinely single-end sequencing (e.g.
+# GSE202881's Diagenode D-Plex/CATS kit). True: UMI sits on a separate read
+# from the biological footprint (NET-seq-style paired-end sequencing) --
+# ORIENTATION then says which physical read (R1/R2) is the biological one.
+# See rules/01a_riboseq_umi_extract.snake for both code paths.
+UMI_PAIRED = _coerce_bool(config.get("UMI_PAIRED", "False"))
+
 # ------------------------------------------------------------------------------
 # Assign parameters from configs
 # ------------------------------------------------------------------------------
