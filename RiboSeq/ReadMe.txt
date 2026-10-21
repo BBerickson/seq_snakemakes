@@ -74,8 +74,25 @@ bash setup_pipeline.sh Bodhi
 ### Pipeline Overview -- Phase 2: Translational Efficiency (optional) ###
 
 Joins this COMPLETED Ribo-seq run with a COMPLETED, PAIRED RNA-seq run into
-anota2seq + xtail translational-efficiency analysis -- its own separate
-pipeline (RiboSeq_TE.smk), set up in its own separate project folder. This
-folder's setup_pipeline.sh does NOT pull those files -- see
-RiboSeq_TE/ReadMe.txt and run RiboSeq_TE/setup_pipeline.sh (same repo), which
-pulls both the paired RNA-seq arm and the TE join together.
+anota2seq (primary, needs >=3 replicates/group) + xtail (secondary, no
+replicate minimum) translational-efficiency analysis. Does no
+alignment/quantification of its own -- only reads both runs' completed
+featureCounts outputs.
+
+Run setup_TE_pipeline.sh (same folder, same profile argument as above) to
+pull the paired RNA-seq arm (RNAseq.smk/star.smk) and the TE join
+(RiboSeq_TE.smk) into this same project folder. Then:
+  1. Edit RNAseq_samples.yaml with your paired RNA-seq sample information
+     and run one of its submit scripts (run_RNAseq_Hisat_bodhi.sh /
+     run_RNAseq_STAR_bodhi.sh).
+  2. Once both this Ribo-seq run and that RNA-seq run are done, edit
+     RiboSeq_TE_samples.yaml (RIBO_PROJ/RNA_PROJ paths, CONTRASTS by sample
+     nickname, CMD_PARAMS.use_psite_counts if using step 3f's counts
+     instead of 3a's), then either:
+       - run run_RiboSeq_TE_bodhi.sh directly, once both arms are already
+         done, or
+       - run run_RiboSeq_TE_pipeline_bodhi.sh --ribo . --rna . --te . to
+         launch all three stages (this Ribo-seq run + the RNA-seq run +
+         the TE join, all in this same folder now) in one command -- the
+         two independent arms run in parallel, TE is deferred via a SLURM
+         job dependency until both finish successfully.
