@@ -75,5 +75,9 @@ if [[ -n "$RNA_DIR" ]]; then
         echo "Submitting TE arm ($TE_DIR/$TE_SCRIPT), deferred until both arms complete (--dependency=afterok:$RIBO_JOBID:$RNA_JOBID)..."
         TE_JOBID=$(cd "$TE_DIR" && sbatch --parsable --dependency="afterok:${RIBO_JOBID}:${RNA_JOBID}" "$TE_SCRIPT")
         echo "  TE driver job: $TE_JOBID (waits on $RIBO_JOBID and $RNA_JOBID)"
+    else
+        echo "No --te given -- TE arm not submitted."
     fi
+else
+    echo "No --rna given -- RNA-seq and TE arms not submitted (Ribo-seq only)."
 fi
