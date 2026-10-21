@@ -79,8 +79,10 @@ replicate minimum) translational-efficiency analysis. Does no
 alignment/quantification of its own -- only reads both runs' completed
 featureCounts outputs.
 
-Run setup_TE_pipeline.sh (same folder, same profile argument as above) to
-pull the paired RNA-seq arm (RNAseq.smk/star.smk) and the TE join
+wget https://raw.githubusercontent.com/BBerickson/seq_snakemakes/main/RiboSeq/setup_TE_pipeline.sh
+bash setup_TE_pipeline.sh Bodhi
+
+This pulls the paired RNA-seq arm (RNAseq.smk/star.smk) and the TE join
 (RiboSeq_TE.smk) into this same project folder. Then:
   1. Edit RNAseq_samples.yaml with your paired RNA-seq sample information
      and run one of its submit scripts (run_RNAseq_Hisat_bodhi.sh /
