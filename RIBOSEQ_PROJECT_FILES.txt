@@ -792,3 +792,36 @@ Not yet re-run against either live validated project (GSE65778_test/
 GSE202881_test) -- not needed, since those runs already completed and
 were validated under the old Trim Galore-based code; this is a
 code-quality refactor, not a bug fix those runs need.
+
+Flexible UMI-read support (RiboSeq_UMI.smk): COMPLETE 2026-10-21. Prompted
+by the question "is there a reason we don't use both reads in umi_tools/
+cutadapt and collapse to 1 for alignment, like NetSeq does?" -- answer was
+that RiboSeq_UMI.smk only ever supported UMI inline on the single
+sequenced read (matching GSE202881's real chemistry, the only UMI dataset
+validated this session), with no code path at all for a paired-end
+chemistry where the UMI lives on a separate read from the footprint
+(NET-seq-style) -- R2 would have been silently ignored if that chemistry
+ever showed up.
+
+Added a new UMI_PAIRED config flag (default False, preserves existing
+validated behavior exactly). True mirrors NET-seq's own
+rules/01_UMI_cutadapt.snake extract_umi logic (ORIENTATION says which
+read is biological, umi_tools pulls the UMI off the other one via
+--read2-in/--read2-out), reusing that same approach rather than
+duplicating a different one -- as close to "merging" the two as the
+existing file-per-rule-name-collision constraint (noted in
+01b_cutadapt.snake, still real) allows. Had to be two separate `rule
+extract_umi:` bodies gated by a plain Python `if UMI_PAIRED:` rather than
+one shared rule with a bash-level branch -- confirmed via a real dry-run
+IndexError that Snakemake resolves {input[1]}-style placeholders across
+the whole shell string regardless of which bash branch runs, so a single
+body referencing input[1] breaks the moment UMI_PAIRED is False and only
+one raw fastq was fetched.
+
+Validated via sandbox dry-run in both configurations (UMI_PAIRED False
+default and True, both ORIENTATION branches) -- 76-job DAG builds cleanly
+either way; -p confirmed the resolved umi_tools command correctly picks
+UMI-bearing vs. biological read in both ORIENTATION cases. Not run against
+real paired-UMI Ribo-seq data yet (no such dataset identified/downloaded
+this session) -- dry-run-only validation, same caveat as any
+not-yet-real-data-tested code path.
