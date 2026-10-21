@@ -17,7 +17,7 @@ bash setup_pipeline.sh Bodhi
 1. Quality Control & Preprocessing
 
 1a FASTQC — Quality control of raw data
-1b Trim Galore — Adapter/quality trimming
+1b cutadapt — Adapter/quality trimming
 1c bbsplit (optional) — Contaminant removal (phiX etc.), skip_bbsplit: true to disable
 1d SortMeRNA — rRNA removal (chunked, rebuilds its index once per chunk)
 1e Salmon (advisory only) — Infers library strandedness; reports to
@@ -73,25 +73,9 @@ bash setup_pipeline.sh Bodhi
 
 ### Pipeline Overview -- Phase 2: Translational Efficiency (optional) ###
 
-Joins this COMPLETED Ribo-seq run with a COMPLETED, PAIRED RNA-seq run
-(separate project, run RNAseq.smk/star.smk there first -- see RNAseq/ReadMe.txt)
-into anota2seq (primary, needs >=3 replicates/group) + xtail (secondary, no
-replicate minimum) translational-efficiency analysis. Does no
-alignment/quantification of its own -- only reads both runs' completed
-featureCounts outputs.
-
-Edit RiboSeq_TE_samples.yaml (RIBO_PROJ/RNA_PROJ paths, CONTRASTS by sample
-nickname, CMD_PARAMS.use_psite_counts if using step 3f's counts instead of
-3a's), then either:
-  - run run_RiboSeq_TE_bodhi.sh directly, once both arms are already done, or
-  - run run_RiboSeq_TE_pipeline_bodhi.sh to launch all three stages (this
-    Ribo-seq run + the paired RNA-seq run + the TE join) in one command --
-    the two independent arms run in parallel, TE is deferred via a SLURM
-    job dependency until both finish successfully.
-
-GO enrichment on TE-changed genes (CMD_PARAMS.run_go_enrichment, off by
-default) needs a species-specific org.*.eg.db annotation package installed
-OUTSIDE the container first -- see workflow/scripts/install_go_annotation_db.sh
-and ref/<your_genome>/go_annotation/README.txt (hg38/human already set up
-in this repo's own test project; same script installs any other organism,
-e.g. mouse, into the same shared location, no container rebuild needed).
+Joins this COMPLETED Ribo-seq run with a COMPLETED, PAIRED RNA-seq run into
+anota2seq + xtail translational-efficiency analysis -- its own separate
+pipeline (RiboSeq_TE.smk), set up in its own separate project folder. This
+folder's setup_pipeline.sh does NOT pull those files -- see
+RiboSeq_TE/ReadMe.txt and run RiboSeq_TE/setup_pipeline.sh (same repo), which
+pulls both the paired RNA-seq arm and the TE join together.
