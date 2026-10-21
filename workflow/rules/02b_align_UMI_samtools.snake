@@ -87,9 +87,6 @@ rule align_filter:
         job_name = "{sample}_aligned_{index}_align_filter",
         cmd      = PROJ + "/pipeline/06_index_filter.cmd",
         cmdd     = PROJ + "/pipeline",
-        # CHROM_PATH optional override -- see 02b_align_samtools.snake's
-        # identical param for why (INDEX_PATH is repurposed for STAR's
-        # genomeDir in *_star.yaml ref families, breaking this lookup).
         idx      = lambda wildcards: config_indexes[wildcards.index].get("CHROM_PATH", INDEX_PATH) + wildcards.index + ".txt",
         samp     = "{sample}_{index}",
         args     = CMD_PARAMS["samtools"],

@@ -25,9 +25,8 @@ SAMPLES_FILE="RiboSeq_UMI_samples.yaml"
 
 # CONTAINER is normally set at the profile level (Bodhi_config.yaml), pointing
 # at the base bioinfopipe image -- Ribo-seq needs its own dedicated image
-# (Trim Galore/SortMeRNA/Salmon/RSeQC/riboWaltz/anota2seq/xtail), so override
-# it here rather than duplicating an entire profile directory just to change
-# one image reference. Update this to wherever you push the Ribo-seq image.
+# (Trim Galore/SortMeRNA/Salmon/RSeQC/riboWaltz/anota2seq/xtail), 
+# override to the Ribo-seq image it here.
 RIBOSEQ_CONTAINER="docker://bberickson/riboseq:1.0.0"
 
 snakemake \

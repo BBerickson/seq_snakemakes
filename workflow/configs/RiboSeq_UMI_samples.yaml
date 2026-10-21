@@ -86,7 +86,7 @@ CMD_PARAMS:
     bamCoverage:   " --binSize 1 --skipNonCoveredRegions "
     scalingFactors: ""
     fragment_size:
-      single:  " bin=1 max=50 " # footprint length distribution (~15-50nt)
+      single:  " bin=1 max=100 " # footprint length distribution (~15-50nt)
     featureCounts: " "
     filter_results: "protein_coding|scalefactor"
 

@@ -22,20 +22,6 @@ rule fragment_size:
     shell:
         """
         if [ "{params.is_paired}" = "True" ]; then
-            # Paired-end fragment size analysis. deepTools' bamPEFragmentSize
-            # can crash with "ValueError: max must be larger than min in range
-            # parameter" -- its histogram step does
-            # plt.hist(lengths, range=(observed_min, --maxFragmentLength)),
-            # which throws whenever a bam is so low-signal that every sampled
-            # fragment is already >= --maxFragmentLength (e.g. a near-empty
-            # spike/control bam). That's a deepTools bug (it never validates
-            # the range), not something our args can prevent, and it kills
-            # the whole process before --table is ever written since the
-            # crash happens before printTable() is called. If it happens,
-            # retry without -hist: the numeric --table stats (min/mean/etc.)
-            # are computed earlier and are unaffected by the histogram code
-            # path, so this still gets real per-sample stats into
-            # fragment_results.tsv -- only the cosmetic PNG is faked.
             if ! bamPEFragmentSize \
                   -hist {output.pic} \
                   --numberOfProcessors {threads} \
@@ -62,22 +48,6 @@ plt.close(fig)
 "
             fi
         else
-            # Single-end read length analysis. Was readlength.sh (BBMap),
-            # but a specific CIGAR+MD combo (spliced alignment immediately
-            # followed by a deletion, e.g. "13M256N1M3D16M") trips an
-            # internal BBMap sanity-check hard enough to hang a worker
-            # thread forever -- confirmed real once Ribo-seq alignment rates
-            # got high enough for such reads to occur. Disabling assertions
-            # (-da, the tool author's own suggested workaround) only swaps
-            # the clean AssertionError for an uncaught
-            # ArrayIndexOutOfBoundsException in the same code path, same
-            # hang. Replaced with a direct samtools+awk length histogram --
-            # read length is just the SEQ field's string length, no
-            # CIGAR/MD reconstruction needed at all, so this sidesteps the
-            # bug entirely rather than working around it. Reproduces
-            # readlength.sh's exact output format (read_size_png.R parses
-            # #Length/reads from line 10 on; fragment_results.R parses
-            # #Avg:/#Median: from lines 5-6).
             samtools view {input.bam} \
               | awk '{{ s = $10; if (s != "*") print length(s) }}' \
               | sort -n | uniq -c \

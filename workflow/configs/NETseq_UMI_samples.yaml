@@ -117,7 +117,7 @@ CMD_PARAMS:
     scalingFactors: "" # " BED-file --centerReads " (set SCALING_REF in the ref yaml) or " bins --binSize 100 "
     fragment_size: 
       paired:  " --maxFragmentLength 1000 "
-      single:  " bin=10 max=1010 "
+      single:  " bin=1 max=1001 "
     featureCounts: "" #--largestOverlap
     filter_results: "protein_coding|scalefactor"
     

@@ -1,34 +1,4 @@
 # ====== Snakefile for trimming Ribo-seq footprints with cutadapt ============
-# Shared by RiboSeq.smk and RiboSeq_UMI.smk -- the top-level smk file sets a
-# module-level UMI_MODE bool (True in RiboSeq_UMI.smk, False in RiboSeq.smk)
-# so this one file's input can pick between the raw fastq (no-UMI) and the
-# UMI-extracted fastq from 01a_riboseq_umi_extract.snake (UMI variant),
-# mirroring how 02a_align_bowtie.snake is already shared verbatim across
-# BRUseq.smk/BRUseq_UMI.smk.
-#
-# Replaces Trim Galore (workflow/rules/01b_riboseq_trimgalore.snake, removed)
-# -- the adapter is always explicitly configured in CMD_PARAMS.cutadapt.single
-# below (no dataset in this repo relies on Trim Galore's adapter
-# auto-detection, its main differentiator over bare cutadapt), so Trim
-# Galore added nothing this pipeline was actually using beyond a redundant,
-# unconsumed second FastQC pass on the trimmed reads. -q 20 -O 1 in the
-# config reproduce Trim Galore's own defaults (quality cutoff 20,
-# stringency/overlap 1) explicitly, so this doesn't silently change
-# trimming behavior.
-#
-# This is deliberately its OWN rule file/rule (not sharing
-# workflow/rules/01_UMI_cutadapt.snake's existing paired-end-only `cutadapt`
-# rule, used by BRUseq_UMI.smk/NETseq_UMI.smk): that file's own
-# `extract_umi` rule is paired-end-specific and would collide with Ribo-seq's
-# single-end `extract_umi` (01a_riboseq_umi_extract.snake) if both were
-# included together, and dozens of real, live NETseq_UMI projects on this
-# filesystem still use that rule's flat-string CMD_PARAMS.cutadapt format --
-# generalizing it to a single/paired dict (needed to genuinely share one
-# rule) would break all of them. The actual summary-parsing logic IS
-# shared regardless (rules._cutadapt_summary() in workflow/scripts/rules.py,
-# generalized to handle both single- and paired-end cutadapt report wording --
-# it just globs *_cutadapt_stats.txt by name, so this rule's own
-# cutadapt_summary instance below reuses it exactly as-is).
 
 rule cutadapt:
     input:
@@ -38,18 +8,7 @@ rule cutadapt:
             _get_fqs(wildcards.sample, RAW_DATA, FASTQ_DIR, full_name=True, paired=False)
         )
     output:
-        # NOT the canonical {sample}_R1.fastq -- bbsplit/sortmerna still run
-        # after this (see 01c_riboseq_bbsplit.snake/01d_riboseq_sortmerna.snake),
-        # and sortmerna's own output is what's actually named {sample}_R1.fastq
-        # (the name 02a_align_star.snake's STAR rule reads), matching this
-        # repo's convention that the LAST filtering step always produces the
-        # canonical name. This was a real bug before (with Trim Galore): its
-        # output used to claim that name itself, which meant STAR read
-        # unfiltered reads directly and bbsplit/sortmerna's filtered fastqs
-        # were computed but never actually fed into alignment.
         R1    = temp(PROJ + "/{sample}_R1_trim.fastq" + (".gz" if config.get("compress_temp", True) else "")),
-        # Ribo-seq is always single-end -- R2 is an empty placeholder, same
-        # convention clumpify/bbduk already use for single-end samples.
         R2    = temp(PROJ + "/{sample}_R2.fastq" + (".gz" if config.get("compress_temp", True) else "")),
         stats = PROJ + "/cutadapt/{sample}_cutadapt_stats.txt"
     params:

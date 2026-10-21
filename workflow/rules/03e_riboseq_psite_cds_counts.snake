@@ -34,14 +34,6 @@ rule psite_cds_counts:
         index    = PRIMARY_INDEX,
         outdir   = PROJ + "/counts"
     resources:
-        # min bumped 48->100: OOM-killed twice on real GSE65778 data (both
-        # attempts MaxRSS ~48.6GB/50.3GB, still climbing when killed against
-        # the 48GB floor -- deterministic undersizing, not a fluke, same
-        # pattern as ribowaltz_psite's own real OOM history). This rule
-        # re-runs bamtolist()/psite_info() (same read-count-scaled cost as
-        # ribowaltz_psite) PLUS holds the full human GTF (4.1M records) in
-        # memory for the transcript->gene rollup -- matching
-        # ribowaltz_psite's own eventual real floor as a starting point.
         memory = lambda wildcards, input: memory_estimator(input, 2, 100, 150)
     threads:
         4

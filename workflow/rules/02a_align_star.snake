@@ -30,13 +30,6 @@ rule star_twopass:
     resources:
         # min bumped 25->45: STAR + --quantMode TranscriptomeSAM against this
         # hg38 index has a real, consistent RAM footprint of ~36-38GB
-        # regardless of input fastq size -- confirmed across 8+ real runs on
-        # multiple nodes (MaxRSS consistently 35.87-37.95GB). A 36GB floor
-        # still landed right on that edge and OOM-killed reliably (not node
-        # contention -- too consistent across nodes/retries for that); 25GB
-        # only ever worked for samples whose fastq size pushed the
-        # 20x-multiplier estimate comfortably above the real requirement on
-        # its own. 45GB gives real headroom above the observed range.
         memory = lambda wildcards, input: memory_estimator([input.R1, input.R2], 20, 45, 250) # input, multiplyer, min, max
     message:
         "Running STAR alignment with two-pass mode"

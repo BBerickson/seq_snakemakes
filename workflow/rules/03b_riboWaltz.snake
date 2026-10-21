@@ -17,9 +17,6 @@ rule ribowaltz_psite:
             sample = SAMS_UNIQ,
             plot = ["periodicity", "metaprofile", "length_dist"]
         ),
-        # Reused by rules/03e_riboseq_psite_cds_counts.snake -- avoids
-        # redoing create_annotation()/psite() (the expensive steps here) a
-        # second time for P-site-restricted CDS counting.
         annotation_rds   = PROJ + "/report/riboWaltz/annotation_dt.rds",
         psite_offset_rds = PROJ + "/report/riboWaltz/psite_offset.rds"
     params:
@@ -31,22 +28,6 @@ rule ribowaltz_psite:
         outdir   = PROJ + "/report/riboWaltz",
         samples  = " ".join(SAMS_UNIQ)
     resources:
-        # min bumped 8->16 previously for node-contention reasons (see git
-        # history). Bumped again 16->48: with a real 4-sample project (~150M
-        # total footprint reads combined across samples), OOM-killed twice
-        # at MaxRSS 10.9GB/12.8GB -- genuine undersizing this time, not
-        # contention, since riboWaltz's real memory need scales with total
-        # read COUNT across all samples merged together (data.table ops in
-        # bamtolist/psite/psite_info), not BAM file byte size -- the
-        # file-size-scaled estimate is nearly irrelevant here (~2GB input
-        # BAMs -> ~4GB estimate, floored to the minsize every time). Raised
-        # maxsize 64->96 too for headroom on larger future projects.
-        # min bumped again 48->100, max 96->150: after fixing an unrelated
-        # Trim Galore adapter bug, STAR's alignment rate jumped from ~18% to
-        # ~93.5%, so total footprint reads (and therefore riboWaltz's real
-        # memory need, which scales with read count, not bam byte size) grew
-        # by roughly the same factor -- OOM-killed again at 34.2GB against
-        # the old 48GB floor.
         memory   = lambda wildcards, input: memory_estimator(input, 2, 100, 150)
     threads:
         4

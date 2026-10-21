@@ -3,11 +3,6 @@
 #SBATCH --job-name=RNAseq
 #SBATCH --output=logs/RNAseq_%j.out
 #SBATCH --error=logs/RNAseq_%j.err
-# This driver job must stay alive for the full pipeline, including both
-# snakemake invocations below -- 24h wasn't enough on a real run where
-# clumpify alone took close to its own 24h ceiling for 2 samples (see
-# workflow/profiles/Bodhi/cluster.yaml's clumpify entry), so this needs
-# real margin above any single rule's own time limit, not just equal to it.
 #SBATCH --time=48:00:00
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=4G

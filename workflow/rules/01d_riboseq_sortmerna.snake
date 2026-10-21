@@ -1,18 +1,6 @@
 # ====== Snakefile for rRNA removal with SortMeRNA (mandatory Ribo-seq step) ===
-# Unlike BBSplit, this step is not toggled -- rRNA contamination is core to
-# Ribo-seq QC even in rRNA-depleted libraries. Reads the primary index's
-# SORTMERNA_DB ref-yaml field (rRNA database path), following the same
-# per-index-ref-yaml-field convention as SCALING_REF/PI_REF.
-#
 # Processes the input in fixed-size read CHUNKS (fresh kvdb per chunk), not
-# as one whole-file invocation. Confirmed via 3 real OOM kills on this
-# dataset that SortMeRNA's kvdb (its RocksDB-backed alignment-results store)
-# keeps growing with total reads processed rather than plateauing at some
-# fixed reference-database footprint -- all 3 failures landed at exactly
-# whatever flat memory was requested (28GB) despite wildly different
-# elapsed times (11h-17h) before being OOM-killed, which only shows where
-# the kill happened, not a natural ceiling; simply requesting more memory
-# risks repeating the same multi-hour failure with no bound. Chunking keeps
+# as one whole-file invocation. Chunking keeps
 # each invocation's reads-in-flight (and therefore its real memory need)
 # fixed regardless of total sample size -- standard practice for SortMeRNA
 # on large datasets.
@@ -21,12 +9,6 @@ rule sortmerna:
     input:
         PROJ + "/{sample}_R1_bbsplit.fastq" + (".gz" if config.get("compress_temp", True) else "")
     output:
-        # The canonical {sample}_R1.fastq name -- this is the LAST filtering
-        # step before alignment, and 02a_align_star.snake's STAR rule reads
-        # exactly this name unchanged (see 01b_cutadapt.snake's header
-        # comment for why this matters: it used to be Trim Galore's own
-        # output that claimed this name, silently bypassing bbsplit/
-        # sortmerna for actual alignment).
         R1  = temp(PROJ + "/{sample}_R1.fastq" + (".gz" if config.get("compress_temp", True) else "")),
         log = PROJ + "/sortmerna/{sample}_sortmerna.log"
     params:
@@ -40,20 +22,9 @@ rule sortmerna:
         chunk_reads = CMD_PARAMS.get("sortmerna_chunk_reads", 20000000)
     resources:
         # Flat, not file-size-scaled -- every chunk is the same fixed read
-        # count by design, so a flat allocation sized for ONE chunk is the
-        # right model here (unlike the old whole-file approach, where no
-        # fixed value was ever safe). Raised 16->32GB: one real chunk (same
-        # size as all the others) OOM-killed twice in a row at exactly 16GB
-        # with kvdb still climbing steadily (~45MB/min) and no plateau in
-        # sight at the time of each kill -- per-chunk memory need varies
-        # with read content (rRNA-hit density), not just chunk size, so a
-        # fixed read count doesn't guarantee a fixed memory footprint.
+        # count by design.
         memory = 32
     threads:
-        # Bumped 8->16: the node has 72 cores with only ~34 in use across all
-        # 4 concurrent samples + driver, plenty of idle headroom. SortMeRNA's
-        # alignment step parallelizes well, so this should give a close-to-
-        # proportional per-chunk speedup for the slow-sample case.
         16
     shell:
       """
@@ -81,15 +52,6 @@ EOF
           : > {output.log}
           : > {params.chunkdir}/filtered.fq
           for chunk in {params.chunkdir}/chunk_*; do
-              # Only clear the per-chunk alignment-results state (kvdb/readb/
-              # out) -- NOT idx/, the built rRNA reference index. The index
-              # only depends on {params.db} (the same for every chunk of this
-              # sample), so rebuilding it per chunk was pure, costly waste
-              # (confirmed: the first real chunked run spent 50+ min with
-              # zero chunks finished, entirely re-indexing from scratch each
-              # time) -- SortMeRNA reuses an existing idx/ automatically when
-              # it matches the --ref file, so leaving it in place after the
-              # first chunk lets every later chunk skip straight to alignment.
               rm -rf {params.workdir}/kvdb {params.workdir}/readb {params.workdir}/out \
                      {params.workdir}/nonrRNA* {params.workdir}/rRNA*
               sortmerna \

@@ -2,31 +2,7 @@
 # UMI location is config-driven (RiboSeq_UMI.smk's UMI_PAIRED, set from
 # RiboSeq_UMI_samples.yaml) since it depends on library-prep chemistry, not
 # something the pipeline can infer:
-#   UMI_PAIRED False (default) -- UMI is inline on the one sequenced read
-#     itself (e.g. GSE202881's Diagenode D-Plex/CATS kit: 12nt UMI + 4nt
-#     spacer at the 5' end of R1, genuinely single-end sequencing, no R2).
-#   UMI_PAIRED True -- UMI sits on a separate read from the biological
-#     footprint (NET-seq-style paired-end sequencing). ORIENTATION says
-#     which physical read (R1/R2) is the biological one; the other read is
-#     assumed to carry the UMI -- the same --read2-in/--read2-out dance as
-#     rules/01_UMI_cutadapt.snake's own extract_umi rule, just not literally
-#     that Snakemake rule: that file's second rule (cutadapt) is hardcoded
-#     to paired-end args/outputs for BRUseq_UMI/NETseq_UMI and would
-#     collide with Ribo-seq's own single-end cutadapt rule
-#     (01b_cutadapt.snake) if both files were included together.
-# Either way only the biological read's UMI-stripped fastq is kept --
-# Ribo-seq always trims/aligns single-end afterward regardless of which
-# read the UMI came from, so in the paired case the UMI-bearing read's own
-# (biologically meaningless) leftover sequence is discarded immediately
-# rather than written out unused like rules/01_UMI_cutadapt.snake does.
-# Snakemake formats a rule's whole shell string up front (indexed
-# placeholders like {input[1]} get resolved even inside a bash branch that
-# won't run), so the two UMI_PAIRED cases can't share one rule body once
-# input arity differs (1 file vs. 2) -- {input[1]} would IndexError
-# whenever UMI_PAIRED is False and only one raw fastq was fetched. UMI_PAIRED
-# is a fixed, run-wide setting (not per-sample), so branching once here in
-# plain Python -- only one of these two `rule extract_umi:` blocks actually
-# gets defined -- is the correct fix, not a bash-level branch.
+
 if UMI_PAIRED:
     rule extract_umi:
         input:
