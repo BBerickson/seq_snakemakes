@@ -1,14 +1,20 @@
 #!/bin/bash
 # setup_TE_pipeline.sh - Download specific files from GitHub
-# Phase 2 (optional): creates sibling rnaseq/ and te/ subfolders next to this
-# already-set-up Ribo-seq project folder, pulling the paired RNA-seq arm
-# (RNAseq.smk/star.smk) into rnaseq/ and the TE join (RiboSeq_TE.smk) into
-# te/. NOT the same folder as this Ribo-seq run -- Snakemake locks its whole
-# working directory for a run, so two snakemake invocations sharing one CWD
-# (Ribo-seq + RNA-seq) collide the moment both run at once, which is
-# exactly what run_RiboSeq_TE_pipeline_bodhi.sh does (submits both in
-# parallel). Run this after setup_pipeline.sh (Phase 1) has already been
-# run here. See ReadMe.txt's Phase 2 section for the full walkthrough.
+# Alternative to setup_pipeline.sh for when you already know you want
+# translational efficiency (Phase 2): sets up all three arms from scratch,
+# in one call, in a fresh/empty project folder -- riboseq/ (Phase 1) and
+# rnaseq/ each get their own complete, self-contained workflow/ tree; the
+# TE join (RiboSeq_TE.smk) lives at this TOP level. Separate subfolders for
+# riboseq/rnaseq, not this same folder -- Snakemake locks its whole working
+# directory for a run, so two snakemake invocations sharing one CWD would
+# collide the moment both run at once, which is exactly what
+# run_RiboSeq_TE_pipeline_bodhi.sh does (submits both in parallel). See
+# ReadMe.txt's Phase 2 section for the full walkthrough.
+#
+# If you already have a completed Ribo-seq run elsewhere (set up via this
+# folder's own setup_pipeline.sh) and just want to add TE later, don't run
+# this script -- just point RiboSeq_TE_samples.yaml's RIBO_PROJ directly at
+# that existing run instead (any path works, nothing here requires it).
 
 GITHUB_USER="BBerickson"
 REPO="seq_snakemakes"
@@ -28,16 +34,10 @@ if [ $# -eq 0 ]; then
     show_usage
 fi
 
-# This script only adds Phase 2's own files (RNA-seq arm + TE join) --
-# RiboSeq_samples.yaml/ReadMe.txt/run_RiboSeq_bodhi.sh are Phase 1's
-# responsibility (setup_pipeline.sh), so check they're already here rather
-# than silently leaving an incomplete folder if someone runs this first.
+# Ribo-seq arm (riboseq/) -- same files this folder's own setup_pipeline.sh
+# pulls, just targeting a subfolder instead of landing flat here.
+RIBO_SMK_FILE="RiboSeq.smk"
 RIBO_CONFIG_FILE="RiboSeq_samples.yaml"
-if [ ! -f "$RIBO_CONFIG_FILE" ]; then
-    echo "Error: $RIBO_CONFIG_FILE not found in this folder." >&2
-    echo "Run setup_pipeline.sh (Phase 1) here first: bash setup_pipeline.sh Bodhi" >&2
-    exit 1
-fi
 
 # RNA-seq arm (rnaseq/) -- same files RNAseq/setup_pipeline.sh itself pulls
 RNA_SMK_FILE="RNAseq.smk"
@@ -45,7 +45,7 @@ RNA_SMK_FILE2="star.smk"
 RNA_CONFIG_FILE="RNAseq_samples.yaml"
 RNA_MTX_CONFIG_FILE="Stranded_matrix.yaml"
 
-# TE join (te/)
+# TE join -- this top level
 TE_SMK_FILE="RiboSeq_TE.smk"
 TE_CONFIG_FILE="RiboSeq_TE_samples.yaml"
 
@@ -53,6 +53,7 @@ PIPELINE_TYPE="$1"
 
 case "$PIPELINE_TYPE" in
     Bodhi)
+        RIBO_SUBMIT_GLOB="run_RiboSeq_bodhi.sh"
         RNA_SUBMIT_GLOB1="run_RNAseq_Hisat_bodhi.sh"
         RNA_SUBMIT_GLOB2="run_RNAseq_STAR_bodhi.sh"
         TE_SUBMIT_GLOB="run_RiboSeq_TE_bodhi.sh"
@@ -89,12 +90,26 @@ fi
 EXTRACT_DIR="$TEMP_DIR/$REPO-$BRANCH"
 
 # Each arm gets its own complete, self-contained workflow/ tree (same
-# convention every other pipeline folder in this repo already uses) -- not
-# shared with the Ribo-seq run already set up flat in this folder, and not
-# shared between rnaseq/ and te/ either, so each one's Snakemake invocation
-# locks only its own subfolder.
+# convention every other pipeline folder in this repo already uses) --
+# riboseq/ and rnaseq/ lock only their own subfolder when running, and
+# this top level (TE) is never run concurrently with either (it's deferred
+# until both finish), so it doesn't need its own subfolder.
+mkdir -p riboseq/workflow/{profiles,ref,rules,scripts}
 mkdir -p rnaseq/workflow/{profiles,ref,rules,scripts}
-mkdir -p te/workflow/{profiles,ref,rules,scripts}
+mkdir -p workflow/{profiles,ref,rules,scripts}
+
+# Ribo-seq arm
+rsync -a "$EXTRACT_DIR/RiboSeq/ReadMe.txt" riboseq/
+rsync -a "$EXTRACT_DIR/workflow/$RIBO_SMK_FILE" riboseq/workflow/
+if [ ! -f "riboseq/$RIBO_CONFIG_FILE" ]; then
+    rsync -a "$EXTRACT_DIR/workflow/configs/$RIBO_CONFIG_FILE" riboseq/
+fi
+rsync -a "$EXTRACT_DIR/workflow/submit_scripts/$RIBO_SUBMIT_GLOB" riboseq/ 2>/dev/null
+rsync -a "$EXTRACT_DIR/workflow/rules" riboseq/workflow/
+rsync -a "$EXTRACT_DIR/workflow/configs/ref" riboseq/workflow/
+rsync -a "$EXTRACT_DIR/workflow/profiles/$PROFILES" riboseq/workflow/profiles/
+rsync -a "$EXTRACT_DIR/workflow/scripts" riboseq/workflow/
+rsync -a "$EXTRACT_DIR/workflow/profiles/$PROFILES/ref/"* riboseq/workflow/ref/
 
 # RNA-seq arm
 rsync -a "$EXTRACT_DIR/workflow/$RNA_SMK_FILE" rnaseq/workflow/
@@ -113,25 +128,20 @@ rsync -a "$EXTRACT_DIR/workflow/profiles/$PROFILES" rnaseq/workflow/profiles/
 rsync -a "$EXTRACT_DIR/workflow/scripts" rnaseq/workflow/
 rsync -a "$EXTRACT_DIR/workflow/profiles/$PROFILES/ref/"* rnaseq/workflow/ref/
 
-# TE join -- reads RIBO_PROJ (this Ribo-seq run, one level up) and RNA_PROJ
-# (../rnaseq/<proj>, once run). NOT copied conditionally like
-# $RNA_CONFIG_FILE above -- RIBO_PROJ/RNA_PROJ/CONTRASTS always need
-# hand-editing per project anyway.
-rsync -a "$EXTRACT_DIR/workflow/$TE_SMK_FILE" te/workflow/
-if [ ! -f "te/$TE_CONFIG_FILE" ]; then
-    rsync -a "$EXTRACT_DIR/workflow/configs/$TE_CONFIG_FILE" te/
+# TE join -- this top level. RIBO_PROJ/RNA_PROJ/CONTRASTS always need
+# hand-editing per project anyway, so TE_CONFIG_FILE isn't copied
+# conditionally like the other two configs above.
+rsync -a "$EXTRACT_DIR/workflow/$TE_SMK_FILE" workflow/
+if [ ! -f "$TE_CONFIG_FILE" ]; then
+    rsync -a "$EXTRACT_DIR/workflow/configs/$TE_CONFIG_FILE" .
 fi
-rsync -a "$EXTRACT_DIR/workflow/submit_scripts/$TE_SUBMIT_GLOB" te/ 2>/dev/null
-rsync -a "$EXTRACT_DIR/workflow/rules" te/workflow/
-rsync -a "$EXTRACT_DIR/workflow/configs/ref" te/workflow/
-rsync -a "$EXTRACT_DIR/workflow/profiles/$PROFILES" te/workflow/profiles/
-rsync -a "$EXTRACT_DIR/workflow/scripts" te/workflow/
-rsync -a "$EXTRACT_DIR/workflow/profiles/$PROFILES/ref/"* te/workflow/ref/
-
-# Orchestrator script (optional) -- lives at the TOP level, alongside this
-# already-set-up Ribo-seq run, since it launches all three arms by
-# directory path (--ribo . --rna ./rnaseq --te ./te)
+rsync -a "$EXTRACT_DIR/workflow/submit_scripts/$TE_SUBMIT_GLOB" . 2>/dev/null
 rsync -a "$EXTRACT_DIR/workflow/submit_scripts/$PIPELINE_SUBMIT_GLOB" . 2>/dev/null
+rsync -a "$EXTRACT_DIR/workflow/rules" workflow/
+rsync -a "$EXTRACT_DIR/workflow/configs/ref" workflow/
+rsync -a "$EXTRACT_DIR/workflow/profiles/$PROFILES" workflow/profiles/
+rsync -a "$EXTRACT_DIR/workflow/scripts" workflow/
+rsync -a "$EXTRACT_DIR/workflow/profiles/$PROFILES/ref/"* workflow/ref/
 # Cleanup
 rm -rf "$TEMP_DIR"
 
@@ -140,26 +150,27 @@ echo "✓ $PIPELINE_TYPE TE pipeline setup complete!"
 echo ""
 echo "!!!STAR is not set up for mixed genome alignment!!!"
 echo "Files created:"
+echo "  - riboseq/workflow/$RIBO_SMK_FILE"
+echo "  - riboseq/$RIBO_CONFIG_FILE"
 echo "  - rnaseq/workflow/$RNA_SMK_FILE"
 echo "  - rnaseq/workflow/$RNA_SMK_FILE2"
 echo "  - rnaseq/$RNA_CONFIG_FILE"
-echo "  - te/workflow/$TE_SMK_FILE"
-echo "  - te/$TE_CONFIG_FILE"
+echo "  - workflow/$TE_SMK_FILE"
+echo "  - $TE_CONFIG_FILE"
 echo "  - $PIPELINE_SUBMIT_GLOB"
 echo ""
 echo "Next steps:"
-echo "  1. cd rnaseq, edit $RNA_CONFIG_FILE with your paired RNA-seq sample"
+echo "  1. cd riboseq, edit $RIBO_CONFIG_FILE with your sample information, and"
+echo "     run $RIBO_SUBMIT_GLOB"
+echo "  2. cd rnaseq, edit $RNA_CONFIG_FILE with your paired RNA-seq sample"
 echo "     information, then run one of its submit scripts ($RNA_SUBMIT_GLOB1 /"
 echo "     $RNA_SUBMIT_GLOB2)"
-echo "  2. Once both this Ribo-seq run and that RNA-seq run are done, cd te and"
-echo "     edit $TE_CONFIG_FILE (RIBO_PROJ -- one level up at ../<this Ribo-seq"
-echo "     run's PROJ> -- and RNA_PROJ -- ../rnaseq/<its PROJ> --, plus CONTRASTS"
-echo "     by sample nickname), then run $TE_SUBMIT_GLOB from inside te/ -- or"
-echo "     from this top folder use"
-echo "     ./$PIPELINE_SUBMIT_GLOB --ribo . --rna ./rnaseq --te ./te to launch the"
-echo "     Ribo-seq run + the RNA-seq run + the TE join in one command (the two"
-echo "     independent arms run in parallel in their own subfolders, TE deferred"
-echo "     until both finish)"
-echo "  3. For GO enrichment (off by default), see"
-echo "     te/workflow/scripts/install_go_annotation_db.sh and"
+echo "  3. Once both arms are done, edit $TE_CONFIG_FILE here (RIBO_PROJ --"
+echo "     riboseq/<its PROJ> -- and RNA_PROJ -- rnaseq/<its PROJ> --, plus"
+echo "     CONTRASTS by sample nickname), then run $TE_SUBMIT_GLOB -- or use"
+echo "     ./$PIPELINE_SUBMIT_GLOB --ribo ./riboseq --rna ./rnaseq --te . to"
+echo "     launch all three stages in one command (the two independent arms run"
+echo "     in parallel in their own subfolders, TE deferred until both finish)"
+echo "  4. For GO enrichment (off by default), see"
+echo "     workflow/scripts/install_go_annotation_db.sh and"
 echo "     ref/<your_genome>/go_annotation/README.txt"

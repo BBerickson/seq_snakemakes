@@ -78,40 +78,50 @@ bash setup_pipeline.sh Bodhi
 
 ### Pipeline Overview -- Phase 2: Translational Efficiency (optional) ###
 
-Joins this COMPLETED Ribo-seq run with a COMPLETED, PAIRED RNA-seq run into
+Joins a COMPLETED Ribo-seq run with a COMPLETED, PAIRED RNA-seq run into
 anota2seq (primary, needs >=3 replicates/group) + xtail (secondary, no
 replicate minimum) translational-efficiency analysis. Does no
 alignment/quantification of its own -- only reads both runs' completed
 featureCounts outputs. Identical to the non-UMI RiboSeq pipeline's Phase 2
 -- RiboSeq_TE.smk doesn't care whether the Ribo-seq side used UMIs.
 
+If you already know up front you want this, use setup_TE_pipeline.sh
+INSTEAD of setup_pipeline.sh above, in a fresh/empty project folder -- it
+sets up all three arms together in one call:
+
 wget https://raw.githubusercontent.com/BBerickson/seq_snakemakes/main/RiboSeq_UMI/setup_TE_pipeline.sh
 bash setup_TE_pipeline.sh Bodhi
 
-This creates sibling rnaseq/ and te/ subfolders (NOT this same folder --
-Snakemake locks its whole working directory for a run, so the RNA-seq and
-Ribo-seq snakemake invocations would collide the moment both run at once,
-which is exactly what step 2's pipeline script below does), pulling the
-paired RNA-seq arm (RNAseq.smk/star.smk) into rnaseq/ and the TE join
-(RiboSeq_TE.smk) into te/. Then:
-  1. cd rnaseq, edit RNAseq_samples.yaml with your paired RNA-seq sample
+This creates riboseq/ and rnaseq/ subfolders (each a complete, self-
+contained Ribo-seq/RNA-seq setup), with the TE join (RiboSeq_TE.smk) at
+this top level. Separate subfolders for riboseq/rnaseq, not this same
+folder -- Snakemake locks its whole working directory for a run, so two
+snakemake invocations sharing one CWD would collide the moment both run
+at once, which is exactly what the pipeline script below does. Then:
+  1. cd riboseq, edit RiboSeq_UMI_samples.yaml with your sample information
+     (UMI pattern, extraction orientation), and run run_RiboSeq_UMI_bodhi.sh.
+  2. cd rnaseq, edit RNAseq_samples.yaml with your paired RNA-seq sample
      information, and run one of its submit scripts (run_RNAseq_Hisat_bodhi.sh /
      run_RNAseq_STAR_bodhi.sh).
-  2. Once both this Ribo-seq run and that RNA-seq run are done, cd te and
-     edit RiboSeq_TE_samples.yaml (RIBO_PROJ -- one level up, this Ribo-seq
-     run's own PROJ -- and RNA_PROJ -- ../rnaseq/<its PROJ> --, CONTRASTS by
-     sample nickname, CMD_PARAMS.use_psite_counts if using step 3f's counts
-     instead of 3a's), then either:
-       - run run_RiboSeq_TE_bodhi.sh from inside te/, once both arms are
-         already done, or
-       - from this top folder, run
-         ./run_RiboSeq_TE_pipeline_bodhi.sh --ribo . --rna ./rnaseq --te ./te
-         --ribo-script run_RiboSeq_UMI_bodhi.sh to launch all three stages
-         (this Ribo-seq run + the RNA-seq run + the TE join, each in its
-         own subfolder) in one command -- the two independent arms run in
-         parallel, TE is deferred via a SLURM job dependency until both
-         finish successfully. --ribo-script must be set here -- the
-         orchestrator script defaults to the non-UMI run_RiboSeq_bodhi.sh.
-         Note: --rna/--te are each required for that arm to be submitted at
-         all -- passing only --ribo (as you might by habit) silently
-         submits just the Ribo-seq arm, which is not a bug.
+  3. Once both arms are done, edit RiboSeq_TE_samples.yaml here (RIBO_PROJ
+     -- riboseq/<its PROJ> -- and RNA_PROJ -- rnaseq/<its PROJ> --,
+     CONTRASTS by sample nickname, CMD_PARAMS.use_psite_counts if using
+     step 3f's counts instead of 3a's), then either:
+       - run run_RiboSeq_TE_bodhi.sh, once both arms are already done, or
+       - run ./run_RiboSeq_TE_pipeline_bodhi.sh --ribo ./riboseq
+         --rna ./rnaseq --te . --ribo-script run_RiboSeq_UMI_bodhi.sh to
+         launch all three stages in one command -- the two independent
+         arms run in parallel in their own subfolders, TE is deferred via
+         a SLURM job dependency until both finish successfully.
+         --ribo-script must be set here -- the orchestrator script
+         defaults to the non-UMI run_RiboSeq_bodhi.sh. Note: --rna/--te
+         are each required for that arm to be submitted at all -- passing
+         only --ribo silently submits just the Ribo-seq arm, which is not
+         a bug.
+
+If you already have a completed Ribo-seq run from this folder's plain
+setup_pipeline.sh and only decided you want TE afterward, don't run
+setup_TE_pipeline.sh here -- it would set up a second, unrelated Ribo-seq
+copy in riboseq/. Instead, get just RiboSeq_TE.smk + RNAseq.smk (e.g. from
+a fresh setup_TE_pipeline.sh run elsewhere) and point RiboSeq_TE_samples.yaml's
+RIBO_PROJ directly at this folder's existing run -- any path works.
