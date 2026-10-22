@@ -156,6 +156,17 @@ COLORS:
 #   zcat <sample>.fastq.gz | awk 'NR%4==2' | cut -c1-6 | sort | uniq -c | sort -rn | head
 # -- a handful of G/C-run 6-mers dominating the list is the signature; try
 # lowcomplexity=f first before assuming it's a memory or file-size problem.
+#
+# optical=t needs genuine Illumina machine headers (flowcell:lane:tile:x:y)
+# to find physically-nearby duplicate reads -- fine for real sequencer
+# output, but SRA-downloaded fastqs (fasterq-dump) get rewritten to a
+# synthetic "@SRR19178811.1 1 length=100" header with none of that
+# coordinate info. Confirmed on a real run (GSE202881 RNA-seq): this
+# crashes clumpify's Illumina header parser per worker thread, which does
+# NOT fail the job (0 exit code) but silently drops every read ("Reads In:
+# 0 / Reads Out: 0" in the log for every sample) -- set optical=f for any
+# SRA-downloaded dataset. dedupe=t (real duplicate removal by sequence
+# content) doesn't need coordinate info and still works fine either way.
 CMD_PARAMS:
     clumpify:
       paired: " lowcomplexity=f overwrite=t dedupe=t optical=t dupedist=12000 subs=0 " # PE settings

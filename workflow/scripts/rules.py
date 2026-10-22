@@ -59,7 +59,11 @@ def _clumpify_summary(input, output, pairedmap):
             for line in open(file, "r"):
                 match = re.search("Reads In: |Duplicates Found:", line)
                 if match:
-                    num = re.search("[0-9,]{2,}", line)
+                    # {1,} not {2,} -- a real sample can legitimately have a
+                    # single-digit count (e.g. "Reads In: 0" when clumpify's
+                    # optical=t crashes on non-Illumina headers and silently
+                    # drops every read), which {2,} fails to match at all.
+                    num = re.search("[0-9,]{1,}", line)
                     num = int(re.sub(",", "", num.group(0)))
                     num_final = num // 2 if pairedmap[name] else num
                     met = re.search("[\w\(\) ]+:", line).group(0)
