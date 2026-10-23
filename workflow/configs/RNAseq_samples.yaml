@@ -161,16 +161,22 @@ COLORS:
 # to find physically-nearby duplicate reads -- fine for real sequencer
 # output, but SRA-downloaded fastqs (fasterq-dump) get rewritten to a
 # synthetic "@SRR19178811.1 1 length=100" header with none of that
-# coordinate info. Confirmed on a real run (GSE202881 RNA-seq): this
-# crashes clumpify's Illumina header parser per worker thread, which does
-# NOT fail the job (0 exit code) but silently drops every read ("Reads In:
-# 0 / Reads Out: 0" in the log for every sample) -- set optical=f for any
-# SRA-downloaded dataset. dedupe=t (real duplicate removal by sequence
-# content) doesn't need coordinate info and still works fine either way.
+# coordinate info, which breaks clumpify's Illumina header parser. BUT this
+# turned out to be an argument-ORDER bug in this BBTools version (39.80/
+# 39.50), not something optical=f alone fixes: "optical=f dupedist=40"
+# (optical before dupedist) still crashes every time on SRA data -- a Java
+# AssertionError per worker thread trying to parse the nonexistent lane
+# field, silently dropping every read (0 exit code, but "Reads In: 0 /
+# Reads Out: 0" in the log). "dupedist=40 optical=f" (optical LAST) works
+# cleanly -- confirmed via direct reproduction against real GSE202881 data,
+# getting a complete, correct read count with optical LAST and the
+# identical crash every time with it earlier in the string. If you ever
+# reorder or add clumpify args here (in any CMD_PARAMS.clumpify entry,
+# paired or single), keep optical=f/t LAST.
 CMD_PARAMS:
     clumpify:
-      paired: " lowcomplexity=f overwrite=t dedupe=t optical=t dupedist=12000 subs=0 " # PE settings
-      single: " lowcomplexity=f overwrite=t dedupe=t optical=t dupedist=40 subs=0 " #  SE settings
+      paired: " lowcomplexity=f overwrite=t dedupe=t dupedist=12000 optical=t subs=0 " # PE settings
+      single: " lowcomplexity=f overwrite=t dedupe=t dupedist=40 optical=t subs=0 " #  SE settings
     bbduk:      
       paired: " overwrite=t ftm=5 minlen=50 ktrim=r k=23 hdist=1 mink=11 tpe tbo ecco=f " # PE settings
       single: " overwrite=t ftm=5 minlen=20 ktrim=r k=23 hdist=1 mink=11 " # SE settings
