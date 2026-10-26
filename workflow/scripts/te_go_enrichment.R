@@ -39,14 +39,25 @@ sig_genes <- te %>%
 
 universe <- te$ID
 
-ego <- enrichGO(
-  gene = sig_genes,
-  universe = universe,
-  OrgDb = get(orgdb_name),
-  keyType = "ENSEMBL",
-  ont = "BP",
-  pAdjustMethod = "BH",
-  pvalueCutoff = 0.05
-)
+# enrichGO()'s behavior on an empty gene list is version-dependent (some
+# versions return a harmless empty result, others error) -- this happens
+# whenever te_analysis.R found no significant genes for the contrast (e.g.
+# both anota2seq and xtail unavailable/skipped for a too-small group size),
+# which is a real, valid outcome, not a bug -- write an empty result
+# directly rather than depend on enrichGO()'s untested empty-input behavior.
+if (length(sig_genes) == 0) {
+  warning("No significant genes in ", results_file, " (te_padj < 0.05) -- writing an empty GO enrichment result instead of calling enrichGO().")
+  write_tsv(tibble(), outfile)
+} else {
+  ego <- enrichGO(
+    gene = sig_genes,
+    universe = universe,
+    OrgDb = get(orgdb_name),
+    keyType = "ENSEMBL",
+    ont = "BP",
+    pAdjustMethod = "BH",
+    pvalueCutoff = 0.05
+  )
 
-write_tsv(as.data.frame(ego), outfile)
+  write_tsv(as.data.frame(ego), outfile)
+}

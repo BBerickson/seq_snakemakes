@@ -111,13 +111,37 @@ if (min_group_n < 3) {
 }
 
 # ---- xtail (secondary / complementary) --------------------------------------
-xt <- xtail(rna_mat, ribo_mat, as.character(condition), baseLevel = "group1", threads = n_threads)
-xt_table <- as.data.frame(resultsTable(xt, log2FCs = TRUE)) %>% rownames_to_column("ID")
-# resultsTable(log2FCs=TRUE)'s exact column names (expected: mRNA/RPF log2FC
-# columns alongside the TE log2FC/pvalue.adjust columns used below) weren't
-# verified against a live run -- print them once so a mismatch is obvious
-# immediately rather than silently producing blank plot axes.
-message("xtail resultsTable columns: ", paste(names(xt_table), collapse = ", "))
+# xtail calls DESeq2's low-level estimateDispersions() directly (not the
+# top-level DESeq() wrapper, which has its own automatic parametric->local
+# fallback), so it has no safety net for DESeq2's "all gene-wise dispersion
+# estimates are within 2 orders of magnitude from the minimum" error --
+# confirmed on a real 2-replicate-per-group RNA-seq contrast, where the
+# gene-wise dispersions were too tightly clustered near the floor for a
+# parametric trend to fit. xtail's own public API doesn't expose a fitType
+# override to work around this. Since anota2seq is ALSO unavailable here
+# (needs >=3 reps/group, same small-sample-size root cause), this is a real
+# statistical limitation of contrasts this small, not a bug -- catch it so
+# the job still completes (raw counts/plots with no TE call) instead of
+# crashing and losing everything, including the other arm's results.
+xt_table <- tryCatch({
+  xt <- xtail(rna_mat, ribo_mat, as.character(condition), baseLevel = "group1", threads = n_threads)
+  table <- as.data.frame(resultsTable(xt, log2FCs = TRUE)) %>% rownames_to_column("ID")
+  # resultsTable(log2FCs=TRUE)'s exact column names (expected: mRNA/RPF
+  # log2FC columns alongside the TE log2FC/pvalue.adjust columns used below)
+  # weren't verified against a live run -- print them once so a mismatch is
+  # obvious immediately rather than silently producing blank plot axes.
+  message("xtail resultsTable columns: ", paste(names(table), collapse = ", "))
+  table
+}, error = function(e) {
+  warning(sprintf(
+    "Skipping xtail: %s. No TE call possible for this contrast via either method (smallest group has %d replicates) -- results.tsv/plots will still be written with gene-level counts but no TE effect/significance columns.",
+    conditionMessage(e), min_group_n
+  ))
+  gene_meta %>%
+    dplyr::select(ID) %>%
+    dplyr::mutate(mRNA_log2FC = NA_real_, RPF_log2FC = NA_real_,
+                  log2FC_TE_v2 = NA_real_, pvalue.adjust = NA_real_)
+})
 
 # ---- combine -----------------------------------------------------------------
 combined <- gene_meta %>%
