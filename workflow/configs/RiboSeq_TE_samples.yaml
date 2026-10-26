@@ -9,6 +9,21 @@
 #
 # Run RiboSeq.smk/RiboSeq_UMI.smk and RNAseq.smk to completion FIRST -- this
 # pipeline does no alignment/quantification of its own, only the TE join.
+#
+# Replicate minimum: anota2seq needs >=3 replicates per group (per
+# CONTRASTS group below) or it's skipped automatically with a warning,
+# falling back to xtail alone. xtail itself has no documented minimum, but
+# in practice its internal DESeq2 dispersion-estimation step can still fail
+# outright with only 2 replicates/group if the real data's gene-wise
+# dispersions end up too tightly clustered to curve-fit -- confirmed on a
+# real 2-replicate-per-group RNA-seq contrast (GSE202881). te_analysis.R
+# catches that failure so the job completes rather than crashing, but a
+# contrast this small may end up with NO valid TE call from either method
+# -- a genuine statistical limitation of too few replicates, not a bug, and
+# not something to work around by faking a 3rd replicate (e.g. concatenating
+# two real replicates' fastqs together) -- that's pseudoreplication: the
+# fake replicate isn't an independent sample, so it doesn't add real
+# variance and produces invalid, misleadingly "significant"-looking results.
 
 PROJ:
     "Example_RiboSeq_TE"
