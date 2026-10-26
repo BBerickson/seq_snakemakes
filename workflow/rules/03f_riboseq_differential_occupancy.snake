@@ -1,0 +1,64 @@
+# ====== Differential ribosome occupancy (optional, no paired RNA-seq) ========
+# Plain two-group DESeq2 test on this project's OWN featureCounts -- NOT
+# translational efficiency (see RiboSeq_TE.smk for that, which needs a
+# completed, paired RNA-seq run). See RiboSeq_samples.yaml/
+# RiboSeq_UMI_samples.yaml's CONTRASTS comment for the caveat this implies.
+# CONTRASTS/CONTRAST_NAMES/CONTRAST_BY_NAME are parsed in the top-level smk
+# file (RiboSeq.smk/RiboSeq_UMI.smk), not here, since rule all's input list
+# (defined before any include:) already needs CONTRAST_NAMES.
+#
+# Output images are named with the same "..._aligned_{index}__..." substring
+# multiqc_config.R already globs for embedding PNGs into the qc_analysis.html
+# (see rules/04c_riboseq_qc_plots.snake's PCA/correlation plots for why that
+# substring matters) -- this project's create_plots rule (03d_results_riboseq
+# [_UMI].snake) has an explicit extra input on these images so Snakemake
+# always builds them before generating the report, rather than racing it.
+
+rule differential_occupancy:
+    input:
+        # featureCounts' own {sample} wildcard is the fastq prefix (e.g.
+        # "riboseq_WT_rep1"), not the SAMPLES nickname (e.g. "WT_Rep1")
+        # CONTRASTS uses -- translate via SAMPIN[nickname][0] (same lookup
+        # SAM_NORM construction above already uses), same ordering as
+        # params.group1/group2 below so file<->column correspondence stays
+        # positional.
+        ribo_fc = lambda wildcards: expand(
+            PROJ + "/counts/{sample}_aligned_{index}_" +
+                ("psite_cds_featureCounts.tsv" if CMD_PARAMS.get("differential_occupancy", {}).get("use_psite_counts") else "featureCounts.tsv"),
+            sample = [SAMPIN[n][0] for n in
+                      CONTRAST_BY_NAME[wildcards.contrast]["group1"] + CONTRAST_BY_NAME[wildcards.contrast]["group2"]],
+            index = PRIMARY_INDEX
+        )
+    output:
+        results = PROJ + "/report/{contrast}_differential_occupancy_results.tsv",
+        ma      = PROJ + "/report/{contrast}_aligned_" + PRIMARY_INDEX + "__occupancy_MA.png",
+        volcano = PROJ + "/report/{contrast}_aligned_" + PRIMARY_INDEX + "__occupancy_volcano.png"
+    params:
+        job_name = "{contrast}_differential_occupancy",
+        script   = "workflow/scripts/differential_occupancy.R",
+        group1   = lambda wildcards: " ".join(CONTRAST_BY_NAME[wildcards.contrast]["group1"]),
+        group2   = lambda wildcards: " ".join(CONTRAST_BY_NAME[wildcards.contrast]["group2"]),
+        filter_biotype = CMD_PARAMS.get("differential_occupancy", {}).get("filter_biotype", ""),
+        outdir   = PROJ + "/report"
+    resources:
+        # same pattern as te_analysis.R's own resource comment -- DESeq2's
+        # memory need scales with gene/sample count, not featureCounts
+        # input file size (a few MB), so the file-size-scaled estimate is
+        # never going to be representative.
+        memory = lambda wildcards, input: memory_estimator(input, 1, 4, 16)
+    threads:
+        2
+    shell:
+        """
+        mkdir -p {params.outdir}
+        Rscript {params.script} \
+            "{input.ribo_fc}" \
+            "{params.group1}" \
+            "{params.group2}" \
+            "{wildcards.contrast}" \
+            "{params.filter_biotype}" \
+            "{threads}" \
+            "{output.results}" \
+            "{output.ma}" \
+            "{output.volcano}"
+        """

@@ -56,7 +56,17 @@ bash setup_pipeline.sh Bodhi
    lower totals than 3a -- that's CDS/in-frame restriction + multi-mapping
    resolution working as intended, not a bug; cross-check against 3d's
    intron % and 3c's in_frame_pct if the magnitude looks surprising.
-3g MultiQC (optional) — Generate interim HTML summary report
+3g Differential ribosome occupancy (optional, CONTRASTS set in
+   RiboSeq_samples.yaml) — plain two-group DESeq2 test on this project's
+   OWN featureCounts, by SAMPLES nickname, no paired RNA-seq needed or
+   used. NOT translational efficiency -- without RNA-seq there's no way to
+   tell "more ribosomes on this transcript" apart from "more of this
+   transcript exists" (see Phase 2 below for the real thing) -- but a
+   real, standard thing to report when no paired RNA-seq run exists, with
+   that caveat. Uses 3a's counts by default, or 3f's P-site/CDS-restricted
+   counts via CMD_PARAMS.differential_occupancy.use_psite_counts.
+3h MultiQC (optional) — Generate interim HTML summary report, including
+   3g's MA/volcano plots if CONTRASTS is set
 
 4. Coverage Track Generation
 

@@ -62,6 +62,15 @@ PAIRED          = config.get("PAIRED")  # always "False" for Ribo-seq footprints
 USER            = config.get("USER")
 CONTAMINANT_REF = config.get("CONTAMINANT_REF", "")
 
+# Differential ribosome occupancy (optional, rules/03f_riboseq_differential_occupancy.snake)
+# -- parsed here (not in that rule file) since rule all's input list below
+# needs CONTRAST_NAMES before any include: runs. Nicknames in group1/group2
+# are this project's own SAMPLES nicknames directly (no cross-run
+# nickname-map indirection needed, unlike RiboSeq_TE.smk's join).
+CONTRASTS = config.get("CONTRASTS") or []
+CONTRAST_NAMES = [c["name"] for c in CONTRASTS]
+CONTRAST_BY_NAME = {c["name"]: c for c in CONTRASTS}
+
 # Directories for data and scripts
 FASTQ_DIR = PROJ + "/fastqs"
 
@@ -159,6 +168,14 @@ rule all:
               sample=SAMS_UNIQ, index=PRIMARY_INDEX
           )
         ],
+
+        # Differential ribosome occupancy (optional, no paired RNA-seq
+        # needed) -- see rules/03f_riboseq_differential_occupancy.snake
+        [] if config.get("stop_after_alignment") or not CONTRASTS else [
+          expand(PROJ + "/report/{contrast}_differential_occupancy_results.tsv", contrast=CONTRAST_NAMES),
+          expand(PROJ + "/report/{contrast}_aligned_" + PRIMARY_INDEX + "__occupancy_MA.png", contrast=CONTRAST_NAMES),
+          expand(PROJ + "/report/{contrast}_aligned_" + PRIMARY_INDEX + "__occupancy_volcano.png", contrast=CONTRAST_NAMES)
+        ],
         expand(PROJ + "/report/" + PROJ + "_{index}_results.tsv", index=PRIMARY_INDEX),
         [] if config.get("skip_html_report") else [
             expand(SEQ_DATE + "_" + PROJ + "_{index}" + "_qc_analysis.html", index=PRIMARY_INDEX)
@@ -209,6 +226,7 @@ include: "rules/03b_riboWaltz.snake"
 include: "rules/03c_rseqc.snake"
 include: "rules/03d_results_riboseq_UMI.snake"
 include: "rules/03e_riboseq_psite_cds_counts.snake"
+include: "rules/03f_riboseq_differential_occupancy.snake"
 # BW with deeptools bamCoverage
 include: "rules/04a_bamCoverage_stranded.snake"
 include: "rules/04b_bw_UCSC_URL_stranded.snake"

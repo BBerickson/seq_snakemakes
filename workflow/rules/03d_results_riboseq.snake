@@ -44,7 +44,16 @@ rule gathering_results:
 
 rule create_plots:
     input:
-        PROJ + "/report/" + PROJ + "_" + PRIMARY_INDEX + "_results.tsv"
+        tsv = PROJ + "/report/" + PROJ + "_" + PRIMARY_INDEX + "_results.tsv",
+        # multiqc scans {params.mydir} recursively once this rule runs, so
+        # any PNGs that should be swept into the report (differential
+        # occupancy's "..._aligned_{index}__..." images) must already exist
+        # -- an explicit dependency here, not just both being in rule all's
+        # input list, which alone wouldn't guarantee this rule runs last.
+        extra = [] if not CONTRASTS else [
+            expand(PROJ + "/report/{contrast}_aligned_" + PRIMARY_INDEX + "__occupancy_MA.png", contrast=CONTRAST_NAMES),
+            expand(PROJ + "/report/{contrast}_aligned_" + PRIMARY_INDEX + "__occupancy_volcano.png", contrast=CONTRAST_NAMES)
+        ]
     output:
         report  = SEQ_DATE + "_" + PROJ + "_" + PRIMARY_INDEX + "_qc_analysis.html",
         reportc = PROJ + "/report/" + SEQ_DATE + "_" + PROJ + "_pipeline_methods.txt",
@@ -72,7 +81,7 @@ sys.path.insert(0, "workflow/scripts/")
 import funs
 funs.aggregate_cmds("{params.cmdd}", "{output.reportc}")
 EOF
-        Rscript {params.script} "{input}" "{params.mydir}" "{params.seqdate}" "{params.index}" "{output.result}" "{output.config}"
+        Rscript {params.script} "{input.tsv}" "{params.mydir}" "{params.seqdate}" "{params.index}" "{output.result}" "{output.config}"
         multiqc {params.mydir} --config {output.config} --force --filename {params.out_file}
         rm -r {params.out_file}_data
         rm -f {PROJ}/pipeline/*.lock

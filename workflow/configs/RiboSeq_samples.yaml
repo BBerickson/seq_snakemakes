@@ -55,6 +55,24 @@ SAMPLES:
             KO_Rep2:
               - "riboseq_KO_rep2"
 
+# Differential ribosome occupancy (optional, rules/03f_riboseq_differential_occupancy.snake)
+# -- plain DESeq2 on this project's OWN featureCounts (no paired RNA-seq
+# needed/used), by SAMPLES nickname (not fastq prefix). This is NOT
+# translational efficiency -- without RNA-seq there's no way to tell "more
+# ribosomes on this transcript" apart from "more of this transcript exists"
+# -- it is differential ribosome FOOTPRINT signal, a real and standard
+# thing to report when no paired RNA-seq run exists, with that caveat.
+# Leave empty/omit to skip this step entirely.
+#
+# CONTRASTS:
+#   - name: "KO_vs_WT"
+#     group1: ["WT_Rep1", "WT_Rep2"]  # baseline/reference
+#     group2: ["KO_Rep1", "KO_Rep2"]  # comparison
+#
+CONTRASTS:
+  - name: "KO_vs_WT"
+    group1: ["WT_Rep1", "WT_Rep2"]
+    group2: ["KO_Rep1", "KO_Rep2"]
 
 # Norm sample bw and matix files
 # with "RPKM","CPM","BPM","RPGC"
@@ -87,6 +105,15 @@ CMD_PARAMS:
       single:  " bin=1 max=50 " # footprint length distribution (~15-50nt)
     featureCounts: " " #--largestOverlap
     filter_results: "protein_coding|scalefactor"
+    # restrict to one biotype before testing (standard practice -- matches
+    # results_riboseq.R's own featureCounts biotype column); empty string
+    # disables filtering. use_psite_counts reuses enable_psite_cds_counts'
+    # stricter P-site/CDS-restricted counts instead of plain featureCounts
+    # for the test itself -- requires enable_psite_cds_counts: true above,
+    # otherwise that file won't exist.
+    differential_occupancy:
+      filter_biotype: "protein_coding"
+      use_psite_counts: false
 
 # phiX/other contaminant reference fasta for BBSplit (workflow/rules/01c_riboseq_bbsplit.snake),
 # or leave empty to skip. Not genome-specific (unlike SORTMERNA_DB/BED12/
